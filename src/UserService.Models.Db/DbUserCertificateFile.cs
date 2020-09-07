@@ -1,10 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace UserService.Models.Db
 {
-    class DbUserCertificateFile
+    public class DbUserCertificateFile
     {
+        public Guid UserId { get; set; }
+        public virtual DbUser User { get; set; }
+        public Guid CertificateId { get; set; }
+    }
+
+    public class UserCertificateFileConfiguration : IEntityTypeConfiguration<DbUserCertificateFile>
+    {
+        public void Configure(EntityTypeBuilder<DbUserCertificateFile> builder)
+        {
+            builder.HasKey(pm => new { pm.UserId, pm.CertificateId });
+            builder.HasOne(pm => pm.User)
+                .WithMany(p => p.CertificatesFilesIds)
+                .HasForeignKey(pm => pm.UserId);
+        }
     }
 }
