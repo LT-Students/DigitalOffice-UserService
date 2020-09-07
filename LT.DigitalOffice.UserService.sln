@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Dto", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Db", "src\UserService.Models.Db\UserService.Models.Db.csproj", "{5FFD14E5-B13D-4854-8412-3353CC169148}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Validation", "src\UserService.Validation\UserService.Validation.csproj", "{B26E767B-DF42-4359-AB19-F52BDC524000}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation", "src\UserService.Validation\UserService.Validation.csproj", "{B26E767B-DF42-4359-AB19-F52BDC524000}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
