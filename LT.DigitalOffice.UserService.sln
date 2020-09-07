@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data.UnitTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Business.UnitTests", "test\UserService.Business.UnitTests\UserService.Business.UnitTests.csproj", "{2F87852B-E69B-4DF8-905E-8D2F097028B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{4513E017-9363-4F2D-AE02-1720780134D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{2F87852B-E69B-4DF8-905E-8D2F097028B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F87852B-E69B-4DF8-905E-8D2F097028B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F87852B-E69B-4DF8-905E-8D2F097028B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4513E017-9363-4F2D-AE02-1720780134D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4513E017-9363-4F2D-AE02-1720780134D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4513E017-9363-4F2D-AE02-1720780134D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4513E017-9363-4F2D-AE02-1720780134D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +108,7 @@ Global
 		{AB30888A-977A-4464-9D5B-2281158244D5} = {0B701B38-983A-4BC4-9DA1-BA5A0A5EEED8}
 		{A8969EB9-4C1A-4C99-B2CB-A6A02D8400A8} = {0B701B38-983A-4BC4-9DA1-BA5A0A5EEED8}
 		{2F87852B-E69B-4DF8-905E-8D2F097028B1} = {0B701B38-983A-4BC4-9DA1-BA5A0A5EEED8}
+		{4513E017-9363-4F2D-AE02-1720780134D2} = {0B701B38-983A-4BC4-9DA1-BA5A0A5EEED8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {120A5F3A-95D6-4F4A-A7C7-CC49DB350602}
