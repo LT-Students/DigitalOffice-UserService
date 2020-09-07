@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UserService.Data.Interfaces
+namespace UserService.Data
 {
-    class IUserServiceRepository
+    class UserRepository
     {
     }
 }

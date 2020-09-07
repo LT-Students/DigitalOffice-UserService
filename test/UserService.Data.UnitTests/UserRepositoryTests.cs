@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UserService.Data
+namespace UserService.Data.UnitTests
 {
-    class UserServiceRepository
+    class UserRepositoryTests
     {
     }
 }
