@@ -1,4 +1,6 @@
-﻿using MassTransit;
+﻿using LT.DigitalOffice.Kernel.AccessValidator.Requests;
+using LT.DigitalOffice.Kernel.Broker;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -6,7 +8,7 @@ using UserService.Data.Interfaces;
 
 namespace UserService.Broker.Consumers
 {
-    /*public class AccessValidatorConsumer : IConsumer<IAccessValidatorRequest>
+    public class AccessValidatorConsumer : IConsumer<IAccessValidatorRequest>
     {
         private readonly IUserRepository repository;
 
@@ -25,5 +27,5 @@ namespace UserService.Broker.Consumers
         {
             return repository.GetUserInfoById(userId).IsAdmin;
         }
-    }*/
+    }
 }

@@ -1,8 +1,10 @@
-﻿using MassTransit;
+﻿using LT.DigitalOffice.Kernel.Broker;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using UserService.Broker.Requests;
+using UserService.Broker.Responses;
 using UserService.Data.Interfaces;
 
 namespace UserService.Broker.Consumers
@@ -25,12 +27,12 @@ namespace UserService.Broker.Consumers
 
         public async Task Consume(ConsumeContext<IGetUserInfoRequest> context)
         {
-            //var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message.UserId);
+            var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message.UserId);
 
-            //await context.RespondAsync<IOperationResult<IUserInfoResponse>>(response);
+            await context.RespondAsync<IOperationResult<IUserInfoResponse>>(response);
         }
 
-        /*private object GetUserInfo(Guid userId)
+        private object GetUserInfo(Guid userId)
         {
             var response = client.GetResponse<IOperationResult<IUserPositionResponse>>(
                 new
@@ -64,6 +66,6 @@ namespace UserService.Broker.Consumers
                 MiddleName = dbUser.MiddleName,
                 UserPosition = position
             };
-        }*/
+        }
     }
 }

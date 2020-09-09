@@ -1,7 +1,9 @@
-﻿using MassTransit;
+﻿using LT.DigitalOffice.Kernel.Broker;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using UserService.Broker.Requests;
+using UserService.Broker.Responses;
 using UserService.Data.Interfaces;
 using UserService.Models.Db;
 
@@ -18,9 +20,9 @@ namespace UserService.Broker.Consumers
 
         public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
         {
-            //var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
+            var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
-            //await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
+            await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
         }
 
         private object GetUserCredentials(IUserCredentialsRequest request)
