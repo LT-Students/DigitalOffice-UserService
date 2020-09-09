@@ -1,6 +1,10 @@
 ﻿namespace UserService.Broker.Responses
 {
-    class IUserPositionResponse
+    /// <summary>
+    /// DTO for getting user position through a message broker.
+    /// </summary>
+    public interface IUserPositionResponse
     {
+        string UserPositionName { get; }
     }
 }

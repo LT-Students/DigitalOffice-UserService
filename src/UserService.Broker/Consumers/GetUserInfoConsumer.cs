@@ -1,6 +1,69 @@
-﻿namespace UserService.Broker.Consumers
+﻿using MassTransit;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using UserService.Broker.Requests;
+using UserService.Data.Interfaces;
+
+namespace UserService.Broker.Consumers
 {
-    class GetUserInfoConsumer
+    /// <summary>
+    /// Consumer for getting information about the user.
+    /// </summary>
+    public class GetUserInfoConsumer : IConsumer<IGetUserInfoRequest>
     {
+        private readonly IRequestClient<IGetUserPositionRequest> client;
+        private readonly IUserRepository repository;
+
+        public GetUserInfoConsumer(
+            [FromServices] IUserRepository repository,
+            [FromServices] IRequestClient<IGetUserPositionRequest> client)
+        {
+            this.repository = repository;
+            this.client = client;
+        }
+
+        public async Task Consume(ConsumeContext<IGetUserInfoRequest> context)
+        {
+            //var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message.UserId);
+
+            //await context.RespondAsync<IOperationResult<IUserInfoResponse>>(response);
+        }
+
+        /*private object GetUserInfo(Guid userId)
+        {
+            var response = client.GetResponse<IOperationResult<IUserPositionResponse>>(
+                new
+                {
+                    UserId = userId
+                }).Result;
+
+            if (!response.Message.IsSuccess)
+            {
+                throw new Exception(string.Join(", ", response.Message.Errors));
+            }
+
+            var dbUser = repository.GetUserInfoById(userId);
+            var position = response.Message.Body;
+
+            if (dbUser == null)
+            {
+                throw new ArgumentNullException(nameof(dbUser));
+            }
+
+            if (position == null)
+            {
+                throw new ArgumentNullException(nameof(position));
+            }
+
+            return new
+            {
+                UserId = dbUser.Id,
+                FirstName = dbUser.FirstName,
+                LastName = dbUser.LastName,
+                MiddleName = dbUser.MiddleName,
+                UserPosition = position
+            };
+        }*/
     }
 }
