@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <RootNamespace>LT.DigitalOffice.UserService.Validation.UnitTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

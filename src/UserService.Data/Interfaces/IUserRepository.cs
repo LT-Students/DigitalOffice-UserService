@@ -1,7 +1,7 @@
 ﻿using System;
-using UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Data.Interfaces
+namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
     /// <summary>
     /// Represents interface of repository in repository pattern.

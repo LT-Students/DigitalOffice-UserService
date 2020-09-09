@@ -1,10 +1,10 @@
-﻿using System;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
+using System;
 using System.Linq;
-using UserService.Data.Interfaces;
-using UserService.Data.Provider.MsSql.Ef;
-using UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Data
+namespace LT.DigitalOffice.UserService.Data
 {
     /// <summary>
     /// Represents interface of repository. Provides method for getting user model from database.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UserService.Broker.Requests
+namespace LT.DigitalOffice.Broker.Requests
 {
     /// <summary>
     /// Represents request for GetFileConsumer in MassTransit logic.

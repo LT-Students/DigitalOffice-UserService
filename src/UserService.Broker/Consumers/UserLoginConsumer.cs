@@ -1,13 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using UserService.Broker.Requests;
-using UserService.Broker.Responses;
-using UserService.Data.Interfaces;
-using UserService.Models.Db;
+using LT.DigitalOffice.Broker.Responses;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Broker.Consumers
+namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
     {

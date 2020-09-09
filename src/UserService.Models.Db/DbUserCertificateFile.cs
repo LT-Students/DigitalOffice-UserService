@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Models.Db
+namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbUserCertificateFile
     {

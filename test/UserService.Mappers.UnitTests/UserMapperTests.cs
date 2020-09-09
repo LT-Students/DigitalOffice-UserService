@@ -1,14 +1,15 @@
-﻿using NUnit.Framework;
+﻿using LT.DigitalOffice.UserService.Mappers;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using UserService.Mappers.Interfaces;
-using UserService.Models.Db;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto;
 
-namespace UserService.Mappers.UnitTests
+namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     public class UserMapperTests
     {

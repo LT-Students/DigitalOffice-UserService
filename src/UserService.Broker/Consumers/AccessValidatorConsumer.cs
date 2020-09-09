@@ -1,12 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidator.Requests;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using UserService.Data.Interfaces;
 
-namespace UserService.Broker.Consumers
+namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class AccessValidatorConsumer : IConsumer<IAccessValidatorRequest>
     {

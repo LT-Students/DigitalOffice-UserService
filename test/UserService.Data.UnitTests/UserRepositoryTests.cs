@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UserService.Data.UnitTests
+namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
     class UserRepositoryTests
     {

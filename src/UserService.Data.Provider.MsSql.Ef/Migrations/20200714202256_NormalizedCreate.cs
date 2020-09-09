@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
-namespace UserService.Data.Provider.MsSql.Ef.Migrations
+namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     public partial class NormalizedCreate : Migration
     {

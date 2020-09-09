@@ -1,8 +1,9 @@
-﻿using System;
+﻿using LT.DigitalOffice.UserService.Models.Db;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace UserService.Models.Db
+namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbUser
     {

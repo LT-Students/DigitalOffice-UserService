@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace UserService.Validation
+namespace LT.DigitalOffice.UserService.Validation
 {
     public class GetUserByEmailValidator : AbstractValidator<string>
     {

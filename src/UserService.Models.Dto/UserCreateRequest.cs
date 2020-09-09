@@ -1,4 +1,4 @@
-﻿namespace UserService.Models.Dto
+﻿namespace LT.DigitalOffice.UserService.Models.Dto
 {
     public class UserCreateRequest
     {

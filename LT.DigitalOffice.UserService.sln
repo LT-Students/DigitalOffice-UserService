@@ -25,15 +25,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Db", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation", "src\UserService.Validation\UserService.Validation.csproj", "{B26E767B-DF42-4359-AB19-F52BDC524000}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Broker.UnitTests", "test\UserService.Broker.UnitTests\UserService.Broker.UnitTests.csproj", "{AB30888A-977A-4464-9D5B-2281158244D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Broker.UnitTests", "test\UserService.Broker.UnitTests\UserService.Broker.UnitTests.csproj", "{AB30888A-977A-4464-9D5B-2281158244D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data.UnitTests", "test\UserService.Data.UnitTests\UserService.Data.UnitTests.csproj", "{A8969EB9-4C1A-4C99-B2CB-A6A02D8400A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.UnitTests", "test\UserService.Data.UnitTests\UserService.Data.UnitTests.csproj", "{A8969EB9-4C1A-4C99-B2CB-A6A02D8400A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Business.UnitTests", "test\UserService.Business.UnitTests\UserService.Business.UnitTests.csproj", "{2F87852B-E69B-4DF8-905E-8D2F097028B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Business.UnitTests", "test\UserService.Business.UnitTests\UserService.Business.UnitTests.csproj", "{2F87852B-E69B-4DF8-905E-8D2F097028B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{4513E017-9363-4F2D-AE02-1720780134D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{4513E017-9363-4F2D-AE02-1720780134D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Validation.UnitTests", "UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{37128414-597E-4EDE-9004-711A99246AC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.UnitTests", "UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{37128414-597E-4EDE-9004-711A99246AC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

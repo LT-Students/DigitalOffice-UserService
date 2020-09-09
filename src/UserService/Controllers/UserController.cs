@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UserService.Controllers
+namespace LT.DigitalOffice.UserService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

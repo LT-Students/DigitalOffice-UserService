@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace UserService.Models.Db
+namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbUserAchievement
     {

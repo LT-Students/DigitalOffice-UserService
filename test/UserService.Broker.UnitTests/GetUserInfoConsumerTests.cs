@@ -1,4 +1,4 @@
-﻿namespace UserService.Broker.UnitTests
+﻿namespace LT.DigitalOffice.UserService.Broker.UnitTests
 {
     class GetUserInfoConsumerTests
     {

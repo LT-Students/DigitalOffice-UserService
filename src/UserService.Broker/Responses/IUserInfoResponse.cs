@@ -1,6 +1,7 @@
-﻿using System;
+﻿using LT.DigitalOffice.Broker.Responses;
+using System;
 
-namespace UserService.Broker.Responses
+namespace LT.DigitalOffice.Broker.Responses
 {
     /// <summary>
     /// DTO for dispatch user information through a message broker.

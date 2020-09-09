@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
 using FluentValidation.TestHelper;
+using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using UserService.Models.Dto;
 
-namespace UserService.Validation.UnitTests
+namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     public class EditUserRequestValidatorTests
     {

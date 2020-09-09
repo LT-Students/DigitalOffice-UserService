@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UserService.Business.UnitTests
+namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     class GetUserServiceByIdCommandTests
     {

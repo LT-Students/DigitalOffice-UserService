@@ -1,13 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Broker.Requests;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using UserService.Broker.Requests;
-using UserService.Broker.Responses;
-using UserService.Data.Interfaces;
+using LT.DigitalOffice.Broker.Responses;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 
-namespace UserService.Broker.Consumers
+namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     /// <summary>
     /// Consumer for getting information about the user.
@@ -61,9 +61,9 @@ namespace UserService.Broker.Consumers
             return new
             {
                 UserId = dbUser.Id,
-                FirstName = dbUser.FirstName,
-                LastName = dbUser.LastName,
-                MiddleName = dbUser.MiddleName,
+                dbUser.FirstName,
+                dbUser.LastName,
+                dbUser.MiddleName,
                 UserPosition = position
             };
         }

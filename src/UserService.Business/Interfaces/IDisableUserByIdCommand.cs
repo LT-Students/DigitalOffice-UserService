@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace UserService.Business.Interfaces
+namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
     /// <summary>
     /// Represents interface for a command in command pattern.

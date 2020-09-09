@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto;
 
-namespace UserService.Validation
+namespace LT.DigitalOffice.UserService.Validation
 {
     public class UserCreateRequestValidator : AbstractValidator<UserCreateRequest>
     {

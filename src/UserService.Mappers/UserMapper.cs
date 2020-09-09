@@ -1,12 +1,12 @@
-﻿using System;
+﻿using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto;
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using UserService.Mappers.Interfaces;
-using UserService.Models.Db;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Mappers
+namespace LT.DigitalOffice.UserService.Mappers
 {
     /// <summary>
     /// Represents mapper. Provides methods for converting an object of <see cref="DbUser"/> type into an object of <see cref="User"/> type according to some rule.

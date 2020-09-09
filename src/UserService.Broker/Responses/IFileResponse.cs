@@ -1,4 +1,4 @@
-﻿namespace UserService.Broker.Responses
+﻿namespace LT.DigitalOffice.Broker.Responses
 {
     /// <summary>
     /// Represents response for GetFileConsumer in MassTransit logic.

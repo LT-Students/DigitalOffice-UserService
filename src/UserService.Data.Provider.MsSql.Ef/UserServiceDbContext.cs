@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Data.Provider.MsSql.Ef
+namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
 {
     /// <summary>
     /// A class that defines the tables and its properties in the database.

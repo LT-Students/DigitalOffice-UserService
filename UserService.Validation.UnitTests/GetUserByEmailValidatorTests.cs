@@ -2,7 +2,7 @@
 using FluentValidation.TestHelper;
 using NUnit.Framework;
 
-namespace UserService.Validation.UnitTests
+namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     class GetUserByEmailValidatorTests
     {

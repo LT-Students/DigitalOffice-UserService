@@ -1,7 +1,7 @@
 ﻿using System;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto;
 
-namespace UserService.Business.Interfaces
+namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
     /// <summary>
     /// Represents interface for a command in command pattern.

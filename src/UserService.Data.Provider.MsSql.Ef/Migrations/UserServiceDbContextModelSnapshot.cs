@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 
-namespace UserService.Data.Provider.MsSql.Ef.Migrations
+namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
     partial class UserServiceDbContextModelSnapshot : ModelSnapshot

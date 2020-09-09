@@ -1,12 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using UserService.Business.Interfaces;
-using UserService.Data.Interfaces;
-using UserService.Models.Db;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Business
+namespace LT.DigitalOffice.UserService.Business
 {
     public class DisableUserByIdCommand : IDisableUserByIdCommand
     {

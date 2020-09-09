@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UserService.Models.Dto
+namespace LT.DigitalOffice.UserService.Models.Dto
 {
     public class User
     {

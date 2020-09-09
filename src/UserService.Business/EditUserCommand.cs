@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using UserService.Business.Interfaces;
-using UserService.Data.Interfaces;
-using UserService.Mappers.Interfaces;
-using UserService.Models.Db;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
 
-namespace UserService.Business
+namespace LT.DigitalOffice.UserService.Business
 {
     public class EditUserCommand : IEditUserCommand
     {

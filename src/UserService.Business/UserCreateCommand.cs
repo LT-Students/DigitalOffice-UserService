@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using UserService.Business.Interfaces;
-using UserService.Data.Interfaces;
-using UserService.Mappers.Interfaces;
-using UserService.Models.Db;
-using UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Db;
 
-namespace UserService.Business
+namespace LT.DigitalOffice.UserService.Business
 {
     public class UserCreateCommand : IUserCreateCommand
     {

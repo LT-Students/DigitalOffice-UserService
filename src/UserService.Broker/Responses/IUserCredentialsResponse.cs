@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UserService.Broker.Responses
+namespace LT.DigitalOffice.Broker.Responses
 {
     /// <summary>
     /// The model is a binding the response internal model of sender for RabbitMQ.

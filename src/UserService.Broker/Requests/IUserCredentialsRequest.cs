@@ -1,4 +1,4 @@
-﻿namespace UserService.Broker.Requests
+﻿namespace LT.DigitalOffice.Broker.Requests
 {
     /// <summary>
     /// The model is a binding the request internal model of sender for RabbitMQ.

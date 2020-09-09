@@ -1,4 +1,4 @@
-﻿namespace UserService.Mappers.Interfaces
+﻿namespace LT.DigitalOffice.UserService.Mappers.Interfaces
 {
     /// <summary>
     /// Represents interface for a mapper in mapper pattern.
