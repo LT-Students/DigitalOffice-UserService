@@ -201,14 +201,14 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.UserCreate(secondUser), Is.EqualTo(secondUser.Id));
+            Assert.That(repository.CreateUser(secondUser), Is.EqualTo(secondUser.Id));
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] { firstUser, secondUser }));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.UserCreate(firstUser),
+            Assert.That(() => repository.CreateUser(firstUser),
                 Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] { firstUser }));
         }

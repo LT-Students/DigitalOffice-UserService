@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.Kernel.UnitTestLibrary;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
@@ -110,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         #endregion
 
         #region EditUserRequest to DbUser
-        /*[Test]
+        [Test]
         public void ShouldReturnNewDbUserWhenDataCorrect()
         {
             var request = new EditUserRequest()
@@ -145,7 +146,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             };
 
             SerializerAssert.AreEqual(user, result);
-        }*/
+        }
 
         [Test]
         public void ShouldThrowExceptionWhenRequestIsNull()
