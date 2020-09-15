@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbAchievement", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbAchievement", b =>
             {
                 b.Property<Guid>("Id")
                     .ValueGeneratedOnAdd()
@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 b.ToTable("Achievements");
             });
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbUser", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUser", b =>
             {
                 b.Property<Guid>("Id")
                     .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 b.ToTable("Users");
             });
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbUserAchievement", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserAchievement", b =>
             {
                 b.Property<Guid>("UserId")
                     .HasColumnType("uniqueidentifier");
@@ -95,7 +95,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 b.ToTable("DbUserAchievement");
             });
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbUserCertificateFile", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCertificateFile", b =>
             {
                 b.Property<Guid>("UserId")
                     .HasColumnType("uniqueidentifier");
@@ -108,24 +108,24 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 b.ToTable("DbUserCertificateFile");
             });
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbUserAchievement", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserAchievement", b =>
             {
-                b.HasOne("LT.DigitalOffice.UserService.Database.Entities.DbAchievement", "Achievement")
+                b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbAchievement", "Achievement")
                     .WithMany()
                     .HasForeignKey("AchievementId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
-                b.HasOne("LT.DigitalOffice.UserService.Database.Entities.DbUser", "User")
+                b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
                     .WithMany("AchievementsIds")
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
 
-            modelBuilder.Entity("LT.DigitalOffice.UserService.Database.Entities.DbUserCertificateFile", b =>
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCertificateFile", b =>
             {
-                b.HasOne("LT.DigitalOffice.UserService.Database.Entities.DbUser", "User")
+                b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
                     .WithMany("CertificatesFilesIds")
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
