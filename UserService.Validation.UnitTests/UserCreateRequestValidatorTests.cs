@@ -11,8 +11,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     public class UserCreateRequestValidatorTests
     {
-        private IValidator<UserCreateRequest> validator;
-        private static IEnumerable<Expression<Func<UserCreateRequest, string>>> NamePropertyCases
+        private IValidator<CreateUserRequest> validator;
+        private static IEnumerable<Expression<Func<CreateUserRequest, string>>> NamePropertyCases
         {
             get
             {
@@ -52,28 +52,28 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression,
+            [ValueSource(nameof(NamePropertyCases))] Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression,
             [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
             string name)
         {
@@ -115,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldThrowValidationExceptionWhenAllFieldsAreEmpty()
         {
-            var request = new UserCreateRequest();
+            var request = new CreateUserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
         }
@@ -123,7 +123,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
         {
-            var request = new UserCreateRequest
+            var request = new CreateUserRequest
             {
                 FirstName = "Example",
                 LastName = "Example",

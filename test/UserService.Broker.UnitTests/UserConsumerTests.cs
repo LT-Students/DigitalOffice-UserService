@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests
         private InMemoryTestHarness harness;
         private Mock<IUserRepository> repositoryMock;
         private DbUser newDbUser;
-        private ConsumerTestHarness<UserLoginConsumer> consumerTestHarness;
+        private ConsumerTestHarness<LoginUserConsumer> consumerTestHarness;
 
         #region SetUp
         [SetUp]
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
                 .Returns(newDbUser);
 
-            consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repositoryMock.Object));
+            consumerTestHarness = harness.Consumer(() => new LoginUserConsumer(repositoryMock.Object));
         }
         #endregion
 

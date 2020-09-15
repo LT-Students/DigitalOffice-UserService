@@ -12,14 +12,17 @@ namespace LT.DigitalOffice.UserService.Controllers
     {
         [HttpGet("getUserById")]
         public User GetUserById([FromServices] IGetUserByIdCommand getUserInfoByIdCommand, [FromQuery] Guid userId)
-            => getUserInfoByIdCommand.Execute(userId);
+        {
+            return getUserInfoByIdCommand.Execute(userId);
+        } 
 
         [HttpPost("register")]
-        public Guid CreateUser([FromServices] IUserCreateCommand command, [FromBody] UserCreateRequest request)
+        public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] CreateUserRequest request)
         {
             return command.Execute(request);
         }
 
+        //TODO: Change to put
         [HttpPost("editUser")]
         public bool EditUser([FromServices] IEditUserCommand command, [FromBody] EditUserRequest request)
         {
@@ -33,10 +36,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpDelete("disableUserById")]
-        public async Task DisableUserById(
-            [FromServices] IDisableUserByIdCommand command,
-            [FromQuery] Guid userId,
-            [FromHeader] Guid requestingUser)
+        public async Task DisableUserById([FromServices] IDisableUserByIdCommand command, [FromQuery] Guid userId, [FromHeader] Guid requestingUser)
         {
             await command.ExecuteAsync(userId, requestingUser);
         }

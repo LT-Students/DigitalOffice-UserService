@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -20,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Business
         /// </summary>
         /// <param name="repository">Specified repository.</param>
         /// <param name="mapper">Specified mapper that convert user model from database to user model for response.</param>
-        public GetUserByIdCommand(IUserRepository repository, IMapper<DbUser, User> mapper)
+        public GetUserByIdCommand([FromServices] IUserRepository repository, [FromServices] IMapper<DbUser, User> mapper)
         {
             this.repository = repository;
             this.mapper = mapper;
@@ -32,6 +33,8 @@ namespace LT.DigitalOffice.UserService.Business
         /// <param name="userId">Specified user's id.</param>
         /// <returns>User model with specified id.</returns>
         public User Execute(Guid userId)
-            => mapper.Map(repository.GetUserInfoById(userId));
+        {
+            return mapper.Map(repository.GetUserInfoById(userId));
+        }
     }
 }

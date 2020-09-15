@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         /// <param name="user">User to add.</param>
         /// <returns>Guid of added user.</returns>
-        Guid UserCreate(DbUser user);
+        Guid CreateUser(DbUser user);
 
         /// <summary>
         /// Edit existing user. Returns whether it was successful to edit.

@@ -20,6 +20,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         public async Task Consume(ConsumeContext<IAccessValidatorRequest> context)
         {
             var response = OperationResultWrapper.CreateResponse(IsAdmin, context.Message.UserId);
+
             await context.RespondAsync<IOperationResult<bool>>(response);
         }
 

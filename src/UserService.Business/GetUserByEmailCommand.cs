@@ -28,9 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             validator.ValidateAndThrow(userEmail);
 
-            var user = mapper.Map(repository.GetUserByEmail(userEmail));
-
-            return user;
+            return mapper.Map(repository.GetUserByEmail(userEmail));
         }
     }
 }

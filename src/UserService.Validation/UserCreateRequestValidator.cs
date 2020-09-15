@@ -3,7 +3,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 
 namespace LT.DigitalOffice.UserService.Validation
 {
-    public class UserCreateRequestValidator : AbstractValidator<UserCreateRequest>
+    public class UserCreateRequestValidator : AbstractValidator<CreateUserRequest>
     {
         public UserCreateRequestValidator()
         {

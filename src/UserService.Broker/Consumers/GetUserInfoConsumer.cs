@@ -17,9 +17,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         private readonly IRequestClient<IGetUserPositionRequest> client;
         private readonly IUserRepository repository;
 
-        public GetUserInfoConsumer(
-            [FromServices] IUserRepository repository,
-            [FromServices] IRequestClient<IGetUserPositionRequest> client)
+        public GetUserInfoConsumer([FromServices] IUserRepository repository, [FromServices] IRequestClient<IGetUserPositionRequest> client)
         {
             this.repository = repository;
             this.client = client;
@@ -34,29 +32,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserInfo(Guid userId)
         {
-            var response = client.GetResponse<IOperationResult<IUserPositionResponse>>(
-                new
-                {
-                    UserId = userId
-                }).Result;
+            var response = client.GetResponse<IOperationResult<IUserPositionResponse>>(new { UserId = userId }).Result;
 
-            if (!response.Message.IsSuccess)
-            {
-                throw new Exception(string.Join(", ", response.Message.Errors));
-            }
+            if (!response.Message.IsSuccess) throw new Exception(string.Join(", ", response.Message.Errors));
+            
+            //TODO: Messages for exceptions.
 
-            var dbUser = repository.GetUserInfoById(userId);
-            var position = response.Message.Body;
-
-            if (dbUser == null)
-            {
-                throw new ArgumentNullException(nameof(dbUser));
-            }
-
-            if (position == null)
-            {
-                throw new ArgumentNullException(nameof(position));
-            }
+            var dbUser = repository.GetUserInfoById(userId) ?? throw new ArgumentNullException();
+            var position = response.Message.Body ?? throw new NullReferenceException();
 
             return new
             {

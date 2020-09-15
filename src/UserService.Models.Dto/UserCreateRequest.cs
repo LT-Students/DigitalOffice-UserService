@@ -1,6 +1,6 @@
 ﻿namespace LT.DigitalOffice.UserService.Models.Dto
 {
-    public class UserCreateRequest
+    public class CreateUserRequest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

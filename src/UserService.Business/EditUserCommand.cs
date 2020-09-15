@@ -28,9 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             validator.ValidateAndThrow(request);
 
-            var user = mapper.Map(request);
-
-            return repository.EditUser(user);
+            return repository.EditUser(mapper.Map(request));
         }
     }
 }

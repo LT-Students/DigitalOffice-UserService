@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -22,25 +21,20 @@ namespace LT.DigitalOffice.UserService.Business
         public async Task ExecuteAsync(Guid userId, Guid requestingUserId)
         {
             var isAcces = await GetResultCheckingUserRights(requestingUserId);
+            if (!isAcces) throw new Exception("Not enough rights.");
 
-            if (!isAcces)
-            {
-                throw new Exception("Not enough rights.");
-            }
-
-            DbUser editedUser = repository.GetUserInfoById(userId);
+            var editedUser = repository.GetUserInfoById(userId);
 
             editedUser.IsActive = false;
-
             repository.EditUser(editedUser);
         }
 
+        //TODO: Think about it.
         private async Task<bool> GetResultCheckingUserRights(Guid userId)
         {
             int numberRight = 1;
 
-            return await accessValidator.IsAdmin() ?
-                true : await accessValidator.HasRights(numberRight);
+            if (await accessValidator.IsAdmin()) return true; else return await accessValidator.HasRights(numberRight);
         }
     }
 }

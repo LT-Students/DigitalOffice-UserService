@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     public class UserCreateRequestToDbUserMapperTests
     {
-        private IMapper<UserCreateRequest, DbUser> mapper;
+        private IMapper<CreateUserRequest, DbUser> mapper;
 
         [SetUp]
         public void SetUp()
@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnNewDbUserWhenDataCorrect()
         {
-            var request = new UserCreateRequest
+            var request = new CreateUserRequest
             {
                 FirstName = "Example",
                 LastName = "Example",

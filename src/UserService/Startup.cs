@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService
 
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<UserLoginConsumer>();
+                x.AddConsumer<LoginUserConsumer>();
                 x.AddConsumer<GetUserInfoConsumer>();
                 x.AddConsumer<AccessValidatorConsumer>();
 
@@ -90,7 +90,7 @@ namespace LT.DigitalOffice.UserService
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(r => r.Interval(2, 100));
 
-                        ep.ConfigureConsumer<UserLoginConsumer>(context);
+                        ep.ConfigureConsumer<LoginUserConsumer>(context);
                     });
                 });
                 x.AddRequestClient<IGetUserPositionRequest>(new Uri("rabbitmq://localhost/CompanyService"));
@@ -132,14 +132,14 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMappers(IServiceCollection services)
         {     
-            services.AddTransient<IMapper<UserCreateRequest, DbUser>, UserMapper>();
+            services.AddTransient<IMapper<CreateUserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
             services.AddTransient<IMapper<EditUserRequest, DbUser>, UserMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)
         {
-            services.AddTransient<IUserCreateCommand, UserCreateCommand>();
+            services.AddTransient<ICreateUserCommand, CreateUserCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
@@ -148,7 +148,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureValidators(IServiceCollection services)
         {
             services.AddTransient<IValidator<EditUserRequest>, EditUserRequestValidator>();
-            services.AddTransient<IValidator<UserCreateRequest>, UserCreateRequestValidator>();
+            services.AddTransient<IValidator<CreateUserRequest>, UserCreateRequestValidator>();
             services.AddTransient<IValidator<string>, GetUserByEmailValidator>();
         }
     }

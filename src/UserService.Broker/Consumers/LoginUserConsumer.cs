@@ -5,15 +5,15 @@ using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.UserService.Models.Db;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-    public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
+    //TODO: Documentation
+    public class LoginUserConsumer : IConsumer<IUserCredentialsRequest>
     {
         private readonly IUserRepository repository;
 
-        public UserLoginConsumer([FromServices] IUserRepository repository)
+        public LoginUserConsumer([FromServices] IUserRepository repository)
         {
             this.repository = repository;
         }
@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
-            DbUser userCredentials = repository.GetUserByEmail(request.Email);
+            var userCredentials = repository.GetUserByEmail(request.Email);
 
             return new
             {
