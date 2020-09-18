@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Data</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Data</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

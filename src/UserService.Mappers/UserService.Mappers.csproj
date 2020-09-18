@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Mappers</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Mappers</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

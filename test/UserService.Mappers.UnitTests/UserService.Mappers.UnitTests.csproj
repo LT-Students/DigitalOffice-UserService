@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
 
     <RootNamespace>LT.DigitalOffice.UserService.Mappers.UnitTests</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Mappers.UnitTests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

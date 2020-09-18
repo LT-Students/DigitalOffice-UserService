@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
 
     <RootNamespace>LT.DigitalOffice.UserService.Business.UnitTests</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Business.UnitTests</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

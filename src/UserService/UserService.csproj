@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,8 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Validation</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Validation</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

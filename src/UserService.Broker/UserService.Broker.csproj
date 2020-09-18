@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Broker</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Broker</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

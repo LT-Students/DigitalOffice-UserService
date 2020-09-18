@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Models.Dto</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Models.Dto</AssemblyName>
+
   </PropertyGroup>
 
 </Project>

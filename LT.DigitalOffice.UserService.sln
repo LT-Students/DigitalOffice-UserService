@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Business.UnitTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{4513E017-9363-4F2D-AE02-1720780134D2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.UnitTests", "UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{37128414-597E-4EDE-9004-711A99246AC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.UnitTests", "test\UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{37128414-597E-4EDE-9004-711A99246AC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

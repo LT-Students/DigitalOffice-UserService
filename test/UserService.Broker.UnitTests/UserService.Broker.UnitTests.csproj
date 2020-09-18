@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
 
     <RootNamespace>LT.DigitalOffice.UserService.Broker.UnitTests</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Broker.UnitTests</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

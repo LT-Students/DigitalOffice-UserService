@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef</RootNamespace>
+    <AssemblyName>LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>
