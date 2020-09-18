@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -26,7 +27,15 @@ namespace LT.DigitalOffice.UserService.Business
 
         public User Execute(string userEmail)
         {
-            validator.ValidateAndThrow(userEmail);
+            var validationResult = validator.Validate(userEmail);
+
+            if (validationResult != null && !validationResult.IsValid)
+            {
+                var messages = validationResult.Errors.Select(x => x.ErrorMessage);
+                string message = messages.Aggregate((x, y) => x + "\n" + y);
+
+                throw new ValidationException(message);
+            }
 
             return mapper.Map(repository.GetUserByEmail(userEmail));
         }

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -7,6 +8,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
@@ -62,16 +64,21 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             command = new EditUserCommand(validatorMock.Object, repositoryMock.Object, mapperMock.Object);
         }
 
-        /*[Test]
+        [Test]
         public void ShouldThrowExceptionWhenUserDataIsInvalid()
         {
             validatorMock
-                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
+                .Setup(x => x.Validate(It.IsAny<EditUserRequest>()))
+                .Returns(new ValidationResult(
+                    new List<ValidationFailure>
+                    {
+                        new ValidationFailure("test", "something", null)
+                    }));
+
 
             Assert.Throws<ValidationException>(() => command.Execute(request));
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
-        }*/
+        }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()

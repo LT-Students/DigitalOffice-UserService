@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -7,6 +8,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
@@ -87,22 +89,27 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             repositoryMock.Verify(repository => repository.CreateUser(It.IsAny<DbUser>()), Times.Never);
         }
 
-        /*[Test]
+        [Test]
         public void ShouldThrowExceptionWhenValidatorThrowsException()
         {
-            validatorMock.Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
+            validatorMock.Setup(x => x.Validate(It.IsAny<CreateUserRequest>()))
+                .Returns(new ValidationResult(
+                    new List<ValidationFailure>
+                    {
+                        new ValidationFailure("test", "something", null)
+                    }));
+
             repositoryMock
-                .Setup(x => x.UserCreate(It.IsAny<DbUser>()))
+                .Setup(x => x.CreateUser(It.IsAny<DbUser>()))
                 .Returns(userId);
             mapperMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>()))
+                .Setup(mapper => mapper.Map(It.IsAny<CreateUserRequest>()))
                 .Returns(new DbUser());
 
             Assert.Throws<ValidationException>(() => command.Execute(request));
-            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
-            repositoryMock.Verify(repository => repository.UserCreate(It.IsAny<DbUser>()), Times.Never);
-            mapperMock.Verify(mapper => mapper.Map(It.IsAny<UserCreateRequest>()), Times.Never);
-        }*/
+            //validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            repositoryMock.Verify(repository => repository.CreateUser(It.IsAny<DbUser>()), Times.Never);
+            mapperMock.Verify(mapper => mapper.Map(It.IsAny<CreateUserRequest>()), Times.Never);
+        }
     }
 }
