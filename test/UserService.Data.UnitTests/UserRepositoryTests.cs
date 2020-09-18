@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             }
         }
 
-        /*#region GetUserInfoById
+        #region GetUserInfoById
         [Test]
         public void ShouldThrowExceptionWhenUserWithRequiredIdDoesNotExist()
         {
@@ -201,17 +201,18 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.CreateUser(secondUser), Is.EqualTo(secondUser.Id));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new[] { firstUser, secondUser }));
+            Assert.AreEqual(secondUser.Id, repository.CreateUser(secondUser));
+
+            Assert.Contains(secondUser, dbContext.Users.ToList());
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.CreateUser(firstUser),
-                Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new[] { firstUser }));
+            var exc = Assert.Throws<Exception>(() => repository.CreateUser(firstUser));
+
+            Assert.AreEqual(EmailAlreadyTakenExceptionMessage, exc.Message);
         }
-        #endregion*/
+        #endregion
     }
 }

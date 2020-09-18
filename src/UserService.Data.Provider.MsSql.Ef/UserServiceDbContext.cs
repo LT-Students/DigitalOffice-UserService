@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
         // Fluent API is written here.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.Load("LT.DigitalOffice.UserService.Models.Db"));
         }
     }
 }
