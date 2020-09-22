@@ -129,7 +129,24 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldNotThrowValidationExceptionWhenDataIsValid()
+        public void ShouldPassWhenDataIsValidWithoutMiddleName()
+        {
+            var request = new EditUserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldPassWhenDataIsValid()
         {
             var request = new EditUserRequest
             {

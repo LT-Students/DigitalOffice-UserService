@@ -23,7 +23,6 @@ namespace LT.DigitalOffice.UserService.Validation
                 .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Last name with error.");
 
             RuleFor(user => user.MiddleName)
-                .NotEmpty()
                 .MaximumLength(32).WithMessage("Middle name is too long.")
                 .MinimumLength(2).WithMessage("Middle name is too short.")
                 .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error.");

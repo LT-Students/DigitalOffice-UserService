@@ -123,13 +123,29 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldNotThrowValidationExceptionWhenDataIsValid()
+        public void ShouldPassWhenDataIsValid()
         {
             var request = new UserCreateRequest
             {
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldPassWhenDataIsValidMiddleNameNull()
+        {
+            var request = new UserCreateRequest
+            {
+                FirstName = "Example",
+                LastName = "Example",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
