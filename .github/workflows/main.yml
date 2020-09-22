@@ -24,14 +24,11 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
-        with:
+        with: 
           dotnet-version: 3.1.301
-          
       - name: Restore
-        run: dotnet-restore
-        
-      - name: Build
+        run: dotnet restore
+      - name: Build 
         run: dotnet build --no-restore --configuration Release
-        
       - name: Test
-        run: dotnet tested --no-restore --verbosity normal
+        run: dotnet test --no-restore --verbosity normal

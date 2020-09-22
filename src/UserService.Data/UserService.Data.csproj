@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>LT.DigitalOffice.UserService.Data</AssemblyName>
+    <RootNamespace>LT.DigitalOffice.UserService.Data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UserService.Data.Provider.MsSql.Ef\UserService.Data.Provider.MsSql.Ef.csproj" />
+    <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
+  </ItemGroup>
+
+</Project>
