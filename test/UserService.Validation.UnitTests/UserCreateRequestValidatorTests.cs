@@ -140,7 +140,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldPassWhenDataIsValidMiddleNameNull()
+        public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
             var request = new UserCreateRequest
             {
