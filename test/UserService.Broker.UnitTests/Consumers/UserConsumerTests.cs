@@ -41,9 +41,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 FirstName = "Example1",
                 LastName = "Example",
                 MiddleName = "Example",
-                Email = "Example@gmail.com",
                 Status = "Example",
-                PasswordHash = "Example",
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true
             };
@@ -65,7 +63,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             var expectedResponse = new UserCredentialsResponse
             {
                 UserId = newDbUser.Id,
-                PasswordHash = newDbUser.PasswordHash
+                //PasswordHash = newDbUser.PasswordHash
             };
 
             await harness.Start();

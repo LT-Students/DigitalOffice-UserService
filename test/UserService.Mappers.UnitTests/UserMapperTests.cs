@@ -8,8 +8,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
@@ -65,9 +63,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             dbUser = new DbUser
             {
                 AchievementsIds = new List<DbUserAchievement> {dbUserAchievement}, AvatarFileId = avatarFileId,
-                CertificatesFilesIds = new List<DbUserCertificateFile> {dbUserCertificateFile}, Email = Email,
                 FirstName = FirstName, Id = userId, IsActive = IsActive, IsAdmin = IsAdmin, LastName = LastName,
-                MiddleName = null, PasswordHash = PasswordHash, Status = Status
             };
         }
 
@@ -126,13 +122,10 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             var user = new DbUser()
             {
                 Id = request.Id,
-                Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password))),
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = request.AvatarFileId

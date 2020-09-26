@@ -20,6 +20,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
         private DbUser firstUser;
         private DbUser secondUser;
+        private DbUserCredentials firstUserCredentials;
+        private DbUserCredentials secondUserCredentials;
 
         private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
@@ -42,13 +44,10 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             firstUser = new DbUser
             {
               Id = Guid.NewGuid(),
-              Email = "Example@gmail.com",
               FirstName = "Example",
               LastName = "Example",
               MiddleName = "Example",
               Status = "Example",
-              PasswordHash =
-                  Encoding.Default.GetString(new SHA512Managed().ComputeHash(Encoding.Default.GetBytes("Example"))),
               AvatarFileId = null,
               IsActive = true,
               IsAdmin = false,
@@ -56,22 +55,40 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
               AchievementsIds = new Collection<DbUserAchievement>()
             };
 
+            firstUserCredentials = new DbUserCredentials
+            {
+                UserId = firstUser.Id,
+                Email = "Example@gmail.com",
+                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
+                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
+                Salt = "Example_Salt"
+            };
+
             secondUser = new DbUser
             {
               Id = Guid.NewGuid(),
-              Email = "DifferentEmail@gmail.com",
               FirstName = "Example",
               LastName = "Example",
               MiddleName = "Example",
               Status = "Example",
-              PasswordHash = Encoding.Default.GetString(new SHA512Managed().ComputeHash(Encoding.Default.GetBytes("Example"))),
               AvatarFileId = null,
               IsActive = true,
               IsAdmin = false,
               CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
               AchievementsIds = new Collection<DbUserAchievement>()
             };
+
+            secondUserCredentials = new DbUserCredentials
+            {
+                UserId = firstUser.Id,
+                Email = "Example@gmail.com",
+                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
+                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
+                Salt = "Example_Salt"
+            };
+
             dbContext.Users.Add(firstUser);
+            dbContext.UserCredentials.Add(firstUserCredentials);
             dbContext.SaveChanges();
         }
 
@@ -114,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldReturnUserSuccessfully()
         {
-            var resultUser = repository.GetUserByEmail(firstUser.Email);
+            var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
 
             SerializerAssert.AreEqual(firstUser, resultUser);
             Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
@@ -132,7 +149,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldReturnUserByEmailSuccessfully()
         {
-            var resultUser = repository.GetUserByEmail(firstUser.Email);
+            var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
 
             SerializerAssert.AreEqual(firstUser, resultUser);
             Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
@@ -146,13 +163,10 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var user = new DbUser
             {
                 Id = Guid.NewGuid(),
-                Email = "Example1@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes("Password"))),
                 AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = false,
@@ -176,13 +190,10 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var user = new DbUser
             {
                 Id = firstUser.Id,
-                Email = "Example1@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes("Password"))),
                 AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = false,
@@ -201,14 +212,14 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.UserCreate(secondUser),Is.EqualTo(secondUser.Id));
+            Assert.That(repository.UserCreate(secondUser, secondUserCredentials.Email),Is.EqualTo(secondUser.Id));
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.UserCreate(firstUser),
+            Assert.That(() => repository.UserCreate(firstUser, firstUserCredentials.Email),
                 Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser}));
         }
