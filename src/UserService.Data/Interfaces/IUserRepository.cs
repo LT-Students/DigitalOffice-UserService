@@ -20,8 +20,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Adds new user to the database. Returns whether it was successful to add.
         /// </summary>
         /// <param name="user">User to add.</param>
+        /// <param name="userEmail">User email for check user in db</param>
         /// <returns>Guid of added user.</returns>
-        Guid UserCreate(DbUser user);
+        Guid UserCreate(DbUser user, string userEmail);
 
         /// <summary>
         /// Edit existing user. Returns whether it was successful to edit.
@@ -36,5 +37,25 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userEmail">Specified email of user.</param>
         /// <returns>User model.</returns>
         DbUser GetUserByEmail(string userEmail);
+
+        /// <summary>
+        /// Returns the user credentials with the specified user id from database.
+        /// </summary>
+        /// <param name="userId">Specified Id of user.</param>
+        /// <returns>User credentials model.</returns>
+        DbUserCredentials GetUserCredentialsByUserId(Guid userId);
+
+        /// <summary>
+        /// Edit existing user credentials. Returns whether it was successful to edit.
+        /// </summary>
+        /// <param name="userCredentials">User credentials to edit.</param>
+        /// <returns>Whether it was successful to edit</returns>
+        bool EditUserCredentials(DbUserCredentials userCredentials);
+
+        /// <summary>
+        /// Create new user credentials.
+        /// </summary>
+        /// <param name="userCredentials">User credentials to add.</param>
+        void CreateUserCredentials(DbUserCredentials userCredentials);
     }
 }

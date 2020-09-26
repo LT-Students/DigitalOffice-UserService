@@ -18,9 +18,9 @@ namespace LT.DigitalOffice.UserService.Data
             this.provider = provider;
         }
 
-        public Guid UserCreate(DbUser user)
+        public Guid UserCreate(DbUser user, string userEmail)
         {
-            if (provider.Users.Any(users => user.Email == users.Email))
+            if (provider.UserCredentials.Any(u => u.Email == userEmail))
             {
                 throw new Exception("Email is already taken.");
             }
@@ -50,7 +50,9 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserByEmail(string userEmail)
         {
-            DbUser user = provider.Users.FirstOrDefault(u => u.Email == userEmail);
+            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.Email == userEmail);
+
+            DbUser user = provider.Users.FirstOrDefault(u => u.Id == userCredentials.UserId);
 
             if (user == null)
             {
@@ -58,6 +60,42 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             return user;
+        }
+
+        public DbUserCredentials GetUserCredentialsByUserId(Guid userId)
+        {
+            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.UserId == userId);
+
+            if (userCredentials == null)
+            {
+                throw new Exception("User credentials not found.");
+            }
+
+            return userCredentials;
+        }
+
+        public bool EditUserCredentials(DbUserCredentials userCredentials)
+        {
+            if (!provider.UserCredentials.Any(user => user.UserId == userCredentials.UserId))
+            {
+                throw new Exception("User was not found.");
+            }
+
+            provider.UserCredentials.Update(userCredentials);
+            provider.Save();
+
+            return true;
+        }
+
+        public void CreateUserCredentials(DbUserCredentials userCredentials)
+        {
+            if (provider.UserCredentials.Any(u => u.Email == userCredentials.Email))
+            {
+                throw new Exception("Email is already taken.");
+            }
+
+            provider.UserCredentials.Update(userCredentials);
+            provider.Save();
         }
     }
 }
