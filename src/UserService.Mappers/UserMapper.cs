@@ -1,17 +1,20 @@
-﻿using System;
-using System.Linq;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
+﻿using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers
 {
     /// <summary>
     /// Represents mapper. Provides methods for converting an object of <see cref="DbUser"/> type into an object of <see cref="User"/> type according to some rule.
     /// </summary>
-    public class UserMapper : IMapper<DbUser, User>, IMapper<DbUser, string, object>, IMapper<UserCreateRequest, DbUser>, IMapper<EditUserRequest, DbUser>
+    public class UserMapper : IMapper<DbUser, User>, IMapper<DbUser, string, object>,
+        IMapper<UserCreateRequest, DbUser>, IMapper<EditUserRequest, DbUser>,
+        IMapper<EditUserRequest, string, DbUserCredentials>,
+        IMapper<UserCreateRequest, Guid, DbUserCredentials>
     {
         public User Map(DbUser dbUser)
         {
@@ -31,7 +34,6 @@ namespace LT.DigitalOffice.UserService.Mappers
                 }).ToList(),
                 AvatarId = dbUser.AvatarFileId,
                 CertificatesIds = dbUser.CertificatesFilesIds?.Select(x => x.CertificateId).ToList(),
-                Email = dbUser.Email,
                 FirstName = dbUser.FirstName,
                 LastName = dbUser.LastName,
                 MiddleName = dbUser.MiddleName,
@@ -50,13 +52,10 @@ namespace LT.DigitalOffice.UserService.Mappers
             return new DbUser
             {
                 Id = request.Id,
-                Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
                 Status = request.Status,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password))),
                 AvatarFileId = request.AvatarFileId,
                 IsActive = request.IsActive,
                 IsAdmin = request.IsAdmin
@@ -95,16 +94,47 @@ namespace LT.DigitalOffice.UserService.Mappers
             return new DbUser
             {
                 Id = Guid.NewGuid(),
-                Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
                 Status = request.Status,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password))),
                 AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = request.IsAdmin
+            };
+        }
+
+        public DbUserCredentials Map(UserCreateRequest request, Guid userId)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            return new DbUserCredentials
+            {
+                UserId = userId,
+                Email = request.Email,
+                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
+                    Encoding.UTF8.GetBytes(request.Password))),
+                Salt = "Exmple_salt"
+            };
+        }
+
+        public DbUserCredentials Map(EditUserRequest request, string salt)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            return new DbUserCredentials
+            {
+                UserId = request.Id,
+                Email = request.Email,
+                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
+                    Encoding.UTF8.GetBytes(request.Password))),
+                Salt = salt
             };
         }
     }

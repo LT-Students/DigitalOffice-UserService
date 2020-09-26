@@ -149,6 +149,8 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
             services.AddTransient<IMapper<EditUserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
+            services.AddTransient<IMapper<EditUserRequest, string, DbUserCredentials>, UserMapper>();
+            services.AddTransient<IMapper<UserCreateRequest, Guid, DbUserCredentials>, UserMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)

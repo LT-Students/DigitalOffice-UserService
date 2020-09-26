@@ -17,6 +17,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
         }
 
         public DbSet<DbUser> Users { get; set; }
+        public DbSet<DbUserCredentials> UserCredentials { get; set; }
         public DbSet<DbAchievement> Achievements { get; set; }
 
         // Fluent API is written here.
@@ -27,23 +28,23 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
 
         public object MakeEntityDetached(object obj)
         {
-            this.Entry(obj).State = EntityState.Detached;
-            return this.Entry(obj).State;
+            Entry(obj).State = EntityState.Detached;
+            return Entry(obj).State;
         }
 
         void IDataProvider.Save()
         {
-            this.SaveChanges();
+            SaveChanges();
         }
 
         public void EnsureDeleted()
         {
-            this.Database.EnsureDeleted();
+            Database.EnsureDeleted();
         }
 
         public bool IsInMemory()
         {
-            return this.Database.IsInMemory();
+            return Database.IsInMemory();
         }
     }
 }

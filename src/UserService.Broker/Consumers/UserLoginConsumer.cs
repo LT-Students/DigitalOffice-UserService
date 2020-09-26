@@ -27,11 +27,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
-            DbUser userCredentials = repository.GetUserByEmail(request.Email);
+            DbUser user = repository.GetUserByEmail(request.Email);
+            DbUserCredentials userCredentials = repository.GetUserCredentialsByUserId(user.Id);
 
             return new
             {
-                UserId = userCredentials.Id,
+                UserId = user.Id,
                 userCredentials.PasswordHash
             };
         }

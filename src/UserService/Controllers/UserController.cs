@@ -2,7 +2,6 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
