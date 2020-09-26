@@ -81,7 +81,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             secondUserCredentials = new DbUserCredentials
             {
                 UserId = firstUser.Id,
-                Email = "Example@gmail.com",
+                Email = "Example2@gmail.com",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
@@ -212,7 +212,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.UserCreate(secondUser, secondUserCredentials.Email),Is.EqualTo(secondUser.Id));
+            Assert.That(repository.UserCreate(secondUser, secondUserCredentials.Email), Is.EqualTo(secondUser.Id));
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
         }
 

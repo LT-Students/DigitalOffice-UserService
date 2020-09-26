@@ -52,18 +52,41 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             certificateFileId = Guid.NewGuid();
             pictureFileId = Guid.NewGuid();
             avatarFileId = Guid.NewGuid();
-            achievement = new DbAchievement {Id = achievementId, Message = Message, PictureFileId = pictureFileId};
+
+            achievement = new DbAchievement
+            {
+                Id = achievementId,
+                Message = Message,
+                PictureFileId = pictureFileId
+            };
+
             dbUserAchievement = new DbUserAchievement
             {
-                Achievement = achievement, AchievementId = achievementId, User = dbUser, Time = DateTime.Now,
+                Achievement = achievement,
+                AchievementId = achievementId,
+                User = dbUser,
+                Time = DateTime.Now,
                 UserId = userId
             };
+
             dbUserCertificateFile = new DbUserCertificateFile
-                {CertificateId = certificateFileId, User = dbUser, UserId = userId};
+            {
+                CertificateId = certificateFileId,
+                User = dbUser,
+                UserId = userId
+            };
+
             dbUser = new DbUser
             {
-                AchievementsIds = new List<DbUserAchievement> {dbUserAchievement}, AvatarFileId = avatarFileId,
-                FirstName = FirstName, Id = userId, IsActive = IsActive, IsAdmin = IsAdmin, LastName = LastName,
+                AchievementsIds = new List<DbUserAchievement> { dbUserAchievement },
+                AvatarFileId = avatarFileId,
+                FirstName = FirstName,
+                Id = userId,
+                IsActive = IsActive,
+                IsAdmin = IsAdmin,
+                LastName = LastName,
+                Status = Status,
+                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile }
             };
         }
 
@@ -92,7 +115,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             Assert.AreEqual(FirstName, resultUserModel.FirstName);
             Assert.AreEqual(LastName, resultUserModel.LastName);
             Assert.IsNull(resultUserModel.MiddleName);
-            Assert.AreEqual(Email, resultUserModel.Email);
             Assert.AreEqual(Status, resultUserModel.Status);
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
@@ -137,7 +159,8 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRequestIsNull()
         {
-            var request = new EditUserRequest();
+            EditUserRequest request = null;
+
             Assert.Throws<ArgumentNullException>(() => mapperEditUserRequest.Map(request));
         }
         #endregion

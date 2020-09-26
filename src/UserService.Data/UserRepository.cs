@@ -52,12 +52,12 @@ namespace LT.DigitalOffice.UserService.Data
         {
             DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.Email == userEmail);
 
-            DbUser user = provider.Users.FirstOrDefault(u => u.Id == userCredentials.UserId);
-
-            if (user == null)
+            if (userCredentials == null)
             {
                 throw new Exception("User not found.");
             }
+
+            DbUser user = provider.Users.FirstOrDefault(u => u.Id == userCredentials.UserId);
 
             return user;
         }
