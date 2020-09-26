@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
             DbUser user = repository.GetUserByEmail(request.Email);
-            DbUserCredentials userCredentials = repository.GetUserCredentialsByUserId(user.Id);
+            DbUserCredentials userCredentials = repository.GetUserCredentialsById(user.Id);
 
             return new
             {

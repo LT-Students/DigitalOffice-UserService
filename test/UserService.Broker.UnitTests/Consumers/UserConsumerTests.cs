@@ -26,6 +26,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
         private InMemoryTestHarness harness;
         private Mock<IUserRepository> repositoryMock;
         private DbUser newDbUser;
+        private DbUserCredentials userCredentials;
         private ConsumerTestHarness<UserLoginConsumer> consumerTestHarness;
 
         #region SetUp
@@ -35,9 +36,11 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             harness = new InMemoryTestHarness();
             repositoryMock = new Mock<IUserRepository>();
 
+            var userId = Guid.NewGuid();
+
             newDbUser = new DbUser
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 FirstName = "Example1",
                 LastName = "Example",
                 MiddleName = "Example",
@@ -46,9 +49,20 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 IsActive = true
             };
 
+            userCredentials = new DbUserCredentials
+            {
+                UserId = userId,
+                PasswordHash = "Example",
+                Email = "Example@gmail.com",
+                Salt = "Example_Salt"
+            };
+
             repositoryMock
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
                 .Returns(newDbUser);
+            repositoryMock
+               .Setup(x => x.GetUserCredentialsById(It.IsAny<Guid>()))
+               .Returns(userCredentials);
 
             consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repositoryMock.Object));
         }
@@ -63,7 +77,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             var expectedResponse = new UserCredentialsResponse
             {
                 UserId = newDbUser.Id,
-                //PasswordHash = newDbUser.PasswordHash
+                PasswordHash = userCredentials.PasswordHash
             };
 
             await harness.Start();

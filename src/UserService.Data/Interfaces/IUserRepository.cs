@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         /// <param name="userId">Specified Id of user.</param>
         /// <returns>User credentials model.</returns>
-        DbUserCredentials GetUserCredentialsByUserId(Guid userId);
+        DbUserCredentials GetUserCredentialsById(Guid userId);
 
         /// <summary>
         /// Edit existing user credentials. Returns whether it was successful to edit.

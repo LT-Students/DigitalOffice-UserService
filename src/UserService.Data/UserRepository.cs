@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Data
             return user;
         }
 
-        public DbUserCredentials GetUserCredentialsByUserId(Guid userId)
+        public DbUserCredentials GetUserCredentialsById(Guid userId)
         {
             DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.UserId == userId);
 
