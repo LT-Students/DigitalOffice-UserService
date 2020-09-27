@@ -48,6 +48,22 @@ namespace LT.DigitalOffice.UserService.Data
             return true;
         }
 
+        public void ChangePassword(Guid userId)
+        {
+            var dbUser = provider.Users.Any(users => userId == users.Id))
+
+            if (dbUser == null)
+            {
+                throw new Exception("User was not found.");
+            }
+
+            provider.Users.Update(user);
+            provider.Save();
+
+            return true;
+        }
+
+
         public DbUser GetUserByEmail(string userEmail)
         {
             DbUser user = provider.Users.FirstOrDefault(u => u.Email == userEmail);
