@@ -2,7 +2,6 @@ using System;
 using FluentValidation;
 using GreenPipes;
 using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Mappers;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -149,8 +148,8 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
             services.AddTransient<IMapper<EditUserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
-            services.AddTransient<IMapper<EditUserRequest, string, DbUserCredentials>, UserMapper>();
-            services.AddTransient<IMapper<UserCreateRequest, Guid, DbUserCredentials>, UserMapper>();
+            services.AddTransient<IMapper<EditUserRequest, string, DbUserCredentials>, UserCredentialsMapper>();
+            services.AddTransient<IMapper<UserCreateRequest, Guid, DbUserCredentials>, UserCredentialsMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)
