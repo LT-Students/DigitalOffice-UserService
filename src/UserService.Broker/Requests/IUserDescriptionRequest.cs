@@ -2,6 +2,9 @@
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
 {
+    /// <summary>
+    /// DTO for sent user information through a message broker in MessageService.
+    /// </summary>
     public interface IUserDescriptionRequest
     {
         Guid GeneratedId { get; }
