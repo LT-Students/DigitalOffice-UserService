@@ -2,7 +2,6 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -39,6 +38,13 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromHeader] Guid requestingUser)
         {
             command.Execute(userId, requestingUser);
+        }
+
+        [HttpPost("forgotPassword")]
+        public void ForgotPassword([FromServices] IForgotPasswordCommand command,
+            [FromBody] ForgotPasswordRequest userEmail)
+        {
+            command.Execute(userEmail);
         }
     }
 }
