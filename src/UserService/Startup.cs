@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using LT.DigitalOffice.UserService.Options;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -54,8 +55,7 @@ namespace LT.DigitalOffice.UserService
             services.AddControllers();
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("Middleware"));
-
-            var option = Configuration.GetSection("Middleware").Get<TokenConfiguration>();
+            services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
 
             services.AddMemoryCache();
 
