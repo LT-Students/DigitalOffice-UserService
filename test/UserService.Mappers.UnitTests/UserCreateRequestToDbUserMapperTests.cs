@@ -3,8 +3,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
 using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {

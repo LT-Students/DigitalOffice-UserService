@@ -17,12 +17,10 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private IMapper<EditUserRequest, DbUser> mapperEditUserRequest;
         private IMapper<DbUser, string, object> mapper2;
 
-        private const string Email = "smth@emal.com";
         private const string Message = "smth";
         private const string FirstName = "Ivan";
         private const string MiddleName = "Ivanovich";
         private const string LastName = "Dudikov";
-        private const string PasswordHash = "42";
         private const bool IsActive = true;
         private const string Status = "Hello, world!";
         private const bool IsAdmin = false;
