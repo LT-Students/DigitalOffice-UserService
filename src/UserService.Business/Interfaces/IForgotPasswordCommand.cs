@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// Method for getting user description by email and sent request in Message Service
         /// </summary>
         /// <param name="userEmail">Specific user email</param>
-        void Execute(ForgotPasswordRequest userEmail);
+        /// <returns>Boolean operation result</returns>
+        bool Execute(string userEmail);
     }
 }

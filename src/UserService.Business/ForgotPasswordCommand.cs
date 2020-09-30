@@ -5,7 +5,6 @@ using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
@@ -38,20 +37,32 @@ namespace LT.DigitalOffice.UserService.Business
 			this.cache = cache;
 		}
 
-		public void Execute(ForgotPasswordRequest request)
+		public bool Execute(string userEmail)
 		{
-			validator.ValidateAndThrow(request.UserEmail);
+			validator.ValidateAndThrow(userEmail);
 
-			var dbUser = repository.GetUserByEmail(request.UserEmail);
+			var dbUser = repository.GetUserByEmail(userEmail);
 
 			var generatedId = SetGuidInCache(Guid.NewGuid());
 
-			SentRequestInMessageService(dbUser, generatedId);
+			return SentRequestInMessageService(dbUser, generatedId);
 		}
 
-		private void SentRequestInMessageService(DbUser dbUser, Guid generatedId)
+		private Guid SetGuidInCache(Guid userId)
+        {
+			var generatedId = Guid.NewGuid();
+
+			cache.Set(generatedId, userId, new MemoryCacheEntryOptions
+			{
+				AbsoluteExpirationRelativeToNow  = TimeSpan.FromMinutes(cacheOptions.Value.CacheLiveInMinutes)
+			});
+
+			return generatedId;
+		}
+
+		private bool SentRequestInMessageService(DbUser dbUser, Guid generatedId)
 		{
-			var brokerResponse = requestClientMS.GetResponse<IOperationResult<IUserDescriptionRequest>>(new
+			var brokerResponse = requestClientMS.GetResponse<IOperationResult<bool>>(new
 			{
 				GeneratedId = generatedId,
 				dbUser.Email,
@@ -65,18 +76,8 @@ namespace LT.DigitalOffice.UserService.Business
 				throw new ForbiddenException(new StringBuilder()
 					.AppendJoin(",", brokerResponse.Message.Errors).ToString());
 			}
-		}
 
-		private Guid SetGuidInCache(Guid userId)
-        {
-			var generatedId = Guid.NewGuid();
-
-			cache.Set(generatedId, userId, new MemoryCacheEntryOptions
-			{
-				AbsoluteExpirationRelativeToNow  = TimeSpan.FromMinutes(cacheOptions.Value.CacheLiveInMinutes)
-			});
-
-			return generatedId;
+			return brokerResponse.Message.Body;
 		}
 	}
 }
