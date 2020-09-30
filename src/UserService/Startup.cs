@@ -1,12 +1,12 @@
 using FluentValidation;
 using GreenPipes;
-using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
+using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data;
@@ -16,6 +16,7 @@ using LT.DigitalOffice.UserService.Mappers;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Options;
 using LT.DigitalOffice.UserService.Validation;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +25,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using LT.DigitalOffice.UserService.Options;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -54,7 +54,7 @@ namespace LT.DigitalOffice.UserService
 
             services.AddControllers();
 
-            services.Configure<TokenConfiguration>(Configuration.GetSection("Middleware"));
+            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
 
             services.AddMemoryCache();
@@ -63,12 +63,12 @@ namespace LT.DigitalOffice.UserService
             ConfigureRepositories(services);
             ConfigureValidators(services);
             ConfigureMappers(services);
-            ConfigRabbitMq(services);
+            ConfigureMassTransit(services);
 
             services.AddMassTransitHostedService();
         }
 
-        private void ConfigRabbitMq(IServiceCollection services)
+        private void ConfigureMassTransit(IServiceCollection services)
         {
             var rabbitmqOptions = Configuration.GetSection(RabbitMQOptions.RabbitMQ).Get<RabbitMQOptions>();
 
@@ -110,7 +110,7 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseHealthChecks("/api/healthcheck");
 
@@ -175,7 +175,7 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddTransient<IValidator<EditUserRequest>, EditUserRequestValidator>();
             services.AddTransient<IValidator<UserCreateRequest>, UserCreateRequestValidator>();
-            services.AddTransient<IValidator<string>, GetUserByEmailValidator>();
+            services.AddTransient<IValidator<string>, UserEmailValidator>();
         }
     }
 }
