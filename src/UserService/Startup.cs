@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService
 
             services.AddControllers();
 
-            services.AddKernelExtensions();
+            services.AddKernelExtensions(Configuration);
 
             services.AddDbContext<UserServiceDbContext>(options =>
             {
