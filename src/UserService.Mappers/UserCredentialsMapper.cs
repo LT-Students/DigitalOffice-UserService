@@ -11,10 +11,10 @@ namespace LT.DigitalOffice.UserService.Mappers
     /// Represents mapper. Provides methods for converting an object of user request
     /// type into an object of <see cref="DbUserCredentials"/> type according to some rule.
     /// </summary>
-    public class UserCredentialsMapper : IMapper<EditUserRequest, string, DbUserCredentials>,
-        IMapper<UserCreateRequest, Guid, DbUserCredentials>
+    public class UserCredentialsMapper : IMapper<EditUserRequest, DbUserCredentials>,
+        IMapper<UserCreateRequest, DbUserCredentials>
     {
-        public DbUserCredentials Map(UserCreateRequest request, Guid userId)
+        public DbUserCredentials Map(UserCreateRequest request)
         {
             if (request == null)
             {
@@ -23,15 +23,13 @@ namespace LT.DigitalOffice.UserService.Mappers
 
             return new DbUserCredentials
             {
-                UserId = userId,
                 Email = request.Email,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password))),
-                Salt = "Example_salt"
+                    Encoding.UTF8.GetBytes(request.Password)))
             };
         }
 
-        public DbUserCredentials Map(EditUserRequest request, string salt)
+        public DbUserCredentials Map(EditUserRequest request)
         {
             if (request == null)
             {
@@ -43,8 +41,7 @@ namespace LT.DigitalOffice.UserService.Mappers
                 UserId = request.Id,
                 Email = request.Email,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password))),
-                Salt = salt
+                    Encoding.UTF8.GetBytes(request.Password)))
             };
         }
     }

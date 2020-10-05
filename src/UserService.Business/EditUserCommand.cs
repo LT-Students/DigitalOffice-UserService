@@ -13,13 +13,13 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IValidator<EditUserRequest> validator;
         private readonly IUserRepository repository;
         private readonly IMapper<EditUserRequest, DbUser> mapperUser;
-        private readonly IMapper<EditUserRequest, string, DbUserCredentials> mapperUserCredentials;
+        private readonly IMapper<EditUserRequest, DbUserCredentials> mapperUserCredentials;
 
         public EditUserCommand(
             [FromServices] IValidator<EditUserRequest> validator,
             [FromServices] IUserRepository repository,
             [FromServices] IMapper<EditUserRequest, DbUser> mapperUser,
-            [FromServices] IMapper<EditUserRequest, string, DbUserCredentials> mapperUserCredentials)
+            [FromServices] IMapper<EditUserRequest, DbUserCredentials> mapperUserCredentials)
         {
             this.validator = validator;
             this.repository = repository;
@@ -34,7 +34,9 @@ namespace LT.DigitalOffice.UserService.Business
             validator.ValidateAndThrow(request);
 
             var dbUser = mapperUser.Map(request);
-            var dbUserCredentials = mapperUserCredentials.Map(request, salt);
+            var dbUserCredentials = mapperUserCredentials.Map(request);
+
+            dbUserCredentials.Salt = salt;
 
             return repository.EditUser(dbUser) && repository.EditUserCredentials(dbUserCredentials);
         }

@@ -14,13 +14,13 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserRepository repository;
         private readonly IValidator<UserCreateRequest> validator;
         private readonly IMapper<UserCreateRequest, DbUser> mapperUser;
-        private readonly IMapper<UserCreateRequest, Guid, DbUserCredentials> mapperUserCredentials;
+        private readonly IMapper<UserCreateRequest, DbUserCredentials> mapperUserCredentials;
 
         public UserCreateCommand(
             [FromServices] IUserRepository repository,
             [FromServices] IValidator<UserCreateRequest> validator,
             [FromServices] IMapper<UserCreateRequest, DbUser> mapperUser,
-            [FromServices] IMapper<UserCreateRequest, Guid, DbUserCredentials> mapperUserCredentials)
+            [FromServices] IMapper<UserCreateRequest, DbUserCredentials> mapperUserCredentials)
         {
             this.validator = validator;
             this.repository = repository;
@@ -33,7 +33,9 @@ namespace LT.DigitalOffice.UserService.Business
             validator.ValidateAndThrow(request);
 
             var dbUser = mapperUser.Map(request);
-            var dBUserCredentials = mapperUserCredentials.Map(request, dbUser.Id);
+            var dBUserCredentials = mapperUserCredentials.Map(request);
+
+            dBUserCredentials.UserId = dbUser.Id;
 
             repository.CreateUserCredentials(dBUserCredentials);
 

@@ -15,7 +15,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IUserRepository> repositoryMock;
         private Mock<IValidator<EditUserRequest>> validatorMock;
         private Mock<IMapper<EditUserRequest, DbUser>> mapperUserMock;
-        private Mock<IMapper<EditUserRequest, string, DbUserCredentials>> mapperUserCredentialsMock;
+        private Mock<IMapper<EditUserRequest, DbUserCredentials>> mapperUserCredentialsMock;
 
         private IEditUserCommand command;
         private EditUserRequest request;
@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             repositoryMock = new Mock<IUserRepository>();
 
             mapperUserMock = new Mock<IMapper<EditUserRequest, DbUser>>();
-            mapperUserCredentialsMock = new Mock<IMapper<EditUserRequest, string, DbUserCredentials>>();
+            mapperUserCredentialsMock = new Mock<IMapper<EditUserRequest, DbUserCredentials>>();
 
             validatorMock = new Mock<IValidator<EditUserRequest>>();
 
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(dbUser);
 
             mapperUserCredentialsMock
-                .Setup(x => x.Map(It.IsAny<EditUserRequest>(), It.IsAny<string>()))
+                .Setup(x => x.Map(It.IsAny<EditUserRequest>()))
                 .Returns(dbUserCredentials);
 
             repositoryMock
@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(dbUser);
 
             mapperUserCredentialsMock
-                .Setup(x => x.Map(It.IsAny<EditUserRequest>(), It.IsAny<string>()))
+                .Setup(x => x.Map(It.IsAny<EditUserRequest>()))
                 .Returns(dbUserCredentials);
 
             repositoryMock

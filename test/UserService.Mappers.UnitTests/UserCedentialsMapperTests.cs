@@ -11,8 +11,8 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     class UserCedentialsMapperTests
     {
-        private IMapper<UserCreateRequest, Guid, DbUserCredentials> mapperGetUser;
-        private IMapper<EditUserRequest, string, DbUserCredentials> mapperEditUser;
+        private IMapper<UserCreateRequest, DbUserCredentials> mapperGetUser;
+        private IMapper<EditUserRequest, DbUserCredentials> mapperEditUser;
 
         private DbUserCredentials dbUserCredentials;
         private UserCreateRequest userCreateRequest;
@@ -49,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             userCreateRequest = null;
 
-            Assert.Throws<ArgumentNullException>(() => mapperGetUser.Map(userCreateRequest, userId));
+            Assert.Throws<ArgumentNullException>(() => mapperGetUser.Map(userCreateRequest));
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                 IsAdmin = false
             };
 
-            SerializerAssert.AreEqual(dbUserCredentials, mapperGetUser.Map(userCreateRequest, userId));
+            SerializerAssert.AreEqual(dbUserCredentials, mapperGetUser.Map(userCreateRequest));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             editUserRequest = null;
 
-            Assert.Throws<ArgumentNullException>(() => mapperEditUser.Map(editUserRequest, salt));
+            Assert.Throws<ArgumentNullException>(() => mapperEditUser.Map(editUserRequest));
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                 AvatarFileId = Guid.NewGuid()
             };
 
-            SerializerAssert.AreEqual(dbUserCredentials, mapperEditUser.Map(editUserRequest, salt));
+            SerializerAssert.AreEqual(dbUserCredentials, mapperEditUser.Map(editUserRequest));
         }
     }
 }

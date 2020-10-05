@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private IUserCreateCommand command;
         private Mock<IValidator<UserCreateRequest>> validatorMock;
         private Mock<IMapper<UserCreateRequest, DbUser>> mapperUserMock;
-        private Mock<IMapper<UserCreateRequest, Guid, DbUserCredentials>> mapperUserCredentialsMock;
+        private Mock<IMapper<UserCreateRequest, DbUserCredentials>> mapperUserCredentialsMock;
 
         private Guid userId = Guid.NewGuid();
 
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             repositoryMock = new Mock<IUserRepository>();
 
             mapperUserMock = new Mock<IMapper<UserCreateRequest, DbUser>>();
-            mapperUserCredentialsMock = new Mock<IMapper<UserCreateRequest, Guid, DbUserCredentials>>();
+            mapperUserCredentialsMock = new Mock<IMapper<UserCreateRequest, DbUserCredentials>>();
 
             validatorMock = new Mock<IValidator<UserCreateRequest>>();
 
@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Verifiable();
 
             mapperUserCredentialsMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>(), It.IsAny<Guid>()))
+                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>()))
                 .Returns(new DbUserCredentials())
                 .Verifiable();
 
@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Verifiable();
 
             mapperUserCredentialsMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>(), It.IsAny<Guid>()))
+                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>()))
                 .Returns(new DbUserCredentials())
                 .Verifiable();
 
@@ -105,7 +105,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>()))
                 .Throws<Exception>().Verifiable();
             mapperUserCredentialsMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>(), It.IsAny<Guid>()))
+                .Setup(mapper => mapper.Map(It.IsAny<UserCreateRequest>()))
                 .Throws<Exception>().Verifiable();
 
             repositoryMock
