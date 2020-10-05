@@ -20,8 +20,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
         private string password;
         private string email;
-        private string salt;
-        private Guid userId;
 
         [SetUp]
         public void SetUp()
@@ -31,16 +29,12 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             password = "ExamplePassword";
             email = "Example@gmail.com";
-            userId = Guid.NewGuid();
-            salt = "Example_salt";
 
             dbUserCredentials = new DbUserCredentials
             {
-                UserId = userId,
                 Email = email,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(password))),
-                Salt = salt
+                    Encoding.UTF8.GetBytes(password)))
             };
         }
 
@@ -82,7 +76,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             editUserRequest = new EditUserRequest
             {
-                Id = userId,
                 Email = email,
                 FirstName = "Example",
                 LastName = "Example",

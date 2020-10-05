@@ -66,9 +66,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserCredentials")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -108,7 +105,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -148,6 +144,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
                         .WithMany("CertificatesFilesIds")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>
+                {
+                    b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
+                        .WithOne("UserCredentials")
+                        .HasForeignKey("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

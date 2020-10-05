@@ -114,6 +114,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var resultUser = repository.GetUserInfoById(firstUser.Id);
 
+            resultUser.UserCredentials = null;
+
             Assert.IsInstanceOf<DbUser>(resultUser);
             SerializerAssert.AreEqual(firstUser, resultUser);
             Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser}));
@@ -133,6 +135,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
 
+            resultUser.UserCredentials = null;
+
             SerializerAssert.AreEqual(firstUser, resultUser);
             Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
@@ -151,6 +155,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
 
+            resultUser.UserCredentials = null;
             SerializerAssert.AreEqual(firstUser, resultUser);
             Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }

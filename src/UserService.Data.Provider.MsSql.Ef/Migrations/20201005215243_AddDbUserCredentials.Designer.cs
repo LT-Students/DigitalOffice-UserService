@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
-    [Migration("20200926164051_AddDbUserCredentials")]
+    [Migration("20201005215243_AddDbUserCredentials")]
     partial class AddDbUserCredentials
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,9 +68,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserCredentials")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -91,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasIndex("AchievementId");
 
-                    b.ToTable("DbUserAchievement");
+                    b.ToTable("UserAchievement");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCertificateFile", b =>
@@ -104,13 +101,12 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasKey("UserId", "CertificateId");
 
-                    b.ToTable("DbUserCertificateFile");
+                    b.ToTable("UserCertificateFile");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -150,6 +146,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
                         .WithMany("CertificatesFilesIds")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>
+                {
+                    b.HasOne("LT.DigitalOffice.UserService.Models.Db.DbUser", "User")
+                        .WithOne("UserCredentials")
+                        .HasForeignKey("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
