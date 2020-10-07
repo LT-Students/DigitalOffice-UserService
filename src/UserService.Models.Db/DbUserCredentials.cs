@@ -8,6 +8,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public class DbUserCredentials
     {
         [Key]
+        public Guid Id { get; set; }
+        [Required]
         public Guid UserId { get; set; }
         public virtual DbUser User { get; set; }
         [Required]

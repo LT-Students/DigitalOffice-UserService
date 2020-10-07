@@ -68,6 +68,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 name: "UserCredentials",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(nullable: false),
                     UserId = table.Column<Guid>(nullable: false),
                     Email = table.Column<string>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: false),
@@ -75,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserCredentials", x => x.UserId);
+                    table.PrimaryKey("PK_UserCredentials", x => x.Id);
                     table.ForeignKey(
                         name: "FK_UserCredentials_Users_UserId",
                         column: x => x.UserId,
@@ -88,6 +89,12 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 name: "IX_UserAchievement_AchievementId",
                 table: "UserAchievement",
                 column: "AchievementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCredentials_UserId",
+                table: "UserCredentials",
+                column: "UserId",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
