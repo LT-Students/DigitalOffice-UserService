@@ -8,13 +8,12 @@ using System.Text;
 namespace LT.DigitalOffice.UserService.Mappers
 {
     /// <summary>
-    /// Represents mapper. Provides methods for converting an object of user request
+    /// Represents mapper. Provides methods for converting an object of user request <see cref="UserRequest"/>
     /// type into an object of <see cref="DbUserCredentials"/> type according to some rule.
     /// </summary>
-    public class UserCredentialsMapper : IMapper<EditUserRequest, DbUserCredentials>,
-        IMapper<UserCreateRequest, DbUserCredentials>
+    public class UserCredentialsMapper : IMapper<UserRequest, DbUserCredentials>
     {
-        public DbUserCredentials Map(UserCreateRequest request)
+        public DbUserCredentials Map(UserRequest request)
         {
             if (request == null)
             {
@@ -23,22 +22,6 @@ namespace LT.DigitalOffice.UserService.Mappers
 
             return new DbUserCredentials
             {
-                Email = request.Email,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password)))
-            };
-        }
-
-        public DbUserCredentials Map(EditUserRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            return new DbUserCredentials
-            {
-                UserId = request.Id,
                 Email = request.Email,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(request.Password)))

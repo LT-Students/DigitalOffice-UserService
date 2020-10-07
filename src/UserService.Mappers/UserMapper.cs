@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Mappers
     /// type into an object of <see cref="User"/> type according to some rule.
     /// </summary>
     public class UserMapper : IMapper<DbUser, User>, IMapper<DbUser, string, object>,
-        IMapper<UserCreateRequest, DbUser>, IMapper<EditUserRequest, DbUser>
+        IMapper<UserRequest, DbUser>
     {
         public User Map(DbUser dbUser)
         {
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Mappers
             };
         }
 
-        public DbUser Map(EditUserRequest request)
+        public DbUser Map(UserRequest request)
         {
             if (request == null)
             {
@@ -48,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Mappers
 
             return new DbUser
             {
-                Id = request.Id,
+                Id = (Guid)request.Id,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
@@ -78,26 +78,6 @@ namespace LT.DigitalOffice.UserService.Mappers
                 LastName = user.LastName,
                 MiddleName = user.MiddleName,
                 UserPosition = position
-            };
-        }
-
-        public DbUser Map(UserCreateRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            return new DbUser
-            {
-                Id = Guid.NewGuid(),
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                MiddleName = request.MiddleName,
-                Status = request.Status,
-                AvatarFileId = null,
-                IsActive = true,
-                IsAdmin = request.IsAdmin
             };
         }
     }
