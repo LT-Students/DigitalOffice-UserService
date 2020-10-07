@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
     public class UserMapperTests
     {
         private IMapper<DbUser, User> mapper;
-        private IMapper<EditUserRequest, DbUser> mapperEditUserRequest;
+        private IMapper<UserRequest, DbUser> mapperEditUserRequest;
         private IMapper<DbUser, string, object> mapper2;
 
         private const string Message = "smth";
@@ -123,7 +123,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnNewDbUserWhenDataCorrect()
         {
-            var request = new EditUserRequest()
+            var request = new UserRequest()
             {
                 Id = Guid.NewGuid(),
                 Email = "Example@gmail.com",
@@ -141,7 +141,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             var user = new DbUser()
             {
-                Id = request.Id,
+                Id = (Guid)request.Id,
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
@@ -157,7 +157,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRequestIsNull()
         {
-            EditUserRequest request = null;
+            UserRequest request = null;
 
             Assert.Throws<ArgumentNullException>(() => mapperEditUserRequest.Map(request));
         }

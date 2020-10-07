@@ -10,8 +10,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     public class UserCreateRequestValidatorTests
     {
-        private IValidator<UserCreateRequest> validator;
-        private static IEnumerable<Expression<Func<UserCreateRequest, string>>> NamePropertyCases
+        private IValidator<UserRequest> validator;
+        private static IEnumerable<Expression<Func<UserRequest, string>>> NamePropertyCases
         {
             get
             {
@@ -49,33 +49,33 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [SetUp]
         public void SetUp()
         {
-            validator = new UserCreateRequestValidator();
+            validator = new UserValidator();
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
-            Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<UserCreateRequest, string>> gettingNamePropertyExpression,
+            [ValueSource(nameof(NamePropertyCases))] Expression<Func<UserRequest, string>> gettingNamePropertyExpression,
             [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
             string name)
         {
@@ -117,7 +117,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldThrowValidationExceptionWhenAllFieldsAreEmpty()
         {
-            var request = new UserCreateRequest();
+            var request = new UserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
         }
@@ -125,7 +125,25 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
         {
-            var request = new UserCreateRequest
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsNull()
+        {
+            var request = new UserRequest
             {
                 FirstName = "Example",
                 LastName = "Example",
@@ -142,8 +160,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndContainsRussianSymbols()
         {
-            var request = new UserCreateRequest
+            var request = new UserRequest
             {
+                Id = Guid.NewGuid(),
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",

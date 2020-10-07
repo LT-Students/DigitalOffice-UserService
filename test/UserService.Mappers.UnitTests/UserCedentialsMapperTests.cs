@@ -11,12 +11,12 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     class UserCedentialsMapperTests
     {
-        private IMapper<UserCreateRequest, DbUserCredentials> mapperGetUser;
-        private IMapper<EditUserRequest, DbUserCredentials> mapperEditUser;
+        private IMapper<UserRequest, DbUserCredentials> mapperGetUser;
+        private IMapper<UserRequest, DbUserCredentials> mapperEditUser;
 
         private DbUserCredentials dbUserCredentials;
-        private UserCreateRequest userCreateRequest;
-        private EditUserRequest editUserRequest;
+        private UserRequest userCreateRequest;
+        private UserRequest editUserRequest;
 
         private string password;
         private string email;
@@ -49,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnNewDbUserCredentialsWhenDataCorrectForGetUser()
         {
-            userCreateRequest = new UserCreateRequest
+            userCreateRequest = new UserRequest
             {
                 FirstName = "Example",
                 LastName = "Example",
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnNewDbUserCredentialsWhenDataCorrectForEditUser()
         {
-            editUserRequest = new EditUserRequest
+            editUserRequest = new UserRequest
             {
                 Email = email,
                 FirstName = "Example",
