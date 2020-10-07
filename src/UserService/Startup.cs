@@ -144,12 +144,12 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMappers(IServiceCollection services)
         {
-            services.AddTransient<IMapper<UserCreateRequest, DbUser>, UserMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
-            services.AddTransient<IMapper<EditUserRequest, DbUser>, UserMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
-            services.AddTransient<IMapper<EditUserRequest, DbUserCredentials>, UserCredentialsMapper>();
-            services.AddTransient<IMapper<UserCreateRequest, DbUserCredentials>, UserCredentialsMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)
@@ -162,8 +162,8 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureValidators(IServiceCollection services)
         {
-            services.AddTransient<IValidator<EditUserRequest>, EditUserRequestValidator>();
-            services.AddTransient<IValidator<UserCreateRequest>, UserCreateRequestValidator>();
+            services.AddTransient<IValidator<UserRequest>, UserValidator>();
+            services.AddTransient<IValidator<UserRequest>, UserValidator>();
             services.AddTransient<IValidator<string>, GetUserByEmailValidator>();
         }
     }

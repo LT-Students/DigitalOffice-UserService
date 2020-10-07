@@ -14,6 +14,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// </summary>
         /// <param name="request">User data.</param>
         /// <returns>Guid of added user.</returns>
-        Guid Execute(UserCreateRequest request);
+        Guid Execute(UserRequest request);
     }
 }

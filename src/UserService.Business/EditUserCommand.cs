@@ -10,16 +10,16 @@ namespace LT.DigitalOffice.UserService.Business
 {
     public class EditUserCommand : IEditUserCommand
     {
-        private readonly IValidator<EditUserRequest> validator;
+        private readonly IValidator<UserRequest> validator;
         private readonly IUserRepository repository;
-        private readonly IMapper<EditUserRequest, DbUser> mapperUser;
-        private readonly IMapper<EditUserRequest, DbUserCredentials> mapperUserCredentials;
+        private readonly IMapper<UserRequest, DbUser> mapperUser;
+        private readonly IMapper<UserRequest, DbUserCredentials> mapperUserCredentials;
 
         public EditUserCommand(
-            [FromServices] IValidator<EditUserRequest> validator,
+            [FromServices] IValidator<UserRequest> validator,
             [FromServices] IUserRepository repository,
-            [FromServices] IMapper<EditUserRequest, DbUser> mapperUser,
-            [FromServices] IMapper<EditUserRequest, DbUserCredentials> mapperUserCredentials)
+            [FromServices] IMapper<UserRequest, DbUser> mapperUser,
+            [FromServices] IMapper<UserRequest, DbUserCredentials> mapperUserCredentials)
         {
             this.validator = validator;
             this.repository = repository;
@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Business
             this.mapperUserCredentials = mapperUserCredentials;
         }
 
-        public bool Execute(EditUserRequest request)
+        public bool Execute(UserRequest request)
         {
             string salt = "Exmple_salt";
 
