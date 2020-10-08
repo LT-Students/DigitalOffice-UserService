@@ -9,22 +9,25 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Business
 {
-    public class UserCreateCommand : IUserCreateCommand
+    public class CreateUserCommand : ICreateUserCommand
     {
-        private readonly IUserRepository repository;
+        private readonly IUserRepository userRepository;
+        private readonly IUserCredentialsRepository userCredentialsRepository;
         private readonly IValidator<UserRequest> validator;
         private readonly IMapper<UserRequest, DbUser> mapperUser;
         private readonly IMapper<UserRequest, DbUserCredentials> mapperUserCredentials;
 
-        public UserCreateCommand(
-            [FromServices] IUserRepository repository,
+        public CreateUserCommand(
+            [FromServices] IUserRepository userRepository,
             [FromServices] IValidator<UserRequest> validator,
             [FromServices] IMapper<UserRequest, DbUser> mapperUser,
+            [FromServices] IUserCredentialsRepository userCredentialsRepository,
             [FromServices] IMapper<UserRequest, DbUserCredentials> mapperUserCredentials)
         {
             this.validator = validator;
-            this.repository = repository;
+            this.userRepository = userRepository;
             this.mapperUser = mapperUser;
+            this.userCredentialsRepository = userCredentialsRepository;
             this.mapperUserCredentials = mapperUserCredentials;
         }
 
@@ -38,9 +41,11 @@ namespace LT.DigitalOffice.UserService.Business
             dBUserCredentials.Id = Guid.NewGuid();
             dBUserCredentials.UserId = dbUser.Id;
 
-            repository.CreateUserCredentials(dBUserCredentials);
+            userRepository.CreateUser(dbUser, request.Email);
 
-            return repository.UserCreate(dbUser, request.Email);
+            userCredentialsRepository.CreateUserCredentials(dBUserCredentials);
+
+            return dbUser.Id;
         }
     }
 }

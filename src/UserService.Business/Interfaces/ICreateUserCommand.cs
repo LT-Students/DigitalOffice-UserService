@@ -7,7 +7,7 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
     /// Represents interface for a command in command pattern.
     /// Provides method for adding a new user.
     /// </summary>
-    public interface IUserCreateCommand
+    public interface ICreateUserCommand
     {
         /// <summary>
         ///  Adds a new user. Returns true if it succeeded to add a user, otherwise false.

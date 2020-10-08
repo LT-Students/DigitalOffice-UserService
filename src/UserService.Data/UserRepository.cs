@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Data
             this.provider = provider;
         }
 
-        public Guid UserCreate(DbUser user, string userEmail)
+        public Guid CreateUser(DbUser user, string userEmail)
         {
             if (provider.UserCredentials.Any(u => u.Email == userEmail))
             {
@@ -50,52 +50,16 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserByEmail(string userEmail)
         {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.Email == userEmail);
-
-            if (userCredentials == null)
-            {
-                throw new Exception("User not found.");
-            }
-
-            DbUser user = provider.Users.FirstOrDefault(u => u.Id == userCredentials.UserId);
-
-            return user;
-        }
-
-        public DbUserCredentials GetUserCredentialsById(Guid userId)
-        {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(u => u.UserId == userId);
+            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Email == userEmail);
 
             if (userCredentials == null)
             {
                 throw new Exception("User credentials not found.");
             }
 
-            return userCredentials;
-        }
+            DbUser user = provider.Users.FirstOrDefault(u => u.Id == userCredentials.UserId);
 
-        public bool EditUserCredentials(DbUserCredentials userCredentials)
-        {
-            if (!provider.UserCredentials.Any(user => user.UserId == userCredentials.UserId))
-            {
-                throw new Exception("User was not found.");
-            }
-
-            provider.UserCredentials.Update(userCredentials);
-            provider.Save();
-
-            return true;
-        }
-
-        public void CreateUserCredentials(DbUserCredentials userCredentials)
-        {
-            if (provider.UserCredentials.Any(u => u.Email == userCredentials.Email))
-            {
-                throw new Exception("Email is already taken.");
-            }
-
-            provider.UserCredentials.Update(userCredentials);
-            provider.Save();
+            return user;
         }
     }
 }
