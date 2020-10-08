@@ -158,6 +158,42 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
+        public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsExist()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenIdUserIsNotValid()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.Empty,
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Id.Value);
+        }
+
+        [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndContainsRussianSymbols()
         {
             var request = new UserRequest
