@@ -1,5 +1,6 @@
 ﻿using System;
 using FluentValidation;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -27,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         public Guid Execute(UserCreateRequest request)
         {
-            validator.ValidateAndThrow(request);
+            validator.ValidateAndThrowCustom(request);
             var user = mapper.Map(request);
 
             return repository.UserCreate(user);

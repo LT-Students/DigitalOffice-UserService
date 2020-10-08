@@ -43,8 +43,6 @@ namespace LT.DigitalOffice.UserService
 
             services.AddControllers();
 
-            services.AddKernelExtensions(Configuration);
-
             services.AddDbContext<UserServiceDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
@@ -59,6 +57,8 @@ namespace LT.DigitalOffice.UserService
             ConfigRabbitMq(services);
 
             services.AddMassTransitHostedService();
+
+            services.AddKernelExtensions();
         }
 
         private void ConfigRabbitMq(IServiceCollection services)
