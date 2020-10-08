@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-    public class AccessValidatorConsumer : IConsumer<IAccessValidatorRequest>
+    public class AccessValidatorConsumer : IConsumer<IAccessValidatorUserServiceRequest>
     {
         private readonly IUserRepository repository;
 
@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             this.repository = repository;
         }
 
-        public async Task Consume(ConsumeContext<IAccessValidatorRequest> context)
+        public async Task Consume(ConsumeContext<IAccessValidatorUserServiceRequest> context)
         {
             var response = OperationResultWrapper.CreateResponse(IsAdmin, context.Message.UserId);
             await context.RespondAsync<IOperationResult<bool>>(response);
