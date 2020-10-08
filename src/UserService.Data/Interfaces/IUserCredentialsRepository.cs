@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Edit existing user credentials. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="userCredentials">User credentials to edit.</param>
-        /// <returns>Whether it was successful to edit</returns>
+        /// <returns>Whether it was successful to edit.</returns>
         bool EditUserCredentials(DbUserCredentials userCredentials);
 
         /// <summary>
