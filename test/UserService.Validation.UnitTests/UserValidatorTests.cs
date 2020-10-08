@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
-    public class UserCreateRequestValidatorTests
+    public class UserValidatorTests
     {
         private IValidator<UserRequest> validator;
         private static IEnumerable<Expression<Func<UserRequest, string>>> NamePropertyCases

@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
     class UserConsumerTests
     {
         private InMemoryTestHarness harness;
-        private Mock<IUserRepository> repositoryMock;
+        private Mock<IUserCredentialsRepository> repository;
         private DbUser newDbUser;
         private DbUserCredentials userCredentials;
         private ConsumerTestHarness<UserLoginConsumer> consumerTestHarness;
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
         public void SetUp()
         {
             harness = new InMemoryTestHarness();
-            repositoryMock = new Mock<IUserRepository>();
+            repository = new Mock<IUserCredentialsRepository>();
 
             var userId = Guid.NewGuid();
 
@@ -51,20 +51,18 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
 
             userCredentials = new DbUserCredentials
             {
+                Id = Guid.NewGuid(),
                 UserId = userId,
                 PasswordHash = "Example",
                 Email = "Example@gmail.com",
                 Salt = "Example_Salt"
             };
 
-            repositoryMock
-                .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
-                .Returns(newDbUser);
-            repositoryMock
-               .Setup(x => x.GetUserCredentialsById(It.IsAny<Guid>()))
+            repository
+               .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
                .Returns(userCredentials);
 
-            consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repositoryMock.Object));
+            consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repository.Object));
         }
         #endregion
 
@@ -96,7 +94,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repositoryMock.Verify(repository => repository.GetUserByEmail(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
             }
             finally
             {
@@ -113,8 +111,8 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
 
             UserCredentialsResponse expectedResponse = null;
 
-            repositoryMock
-                .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
+            repository
+                .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
                 .Throws(new ArgumentNullException());
 
             await harness.Start();
@@ -133,7 +131,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repositoryMock.Verify(repository => repository.GetUserByEmail(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
             }
             finally
             {

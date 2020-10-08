@@ -7,9 +7,9 @@ namespace LT.DigitalOffice.UserService.Validation
     {
         public UserValidator()
         {
-            RuleFor(user => user.Id)
+            RuleFor(user => user.Id.Value)
                 .NotEmpty()
-                .When(user => user.Id != null);
+                .When(x => x.Id.HasValue);
 
             RuleFor(user => user.FirstName)
                 .NotEmpty()

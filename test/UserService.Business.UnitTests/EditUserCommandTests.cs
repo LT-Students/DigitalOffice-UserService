@@ -12,7 +12,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     public class EditUserCommandTests
     {
-        private Mock<IUserRepository> repositoryMock;
+        private Mock<IUserRepository> userRepositoryMock;
+        private Mock<IUserCredentialsRepository> userCredentialsRepositoryMock;
         private Mock<IValidator<UserRequest>> validatorMock;
         private Mock<IMapper<UserRequest, DbUser>> mapperUserMock;
         private Mock<IMapper<UserRequest, DbUserCredentials>> mapperUserCredentialsMock;
@@ -63,15 +64,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [SetUp]
         public void SetUp()
         {
-            repositoryMock = new Mock<IUserRepository>();
+            userRepositoryMock = new Mock<IUserRepository>();
+            userCredentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
 
             mapperUserMock = new Mock<IMapper<UserRequest, DbUser>>();
             mapperUserCredentialsMock = new Mock<IMapper<UserRequest, DbUserCredentials>>();
 
             validatorMock = new Mock<IValidator<UserRequest>>();
 
-            command = new EditUserCommand(validatorMock.Object, repositoryMock.Object,
-                mapperUserMock.Object, mapperUserCredentialsMock.Object);
+            command = new EditUserCommand(validatorMock.Object,
+                userRepositoryMock.Object,
+                userCredentialsRepositoryMock.Object,
+                mapperUserMock.Object,
+                mapperUserCredentialsMock.Object);
         }
 
         [Test]
@@ -82,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             Assert.Throws<ValidationException>(() => command.Execute(request));
-            repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
+            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
         }
 
         [Test]
@@ -100,7 +105,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(It.IsAny<UserRequest>()))
                 .Returns(dbUserCredentials);
 
-            repositoryMock
+            userRepositoryMock
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Throws(new Exception());
 
@@ -122,16 +127,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(It.IsAny<UserRequest>()))
                 .Returns(dbUserCredentials);
 
-            repositoryMock
+            userRepositoryMock
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Returns(true);
 
-            repositoryMock
+            userCredentialsRepositoryMock
                 .Setup(x => x.EditUserCredentials(It.IsAny<DbUserCredentials>()))
                 .Returns(true);
 
             Assert.IsTrue(command.Execute(request));
-            repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
+            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
         }
     }
 }

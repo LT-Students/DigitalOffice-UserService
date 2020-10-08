@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.UnitTestLibrary;
+﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.UnitTestLibrary;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -15,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
     public class UserRepositoryTests
     {
-        private UserServiceDbContext dbContext;
+        private IDataProvider provider;
         private IUserRepository repository;
 
         private DbUser firstUser;
@@ -26,33 +27,21 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
 
-        private UserServiceDbContext GetMemoryContext()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
-            var options = new DbContextOptionsBuilder<UserServiceDbContext>()
-                .UseInMemoryDatabase("InMemoryDatabase")
-                .Options;
-
-            return new UserServiceDbContext(options);
-        }
-
-        [SetUp]
-        public void SetUp()
-        {
-            dbContext = GetMemoryContext();
-            repository = new UserRepository(dbContext);
-
             firstUser = new DbUser
             {
-              Id = Guid.NewGuid(),
-              FirstName = "Example",
-              LastName = "Example",
-              MiddleName = "Example",
-              Status = "Example",
-              AvatarFileId = null,
-              IsActive = true,
-              IsAdmin = false,
-              CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
-              AchievementsIds = new Collection<DbUserAchievement>()
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Status = "Example",
+                AvatarFileId = null,
+                IsActive = true,
+                IsAdmin = false,
+                CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
+                AchievementsIds = new Collection<DbUserAchievement>()
             };
 
             firstUserCredentials = new DbUserCredentials
@@ -66,16 +55,16 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             secondUser = new DbUser
             {
-              Id = Guid.NewGuid(),
-              FirstName = "Example",
-              LastName = "Example",
-              MiddleName = "Example",
-              Status = "Example",
-              AvatarFileId = null,
-              IsActive = true,
-              IsAdmin = false,
-              CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
-              AchievementsIds = new Collection<DbUserAchievement>()
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Status = "Example",
+                AvatarFileId = null,
+                IsActive = true,
+                IsAdmin = false,
+                CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
+                AchievementsIds = new Collection<DbUserAchievement>()
             };
 
             secondUserCredentials = new DbUserCredentials
@@ -86,18 +75,35 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
             };
+        }
 
-            dbContext.Users.Add(firstUser);
-            dbContext.UserCredentials.Add(firstUserCredentials);
-            dbContext.SaveChanges();
+        [SetUp]
+        public void SetUp()
+        {
+            GetMemoryContext();
+
+            repository = new UserRepository(provider);
+
+            provider.Users.Add(firstUser);
+            provider.UserCredentials.Add(firstUserCredentials);
+            provider.Save();
+        }
+
+        private void GetMemoryContext()
+        {
+            var options = new DbContextOptionsBuilder<UserServiceDbContext>()
+                .UseInMemoryDatabase("InMemoryDatabase")
+                .Options;
+
+            provider = new UserServiceDbContext(options);
         }
 
         [TearDown]
         public void TearDown()
         {
-            if (dbContext.Database.IsInMemory())
+            if (provider.IsInMemory())
             {
-                dbContext.Database.EnsureDeleted();
+                provider.EnsureDeleted();
             }
         }
 
@@ -118,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             Assert.IsInstanceOf<DbUser>(resultUser);
             SerializerAssert.AreEqual(firstUser, resultUser);
-            Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser}));
+            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser}));
         }
         #endregion
 
@@ -127,7 +133,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExist()
         {
             Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
         [Test]
@@ -138,7 +144,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             resultUser.UserCredentials = null;
 
             SerializerAssert.AreEqual(firstUser, resultUser);
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
         #endregion
 
@@ -147,7 +153,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExistWhileGettingUserByEmail()
         {
             Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
         [Test]
@@ -157,7 +163,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             resultUser.UserCredentials = null;
             SerializerAssert.AreEqual(firstUser, resultUser);
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
         #endregion
 
@@ -180,17 +186,18 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             };
 
             Assert.Throws<Exception>(() => repository.EditUser(user));
-            Assert.That(dbContext.Users.Find(firstUser.Id).Equals(firstUser));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
+            Assert.That(provider.Users.Find(firstUser.Id).Equals(firstUser));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
         [Test]
         public void ShouldEditUserWhenUserDataIsCorrect()
         {
-            var local = dbContext.Users
+            var local = provider.Users
                 .Local
                 .FirstOrDefault(entry => entry.Id.Equals(firstUser.Id));
-            dbContext.Entry(local).State = EntityState.Detached;
+
+            provider.MakeEntityDetached(local);
 
             var user = new DbUser
             {
@@ -205,11 +212,12 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 CertificatesFilesIds = new Collection<DbUserCertificateFile>(),
                 AchievementsIds = new Collection<DbUserAchievement>()
             };
-            dbContext.Entry(user).State = EntityState.Modified;
+
+            provider.MakeEntityDetached(local);
 
             Assert.True(repository.EditUser(user));
-            Assert.That(dbContext.Users.Find(firstUser.Id).Equals(user));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new List<DbUser> { user }));
+            Assert.That(provider.Users.Find(firstUser.Id).Equals(user));
+            Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { user }));
         }
         #endregion
 
@@ -217,16 +225,16 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.UserCreate(secondUser, secondUserCredentials.Email), Is.EqualTo(secondUser.Id));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
+            Assert.That(repository.CreateUser(secondUser, secondUserCredentials.Email), Is.EqualTo(secondUser.Id));
+            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.UserCreate(firstUser, firstUserCredentials.Email),
+            Assert.That(() => repository.CreateUser(firstUser, firstUserCredentials.Email),
                 Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
-            Assert.That(dbContext.Users, Is.EquivalentTo(new[] {firstUser}));
+            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser}));
         }
         #endregion
     }
