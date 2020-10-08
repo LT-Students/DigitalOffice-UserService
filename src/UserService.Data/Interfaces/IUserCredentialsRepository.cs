@@ -1,7 +1,5 @@
 ﻿using LT.DigitalOffice.UserService.Models.Db;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {

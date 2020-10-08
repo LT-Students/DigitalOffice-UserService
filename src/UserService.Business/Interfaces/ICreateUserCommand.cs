@@ -1,5 +1,5 @@
-﻿using System;
-using LT.DigitalOffice.UserService.Models.Dto;
+﻿using LT.DigitalOffice.UserService.Models.Dto;
+using System;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {

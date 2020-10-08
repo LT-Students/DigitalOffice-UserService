@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.TestHelper;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
