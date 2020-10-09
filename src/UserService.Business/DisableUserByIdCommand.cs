@@ -23,9 +23,9 @@ namespace LT.DigitalOffice.UserService.Business
 
         public void Execute(Guid userId, Guid requestingUserId)
         {
-            var isAcces = GetResultCheckingUserRights(requestingUserId);
+            var isAccess = GetResultCheckingUserRights(requestingUserId);
 
-            if (!isAcces)
+            if (!isAccess)
             {
                 throw new Exception("Not enough rights.");
             }
