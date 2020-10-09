@@ -20,8 +20,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Adds new user to the database. Returns whether it was successful to add.
         /// </summary>
         /// <param name="user">User to add.</param>
+        /// <param name="userEmail">User email for check user in db</param>
         /// <returns>Guid of added user.</returns>
-        Guid UserCreate(DbUser user);
+        Guid CreateUser(DbUser user, string userEmail);
 
         /// <summary>
         /// Edit existing user. Returns whether it was successful to edit.
@@ -33,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <summary>
         /// Returns the user with the specified email from database.
         /// </summary>
-        /// <param name="userEmail">Specified email of user.</param>
+        /// <param name="userEmail">Specified user email.</param>
         /// <returns>User model.</returns>
         DbUser GetUserByEmail(string userEmail);
     }
