@@ -54,12 +54,12 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 PasswordHash = "Example",
-                Email = "Example@gmail.com",
+                Login = "Example",
                 Salt = "Example_Salt"
             };
 
             repository
-               .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
+               .Setup(x => x.GetUserCredentialsByLogin(It.IsAny<string>()))
                .Returns(userCredentials);
 
             consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repository.Object));
@@ -94,7 +94,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserCredentialsByLogin(It.IsAny<string>()), Times.Once);
             }
             finally
             {
@@ -112,7 +112,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             UserCredentialsResponse expectedResponse = null;
 
             repository
-                .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
+                .Setup(x => x.GetUserCredentialsByLogin(It.IsAny<string>()))
                 .Throws(new ArgumentNullException());
 
             await harness.Start();
@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserCredentialsByLogin(It.IsAny<string>()), Times.Once);
             }
             finally
             {

@@ -30,13 +30,13 @@ namespace LT.DigitalOffice.UserService.Data
             return userCredentials;
         }
 
-        public DbUserCredentials GetUserCredentialsByEmail(string userEmail)
+        public DbUserCredentials GetUserCredentialsByLogin(string userLogin)
         {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Email == userEmail);
+            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Login == userLogin);
 
             if (userCredentials == null)
             {
-                throw new Exception("User credentials with this user email not found.");
+                throw new Exception("User credentials with this user login not found.");
             }
 
             return userCredentials;
@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public void CreateUserCredentials(DbUserCredentials userCredentials)
         {
-            if (provider.UserCredentials.Any(uc => uc.Email == userCredentials.Email))
+            if (provider.UserCredentials.Any(uc => uc.Login == userCredentials.Login))
             {
                 throw new Exception("User credentials is already exist.");
             }

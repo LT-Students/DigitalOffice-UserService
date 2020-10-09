@@ -43,6 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             dbUser = new DbUser
             {
                 Id = (Guid)request.Id,
+                Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
@@ -56,7 +57,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             {
                 UserId = (Guid)request.Id,
                 PasswordHash = request.Password,
-                Email = request.Email,
                 Salt = "Example"
             };
         }

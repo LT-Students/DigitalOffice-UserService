@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers
 
             return new DbUserCredentials
             {
-                Email = request.Email,
+                Login = request.Login,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(request.Password)))
             };

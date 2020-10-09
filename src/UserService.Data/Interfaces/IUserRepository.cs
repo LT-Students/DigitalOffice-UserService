@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="user">User to add.</param>
         /// <param name="userEmail">User email for check user in db</param>
         /// <returns>Guid of added user.</returns>
-        Guid CreateUser(DbUser user, string userEmail);
+        Guid CreateUser(DbUser user);
 
         /// <summary>
         /// Edit existing user. Returns whether it was successful to edit.

@@ -19,6 +19,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private UserRequest editUserRequest;
 
         private string password;
+        private string login;
         private string email;
 
         [SetUp]
@@ -28,11 +29,11 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             mapperEditUser = new UserCredentialsMapper();
 
             password = "ExamplePassword";
-            email = "Example@gmail.com";
+            login = "Example";
 
             dbUserCredentials = new DbUserCredentials
             {
-                Email = email,
+                Login = login,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(password)))
             };
@@ -55,6 +56,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                 LastName = "Example",
                 MiddleName = "Example",
                 Email = email,
+                Login = login,
                 Status = "Example",
                 Password = password,
                 IsAdmin = false
@@ -77,6 +79,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             editUserRequest = new UserRequest
             {
                 Email = email,
+                Login = login,
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",

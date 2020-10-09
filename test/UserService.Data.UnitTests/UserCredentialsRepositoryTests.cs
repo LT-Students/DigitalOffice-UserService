@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 Id = Guid.NewGuid(),
                 UserId = firstUserId,
-                Email = "Example@gmail.com",
+                Login = "Example",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 Id = Guid.NewGuid(),
                 UserId = secondUserId,
-                Email = "Example2@gmail.com",
+                Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
@@ -93,15 +93,15 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenUserEmailDoesNotFound()
+        public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
-            Assert.Throws<Exception>(() => repository.GetUserCredentialsByEmail(secondUserCredentials.Email));
+            Assert.Throws<Exception>(() => repository.GetUserCredentialsByLogin(secondUserCredentials.Login));
         }
 
         [Test]
         public void ShouldGotUserCredentialsByUserEmailSuccessful()
         {
-            SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByEmail(firstUserCredentials.Email));
+            SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByLogin(firstUserCredentials.Login));
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 Id = Guid.NewGuid(),
                 UserId = secondUserId,
-                Email = "Example2@gmail.com",
+                Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
