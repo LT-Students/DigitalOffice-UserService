@@ -11,9 +11,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
     {
-        private readonly IUserRepository repository;
+        private readonly IUserCredentialsRepository repository;
 
-        public UserLoginConsumer([FromServices] IUserRepository repository)
+        public UserLoginConsumer([FromServices] IUserCredentialsRepository repository)
         {
             this.repository = repository;
         }
@@ -27,12 +27,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
-            DbUser userCredentials = repository.GetUserByEmail(request.Email);
+            var dbUserCredentials = repository.GetUserCredentialsByEmail(request.Email);
 
             return new
             {
-                UserId = userCredentials.Id,
-                userCredentials.PasswordHash
+                dbUserCredentials.UserId,
+                dbUserCredentials.PasswordHash
             };
         }
     }

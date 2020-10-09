@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class NewDbUser : Migration
+    public partial class AddDbUserCredentials : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,11 +13,13 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
             migrationBuilder.DropTable(
                 name: "UserCertificateFile");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsAdmin",
-                table: "Users",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.DropColumn(
+                name: "Email",
+                table: "Users");
+
+            migrationBuilder.DropColumn(
+                name: "PasswordHash",
+                table: "Users");
 
             migrationBuilder.CreateTable(
                 name: "UserAchievement",
@@ -29,15 +31,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DbUserAchievement", x => new { x.UserId, x.AchievementId });
+                    table.PrimaryKey("PK_UserAchievement", x => new { x.UserId, x.AchievementId });
                     table.ForeignKey(
-                        name: "FK_DbUserAchievement_Achievements_AchievementId",
+                        name: "FK_UserAchievement_Achievements_AchievementId",
                         column: x => x.AchievementId,
                         principalTable: "Achievements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DbUserAchievement_Users_UserId",
+                        name: "FK_UserAchievement_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -53,9 +55,30 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DbUserCertificateFile", x => new { x.UserId, x.CertificateId });
+                    table.PrimaryKey("PK_UserCertificateFile", x => new { x.UserId, x.CertificateId });
                     table.ForeignKey(
-                        name: "FK_DbUserCertificateFile_Users_UserId",
+                        name: "FK_UserCertificateFile_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCredentials",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    Email = table.Column<string>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: false),
+                    Salt = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCredentials", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserCredentials_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -63,9 +86,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DbUserAchievement_AchievementId",
+                name: "IX_UserAchievement_AchievementId",
                 table: "UserAchievement",
                 column: "AchievementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCredentials_UserId",
+                table: "UserCredentials",
+                column: "UserId",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -76,9 +105,22 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
             migrationBuilder.DropTable(
                 name: "UserCertificateFile");
 
-            migrationBuilder.DropColumn(
-                name: "IsAdmin",
-                table: "Users");
+            migrationBuilder.DropTable(
+                name: "UserCredentials");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Email",
+                table: "Users",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "PasswordHash",
+                table: "Users",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.CreateTable(
                 name: "UserAchievement",
