@@ -125,7 +125,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
-            var request = new UserRequest
+            var request = new EditUserRequest
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Example",
