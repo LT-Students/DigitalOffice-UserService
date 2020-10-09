@@ -5,7 +5,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -27,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         public bool Execute(EditUserRequest request)
         {
-            validator.ValidateAndThrowCustom(request);
+            validator.ValidateAndThrow(request);
 
             var user = mapper.Map(request);
 
