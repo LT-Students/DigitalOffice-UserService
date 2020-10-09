@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
@@ -69,6 +71,16 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                            FirstName = "admin@lt.ru",
+                            LastName = "admin@lt",
+                            IsActive = true,
+                            IsAdmin = true
+                        });
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserAchievement", b =>
@@ -129,6 +141,20 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                         .IsUnique();
 
                     b.ToTable("UserCredentials");
+
+                    string adminSalt = "57851450-26DB-47DD-91A4-14B3BF71F06A";
+                    string adminPasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
+                            Encoding.UTF8.GetBytes($"admin_{adminSalt}")));
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"),
+                            UserId = new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                            Email = "admin@lt",
+                            PasswordHash = adminPasswordHash,
+                            Salt = adminSalt
+                        });
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserAchievement", b =>
