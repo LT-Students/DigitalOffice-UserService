@@ -1,43 +1,36 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.UserService.Data.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
-using Microsoft.AspNetCore.Mvc;
+using LT.DigitalOffice.UserService.Business.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Business
 {
     public class EditUserCommand : IEditUserCommand
     {
-        private readonly IValidator<UserRequest> validator;
-        private readonly IUserRepository userRepository;
-        private readonly IUserCredentialsRepository userCredentialsRepository;
-        private readonly IMapper<UserRequest, DbUser> mapperUser;
-        private readonly IMapper<UserRequest, DbUserCredentials> mapperUserCredentials;
+        private readonly IValidator<EditUserRequest> validator;
+        private readonly IUserRepository repository;
+        private readonly IMapper<EditUserRequest, DbUser> mapper;
 
         public EditUserCommand(
-            [FromServices] IValidator<UserRequest> validator,
-            [FromServices] IUserRepository userRepository,
-            [FromServices] IUserCredentialsRepository userCredentialsRepository,
-            [FromServices] IMapper<UserRequest, DbUser> mapperUser,
-            [FromServices] IMapper<UserRequest, DbUserCredentials> mapperUserCredentials)
+            [FromServices] IValidator<EditUserRequest> validator,
+            [FromServices] IUserRepository repository,
+            [FromServices] IMapper<EditUserRequest, DbUser> mapper)
         {
             this.validator = validator;
-            this.userRepository = userRepository;
-            this.mapperUser = mapperUser;
-            this.mapperUserCredentials = mapperUserCredentials;
-            this.userCredentialsRepository = userCredentialsRepository;
+            this.repository = repository;
+            this.mapper = mapper;
         }
 
-        public bool Execute(UserRequest request)
+        public bool Execute(EditUserRequest request)
         {
             validator.ValidateAndThrow(request);
 
-            var dbUser = mapperUser.Map(request);
-            var dbUserCredentials = mapperUserCredentials.Map(request);
+            var user = mapper.Map(request);
 
-            return userRepository.EditUser(dbUser) && userCredentialsRepository.EditUserCredentials(dbUserCredentials);
+            return repository.EditUser(user);
         }
     }
 }

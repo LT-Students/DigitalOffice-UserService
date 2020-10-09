@@ -8,19 +8,23 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     public class UserMapperTests
     {
         private IMapper<DbUser, User> mapper;
-        private IMapper<UserRequest, DbUser> mapperEditUserRequest;
+        private IMapper<EditUserRequest, DbUser> mapperEditUserRequest;
         private IMapper<DbUser, string, object> mapper2;
 
+        private const string Email = "smth@emal.com";
         private const string Message = "smth";
         private const string FirstName = "Ivan";
         private const string MiddleName = "Ivanovich";
         private const string LastName = "Dudikov";
+        private const string PasswordHash = "42";
         private const bool IsActive = true;
         private const string Status = "Hello, world!";
         private const bool IsAdmin = false;
@@ -50,41 +54,20 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             certificateFileId = Guid.NewGuid();
             pictureFileId = Guid.NewGuid();
             avatarFileId = Guid.NewGuid();
-
-            achievement = new DbAchievement
-            {
-                Id = achievementId,
-                Message = Message,
-                PictureFileId = pictureFileId
-            };
-
+            achievement = new DbAchievement {Id = achievementId, Message = Message, PictureFileId = pictureFileId};
             dbUserAchievement = new DbUserAchievement
             {
-                Achievement = achievement,
-                AchievementId = achievementId,
-                User = dbUser,
-                Time = DateTime.Now,
+                Achievement = achievement, AchievementId = achievementId, User = dbUser, Time = DateTime.Now,
                 UserId = userId
             };
-
             dbUserCertificateFile = new DbUserCertificateFile
-            {
-                CertificateId = certificateFileId,
-                User = dbUser,
-                UserId = userId
-            };
-
+                {CertificateId = certificateFileId, User = dbUser, UserId = userId};
             dbUser = new DbUser
             {
-                AchievementsIds = new List<DbUserAchievement> { dbUserAchievement },
-                AvatarFileId = avatarFileId,
-                FirstName = FirstName,
-                Id = userId,
-                IsActive = IsActive,
-                IsAdmin = IsAdmin,
-                LastName = LastName,
-                Status = Status,
-                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile }
+                AchievementsIds = new List<DbUserAchievement> {dbUserAchievement}, AvatarFileId = avatarFileId,
+                CertificatesFilesIds = new List<DbUserCertificateFile> {dbUserCertificateFile}, Email = Email,
+                FirstName = FirstName, Id = userId, IsActive = IsActive, IsAdmin = IsAdmin, LastName = LastName,
+                MiddleName = null, PasswordHash = PasswordHash, Status = Status
             };
         }
 
@@ -113,6 +96,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             Assert.AreEqual(FirstName, resultUserModel.FirstName);
             Assert.AreEqual(LastName, resultUserModel.LastName);
             Assert.IsNull(resultUserModel.MiddleName);
+            Assert.AreEqual(Email, resultUserModel.Email);
             Assert.AreEqual(Status, resultUserModel.Status);
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
@@ -123,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnNewDbUserWhenDataCorrect()
         {
-            var request = new UserRequest()
+            var request = new EditUserRequest()
             {
                 Id = Guid.NewGuid(),
                 Email = "Example@gmail.com",
@@ -141,11 +125,14 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             var user = new DbUser()
             {
-                Id = (Guid)request.Id,
+                Id = request.Id,
+                Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
+                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
+                    Encoding.UTF8.GetBytes(request.Password))),
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = request.AvatarFileId
@@ -157,8 +144,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRequestIsNull()
         {
-            UserRequest request = null;
-
+            var request = new EditUserRequest();
             Assert.Throws<ArgumentNullException>(() => mapperEditUserRequest.Map(request));
         }
         #endregion

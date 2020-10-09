@@ -24,9 +24,8 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
     class UserConsumerTests
     {
         private InMemoryTestHarness harness;
-        private Mock<IUserCredentialsRepository> repository;
+        private Mock<IUserRepository> repositoryMock;
         private DbUser newDbUser;
-        private DbUserCredentials userCredentials;
         private ConsumerTestHarness<UserLoginConsumer> consumerTestHarness;
 
         #region SetUp
@@ -34,35 +33,26 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
         public void SetUp()
         {
             harness = new InMemoryTestHarness();
-            repository = new Mock<IUserCredentialsRepository>();
-
-            var userId = Guid.NewGuid();
+            repositoryMock = new Mock<IUserRepository>();
 
             newDbUser = new DbUser
             {
-                Id = userId,
+                Id = Guid.NewGuid(),
                 FirstName = "Example1",
                 LastName = "Example",
                 MiddleName = "Example",
+                Email = "Example@gmail.com",
                 Status = "Example",
+                PasswordHash = "Example",
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true
             };
 
-            userCredentials = new DbUserCredentials
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                PasswordHash = "Example",
-                Email = "Example@gmail.com",
-                Salt = "Example_Salt"
-            };
+            repositoryMock
+                .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
+                .Returns(newDbUser);
 
-            repository
-               .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
-               .Returns(userCredentials);
-
-            consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repository.Object));
+            consumerTestHarness = harness.Consumer(() => new UserLoginConsumer(repositoryMock.Object));
         }
         #endregion
 
@@ -75,7 +65,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             var expectedResponse = new UserCredentialsResponse
             {
                 UserId = newDbUser.Id,
-                PasswordHash = userCredentials.PasswordHash
+                PasswordHash = newDbUser.PasswordHash
             };
 
             await harness.Start();
@@ -94,7 +84,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
+                repositoryMock.Verify(repository => repository.GetUserByEmail(It.IsAny<string>()), Times.Once);
             }
             finally
             {
@@ -111,8 +101,8 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
 
             UserCredentialsResponse expectedResponse = null;
 
-            repository
-                .Setup(x => x.GetUserCredentialsByEmail(It.IsAny<string>()))
+            repositoryMock
+                .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
                 .Throws(new ArgumentNullException());
 
             await harness.Start();
@@ -131,7 +121,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                 SerializerAssert.AreEqual(expectedResponse, response.Message.Body);
                 Assert.That(consumerTestHarness.Consumed.Select<IUserCredentialsRequest>().Any(), Is.True);
                 Assert.That(harness.Sent.Select<IOperationResult<IUserCredentialsResponse>>().Any(), Is.True);
-                repository.Verify(repository => repository.GetUserCredentialsByEmail(It.IsAny<string>()), Times.Once);
+                repositoryMock.Verify(repository => repository.GetUserByEmail(It.IsAny<string>()), Times.Once);
             }
             finally
             {

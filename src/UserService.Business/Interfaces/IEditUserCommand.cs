@@ -13,6 +13,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// </summary>
         /// <param name="request">User data.</param>
         /// <returns>Whether it was successful to edit.</returns>
-        bool Execute(UserRequest request);
+        bool Execute(EditUserRequest request);
     }
 }

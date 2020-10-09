@@ -3,14 +3,10 @@ using LT.DigitalOffice.UserService.Models.Dto;
 
 namespace LT.DigitalOffice.UserService.Validation
 {
-    public class UserValidator : AbstractValidator<UserRequest>
+    public class UserCreateRequestValidator : AbstractValidator<UserCreateRequest>
     {
-        public UserValidator()
+        public UserCreateRequestValidator()
         {
-            RuleFor(user => user.Id.Value)
-                .NotEmpty()
-                .When(x => x.Id.HasValue);
-
             RuleFor(user => user.FirstName)
                 .NotEmpty()
                 .MaximumLength(32).WithMessage("First name is too long.")

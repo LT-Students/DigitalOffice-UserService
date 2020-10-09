@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 defaultValue: false);
 
             migrationBuilder.CreateTable(
-                name: "UserAchievement",
+                name: "DbUserAchievement",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(nullable: false),
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserCertificateFile",
+                name: "DbUserCertificateFile",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(nullable: false),
@@ -64,17 +64,17 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_DbUserAchievement_AchievementId",
-                table: "UserAchievement",
+                table: "DbUserAchievement",
                 column: "AchievementId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserAchievement");
+                name: "DbUserAchievement");
 
             migrationBuilder.DropTable(
-                name: "UserCertificateFile");
+                name: "DbUserCertificateFile");
 
             migrationBuilder.DropColumn(
                 name: "IsAdmin",

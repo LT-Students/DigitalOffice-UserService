@@ -32,10 +32,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             newDbUser = new DbUser
             {
                 Id = userId,
+                Email = "Example",
                 FirstName = "Example1",
                 LastName = "Example1",
                 MiddleName = "Example1",
                 Status = "normal",
+                PasswordHash = "Example1",
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
                 IsAdmin = false

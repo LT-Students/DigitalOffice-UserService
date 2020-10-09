@@ -1,32 +1,29 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
 using NUnit.Framework;
 using System;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Business.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     public class EditUserCommandTests
     {
-        private Mock<IUserRepository> userRepositoryMock;
-        private Mock<IUserCredentialsRepository> userCredentialsRepositoryMock;
-        private Mock<IValidator<UserRequest>> validatorMock;
-        private Mock<IMapper<UserRequest, DbUser>> mapperUserMock;
-        private Mock<IMapper<UserRequest, DbUserCredentials>> mapperUserCredentialsMock;
+        private Mock<IUserRepository> repositoryMock;
+        private Mock<IValidator<EditUserRequest>> validatorMock;
+        private Mock<IMapper<EditUserRequest, DbUser>> mapperMock;
 
         private IEditUserCommand command;
-        private UserRequest request;
-        private DbUserCredentials dbUserCredentials;
+        private EditUserRequest request;
         private DbUser dbUser;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            request = new UserRequest
+            request = new EditUserRequest
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Example",
@@ -42,41 +39,27 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             dbUser = new DbUser
             {
-                Id = (Guid)request.Id,
+                Id = request.Id,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
+                Email = request.Email,
                 Status = request.Status,
+                PasswordHash = request.Password,
                 IsAdmin = request.IsAdmin,
                 IsActive = request.IsActive,
                 AvatarFileId = request.AvatarFileId
-            };
-
-            dbUserCredentials = new DbUserCredentials
-            {
-                UserId = (Guid)request.Id,
-                PasswordHash = request.Password,
-                Email = request.Email,
-                Salt = "Example"
             };
         }
 
         [SetUp]
         public void SetUp()
         {
-            userRepositoryMock = new Mock<IUserRepository>();
-            userCredentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
+            repositoryMock = new Mock<IUserRepository>();
+            mapperMock = new Mock<IMapper<EditUserRequest, DbUser>>();
+            validatorMock = new Mock<IValidator<EditUserRequest>>();
 
-            mapperUserMock = new Mock<IMapper<UserRequest, DbUser>>();
-            mapperUserCredentialsMock = new Mock<IMapper<UserRequest, DbUserCredentials>>();
-
-            validatorMock = new Mock<IValidator<UserRequest>>();
-
-            command = new EditUserCommand(validatorMock.Object,
-                userRepositoryMock.Object,
-                userCredentialsRepositoryMock.Object,
-                mapperUserMock.Object,
-                mapperUserCredentialsMock.Object);
+            command = new EditUserCommand(validatorMock.Object, repositoryMock.Object, mapperMock.Object);
         }
 
         [Test]
@@ -87,7 +70,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             Assert.Throws<ValidationException>(() => command.Execute(request));
-            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
+            repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
         }
 
         [Test]
@@ -97,15 +80,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
 
-            mapperUserMock
-                .Setup(x => x.Map(It.IsAny<UserRequest>()))
+            mapperMock
+                .Setup(x => x.Map(It.IsAny<EditUserRequest>()))
                 .Returns(dbUser);
 
-            mapperUserCredentialsMock
-                .Setup(x => x.Map(It.IsAny<UserRequest>()))
-                .Returns(dbUserCredentials);
-
-            userRepositoryMock
+            repositoryMock
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Throws(new Exception());
 
@@ -119,24 +98,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
 
-            mapperUserMock
-                .Setup(x => x.Map(It.IsAny<UserRequest>()))
+            mapperMock
+                .Setup(x => x.Map(It.IsAny<EditUserRequest>()))
                 .Returns(dbUser);
 
-            mapperUserCredentialsMock
-                .Setup(x => x.Map(It.IsAny<UserRequest>()))
-                .Returns(dbUserCredentials);
-
-            userRepositoryMock
+            repositoryMock
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Returns(true);
 
-            userCredentialsRepositoryMock
-                .Setup(x => x.EditUserCredentials(It.IsAny<DbUserCredentials>()))
-                .Returns(true);
-
             Assert.IsTrue(command.Execute(request));
-            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
+            repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
         }
     }
 }
