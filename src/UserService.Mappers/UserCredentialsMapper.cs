@@ -20,11 +20,14 @@ namespace LT.DigitalOffice.UserService.Mappers
                 throw new ArgumentNullException(nameof(request));
             }
 
+            var salt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+
             return new DbUserCredentials
             {
                 Email = request.Email,
+                Salt = salt,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password)))
+                    Encoding.UTF8.GetBytes(salt + request.Email + request.Password))) //TODO: salt3, add login instead of email
             };
         }
     }
