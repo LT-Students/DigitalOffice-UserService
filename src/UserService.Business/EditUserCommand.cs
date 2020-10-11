@@ -4,7 +4,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using Microsoft.AspNetCore.Mvc;
 
