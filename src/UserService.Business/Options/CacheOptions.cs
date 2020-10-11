@@ -1,4 +1,4 @@
-﻿namespace LT.DigitalOffice.UserService.Options
+﻿namespace LT.DigitalOffice.UserService.Business.Cache.Options
 {
     public class CacheOptions
     {

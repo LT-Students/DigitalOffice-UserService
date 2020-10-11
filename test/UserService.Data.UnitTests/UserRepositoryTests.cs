@@ -22,7 +22,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private DbUser firstUser;
         private DbUser secondUser;
         private DbUserCredentials firstUserCredentials;
-        private DbUserCredentials secondUserCredentials;
 
         private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
@@ -69,14 +68,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 AchievementsIds = new Collection<DbUserAchievement>()
             };
 
-            secondUserCredentials = new DbUserCredentials
-            {
-                UserId = firstUser.Id,
-                Login = "Example2",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
-            };
         }
 
         [SetUp]

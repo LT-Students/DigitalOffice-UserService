@@ -1,11 +1,10 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Broker.Requests;
-using LT.DigitalOffice.UserService.Business;
+using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Options;
 using MassTransit;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -15,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace LT.DigitalOffice.AuthentificationService.Business.UnitTests
+namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     public class OperationResult<T> : IOperationResult<T>
     {
@@ -61,7 +60,6 @@ namespace LT.DigitalOffice.AuthentificationService.Business.UnitTests
                 LastName = "Example1",
                 MiddleName = "Example1",
                 Status = "normal",
-                PasswordHash = "Example1",
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
                 IsAdmin = false
