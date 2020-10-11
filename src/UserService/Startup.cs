@@ -152,6 +152,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureCommands(IServiceCollection services)
         {
             services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+            services.AddTransient<IChangePasswordCommand, ChangePasswordCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
