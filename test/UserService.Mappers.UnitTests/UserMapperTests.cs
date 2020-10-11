@@ -127,6 +127,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             {
                 Id = Guid.NewGuid(),
                 Email = "Example@gmail.com",
+                Login = "Example",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
@@ -142,6 +143,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             var user = new DbUser()
             {
                 Id = (Guid)request.Id,
+                Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",

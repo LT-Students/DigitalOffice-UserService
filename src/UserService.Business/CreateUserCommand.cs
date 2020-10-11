@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business
             dBUserCredentials.Id = Guid.NewGuid();
             dBUserCredentials.UserId = dbUser.Id;
 
-            userRepository.CreateUser(dbUser, request.Email);
+            userRepository.CreateUser(dbUser);
 
             userCredentialsRepository.CreateUserCredentials(dBUserCredentials);
 
