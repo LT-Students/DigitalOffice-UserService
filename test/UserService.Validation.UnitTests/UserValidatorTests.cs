@@ -16,7 +16,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             get
             {
                 yield return request => request.FirstName;
-                yield return request => request.MiddleName;
                 yield return request => request.LastName;
             }
         }
@@ -202,6 +201,22 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        public void ShouldPassWhenDataIsValidWithoutMiddleName()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",

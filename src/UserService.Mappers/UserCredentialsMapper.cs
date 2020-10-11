@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Mappers
 
             return new DbUserCredentials
             {
-                Email = request.Email,
+                Login = request.Login,
                 Salt = salt,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(salt + request.Email + request.Password))) //TODO: salt3, add login instead of email

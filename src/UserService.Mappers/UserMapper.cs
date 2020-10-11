@@ -23,6 +23,7 @@ namespace LT.DigitalOffice.UserService.Mappers
             return new User
             {
                 Id = dbUser.Id,
+                Email = dbUser.Email,
                 Achievements = dbUser.AchievementsIds?.Select(dbUserAchievement => new Achievement
                 {
                     Id = dbUserAchievement.Achievement.Id,
@@ -49,6 +50,7 @@ namespace LT.DigitalOffice.UserService.Mappers
             return new DbUser
             {
                 Id = (Guid)request.Id,
+                Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
