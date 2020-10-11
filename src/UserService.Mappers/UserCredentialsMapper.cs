@@ -13,6 +13,8 @@ namespace LT.DigitalOffice.UserService.Mappers
     /// </summary>
     public class UserCredentialsMapper : IMapper<UserRequest, DbUserCredentials>
     {
+        internal static string SALT3 = "LT.DigitalOffice.SALT3";
+
         public DbUserCredentials Map(UserRequest request)
         {
             if (request == null)
@@ -27,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Mappers
                 Login = request.Login,
                 Salt = salt,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(salt + request.Email + request.Password))) //TODO: salt3, add login instead of email
+                    Encoding.UTF8.GetBytes(salt + request.Login + request.Password + SALT3)))
             };
         }
     }
