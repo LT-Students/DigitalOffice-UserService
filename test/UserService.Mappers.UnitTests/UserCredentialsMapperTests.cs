@@ -9,7 +9,7 @@ using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
-    class UserCedentialsMapperTests
+    class UserCredentialsMapperTests
     {
         private IMapper<UserRequest, DbUserCredentials> mapperGetUser;
         private IMapper<UserRequest, DbUserCredentials> mapperEditUser;
