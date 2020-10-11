@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Edit existing user. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="user">User to edit.</param>
-        /// <returns>Whether it was successful to edit</returns>
+        /// <returns>Whether it was successful to edit.</returns>
         bool EditUser(DbUser user);
 
         /// <summary>
