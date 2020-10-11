@@ -14,13 +14,13 @@ namespace LT.DigitalOffice.UserService.Controllers
             => getUserInfoByIdCommand.Execute(userId);
 
         [HttpPost("register")]
-        public Guid CreateUser([FromServices] IUserCreateCommand command, [FromBody] UserCreateRequest request)
+        public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
         {
             return command.Execute(request);
         }
 
         [HttpPost("editUser")]
-        public bool EditUser([FromServices] IEditUserCommand command, [FromBody] EditUserRequest request)
+        public bool EditUser([FromServices] IEditUserCommand command, [FromBody] UserRequest request)
         {
             return command.Execute(request);
         }

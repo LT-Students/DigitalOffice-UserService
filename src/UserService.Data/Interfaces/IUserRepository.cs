@@ -21,19 +21,19 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         /// <param name="user">User to add.</param>
         /// <returns>Guid of added user.</returns>
-        Guid UserCreate(DbUser user);
+        Guid CreateUser(DbUser user);
 
         /// <summary>
         /// Edit existing user. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="user">User to edit.</param>
-        /// <returns>Whether it was successful to edit</returns>
+        /// <returns>Whether it was successful to edit.</returns>
         bool EditUser(DbUser user);
 
         /// <summary>
         /// Returns the user with the specified email from database.
         /// </summary>
-        /// <param name="userEmail">Specified email of user.</param>
+        /// <param name="userEmail">Specified user email.</param>
         /// <returns>User model.</returns>
         DbUser GetUserByEmail(string userEmail);
     }

@@ -18,9 +18,9 @@ namespace LT.DigitalOffice.UserService.Data
             this.provider = provider;
         }
 
-        public Guid UserCreate(DbUser user)
+        public Guid CreateUser(DbUser user)
         {
-            if (provider.Users.Any(users => user.Email == users.Email))
+            if (provider.Users.Any(u => u.Email == user.Email))
             {
                 throw new Exception("Email is already taken.");
             }
@@ -50,14 +50,14 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserByEmail(string userEmail)
         {
-            DbUser user = provider.Users.FirstOrDefault(u => u.Email == userEmail);
+            DbUser dbUser = provider.Users.FirstOrDefault(uc => uc.Email == userEmail);
 
-            if (user == null)
+            if (dbUser == null)
             {
-                throw new Exception("User not found.");
+                throw new Exception("User credentials not found.");
             }
 
-            return user;
+            return dbUser;
         }
     }
 }

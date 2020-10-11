@@ -27,7 +27,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             userEmail = "example@gmail.com";
             user = new User { Email = userEmail };
-            dbUser = new DbUser { Email = userEmail };
+
+            dbUser = new DbUser
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Status = "Example",
+                IsAdmin = false,
+                IsActive = true,
+                AvatarFileId = Guid.NewGuid()
+            };
         }
 
         [SetUp]
@@ -66,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(It.IsAny<DbUser>()))
                 .Returns(user);
 
-            Assert.Throws<Exception>(() => command.Execute(dbUser.Email));
+            Assert.Throws<Exception>(() => command.Execute(userEmail));
             mapperMock.Verify(mapper => mapper.Map(It.IsAny<DbUser>()), Times.Never);
         }
 

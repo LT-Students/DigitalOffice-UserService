@@ -16,12 +16,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string LastName { get; set; }
         public string MiddleName { get; set; }
         public string Status { get; set; }
-        [Required]
-        public string PasswordHash { get; set; }
         public Guid? AvatarFileId { get; set; }
         [Required]
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
+        public DbUserCredentials UserCredentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFilesIds { get; set; }
         public ICollection<DbUserAchievement> AchievementsIds { get; set; }
     }
