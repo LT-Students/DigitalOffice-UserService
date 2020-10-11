@@ -6,5 +6,6 @@
     public interface IUserCredentialsRequest
     {
         string Email { get; }
+        string Login { get; }
     }
 }
