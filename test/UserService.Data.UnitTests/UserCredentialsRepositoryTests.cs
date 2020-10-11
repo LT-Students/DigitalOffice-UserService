@@ -78,6 +78,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             }
         }
 
+        #region GetUserCredentialsByUserId
         [Test]
         public void ShouldThrowExceptionWhenGotUserCredentialsUserIdDoesNotFound()
         {
@@ -91,7 +92,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByUserId(firstUserId));
         }
+        #endregion
 
+        #region GetUserCredentialsByLogin
         [Test]
         public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
@@ -103,7 +106,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByLogin(firstUserCredentials.Login));
         }
+        #endregion
 
+        #region EditUserCredentials
         [Test]
         public void ShouldThrowExceptionWhenEditedUserCredentialsFieldUserIdDoesNotFound()
         {
@@ -117,7 +122,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             Assert.That(repository.EditUserCredentials(firstUserCredentials), Is.True);
         }
+        #endregion
 
+        #region CreateUserCredentials
         [Test]
         public void ShouldThrowExceptionWhenCreationdUserCredentialsDataIsAlreadyExist()
         {
@@ -142,5 +149,24 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             SerializerAssert.AreEqual(newUserCredentials,
                 provider.UserCredentials.FirstOrDefault(uc => uc.Id == newUserCredentials.Id));
         }
+        #endregion
+
+        #region ChangePassword
+        [Test]
+        public void ShouldThrowExceptionWhenUserCredentialsDoesNotFound()
+        {
+            Assert.Throws<Exception>(() => repository.ChangePassword("login12345", "newPassword"));
+        }
+
+        [Test]
+        public void ShouldChangePassword()
+        {
+            var newPassword = "newPassword";
+
+            Assert.DoesNotThrow(() => repository.ChangePassword(firstUserCredentials.Login, newPassword));
+            Assert.AreEqual(Encoding.Default.GetString(new SHA512Managed()
+                    .ComputeHash(Encoding.Default.GetBytes(newPassword))), firstUserCredentials.PasswordHash);
+        }
+        #endregion
     }
 }

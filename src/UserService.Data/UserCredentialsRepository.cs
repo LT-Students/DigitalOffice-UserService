@@ -3,6 +3,8 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -63,6 +65,22 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             provider.UserCredentials.Add(userCredentials);
+            provider.Save();
+        }
+
+        public void ChangePassword(string login, string newPassword)
+        {
+            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
+
+            if (userCredentials == null)
+            {
+                throw new Exception("User credentials with this user login not found.");
+            }
+
+            userCredentials.PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
+                    Encoding.UTF8.GetBytes(newPassword)));
+
+            provider.UserCredentials.Update(userCredentials);
             provider.Save();
         }
     }
