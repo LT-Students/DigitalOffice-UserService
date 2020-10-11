@@ -20,7 +20,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Adds new user to the database. Returns whether it was successful to add.
         /// </summary>
         /// <param name="user">User to add.</param>
-        /// <param name="userEmail">User email for check user in db</param>
         /// <returns>Guid of added user.</returns>
         Guid CreateUser(DbUser user);
 

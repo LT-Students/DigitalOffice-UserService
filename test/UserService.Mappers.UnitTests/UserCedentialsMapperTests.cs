@@ -28,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             mapperGetUser = new UserCredentialsMapper();
             mapperEditUser = new UserCredentialsMapper();
 
+            email = "example@gmail.com";
             password = "ExamplePassword";
             login = "Example";
 
