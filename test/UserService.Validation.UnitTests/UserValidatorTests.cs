@@ -8,16 +8,14 @@ using System.Linq.Expressions;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
-    public class EditUserRequestValidatorTests
+    public class UserValidatorTests
     {
-        private IValidator<EditUserRequest> validator;
-
-        private static IEnumerable<Expression<Func<EditUserRequest, string>>> NamePropertyCases
+        private IValidator<UserRequest> validator;
+        private static IEnumerable<Expression<Func<UserRequest, string>>> NamePropertyCases
         {
             get
             {
                 yield return request => request.FirstName;
-                yield return request => request.MiddleName;
                 yield return request => request.LastName;
             }
         }
@@ -50,39 +48,33 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [SetUp]
         public void SetUp()
         {
-            validator = new EditUserRequestValidator();
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenIdIsEmpty()
-        {
-            validator.ShouldHaveValidationErrorFor(x => x.Id, Guid.Empty);
+            validator = new UserValidator();
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
-            Expression<Func<EditUserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<EditUserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
-            Expression<Func<EditUserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<EditUserRequest, string>> gettingNamePropertyExpression,
+            [ValueSource(nameof(NamePropertyCases))] Expression<Func<UserRequest, string>> gettingNamePropertyExpression,
             [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
             string name)
         {
@@ -114,6 +106,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             var status = new string('a', 300) + "@gmail.com";
             validator.ShouldHaveValidationErrorFor(x => x.Status, status);
         }
+
         [Test]
         public void ShouldThrowValidationExceptionWhenPasswordIsEmpty()
         {
@@ -123,7 +116,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldThrowValidationExceptionWhenAllFieldsAreEmpty()
         {
-            var request = new EditUserRequest();
+            var request = new UserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
         }
@@ -131,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
         {
-            var request = new EditUserRequest
+            var request = new UserRequest
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Example",
@@ -147,9 +140,62 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
+        public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsNull()
+        {
+            var request = new UserRequest
+            {
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsExist()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenIdUserIsNotValid()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.Empty,
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Id.Value);
+        }
+
+        [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndContainsRussianSymbols()
         {
-            var request = new EditUserRequest
+            var request = new UserRequest
             {
                 Id = Guid.NewGuid(),
                 FirstName = "Пример",
@@ -163,6 +209,21 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
+
+        public void ShouldPassWhenDataIsValidWithoutMiddleName()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
     }
 }
-

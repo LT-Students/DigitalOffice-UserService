@@ -1,28 +1,27 @@
-using System;
 using FluentValidation;
 using GreenPipes;
 using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
+using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Broker.Consumers;
+using LT.DigitalOffice.UserService.Business;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Data;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Mappers;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using MassTransit;
-using LT.DigitalOffice.Kernel.Broker;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using LT.DigitalOffice.Kernel;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Data;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.UserService.Business;
 using LT.DigitalOffice.UserService.Validation;
-using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.CompanyService.Data.Provider;
+using MassTransit;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -37,13 +36,11 @@ namespace LT.DigitalOffice.UserService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<RabbitMQOptions>(Configuration);
-
             services.AddHealthChecks();
 
             services.AddControllers();
 
-            services.AddKernelExtensions(Configuration);
+            services.AddKernelExtensions();
 
             services.AddDbContext<UserServiceDbContext>(options =>
             {
@@ -63,9 +60,7 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigRabbitMq(IServiceCollection services)
         {
-            const string serviceSection = "RabbitMQ";
-            string serviceName = Configuration.GetSection(serviceSection)["Username"];
-            string servicePassword = Configuration.GetSection(serviceSection)["Password"];
+            var rabbitmqOptions = Configuration.GetSection(RabbitMQOptions.RabbitMQ).Get<RabbitMQOptions>();
 
             services.AddMassTransit(x =>
             {
@@ -75,10 +70,10 @@ namespace LT.DigitalOffice.UserService
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host("localhost", "/", host =>
+                    cfg.Host(rabbitmqOptions.Host, "/", host =>
                     {
-                        host.Username($"{serviceName}_{servicePassword}");
-                        host.Password(servicePassword);
+                        host.Username($"{rabbitmqOptions.Username}_{rabbitmqOptions.Password}");
+                        host.Password(rabbitmqOptions.Password);
                     });
 
                     cfg.ReceiveEndpoint("UserService", ep =>
@@ -100,10 +95,12 @@ namespace LT.DigitalOffice.UserService
                     new Uri("rabbitmq://localhost/CompanyService"));
                 x.AddRequestClient<IGetFileRequest>(
                     new Uri("rabbitmq://localhost/FileService"));
+
+                x.ConfigureKernelMassTransit(rabbitmqOptions);
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseHealthChecks("/api/healthcheck");
 
@@ -141,19 +138,20 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddTransient<IDataProvider, UserServiceDbContext>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IUserCredentialsRepository, UserCredentialsRepository>();
         }
 
         private void ConfigureMappers(IServiceCollection services)
         {
-            services.AddTransient<IMapper<UserCreateRequest, DbUser>, UserMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
-            services.AddTransient<IMapper<EditUserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
+            services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)
         {
-            services.AddTransient<IUserCreateCommand, UserCreateCommand>();
+            services.AddTransient<ICreateUserCommand, CreateUserCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
@@ -161,8 +159,7 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureValidators(IServiceCollection services)
         {
-            services.AddTransient<IValidator<EditUserRequest>, EditUserRequestValidator>();
-            services.AddTransient<IValidator<UserCreateRequest>, UserCreateRequestValidator>();
+            services.AddTransient<IValidator<UserRequest>, UserValidator>();
             services.AddTransient<IValidator<string>, GetUserByEmailValidator>();
         }
     }
