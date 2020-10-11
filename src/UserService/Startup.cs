@@ -168,7 +168,7 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
-            services.AddTransient<IForgotPasswordCommand, ForgotPasswordCommand>();
+            services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
         }
 
         private void ConfigureValidators(IServiceCollection services)

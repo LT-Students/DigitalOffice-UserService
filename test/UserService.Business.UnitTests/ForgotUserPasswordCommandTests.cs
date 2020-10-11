@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public T Body { get; set; }
     }
 
-    class ForgotPasswordCommandTests
+    class ForgotUserPasswordCommandTests
     {
         private Mock<IRequestClient<IUserDescriptionRequest>> requestClientMock;
         private Mock<IValidator<string>> validatorMock;
@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             BrokerSetUp();
 
-            command = new ForgotPasswordCommand(requestClientMock.Object,
+            command = new ForgotUserPasswordCommand(requestClientMock.Object,
                 cacheOptions, validatorMock.Object, repositoryMock.Object, cache);
         }
 
