@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
@@ -27,16 +28,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
     class ForgotUserPasswordCommandTests
     {
-        private Mock<IRequestClient<IUserDescriptionRequest>> requestClientMock;
-        private Mock<IValidator<string>> validatorMock;
         private Mock<IUserRepository> repositoryMock;
-        private IOptions<CacheOptions> cacheOptions;
-        private IMemoryCache cache;
+        private Mock<IValidator<string>> validatorMock;
+        private Mock<ValidationResult> validationResultIsValidMock;
+        private Mock<IRequestClient<IUserDescriptionRequest>> requestClientMock;
 
-        private IForgotPasswordCommand command;
-        private OperationResult<bool> operationResult;
-        private string userEmail;
+        private IMemoryCache cache;
+        private IOptions<CacheOptions> cacheOptions;
+
         private DbUser dbUser;
+        private string userEmail;
+        private IForgotPasswordCommand command;
+        private ValidationResult validationResultError;
+        private OperationResult<bool> operationResult;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -69,6 +73,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             command = new ForgotUserPasswordCommand(requestClientMock.Object,
                 cacheOptions, validatorMock.Object, repositoryMock.Object, cache);
+
+            validationResultError = new ValidationResult(
+                new List<ValidationFailure>
+                {
+                    new ValidationFailure("error", "something", null)
+                });
+
+            validationResultIsValidMock = new Mock<ValidationResult>();
+
+            validationResultIsValidMock
+                .Setup(x => x.IsValid)
+                .Returns(true);
         }
 
         private void BrokerSetUp()
@@ -96,8 +112,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             operationResult.Body = true;
 
             validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
+                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultError);
 
             Assert.Throws<ValidationException>(() => command.Execute(userEmail));
         }
@@ -110,8 +126,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             operationResult.Body = true;
 
             validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultIsValidMock.Object);
 
             repositoryMock
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
@@ -128,8 +144,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             operationResult.Body = false;
 
             validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultIsValidMock.Object);
 
             repositoryMock
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
@@ -146,8 +162,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             operationResult.Body = true;
 
             validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultIsValidMock.Object);
 
             repositoryMock
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
