@@ -22,9 +22,9 @@ namespace LT.DigitalOffice.UserService.Business
 
         public void Execute(Guid userId, Guid requestingUserId)
         {
-            var isAcces = GetResultCheckingUserRights(requestingUserId);
+            var isAccess = GetResultCheckingUserRights();
 
-            if (!isAcces)
+            if (!isAccess)
             {
                 throw new Exception("Not enough rights.");
             }
@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Business
             repository.EditUser(editedUser);
         }
 
-        private bool GetResultCheckingUserRights(Guid userId)
+        private bool GetResultCheckingUserRights()
         {
             int numberRight = 1;
 

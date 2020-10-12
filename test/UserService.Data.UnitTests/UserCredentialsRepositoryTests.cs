@@ -17,12 +17,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private IDataProvider provider;
         private IUserCredentialsRepository repository;
 
-        private DbUserCredentials firstUserCredentials;
-        private DbUserCredentials secondUserCredentials;
-        private Guid firstUserId;
-        private Guid secondUserId;
-        private string firstSalt;
-        private string secondSalt;
+        private Guid userId;
+        private string salt;
+        private DbUserCredentials userCredentials;
         internal const string SALT3 = "LT.DigitalOffice.SALT3";
 
         private void GetMemoryContext()
@@ -37,30 +34,17 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            firstUserId = Guid.NewGuid();
-            secondUserId = Guid.NewGuid();
-            firstSalt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
-            secondSalt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+            userId = Guid.NewGuid();
+            salt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
 
-
-            firstUserCredentials = new DbUserCredentials
+            userCredentials = new DbUserCredentials
             {
                 Id = Guid.NewGuid(),
-                UserId = firstUserId,
+                UserId = userId,
                 Login = "Example",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes($"{ firstUserCredentials.Salt }{ firstUserCredentials.Login }{ "Password" }{ SALT3 }"))),
-                Salt = firstSalt
-            };
-
-            secondUserCredentials = new DbUserCredentials
-            {
-                Id = Guid.NewGuid(),
-                UserId = secondUserId,
-                Login = "Example2",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes($"{ secondUserCredentials.Salt }{ secondUserCredentials.Login }{ "Password123" }{ SALT3 }"))),
-                Salt = secondSalt
+                    .ComputeHash(Encoding.Default.GetBytes($"{ salt }{ "Example" }{ "Password" }{ SALT3 }"))),
+                Salt = salt
             };
         }
 
@@ -71,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             repository = new UserCredentialsRepository(provider);
 
-            provider.UserCredentials.Add(firstUserCredentials);
+            provider.UserCredentials.Add(userCredentials);
             provider.Save();
         }
 
@@ -95,39 +79,41 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldGotUserCredentialsByUserIdSuccessful()
         {
-            SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByUserId(firstUserId));
+            SerializerAssert.AreEqual(userCredentials, repository.GetUserCredentialsByUserId(userId));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
-            Assert.Throws<Exception>(() => repository.GetUserCredentialsByLogin(secondUserCredentials.Login));
+            Assert.Throws<Exception>(() => repository.GetUserCredentialsByLogin("login123456"));
         }
 
         [Test]
         public void ShouldGotUserCredentialsByUserEmailSuccessful()
         {
-            SerializerAssert.AreEqual(firstUserCredentials, repository.GetUserCredentialsByLogin(firstUserCredentials.Login));
+            SerializerAssert.AreEqual(userCredentials, repository.GetUserCredentialsByLogin(userCredentials.Login));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEditedUserCredentialsFieldUserIdDoesNotFound()
         {
-            Assert.Throws<Exception>(() => repository.EditUserCredentials(secondUserCredentials));
+            userCredentials.UserId = Guid.NewGuid();
+
+            Assert.Throws<Exception>(() => repository.EditUserCredentials(userCredentials));
         }
 
         [Test]
         public void ShouldEditedUserCredentialsSuccessful()
         {
-            firstUserCredentials.PasswordHash = "Example2";
+            userCredentials.PasswordHash = "Example2";
 
-            Assert.That(repository.EditUserCredentials(firstUserCredentials), Is.True);
+            Assert.That(repository.EditUserCredentials(userCredentials), Is.True);
         }
 
         [Test]
         public void ShouldThrowExceptionWhenCreationdUserCredentialsDataIsAlreadyExist()
         {
-            Assert.Throws<Exception>(() => repository.CreateUserCredentials(firstUserCredentials));
+            Assert.Throws<Exception>(() => repository.CreateUserCredentials(userCredentials));
         }
 
         [Test]
@@ -136,11 +122,11 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var newUserCredentials = new DbUserCredentials
             {
                 Id = Guid.NewGuid(),
-                UserId = secondUserId,
+                UserId = userId,
                 Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes($"{ firstSalt }{ "Example2" }{ "Password123" }{ SALT3 }"))),
-                Salt = firstSalt
+                    .ComputeHash(Encoding.Default.GetBytes($"{ salt }{ "Example2" }{ "Password123" }{ SALT3 }"))),
+                Salt = salt
             };
 
             repository.CreateUserCredentials(newUserCredentials);
