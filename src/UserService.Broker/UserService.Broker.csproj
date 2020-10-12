@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.6" />
+    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>

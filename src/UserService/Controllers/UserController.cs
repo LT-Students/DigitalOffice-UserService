@@ -39,5 +39,12 @@ namespace LT.DigitalOffice.UserService.Controllers
         {
             command.Execute(userId, requestingUser);
         }
+
+        [HttpGet("forgotPassword")]
+        public void ForgotPassword([FromServices] IForgotPasswordCommand command,
+            [FromQuery] string userEmail)
+        {
+            command.Execute(userEmail);
+        }
     }
 }
