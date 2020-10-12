@@ -2,9 +2,9 @@
 
 namespace LT.DigitalOffice.UserService.Validation
 {
-    public class GetUserByEmailValidator : AbstractValidator<string>
+    public class UserEmailValidator : AbstractValidator<string>
     {
-        public GetUserByEmailValidator()
+        public UserEmailValidator()
         {
             RuleFor(email => email)
                 .NotEmpty()

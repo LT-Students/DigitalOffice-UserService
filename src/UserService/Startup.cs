@@ -4,8 +4,11 @@ using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
+using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business;
+using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -47,18 +50,23 @@ namespace LT.DigitalOffice.UserService
 
             services.AddControllers();
 
+            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
+            services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
+
+            services.AddMemoryCache();
+
             ConfigureCommands(services);
             ConfigureRepositories(services);
             ConfigureValidators(services);
             ConfigureMappers(services);
-            ConfigRabbitMq(services);
+            ConfigureMassTransit(services);
 
             services.AddMassTransitHostedService();
 
             services.AddKernelExtensions();
         }
 
-        private void ConfigRabbitMq(IServiceCollection services)
+        private void ConfigureMassTransit(IServiceCollection services)
         {
             var rabbitmqOptions = Configuration.GetSection(RabbitMQOptions.RabbitMQ).Get<RabbitMQOptions>();
 
@@ -90,11 +98,13 @@ namespace LT.DigitalOffice.UserService
                         ep.ConfigureConsumer<UserLoginConsumer>(context);
                     });
                 });
-                x.AddRequestClient<IGetUserPositionRequest>(new Uri("rabbitmq://localhost/CompanyService"));
+
+                x.AddRequestClient<IUserDescriptionRequest>(new Uri("rabbitmq://localhost/MessageService"));
                 x.AddRequestClient<IGetUserPositionRequest>(
                     new Uri("rabbitmq://localhost/CompanyService"));
                 x.AddRequestClient<IGetFileRequest>(
                     new Uri("rabbitmq://localhost/FileService"));
+                x.AddRequestClient<IUserJwtRequest>(new Uri("rabbitmq://localhost/AuthenticationService_ValidationJwt"));
 
                 x.ConfigureKernelMassTransit(rabbitmqOptions);
             });
@@ -110,6 +120,8 @@ namespace LT.DigitalOffice.UserService
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
+            app.UseMiddleware<TokenMiddleware>();
 
             string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
 
@@ -130,7 +142,9 @@ namespace LT.DigitalOffice.UserService
             using var serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
+
             using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
+
             context.Database.Migrate();
         }
 
@@ -155,12 +169,13 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
+            services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
         }
 
         private void ConfigureValidators(IServiceCollection services)
         {
             services.AddTransient<IValidator<UserRequest>, UserValidator>();
-            services.AddTransient<IValidator<string>, GetUserByEmailValidator>();
+            services.AddTransient<IValidator<string>, UserEmailValidator>();
         }
     }
 }

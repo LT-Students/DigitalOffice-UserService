@@ -4,14 +4,14 @@ using NUnit.Framework;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
-    class GetUserByEmailValidatorTests
+    class UserEmailValidatorTests
     {
         private IValidator<string> validator;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            validator = new GetUserByEmailValidator();
+            validator = new UserEmailValidator();
         }
 
         [Test]
