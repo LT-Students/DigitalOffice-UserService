@@ -43,8 +43,6 @@ namespace LT.DigitalOffice.UserService
 
             services.AddControllers();
 
-            services.AddKernelExtensions();
-
             services.AddDbContext<UserServiceDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
@@ -64,6 +62,8 @@ namespace LT.DigitalOffice.UserService
             ConfigureMassTransit(services);
 
             services.AddMassTransitHostedService();
+
+            services.AddKernelExtensions();
         }
 
         private void ConfigureMassTransit(IServiceCollection services)
