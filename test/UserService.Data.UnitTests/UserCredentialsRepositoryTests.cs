@@ -21,6 +21,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private DbUserCredentials secondUserCredentials;
         private Guid firstUserId;
         private Guid secondUserId;
+        private string firstSalt;
+        private string secondSalt;
+        internal const string SALT3 = "LT.DigitalOffice.SALT3";
 
         private void GetMemoryContext()
         {
@@ -36,6 +39,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             firstUserId = Guid.NewGuid();
             secondUserId = Guid.NewGuid();
+            firstSalt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+            secondSalt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+
 
             firstUserCredentials = new DbUserCredentials
             {
@@ -43,8 +49,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UserId = firstUserId,
                 Login = "Example",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
+                    .ComputeHash(Encoding.Default.GetBytes($"{ firstUserCredentials.Salt }{ firstUserCredentials.Login }{ "Password" }{ SALT3 }"))),
+                Salt = firstSalt
             };
 
             secondUserCredentials = new DbUserCredentials
@@ -53,8 +59,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UserId = secondUserId,
                 Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
+                    .ComputeHash(Encoding.Default.GetBytes($"{ secondUserCredentials.Salt }{ secondUserCredentials.Login }{ "Password123" }{ SALT3 }"))),
+                Salt = secondSalt
             };
         }
 
@@ -133,8 +139,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UserId = secondUserId,
                 Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
+                    .ComputeHash(Encoding.Default.GetBytes($"{ firstSalt }{ "Example2" }{ "Password123" }{ SALT3 }"))),
+                Salt = firstSalt
             };
 
             repository.CreateUserCredentials(newUserCredentials);

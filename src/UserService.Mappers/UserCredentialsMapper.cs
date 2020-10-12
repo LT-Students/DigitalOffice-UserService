@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Mappers
                 Login = request.Login,
                 Salt = salt,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(salt + request.Login + request.Password + SALT3)))
+                    Encoding.UTF8.GetBytes($"{ salt }{ request.Login }{ request.Password }{ SALT3 }")))
             };
         }
     }

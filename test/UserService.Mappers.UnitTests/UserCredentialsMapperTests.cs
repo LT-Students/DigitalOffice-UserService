@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                 Login = login,
                 Salt = salt,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(salt + login + password + SALT3)))
+                    Encoding.UTF8.GetBytes($"{ salt }{ login }{ password }{ SALT3 }")))
             };
         }
 
@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             var result = mapper.Map(userRequest);
             result.Salt = salt;
             result.PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(result.Salt + userRequest.Login + userRequest.Password + SALT3)));
+                    Encoding.UTF8.GetBytes($"{ result.Salt }{ userRequest.Login }{ userRequest.Password }{ SALT3 }")));
 
             SerializerAssert.AreEqual(dbUserCredentials, result);
         }
