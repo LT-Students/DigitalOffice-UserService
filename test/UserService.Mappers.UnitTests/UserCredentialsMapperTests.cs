@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.UnitTestLibrary;
+﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
@@ -11,22 +11,21 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     class UserCredentialsMapperTests
     {
-        private IMapper<UserRequest, DbUserCredentials> mapperGetUser;
-        private IMapper<UserRequest, DbUserCredentials> mapperEditUser;
+        private IMapper<UserRequest, DbUserCredentials> _mapper;
 
         private DbUserCredentials dbUserCredentials;
-        private UserRequest userCreateRequest;
         private UserRequest editUserRequest;
 
         private string password;
         private string login;
         private string email;
 
+        private readonly Guid _userId = Guid.NewGuid();
+
         [SetUp]
         public void SetUp()
         {
-            mapperGetUser = new UserCredentialsMapper();
-            mapperEditUser = new UserCredentialsMapper();
+            _mapper = new UserCredentialsMapper();
 
             email = "example@gmail.com";
             password = "ExamplePassword";
@@ -34,6 +33,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             dbUserCredentials = new DbUserCredentials
             {
+                UserId = _userId,
                 Login = login,
                 PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(password)))
@@ -43,27 +43,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowArgumentNullExceptionWhenRequestIsNullForGetUser()
         {
-            userCreateRequest = null;
-
-            Assert.Throws<ArgumentNullException>(() => mapperGetUser.Map(userCreateRequest));
-        }
-
-        [Test]
-        public void ShouldReturnNewDbUserCredentialsWhenDataCorrectForGetUser()
-        {
-            userCreateRequest = new UserRequest
-            {
-                FirstName = "Example",
-                LastName = "Example",
-                MiddleName = "Example",
-                Email = email,
-                Login = login,
-                Status = "Example",
-                Password = password,
-                IsAdmin = false
-            };
-
-            SerializerAssert.AreEqual(dbUserCredentials, mapperGetUser.Map(userCreateRequest));
+            Assert.Throws<BadRequestException>(() => _mapper.Map(null));
         }
 
         [Test]
@@ -71,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             editUserRequest = null;
 
-            Assert.Throws<ArgumentNullException>(() => mapperEditUser.Map(editUserRequest));
+            Assert.Throws<BadRequestException>(() => _mapper.Map(editUserRequest));
         }
 
         [Test]
@@ -79,6 +59,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             editUserRequest = new UserRequest
             {
+                Id = _userId,
                 Email = email,
                 Login = login,
                 FirstName = "Example",
@@ -91,7 +72,12 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                 AvatarFileId = Guid.NewGuid()
             };
 
-            SerializerAssert.AreEqual(dbUserCredentials, mapperEditUser.Map(editUserRequest));
+            var result = _mapper.Map(editUserRequest);
+
+            Assert.AreNotEqual(Guid.Empty, result.Id);
+            Assert.AreEqual(_userId, result.UserId);
+            Assert.AreEqual(dbUserCredentials.PasswordHash, result.PasswordHash);
+            Assert.AreEqual(login, result.Login);
         }
     }
 }

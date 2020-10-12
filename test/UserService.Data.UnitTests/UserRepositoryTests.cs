@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -22,6 +23,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private DbUser firstUser;
         private DbUser secondUser;
         private DbUserCredentials firstUserCredentials;
+        private DbUserCredentials secondUserCredentials;
 
         private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
@@ -68,6 +70,14 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 AchievementsIds = new Collection<DbUserAchievement>()
             };
 
+            secondUserCredentials = new DbUserCredentials
+            {
+                UserId = secondUser.Id,
+                Login = "Example2",
+                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
+                    .ComputeHash(Encoding.Default.GetBytes("Example2"))),
+                Salt = "Example_Salt2"
+            };
         }
 
         [SetUp]
@@ -218,16 +228,20 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.CreateUser(secondUser), Is.EqualTo(secondUser.Id));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
+            Assert.AreEqual(secondUser.Id, repository.CreateUser(secondUser, secondUserCredentials));
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
+            Assert.Contains(secondUser, provider.Users.ToArray());
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.CreateUser(firstUser),
-                Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser}));
+            Assert.Throws<BadRequestException>(
+                () => repository.CreateUser(firstUser, firstUserCredentials),
+                EmailAlreadyTakenExceptionMessage);
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
         }
         #endregion
     }

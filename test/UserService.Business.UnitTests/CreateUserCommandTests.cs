@@ -19,7 +19,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IValidator<UserRequest>> validatorMock;
         private Mock<ValidationResult> validationResultIsValidMock;
         private Mock<IMapper<UserRequest, DbUser>> mapperUserMock;
-        private Mock<IUserCredentialsRepository> userCredentialsRepositoryMock;
         private Mock<IMapper<UserRequest, DbUserCredentials>> mapperUserCredentialsMock;
 
         private Guid userId;
@@ -71,7 +70,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void SetUp()
         {
             userRepositoryMock = new Mock<IUserRepository>();
-            userCredentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
 
             mapperUserMock = new Mock<IMapper<UserRequest, DbUser>>();
             mapperUserCredentialsMock = new Mock<IMapper<UserRequest, DbUserCredentials>>();
@@ -82,7 +80,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 userRepositoryMock.Object,
                 validatorMock.Object,
                 mapperUserMock.Object,
-                userCredentialsRepositoryMock.Object,
                 mapperUserCredentialsMock.Object);
         }
 
@@ -104,7 +101,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Verifiable();
 
             userRepositoryMock
-                .Setup(x => x.CreateUser(It.IsAny<DbUser>()))
+                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => command.Execute(request));
@@ -118,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(validationResultIsValidMock.Object);
 
             userRepositoryMock
-                .Setup(x => x.CreateUser(It.IsAny<DbUser>()))
+                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
                 .Returns(userId)
                 .Verifiable();
 
@@ -155,13 +152,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Throws<Exception>().Verifiable();
 
             userRepositoryMock
-                .Setup(x => x.CreateUser(It.IsAny<DbUser>()))
+                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
                 .Returns(userId);
 
             Assert.Throws<Exception>(() => command.Execute(request));
             validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
             mapperUserMock.Verify();
-            userRepositoryMock.Verify(repository => repository.CreateUser(It.IsAny<DbUser>()), Times.Never);
+            userRepositoryMock.Verify(
+                repository => repository.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()), Times.Never);
         }
 
         [Test]

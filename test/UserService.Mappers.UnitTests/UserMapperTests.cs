@@ -8,6 +8,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
@@ -91,9 +92,9 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         #region IMapper<DbUser, User>
 
         [Test]
-        public void ShouldThrowArgumentNullExceptionWhenDbUserIsNull()
+        public void ShouldThrowBadRequestExceptionWhenDbUserIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => mapper.Map(null));
+            Assert.Throws<BadRequestException>(() => mapper.Map(null));
         }
 
         [Test]
@@ -161,7 +162,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         {
             UserRequest request = null;
 
-            Assert.Throws<ArgumentNullException>(() => mapperEditUserRequest.Map(request));
+            Assert.Throws<BadRequestException>(() => mapperEditUserRequest.Map(request));
         }
         #endregion
 
