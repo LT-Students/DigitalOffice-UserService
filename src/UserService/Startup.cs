@@ -104,6 +104,7 @@ namespace LT.DigitalOffice.UserService
                     new Uri("rabbitmq://localhost/CompanyService"));
                 x.AddRequestClient<IGetFileRequest>(
                     new Uri("rabbitmq://localhost/FileService"));
+                x.AddRequestClient<IUserJwtRequest>(new Uri("rabbitmq://localhost/AuthenticationService_ValidationJwt"));
 
                 x.ConfigureKernelMassTransit(rabbitmqOptions);
             });

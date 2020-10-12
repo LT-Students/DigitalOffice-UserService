@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -39,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Business
 
 		public bool Execute(string userEmail)
 		{
-			validator.ValidateAndThrow(userEmail);
+			validator.ValidateAndThrowCustom(userEmail);
 
 			var dbUser = repository.GetUserByEmail(userEmail);
 
