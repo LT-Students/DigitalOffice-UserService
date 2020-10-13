@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.6" />
+    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\UserService.Mappers\UserService.Mappers.csproj" />
+    <ProjectReference Include="..\UserService.Models.BrokerRequest\UserService.Models.BrokerRequest.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
   </ItemGroup>
 

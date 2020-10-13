@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -9,43 +10,34 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Business
 {
+    /// <inheritdoc/>
     public class CreateUserCommand : ICreateUserCommand
     {
-        private readonly IUserRepository userRepository;
-        private readonly IUserCredentialsRepository userCredentialsRepository;
-        private readonly IValidator<UserRequest> validator;
-        private readonly IMapper<UserRequest, DbUser> mapperUser;
-        private readonly IMapper<UserRequest, DbUserCredentials> mapperUserCredentials;
+        private readonly IUserRepository _userRepository;
+        private readonly IValidator<UserRequest> _validator;
+        private readonly IMapper<UserRequest, DbUser> _mapperUser;
+        private readonly IMapper<UserRequest, DbUserCredentials> _mapperUserCredentials;
 
         public CreateUserCommand(
             [FromServices] IUserRepository userRepository,
             [FromServices] IValidator<UserRequest> validator,
             [FromServices] IMapper<UserRequest, DbUser> mapperUser,
-            [FromServices] IUserCredentialsRepository userCredentialsRepository,
             [FromServices] IMapper<UserRequest, DbUserCredentials> mapperUserCredentials)
         {
-            this.validator = validator;
-            this.userRepository = userRepository;
-            this.mapperUser = mapperUser;
-            this.userCredentialsRepository = userCredentialsRepository;
-            this.mapperUserCredentials = mapperUserCredentials;
+            _validator = validator;
+            _userRepository = userRepository;
+            _mapperUser = mapperUser;
+            _mapperUserCredentials = mapperUserCredentials;
         }
 
+        /// <inheritdoc/>
         public Guid Execute(UserRequest request)
         {
-            validator.ValidateAndThrow(request);
+            _validator.ValidateAndThrowCustom(request);
 
-            var dbUser = mapperUser.Map(request);
-            var dBUserCredentials = mapperUserCredentials.Map(request);
-
-            dBUserCredentials.Id = Guid.NewGuid();
-            dBUserCredentials.UserId = dbUser.Id;
-
-            userRepository.CreateUser(dbUser);
-
-            userCredentialsRepository.CreateUserCredentials(dBUserCredentials);
-
-            return dbUser.Id;
+            return _userRepository.CreateUser(
+                _mapperUser.Map(request),
+                _mapperUserCredentials.Map(request));
         }
     }
 }

@@ -19,9 +19,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <summary>
         /// Returns the user credentials with the specified user email from database.
         /// </summary>
-        /// <param name="userLogin">Specified login of user.</param>
+        /// <param name="login">Specified login of user.</param>
         /// <returns>User credentials model.</returns>
-        DbUserCredentials GetUserCredentialsByLogin(string userLogin);
+        DbUserCredentials GetUserCredentialsByLogin(string login);
 
         /// <summary>
         /// Edit existing user credentials. Returns whether it was successful to edit.
@@ -29,12 +29,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userCredentials">User credentials to edit.</param>
         /// <returns>Whether it was successful to edit.</returns>
         bool EditUserCredentials(DbUserCredentials userCredentials);
-
-        /// <summary>
-        /// Create new user credentials.
-        /// </summary>
-        /// <param name="userCredentials">User credentials to add.</param>
-        void CreateUserCredentials(DbUserCredentials userCredentials);
 
         /// <summary>
         /// Change password of the specified user.

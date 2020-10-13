@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UserService.Data.Provider.MsSql.Ef\UserService.Data.Provider.MsSql.Ef.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
   </ItemGroup>

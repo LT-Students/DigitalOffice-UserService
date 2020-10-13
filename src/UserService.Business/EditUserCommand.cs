@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LT.DigitalOffice.UserService.Business
@@ -32,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         public bool Execute(UserRequest request)
         {
-            validator.ValidateAndThrow(request);
+            validator.ValidateAndThrowCustom(request);
 
             var dbUser = mapperUser.Map(request);
             var dbUserCredentials = mapperUserCredentials.Map(request);

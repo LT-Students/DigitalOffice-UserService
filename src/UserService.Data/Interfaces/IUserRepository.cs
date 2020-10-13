@@ -10,30 +10,31 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     public interface IUserRepository
     {
         /// <summary>
-        /// Returns the user with the specified id from database.
+        /// Returns the dbUser with the specified id from database.
         /// </summary>
-        /// <param name="userId">Specified id of user.</param>
+        /// <param name="userId">Specified id of dbUser.</param>
         /// <returns>User with specified id.</returns>
         DbUser GetUserInfoById(Guid userId);
 
         /// <summary>
-        /// Adds new user to the database. Returns whether it was successful to add.
+        /// Adds new dbUser to the database. Returns whether it was successful to add.
         /// </summary>
-        /// <param name="user">User to add.</param>
-        /// <returns>Guid of added user.</returns>
-        Guid CreateUser(DbUser user);
+        /// <param name="dbUser">User to add.</param>
+        /// <param name="dbUserCredentials">User credentials to add.</param>
+        /// <returns>ID of added dbUser.</returns>
+        Guid CreateUser(DbUser dbUser, DbUserCredentials dbUserCredentials);
 
         /// <summary>
-        /// Edit existing user. Returns whether it was successful to edit.
+        /// Edit existing dbUser. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="user">User to edit.</param>
         /// <returns>Whether it was successful to edit.</returns>
         bool EditUser(DbUser user);
 
         /// <summary>
-        /// Returns the user with the specified email from database.
+        /// Returns the dbUser with the specified email from database.
         /// </summary>
-        /// <param name="userEmail">Specified user email.</param>
+        /// <param name="userEmail">Specified dbUser email.</param>
         /// <returns>User model.</returns>
         DbUser GetUserByEmail(string userEmail);
     }

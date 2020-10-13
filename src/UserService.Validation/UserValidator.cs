@@ -41,6 +41,11 @@ namespace LT.DigitalOffice.UserService.Validation
 
             RuleFor(user => user.Password)
                 .NotEmpty();
+
+            RuleFor(request => request.Login)
+                .NotEmpty()
+                .MinimumLength(5)
+                .MaximumLength(15);
         }
     }
 }

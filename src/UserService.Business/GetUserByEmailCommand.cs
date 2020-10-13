@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -26,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         public User Execute(string userEmail)
         {
-            validator.ValidateAndThrow(userEmail);
+            validator.ValidateAndThrowCustom(userEmail);
 
             var user = mapper.Map(repository.GetUserByEmail(userEmail));
 
