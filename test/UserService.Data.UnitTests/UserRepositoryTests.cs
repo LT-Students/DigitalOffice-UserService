@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -71,11 +72,11 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             secondUserCredentials = new DbUserCredentials
             {
-                UserId = firstUser.Id,
+                UserId = secondUser.Id,
                 Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
+                    .ComputeHash(Encoding.Default.GetBytes("Example2"))),
+                Salt = "Example_Salt2"
             };
         }
 
@@ -227,16 +228,20 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.CreateUser(secondUser), Is.EqualTo(secondUser.Id));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
+            Assert.AreEqual(secondUser.Id, repository.CreateUser(secondUser, secondUserCredentials));
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
+            Assert.Contains(secondUser, provider.Users.ToArray());
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.CreateUser(firstUser),
-                Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser}));
+            Assert.Throws<BadRequestException>(
+                () => repository.CreateUser(firstUser, firstUserCredentials),
+                EmailAlreadyTakenExceptionMessage);
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
         }
         #endregion
     }

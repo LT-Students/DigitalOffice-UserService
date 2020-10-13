@@ -6,9 +6,9 @@ using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -73,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var userId = Guid.Empty;
 
-            Assert.Throws<Exception>(() => repository.GetUserCredentialsByUserId(userId));
+            Assert.Throws<NotFoundException>(() => repository.GetUserCredentialsByUserId(userId));
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
-            Assert.Throws<Exception>(() => repository.GetUserCredentialsByLogin("login123456"));
+            Assert.Throws<NotFoundException>(() => repository.GetUserCredentialsByLogin(secondUserCredentials.Login));
         }
 
         [Test]
@@ -97,9 +97,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenEditedUserCredentialsFieldUserIdDoesNotFound()
         {
-            userCredentials.UserId = Guid.NewGuid();
-
-            Assert.Throws<Exception>(() => repository.EditUserCredentials(userCredentials));
+            Assert.Throws<NotFoundException>(() => repository.EditUserCredentials(secondUserCredentials));
         }
 
         [Test]
@@ -108,31 +106,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             userCredentials.PasswordHash = "Example2";
 
             Assert.That(repository.EditUserCredentials(userCredentials), Is.True);
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenCreationdUserCredentialsDataIsAlreadyExist()
-        {
-            Assert.Throws<Exception>(() => repository.CreateUserCredentials(userCredentials));
-        }
-
-        [Test]
-        public void ShouldCreatedUserCredentialsSuccessful()
-        {
-            var newUserCredentials = new DbUserCredentials
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                Login = "Example2",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes($"{ salt }{ "Example2" }{ "Password123" }{ SALT3 }"))),
-                Salt = salt
-            };
-
-            repository.CreateUserCredentials(newUserCredentials);
-
-            SerializerAssert.AreEqual(newUserCredentials,
-                provider.UserCredentials.FirstOrDefault(uc => uc.Id == newUserCredentials.Id));
         }
     }
 }

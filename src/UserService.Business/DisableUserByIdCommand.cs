@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         public void Execute(Guid userId, Guid requestingUserId)
         {
-            var isAccess = GetResultCheckingUserRights();
+            var isAccess = GetResultCheckingUserRights(requestingUserId);
 
             if (!isAccess)
             {

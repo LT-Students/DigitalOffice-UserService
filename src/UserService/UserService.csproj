@@ -14,6 +14,7 @@
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
+    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.9" />
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -22,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UserService.Broker\UserService.Broker.csproj" />
     <ProjectReference Include="..\UserService.Business\UserService.Business.csproj" />
+    <ProjectReference Include="..\UserService.Models.BrokerRequest\UserService.Models.BrokerRequest.csproj" />
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 
