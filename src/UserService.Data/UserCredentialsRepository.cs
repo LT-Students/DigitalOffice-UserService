@@ -58,7 +58,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public void ChangePassword(string login, string newPassword)
         {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
+            DbUserCredentials userCredentials = _provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
 
             if (userCredentials == null)
             {
@@ -68,8 +68,8 @@ namespace LT.DigitalOffice.UserService.Data
             userCredentials.PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
                     Encoding.UTF8.GetBytes(newPassword)));
 
-            provider.UserCredentials.Update(userCredentials);
-            provider.Save();
+            _provider.UserCredentials.Update(userCredentials);
+            _provider.Save();
         }
     }
 }
