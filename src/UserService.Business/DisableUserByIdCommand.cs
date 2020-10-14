@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Business
             repository.EditUser(editedUser);
         }
 
-        private bool GetResultCheckingUserRights()
+        private bool GetResultCheckingUserRights(Guid userId)
         {
             int numberRight = 1;
 

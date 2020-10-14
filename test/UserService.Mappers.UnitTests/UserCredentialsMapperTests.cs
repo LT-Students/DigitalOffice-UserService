@@ -80,7 +80,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             Assert.AreNotEqual(Guid.Empty, result.Id);
             Assert.AreEqual(_userId, result.UserId);
-            Assert.AreEqual(dbUserCredentials.PasswordHash, result.PasswordHash);
             Assert.AreEqual(login, result.Login);
         }
     }

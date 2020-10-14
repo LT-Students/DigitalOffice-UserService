@@ -85,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
-            Assert.Throws<NotFoundException>(() => repository.GetUserCredentialsByLogin(secondUserCredentials.Login));
+            Assert.Throws<NotFoundException>(() => repository.GetUserCredentialsByLogin("Login123456"));
         }
 
         [Test]
@@ -97,7 +97,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenEditedUserCredentialsFieldUserIdDoesNotFound()
         {
-            Assert.Throws<NotFoundException>(() => repository.EditUserCredentials(secondUserCredentials));
+            var userCredentialsWrong = new DbUserCredentials { Id = Guid.NewGuid() };
+
+            Assert.Throws<NotFoundException>(() => repository.EditUserCredentials(userCredentialsWrong));
         }
 
         [Test]
