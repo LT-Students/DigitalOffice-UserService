@@ -13,14 +13,11 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
     {
         private IMapper<UserRequest, DbUserCredentials> _mapper;
 
-        private DbUserCredentials dbUserCredentials;
         private UserRequest editUserRequest;
 
         private string password;
         private string login;
         private string email;
-        private string salt;
-        internal const string SALT3 = "LT.DigitalOffice.SALT3";
 
         private readonly Guid _userId = Guid.NewGuid();
 
@@ -32,16 +29,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             email = "example@gmail.com";
             password = "ExamplePassword";
             login = "Example";
-            salt = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
-
-            dbUserCredentials = new DbUserCredentials
-            {
-                UserId = _userId,
-                Login = login,
-                Salt = salt,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes($"{ salt }{ login }{ password }{ SALT3 }")))
-            };
         }
 
         [Test]
