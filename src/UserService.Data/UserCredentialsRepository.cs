@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (userCredentials == null)
             {
-                throw new Exception("User credentials with this user login not found.");
+                throw new NotFoundException("User credentials with this user login not found.");
             }
 
             userCredentials.PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(

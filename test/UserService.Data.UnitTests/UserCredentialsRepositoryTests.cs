@@ -128,7 +128,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUserCredentialsDoesNotFound()
         {
-            Assert.Throws<Exception>(() => repository.ChangePassword("login12345", "newPassword"));
+            Assert.Throws<NotFoundException>(() => repository.ChangePassword("login12345", "newPassword"));
         }
 
         [Test]
