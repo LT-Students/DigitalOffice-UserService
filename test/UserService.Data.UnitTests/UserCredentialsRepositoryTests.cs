@@ -12,7 +12,7 @@ using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
-    class UserCredentialsRepositoryTests
+    public class UserCredentialsRepositoryTests
     {
         private IDataProvider provider;
         private IUserCredentialsRepository repository;
@@ -129,6 +129,12 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldThrowExceptionWhenUserCredentialsDoesNotFound()
         {
             Assert.Throws<NotFoundException>(() => repository.ChangePassword("login12345", "newPassword"));
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenRequestDataIsEmpty()
+        {
+            Assert.Throws<BadRequestException>(() => repository.ChangePassword(null, "newPassword"));
         }
 
         [Test]

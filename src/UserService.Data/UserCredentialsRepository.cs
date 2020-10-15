@@ -58,6 +58,12 @@ namespace LT.DigitalOffice.UserService.Data
 
         public void ChangePassword(string login, string newPassword)
         {
+            if (login == string.Empty || newPassword == string.Empty ||
+                login == null || newPassword == null)
+            {
+                throw new BadRequestException();
+            }
+
             DbUserCredentials userCredentials = _provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
 
             if (userCredentials == null)
