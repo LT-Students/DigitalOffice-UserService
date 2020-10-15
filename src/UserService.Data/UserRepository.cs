@@ -38,13 +38,13 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserInfoById(Guid userId)
             => _provider.Users.FirstOrDefault(dbUser => dbUser.Id == userId) ??
-               throw new Exception("User with this id not found.");
+               throw new NotFoundException("User with this id was not found.");
 
         public bool EditUser(DbUser user)
         {
             if (!_provider.Users.Any(users => user.Id == users.Id))
             {
-                throw new Exception("User was not found.");
+                throw new NotFoundException("User was not found.");
             }
 
             _provider.Users.Update(user);
@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (dbUser == null)
             {
-                throw new Exception("User credentials not found.");
+                throw new NotFoundException("User credentials not found.");
             }
 
             return dbUser;

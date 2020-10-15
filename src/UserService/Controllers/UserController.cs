@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -29,6 +30,14 @@ namespace LT.DigitalOffice.UserService.Controllers
         public User GetUserByEmail([FromServices] IGetUserByEmailCommand command, [FromQuery] string userEmail)
         {
             return command.Execute(userEmail);
+        }
+
+        [HttpGet("getUsersByIds")]
+        public List<User> GetUsersByIds(
+            [FromServices] IGetUsersByIdsCommand command,
+            [FromQuery] IEnumerable<Guid> usersIds)
+        {
+            return command.Execute(usersIds);
         }
 
         [HttpDelete("disableUserById")]

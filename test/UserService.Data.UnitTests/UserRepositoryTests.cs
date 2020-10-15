@@ -114,8 +114,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUserWithRequiredIdDoesNotExist()
         {
-            Assert.That(() => repository.GetUserInfoById(Guid.Empty),
-                Throws.TypeOf<Exception>().And.Message.EqualTo(UserNotFoundExceptionMessage));
+            Assert.Throws<NotFoundException>(() => repository.GetUserInfoById(Guid.Empty));
         }
 
         [Test]
@@ -135,7 +134,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExist()
         {
-            Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
+            Assert.Throws<NotFoundException>(() => repository.GetUserByEmail(string.Empty));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
@@ -155,7 +154,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExistWhileGettingUserByEmail()
         {
-            Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
+            Assert.Throws<NotFoundException>(() => repository.GetUserByEmail(string.Empty));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
@@ -188,7 +187,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 AchievementsIds = new Collection<DbUserAchievement>()
             };
 
-            Assert.Throws<Exception>(() => repository.EditUser(user));
+            Assert.Throws<NotFoundException>(() => repository.EditUser(user));
             Assert.That(provider.Users.Find(firstUser.Id).Equals(firstUser));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
