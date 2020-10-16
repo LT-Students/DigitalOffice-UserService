@@ -6,9 +6,8 @@ using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System;
-using System.Security.Cryptography;
-using System.Text;
 using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UserService.Models.Dto;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -20,7 +19,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private Guid userId;
         private string salt;
         private DbUserCredentials userCredentials;
-        internal const string SALT3 = "LT.DigitalOffice.SALT3";
 
         private void GetMemoryContext()
         {
@@ -42,8 +40,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Login = "Example",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes($"{ salt }{ "Example" }{ "Password" }{ SALT3 }"))),
+                PasswordHash = UserPassword.GetPasswordHash("Example", salt, "Password"),
                 Salt = salt
             };
         }

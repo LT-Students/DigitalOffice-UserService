@@ -14,8 +14,6 @@ namespace LT.DigitalOffice.UserService.Mappers
     /// </summary>
     public class UserCredentialsMapper : IMapper<UserRequest, DbUserCredentials>
     {
-        internal static string SALT3 = "LT.DigitalOffice.SALT3";
-
         public DbUserCredentials Map(UserRequest value)
         {
             if (value?.Id == null || value.Id == Guid.Empty)
@@ -31,8 +29,7 @@ namespace LT.DigitalOffice.UserService.Mappers
                 UserId = value.Id.Value,
                 Login = value.Login,
                 Salt = salt,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes($"{ salt }{ value.Login }{ value.Password }{ SALT3 }")))
+                PasswordHash = UserPassword.GetPasswordHash(value.Login, salt, value.Password)
             };
         }
     }
