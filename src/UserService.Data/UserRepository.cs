@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -63,6 +64,18 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             return dbUser;
+        }
+
+        public IEnumerable<DbUser> GetAllUsers()
+        {
+            var dbUsers =  _provider.Users.AsEnumerable();
+
+            if (dbUsers == null)
+            {
+                throw new NotFoundException("Users were not found.");
+            }
+
+            return dbUsers;
         }
     }
 }

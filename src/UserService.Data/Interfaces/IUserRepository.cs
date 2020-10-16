@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Db;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -37,5 +38,11 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userEmail">Specified dbUser email.</param>
         /// <returns>User model.</returns>
         DbUser GetUserByEmail(string userEmail);
+
+        /// <summary>
+        /// Returns the list of all dbUser from database.
+        /// </summary>
+        /// <returns>List of all user models.</returns>
+        IEnumerable<DbUser> GetAllUsers();
     }
 }

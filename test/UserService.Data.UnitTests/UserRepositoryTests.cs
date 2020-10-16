@@ -244,5 +244,24 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.Contains(firstUser, provider.Users.ToArray());
         }
         #endregion
+
+        #region GetAllUsers
+        [Test]
+        public void ShouldThrowExceptionWhenUsersNotFound()
+        {
+            provider.Users = null;
+
+            Assert.Throws<NotFoundException>(() => repository.GetAllUsers());
+        }
+
+        [Test]
+        public void ShouldReturnUsers()
+        {
+            var result = repository.GetAllUsers();
+
+            Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
+            Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
+        }
+        #endregion
     }
 }

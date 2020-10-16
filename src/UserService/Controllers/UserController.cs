@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -45,6 +46,13 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromQuery] string userEmail)
         {
             command.Execute(userEmail);
+        }
+
+        [HttpGet("getAllUsers")]
+        public IEnumerable<User> GetAllUsers(
+            [FromServices] IGetAllUsersCommand command)
+        {
+            return command.Execute();
         }
     }
 }
