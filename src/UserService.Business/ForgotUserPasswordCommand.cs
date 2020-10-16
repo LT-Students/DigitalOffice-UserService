@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;

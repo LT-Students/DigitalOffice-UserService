@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;

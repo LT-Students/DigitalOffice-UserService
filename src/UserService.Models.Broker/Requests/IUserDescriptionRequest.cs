@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LT.DigitalOffice.UserService.Broker.Requests
+namespace LT.DigitalOffice.Broker.Requests
 {
     /// <summary>
     /// DTO for sent user information through a message broker in MessageService.
