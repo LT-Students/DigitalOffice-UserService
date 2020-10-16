@@ -21,7 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UserService.Broker\UserService.Broker.csproj" />
     <ProjectReference Include="..\UserService.Business\UserService.Business.csproj" />
-    <ProjectReference Include="..\UserService.Models.BrokerRequest\UserService.Models.BrokerRequest.csproj" />
+    <ProjectReference Include="..\UserService.Models.BrokerRequest\UserService.Models.Broker.csproj" />
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 

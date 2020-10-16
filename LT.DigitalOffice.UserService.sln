@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.Unit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.Provider", "src\UserService.Data.Provider\UserService.Data.Provider.csproj", "{E8040D9B-F039-4B9F-93CB-09E930112703}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Models.BrokerRequest", "src\UserService.Models.BrokerRequest\UserService.Models.BrokerRequest.csproj", "{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Broker", "src\UserService.Models.BrokerRequest\UserService.Models.Broker.csproj", "{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
