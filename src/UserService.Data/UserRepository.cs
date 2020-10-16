@@ -3,6 +3,8 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -38,13 +40,13 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserInfoById(Guid userId)
             => _provider.Users.FirstOrDefault(dbUser => dbUser.Id == userId) ??
-               throw new NotFoundException("User with this id was not found.");
+               throw new NotFoundException($"User with this id: '{userId}' was not found.");
 
         public bool EditUser(DbUser user)
         {
             if (!_provider.Users.Any(users => user.Id == users.Id))
             {
-                throw new NotFoundException("User was not found.");
+                throw new NotFoundException($"User with this id: '{user.Id}' was not found.");
             }
 
             _provider.Users.Update(user);
@@ -59,10 +61,27 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (dbUser == null)
             {
-                throw new NotFoundException("User credentials not found.");
+                throw new NotFoundException($"User with this email: '{userEmail}' was not found.");
             }
 
             return dbUser;
+        }
+
+        public IEnumerable<DbUser> GetUsersByIds(IEnumerable<Guid> usersIds)
+        {
+            if (!usersIds.Any())
+            {
+                throw new BadRequestException();
+            }
+
+            var dbUsers = _provider.Users.Where(user => usersIds.Contains(user.Id)).ToList();
+
+            if (!dbUsers.Any())
+            {
+                throw new NotFoundException("Users were not found.");
+            }
+
+            return dbUsers;
         }
     }
 }

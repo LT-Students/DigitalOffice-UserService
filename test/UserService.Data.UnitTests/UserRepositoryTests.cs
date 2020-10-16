@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
     {
         private IDataProvider provider;
         private IUserRepository repository;
-
+        private Guid firstUserId;
         private DbUser firstUser;
         private DbUser secondUser;
         private DbUserCredentials firstUserCredentials;
@@ -31,9 +31,11 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            firstUserId = Guid.NewGuid();
+
             firstUser = new DbUser
             {
-                Id = Guid.NewGuid(),
+                Id = firstUserId,
                 Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
@@ -241,6 +243,30 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 EmailAlreadyTakenExceptionMessage);
 
             Assert.Contains(firstUser, provider.Users.ToArray());
+        }
+        #endregion
+
+        #region GetUsersByIds
+        [Test]
+        public void ShouldThrowExceptionWhenUsersIdsAreEmpty()
+        {
+            Assert.Throws<BadRequestException>(() => repository.GetUsersByIds(new List<Guid>()));
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenAnyUserWithRequiredIdDoesNotExist()
+        {
+            Assert.Throws<NotFoundException>(() => repository.GetUsersByIds(new List<Guid>() { Guid.NewGuid() }));
+        }
+
+        [Test]
+        public void ShouldReturnDbUsersList()
+        {
+            var result = repository.GetUsersByIds(new List<Guid>() { firstUserId });
+
+            Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
+            Assert.That(provider.Users, Is.EquivalentTo(new[] { firstUser }));
+            Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
         }
         #endregion
     }

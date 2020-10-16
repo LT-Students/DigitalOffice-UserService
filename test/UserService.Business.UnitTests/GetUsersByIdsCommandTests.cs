@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IMapper<DbUser, User>> mapperMock;
 
         private Guid userId;
-        private List<Guid> userIdList;
+        private List<Guid> usersIdsList;
         private User user;
         private List<User> usersList;
         private DbUser dbUser;
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             command = new GetUsersByIdsCommand(repositoryMock.Object, mapperMock.Object);
 
             userId = Guid.NewGuid();
-            userIdList = new List<Guid>() { userId };
+            usersIdsList = new List<Guid>() { userId };
             user = new User { Id = userId };
             usersList = new List<User>() { user };
             dbUser = new DbUser { Id = userId };
@@ -41,10 +41,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldReturnModelOfUser()
         {
-            repositoryMock.Setup(repository => repository.GetUserInfoById(userId)).Returns(dbUser).Verifiable();
+            repositoryMock.Setup(repository => repository.GetUsersByIds(usersIdsList)).Returns(new List<DbUser>() { dbUser }).Verifiable();
             mapperMock.Setup(mapper => mapper.Map(dbUser)).Returns(user).Verifiable();
 
-            SerializerAssert.AreEqual(usersList, command.Execute(userIdList));
+            SerializerAssert.AreEqual(usersList, command.Execute(usersIdsList));
             repositoryMock.Verify();
             mapperMock.Verify();
         }
@@ -52,10 +52,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenMapperThrowsException()
         {
-            repositoryMock.Setup(repository => repository.GetUserInfoById(It.IsAny<Guid>())).Returns(dbUser).Verifiable();
+            repositoryMock.Setup(repository => repository.GetUsersByIds(It.IsAny<IEnumerable<Guid>>())).Returns(new List<DbUser>() { dbUser }).Verifiable();
             mapperMock.Setup(mapper => mapper.Map(It.IsAny<DbUser>())).Throws<BadRequestException>().Verifiable();
 
-            Assert.Throws<BadRequestException>(() => command.Execute(userIdList));
+            Assert.Throws<BadRequestException>(() => command.Execute(usersIdsList));
             mapperMock.Verify();
             repositoryMock.Verify();
         }
@@ -63,10 +63,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRepositoryThrowsException()
         {
-            repositoryMock.Setup(repository => repository.GetUserInfoById(userId)).Throws<NotFoundException>().Verifiable();
+            repositoryMock.Setup(repository => repository.GetUsersByIds(usersIdsList)).Throws(new NotFoundException()).Verifiable();
             mapperMock.Setup(mapper => mapper.Map(dbUser)).Returns(user);
 
-            Assert.Throws<NotFoundException>(() => command.Execute(userIdList));
+            Assert.Throws<NotFoundException>(() => command.Execute(usersIdsList));
             repositoryMock.Verify();
             mapperMock.Verify(mapper => mapper.Map(It.IsAny<DbUser>()), Times.Never);
         }
