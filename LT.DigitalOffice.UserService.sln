@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.Unit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.Provider", "src\UserService.Data.Provider\UserService.Data.Provider.csproj", "{E8040D9B-F039-4B9F-93CB-09E930112703}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Broker", "src\UserService.Models.BrokerRequest\UserService.Models.Broker.csproj", "{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Models.Broker", "src\UserService.Models.Broker\UserService.Models.Broker.csproj", "{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,10 +105,10 @@ Global
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2C48C54-ABC4-4DF3-AA53-B3B933779B08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,7 +129,7 @@ Global
 		{573F74FE-C343-4398-A8A0-81299D6DF44E} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
 		{90AD447B-CD38-467E-A011-077BC2C87641} = {FC27EFCA-905F-497A-BAA3-870E7CC6B37C}
 		{E8040D9B-F039-4B9F-93CB-09E930112703} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
-		{A2C48C54-ABC4-4DF3-AA53-B3B933779B08} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {06F03EFD-257B-41F0-9325-51FB29388C91}
