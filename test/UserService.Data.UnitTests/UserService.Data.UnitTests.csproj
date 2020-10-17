@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UserService.Data\UserService.Data.csproj" />
+    <ProjectReference Include="..\..\src\UserService.Models.Dto\UserService.Models.Dto.csproj" />
   </ItemGroup>
 
 </Project>
