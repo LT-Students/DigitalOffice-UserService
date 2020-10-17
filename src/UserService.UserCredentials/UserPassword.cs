@@ -6,7 +6,7 @@ using System.Text;
            InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests"),
            InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers")]
 
-namespace LT.DigitalOffice.UserService.Models.Dto
+namespace LT.DigitalOffice.UserService.UserCredentials
 {
     internal static class UserPassword
     {

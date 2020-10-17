@@ -90,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasIndex("AchievementId");
 
-                    b.ToTable("DbUserAchievement");
+                    b.ToTable("UserAchievement");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCertificateFile", b =>
@@ -103,7 +103,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasKey("UserId", "CertificateId");
 
-                    b.ToTable("DbUserCertificateFile");
+                    b.ToTable("UserCertificateFile");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>
