@@ -1,13 +1,13 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.UnitTestLibrary;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System;
-using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Models.Dto;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
