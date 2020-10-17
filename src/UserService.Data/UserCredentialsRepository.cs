@@ -5,8 +5,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Data
 {
