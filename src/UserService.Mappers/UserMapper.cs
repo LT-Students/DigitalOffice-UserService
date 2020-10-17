@@ -25,13 +25,13 @@ namespace LT.DigitalOffice.UserService.Mappers
             {
                 Id = value.Id,
                 Email = value.Email,
-                Achievements = value.AchievementsIds?.Select(dbUserAchievement => new Achievement
+                AchievementsIds = value.AchievementsIds?.Select(dbUserAchievement => new Achievement
                 {
                     Id = dbUserAchievement.Achievement.Id,
                     Message = dbUserAchievement.Achievement.Message,
                     PictureFileId = dbUserAchievement.Achievement.PictureFileId
                 }).ToList(),
-                AvatarId = value.AvatarFileId,
+                AvatarFileId = value.AvatarFileId,
                 CertificatesIds = value.CertificatesFilesIds?.Select(x => x.CertificateId).ToList(),
                 FirstName = value.FirstName,
                 LastName = value.LastName,
