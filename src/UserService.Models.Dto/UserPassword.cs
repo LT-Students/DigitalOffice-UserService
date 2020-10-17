@@ -2,9 +2,9 @@
 using System.Security.Cryptography;
 using System.Text;
 
-[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Data.UnitTests")]
-[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests")]
-[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers")]
+[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Data.UnitTests"),
+           InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests"),
+           InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers")]
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
