@@ -14,7 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\UserService.Mappers\UserService.Mappers.csproj" />
-    <ProjectReference Include="..\UserService.Models.BrokerRequest\UserService.Models.BrokerRequest.csproj" />
+    <ProjectReference Include="..\UserService.Models.Broker\UserService.Models.Broker.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
   </ItemGroup>
 
