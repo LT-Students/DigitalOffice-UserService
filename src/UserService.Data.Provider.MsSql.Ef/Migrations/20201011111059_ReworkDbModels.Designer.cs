@@ -4,14 +4,16 @@ using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
-    partial class UserServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201011111059_ReworkDbModels")]
+    partial class ReworkDbModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasIndex("AchievementId");
 
-                    b.ToTable("UserAchievement");
+                    b.ToTable("DbUserAchievement");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCertificateFile", b =>
@@ -103,7 +105,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
                     b.HasKey("UserId", "CertificateId");
 
-                    b.ToTable("UserCertificateFile");
+                    b.ToTable("DbUserCertificateFile");
                 });
 
             modelBuilder.Entity("LT.DigitalOffice.UserService.Models.Db.DbUserCredentials", b =>

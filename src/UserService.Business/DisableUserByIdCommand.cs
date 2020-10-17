@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -20,13 +21,13 @@ namespace LT.DigitalOffice.UserService.Business
             this.accessValidator = accessValidator;
         }
 
-        public void Execute(Guid userId, Guid requestingUserId)
+        public void Execute(Guid userId)
         {
-            var isAcces = GetResultCheckingUserRights(requestingUserId);
+            const int rightId = 1;
 
-            if (!isAcces)
+            if (!GetResultCheckingUserRights(rightId))
             {
-                throw new Exception("Not enough rights.");
+                throw new ForbiddenException("Not enough rights.");
             }
 
             DbUser editedUser = repository.GetUserInfoById(userId);
@@ -36,12 +37,9 @@ namespace LT.DigitalOffice.UserService.Business
             repository.EditUser(editedUser);
         }
 
-        private bool GetResultCheckingUserRights(Guid userId)
+        private bool GetResultCheckingUserRights(int rightId)
         {
-            int numberRight = 1;
-
-            return accessValidator.IsAdmin() ?
-                true : accessValidator.HasRights(numberRight);
+            return accessValidator.IsAdmin() || accessValidator.HasRights(rightId);
         }
     }
 }

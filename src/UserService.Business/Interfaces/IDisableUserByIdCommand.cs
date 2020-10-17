@@ -12,7 +12,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// The result of operation with boolean value.
         /// </summary>
         /// <param name="userId">Specified id.</param>
-        /// /// <param name="requestingUserId">The user made the request.</param>
-        void Execute(Guid userId, Guid requestingUserId);
+        void Execute(Guid userId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
@@ -6,37 +7,35 @@ using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-    /// <summary>
-    /// Represents interface of repository. Provides method for getting user model from database.
-    /// </summary>
+    /// <inheritdoc />
     public class UserCredentialsRepository : IUserCredentialsRepository
     {
-        private readonly IDataProvider provider;
+        private readonly IDataProvider _provider;
 
         public UserCredentialsRepository(IDataProvider provider)
         {
-            this.provider = provider;
+            _provider = provider;
         }
 
         public DbUserCredentials GetUserCredentialsByUserId(Guid userId)
         {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.UserId == userId);
+            DbUserCredentials userCredentials = _provider.UserCredentials.FirstOrDefault(uc => uc.UserId == userId);
 
             if (userCredentials == null)
             {
-                throw new Exception("User credentials with this user id not found.");
+                throw new NotFoundException($"User credentials with this user id: '{userId}' not found.");
             }
 
             return userCredentials;
         }
 
-        public DbUserCredentials GetUserCredentialsByEmail(string userEmail)
+        public DbUserCredentials GetUserCredentialsByLogin(string login)
         {
-            DbUserCredentials userCredentials = provider.UserCredentials.FirstOrDefault(uc => uc.Email == userEmail);
+            DbUserCredentials userCredentials = _provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
 
             if (userCredentials == null)
             {
-                throw new Exception("User credentials with this user email not found.");
+                throw new NotFoundException($"User credentials with this user login: '{login}' not found.");
             }
 
             return userCredentials;
@@ -44,26 +43,15 @@ namespace LT.DigitalOffice.UserService.Data
 
         public bool EditUserCredentials(DbUserCredentials userCredentials)
         {
-            if (!provider.UserCredentials.Any(uc => uc.UserId == userCredentials.UserId))
+            if (!_provider.UserCredentials.Any(uc => uc.UserId == userCredentials.UserId))
             {
-                throw new Exception("User credentials was not found.");
+                throw new NotFoundException("User credentials was not found.");
             }
 
-            provider.UserCredentials.Update(userCredentials);
-            provider.Save();
+            _provider.UserCredentials.Update(userCredentials);
+            _provider.Save();
 
             return true;
-        }
-
-        public void CreateUserCredentials(DbUserCredentials userCredentials)
-        {
-            if (provider.UserCredentials.Any(uc => uc.Email == userCredentials.Email))
-            {
-                throw new Exception("User credentials is already exist.");
-            }
-
-            provider.UserCredentials.Add(userCredentials);
-            provider.Save();
         }
     }
 }

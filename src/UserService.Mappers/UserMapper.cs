@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
@@ -13,49 +14,53 @@ namespace LT.DigitalOffice.UserService.Mappers
     public class UserMapper : IMapper<DbUser, User>, IMapper<DbUser, string, object>,
         IMapper<UserRequest, DbUser>
     {
-        public User Map(DbUser dbUser)
+        public User Map(DbUser value)
         {
-            if (dbUser == null)
+            if (value == null)
             {
-                throw new ArgumentNullException(nameof(dbUser));
+                throw new BadRequestException();
             }
 
             return new User
             {
-                Id = dbUser.Id,
-                Achievements = dbUser.AchievementsIds?.Select(dbUserAchievement => new Achievement
+                Id = value.Id,
+                Email = value.Email,
+                AchievementsIds = value.AchievementsIds?.Select(dbUserAchievement => new Achievement
                 {
                     Id = dbUserAchievement.Achievement.Id,
                     Message = dbUserAchievement.Achievement.Message,
                     PictureFileId = dbUserAchievement.Achievement.PictureFileId
                 }).ToList(),
-                AvatarId = dbUser.AvatarFileId,
-                CertificatesIds = dbUser.CertificatesFilesIds?.Select(x => x.CertificateId).ToList(),
-                FirstName = dbUser.FirstName,
-                LastName = dbUser.LastName,
-                MiddleName = dbUser.MiddleName,
-                Status = dbUser.Status,
-                IsAdmin = dbUser.IsAdmin
+                AvatarFileId = value.AvatarFileId,
+                CertificatesIds = value.CertificatesFilesIds?.Select(x => x.CertificateId).ToList(),
+                FirstName = value.FirstName,
+                LastName = value.LastName,
+                MiddleName = value.MiddleName,
+                Status = value.Status,
+                IsAdmin = value.IsAdmin
             };
         }
 
-        public DbUser Map(UserRequest request)
+        public DbUser Map(UserRequest value)
         {
-            if (request == null)
+            if (value == null)
             {
-                throw new ArgumentNullException(nameof(request));
+                throw new BadRequestException();
             }
+
+            value.Id ??= Guid.NewGuid();
 
             return new DbUser
             {
-                Id = (Guid)request.Id,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                MiddleName = request.MiddleName,
-                Status = request.Status,
-                AvatarFileId = request.AvatarFileId,
-                IsActive = request.IsActive,
-                IsAdmin = request.IsAdmin
+                Id = value.Id.Value,
+                Email = value.Email,
+                FirstName = value.FirstName,
+                LastName = value.LastName,
+                MiddleName = value.MiddleName,
+                Status = value.Status,
+                AvatarFileId = value.AvatarFileId,
+                IsActive = value.IsActive,
+                IsAdmin = value.IsAdmin
             };
         }
 

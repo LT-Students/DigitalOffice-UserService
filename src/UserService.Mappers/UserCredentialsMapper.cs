@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
@@ -8,23 +9,27 @@ using System.Text;
 namespace LT.DigitalOffice.UserService.Mappers
 {
     /// <summary>
-    /// Represents mapper. Provides methods for converting an object of user request <see cref="UserRequest"/>
+    /// Represents mapper. Provides methods for converting an object of user value <see cref="UserRequest"/>
     /// type into an object of <see cref="DbUserCredentials"/> type according to some rule.
     /// </summary>
     public class UserCredentialsMapper : IMapper<UserRequest, DbUserCredentials>
     {
-        public DbUserCredentials Map(UserRequest request)
+        public DbUserCredentials Map(UserRequest value)
         {
-            if (request == null)
+            if (value?.Id == null || value.Id == Guid.Empty)
             {
-                throw new ArgumentNullException(nameof(request));
+                throw new BadRequestException();
             }
+
+            var salt = $"{ Guid.NewGuid() }{ Guid.NewGuid() }";
 
             return new DbUserCredentials
             {
-                Email = request.Email,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(request.Password)))
+                Id = Guid.NewGuid(),
+                UserId = value.Id.Value,
+                Login = value.Login,
+                Salt = salt,
+                PasswordHash = UserPassword.GetPasswordHash(value.Login, salt, value.Password)
             };
         }
     }

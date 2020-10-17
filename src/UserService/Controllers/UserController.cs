@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         public User GetUserById([FromServices] IGetUserByIdCommand getUserInfoByIdCommand, [FromQuery] Guid userId)
             => getUserInfoByIdCommand.Execute(userId);
 
-        [HttpPost("register")]
+        [HttpPost("createUser")]
         public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
         {
             return command.Execute(request);
@@ -34,10 +34,16 @@ namespace LT.DigitalOffice.UserService.Controllers
         [HttpDelete("disableUserById")]
         public void DisableUserById(
             [FromServices] IDisableUserByIdCommand command,
-            [FromQuery] Guid userId,
-            [FromHeader] Guid requestingUser)
+            [FromQuery] Guid userId)
         {
-            command.Execute(userId, requestingUser);
+            command.Execute(userId);
+        }
+
+        [HttpGet("forgotPassword")]
+        public void ForgotPassword([FromServices] IForgotPasswordCommand command,
+            [FromQuery] string userEmail)
+        {
+            command.Execute(userEmail);
         }
     }
 }

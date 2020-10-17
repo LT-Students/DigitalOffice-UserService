@@ -9,33 +9,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FC27EFCA-9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "src\UserService\UserService.csproj", "{8D068B8A-9E53-4D13-859C-0B00A0A56198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Broker", "src\UserService.Broker\UserService.Broker.csproj", "{370048C5-B929-4711-9F25-472FED3596FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Broker", "src\UserService.Broker\UserService.Broker.csproj", "{370048C5-B929-4711-9F25-472FED3596FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Broker.UnitTests", "test\UserService.Broker.UnitTests\UserService.Broker.UnitTests.csproj", "{C7A95BAA-8986-4954-AF4B-581F6AF8F13C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Broker.UnitTests", "test\UserService.Broker.UnitTests\UserService.Broker.UnitTests.csproj", "{C7A95BAA-8986-4954-AF4B-581F6AF8F13C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Business", "src\UserService.Business\UserService.Business.csproj", "{11460E90-67BD-4CC1-A836-9770F1F7E95F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Business", "src\UserService.Business\UserService.Business.csproj", "{11460E90-67BD-4CC1-A836-9770F1F7E95F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Business.UnitTests", "test\UserService.Business.UnitTests\UserService.Business.UnitTests.csproj", "{585B3749-7E23-4A1F-B0F1-A050523AF42A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Business.UnitTests", "test\UserService.Business.UnitTests\UserService.Business.UnitTests.csproj", "{585B3749-7E23-4A1F-B0F1-A050523AF42A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data.Provider.MsSql.Ef", "src\UserService.Data.Provider.MsSql.Ef\UserService.Data.Provider.MsSql.Ef.csproj", "{DA4AA579-4624-4B38-9CAC-87E5C6B04359}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.Provider.MsSql.Ef", "src\UserService.Data.Provider.MsSql.Ef\UserService.Data.Provider.MsSql.Ef.csproj", "{DA4AA579-4624-4B38-9CAC-87E5C6B04359}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data", "src\UserService.Data\UserService.Data.csproj", "{AC9BD625-0801-44D5-98CD-108061817D4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data", "src\UserService.Data\UserService.Data.csproj", "{AC9BD625-0801-44D5-98CD-108061817D4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data.UnitTests", "test\UserService.Data.UnitTests\UserService.Data.UnitTests.csproj", "{618470C8-49CF-4CE7-97B8-7E46DF408588}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.UnitTests", "test\UserService.Data.UnitTests\UserService.Data.UnitTests.csproj", "{618470C8-49CF-4CE7-97B8-7E46DF408588}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Mappers", "src\UserService.Mappers\UserService.Mappers.csproj", "{D34B139A-50C4-4AC4-B1DA-65722B5940D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Mappers", "src\UserService.Mappers\UserService.Mappers.csproj", "{D34B139A-50C4-4AC4-B1DA-65722B5940D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{A33164A0-1B26-4534-A5E5-27F31DB90D04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Mappers.UnitTests", "test\UserService.Mappers.UnitTests\UserService.Mappers.UnitTests.csproj", "{A33164A0-1B26-4534-A5E5-27F31DB90D04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Models.Db", "src\UserService.Models.Db\UserService.Models.Db.csproj", "{947E60D6-39F2-4E1A-B7FF-3C6D659F68E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Db", "src\UserService.Models.Db\UserService.Models.Db.csproj", "{947E60D6-39F2-4E1A-B7FF-3C6D659F68E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Models.Dto", "src\UserService.Models.Dto\UserService.Models.Dto.csproj", "{7A114A42-E1F4-43B4-B1D0-D75B8AB72F9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Dto", "src\UserService.Models.Dto\UserService.Models.Dto.csproj", "{7A114A42-E1F4-43B4-B1D0-D75B8AB72F9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Validation", "src\UserService.Validation\UserService.Validation.csproj", "{573F74FE-C343-4398-A8A0-81299D6DF44E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation", "src\UserService.Validation\UserService.Validation.csproj", "{573F74FE-C343-4398-A8A0-81299D6DF44E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Validation.UnitTests", "test\UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{90AD447B-CD38-467E-A011-077BC2C87641}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Validation.UnitTests", "test\UserService.Validation.UnitTests\UserService.Validation.UnitTests.csproj", "{90AD447B-CD38-467E-A011-077BC2C87641}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Data.Provider", "src\UserService.Data.Provider\UserService.Data.Provider.csproj", "{E8040D9B-F039-4B9F-93CB-09E930112703}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.Provider", "src\UserService.Data.Provider\UserService.Data.Provider.csproj", "{E8040D9B-F039-4B9F-93CB-09E930112703}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Models.Broker", "src\UserService.Models.Broker\UserService.Models.Broker.csproj", "{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,10 @@ Global
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8040D9B-F039-4B9F-93CB-09E930112703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +129,7 @@ Global
 		{573F74FE-C343-4398-A8A0-81299D6DF44E} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
 		{90AD447B-CD38-467E-A011-077BC2C87641} = {FC27EFCA-905F-497A-BAA3-870E7CC6B37C}
 		{E8040D9B-F039-4B9F-93CB-09E930112703} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
+		{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C} = {59CD9EDC-B1FA-45A2-A133-199308885D41}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {06F03EFD-257B-41F0-9325-51FB29388C91}

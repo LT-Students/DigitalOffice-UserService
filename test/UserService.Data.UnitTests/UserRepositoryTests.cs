@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -33,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             firstUser = new DbUser
             {
                 Id = Guid.NewGuid(),
+                Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
@@ -47,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             firstUserCredentials = new DbUserCredentials
             {
                 UserId = firstUser.Id,
-                Email = "Example@gmail.com",
+                Login = "Example",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
                     .ComputeHash(Encoding.Default.GetBytes("Example"))),
                 Salt = "Example_Salt"
@@ -56,6 +58,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             secondUser = new DbUser
             {
                 Id = Guid.NewGuid(),
+                Email = "Example2@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
@@ -69,11 +72,11 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             secondUserCredentials = new DbUserCredentials
             {
-                UserId = firstUser.Id,
-                Email = "Example2@gmail.com",
+                UserId = secondUser.Id,
+                Login = "Example2",
                 PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
-                Salt = "Example_Salt"
+                    .ComputeHash(Encoding.Default.GetBytes("Example2"))),
+                Salt = "Example_Salt2"
             };
         }
 
@@ -139,7 +142,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldReturnUserSuccessfully()
         {
-            var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
+            var resultUser = repository.GetUserByEmail(firstUser.Email);
 
             resultUser.UserCredentials = null;
 
@@ -159,7 +162,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldReturnUserByEmailSuccessfully()
         {
-            var resultUser = repository.GetUserByEmail(firstUserCredentials.Email);
+            var resultUser = repository.GetUserByEmail(firstUser.Email);
 
             resultUser.UserCredentials = null;
             SerializerAssert.AreEqual(firstUser, resultUser);
@@ -225,16 +228,20 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldCreateUserWhenUserDataIsValid()
         {
-            Assert.That(repository.CreateUser(secondUser, secondUserCredentials.Email), Is.EqualTo(secondUser.Id));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser, secondUser}));
+            Assert.AreEqual(secondUser.Id, repository.CreateUser(secondUser, secondUserCredentials));
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
+            Assert.Contains(secondUser, provider.Users.ToArray());
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            Assert.That(() => repository.CreateUser(firstUser, firstUserCredentials.Email),
-                Throws.Exception.TypeOf<Exception>().And.Message.EqualTo(EmailAlreadyTakenExceptionMessage));
-            Assert.That(provider.Users, Is.EquivalentTo(new[] {firstUser}));
+            Assert.Throws<BadRequestException>(
+                () => repository.CreateUser(firstUser, firstUserCredentials),
+                EmailAlreadyTakenExceptionMessage);
+
+            Assert.Contains(firstUser, provider.Users.ToArray());
         }
         #endregion
     }

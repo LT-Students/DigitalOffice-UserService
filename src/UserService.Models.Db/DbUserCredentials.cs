@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid UserId { get; set; }
         public virtual DbUser User { get; set; }
         [Required]
-        public string Email { get; set; }
+        public string Login { get; set; }
         [Required]
         public string PasswordHash { get; set; }
         [Required]

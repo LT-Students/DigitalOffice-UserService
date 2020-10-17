@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -7,6 +8,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
@@ -15,12 +17,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IUserRepository> repositoryMock;
         private Mock<IMapper<DbUser, User>> mapperMock;
         private Mock<IValidator<string>> validatorMock;
+        private Mock<ValidationResult> validationResultIsValidMock;
 
         private IGetUserByEmailCommand command;
 
         private string userEmail;
         private User user;
         private DbUser dbUser;
+        private ValidationResult validationResultError;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -39,6 +43,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 IsActive = true,
                 AvatarFileId = Guid.NewGuid()
             };
+
+            validationResultError = new ValidationResult(
+                new List<ValidationFailure>
+                {
+                    new ValidationFailure("error", "something", null)
+                });
+
+            validationResultIsValidMock = new Mock<ValidationResult>();
+
+            validationResultIsValidMock
+                .Setup(x => x.IsValid)
+                .Returns(true);
         }
 
         [SetUp]
@@ -55,8 +71,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldThrowExceptionIfValidatorThrowsIt()
         {
             validatorMock
-                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
+                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultError);
 
             Assert.Throws<ValidationException>(() => command.Execute(userEmail));
             repositoryMock.Verify(repository => repository.GetUserByEmail(userEmail), Times.Never);
@@ -66,8 +82,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldThrowExceptionAccordingToRepository()
         {
             validatorMock
-                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultIsValidMock.Object);
 
             repositoryMock
                 .Setup(x => x.GetUserByEmail(It.IsAny<string>()))
@@ -85,8 +101,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldReturnsCorrectModelOfUserIfUserExists()
         {
             validatorMock
-                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup(validator => validator.Validate(It.IsAny<IValidationContext>()))
+                .Returns(validationResultIsValidMock.Object);
 
             repositoryMock
                 .Setup(repository => repository.GetUserByEmail(userEmail))

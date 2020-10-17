@@ -16,7 +16,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             get
             {
                 yield return request => request.FirstName;
-                yield return request => request.MiddleName;
                 yield return request => request.LastName;
             }
         }
@@ -130,6 +129,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
+                Login = "admin",
                 MiddleName = "Example",
                 Email = "Example@gmail.com",
                 Status = "Example",
@@ -148,6 +148,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Login = "admin",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
@@ -166,6 +167,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Login = "admin",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
@@ -202,6 +204,23 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",
+                Login = "админ",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        public void ShouldPassWhenDataIsValidWithoutMiddleName()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
