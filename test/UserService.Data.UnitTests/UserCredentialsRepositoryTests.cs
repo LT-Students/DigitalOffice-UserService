@@ -131,9 +131,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var newPassword = "newPassword";
 
-            Assert.DoesNotThrow(() => repository.ChangePassword(firstUserCredentials.Login, newPassword));
-            Assert.AreEqual(Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes(newPassword))), firstUserCredentials.PasswordHash);
+            Assert.DoesNotThrow(() => repository.ChangePassword(userCredentials.Login, newPassword));
+            Assert.AreEqual(UserPassword.GetPasswordHash(userCredentials.Login, userCredentials.Salt, newPassword), userCredentials.PasswordHash);
         }
         #endregion
     }

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UserService.Models.Dto;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -50,8 +51,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 UserId = firstUser.Id,
                 Login = "Example",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
+                PasswordHash = UserPassword.GetPasswordHash("Example", "Example_salt", "Password"),
                 Salt = "Example_Salt"
             };
 
@@ -74,8 +74,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 UserId = secondUser.Id,
                 Login = "Example2",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example2"))),
+                PasswordHash = UserPassword.GetPasswordHash("Example", "Example_salt", "Password2"),
                 Salt = "Example_Salt2"
             };
         }

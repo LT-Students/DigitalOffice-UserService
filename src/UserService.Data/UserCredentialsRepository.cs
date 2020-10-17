@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -71,8 +72,7 @@ namespace LT.DigitalOffice.UserService.Data
                 throw new NotFoundException("User credentials with this user login not found.");
             }
 
-            userCredentials.PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(newPassword)));
+            userCredentials.PasswordHash = UserPassword.GetPasswordHash(login, userCredentials.Salt, newPassword);
 
             _provider.UserCredentials.Update(userCredentials);
             _provider.Save();
