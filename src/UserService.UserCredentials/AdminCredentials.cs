@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef"),
-    InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests")]
+[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef")]
 
 namespace LT.DigitalOffice.UserService.UserCredentials.Admin
 {
