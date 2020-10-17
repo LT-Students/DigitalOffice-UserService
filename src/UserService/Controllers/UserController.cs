@@ -50,9 +50,12 @@ namespace LT.DigitalOffice.UserService.Controllers
 
         [HttpGet("getAllUsers")]
         public IEnumerable<User> GetAllUsers(
-            [FromServices] IGetAllUsersCommand command)
+            [FromServices] IGetAllUsersCommand command,
+            [FromQuery] int skipCount,
+            [FromQuery] int takeCount,
+            [FromQuery] string nameFilter)
         {
-            return command.Execute();
+            return command.Execute(skipCount, takeCount, nameFilter);
         }
     }
 }

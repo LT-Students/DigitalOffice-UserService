@@ -40,9 +40,12 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         DbUser GetUserByEmail(string userEmail);
 
         /// <summary>
-        /// Returns the list of all dbUser from database.
+        /// Returns the list of user models using pagination and filter by full name.
         /// </summary>
-        /// <returns>List of all user models.</returns>
-        IEnumerable<DbUser> GetAllUsers();
+        /// <param name="skipCount">Number of pages to skip.</param>
+        /// <param name="takeCount">Number of users on one page.</param>
+        /// <param name="nameFilter">Full name that is wanted to be found.</param>
+        /// <returns>List of user models.</returns>
+        IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string nameFilter);
     }
 }

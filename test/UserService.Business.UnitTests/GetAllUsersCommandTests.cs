@@ -38,38 +38,38 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldThrowExceptionWhenRepositoryThrowsIt()
         {
             repositoryMock
-                .Setup(x => x.GetAllUsers())
+                .Setup(x => x.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Throws(new NotFoundException());
 
-            Assert.Throws<NotFoundException>(() => command.Execute());
+            Assert.Throws<NotFoundException>(() => command.Execute(0, 1, ""));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenMapperThrowsIt()
         {
             repositoryMock
-                .Setup(x => x.GetAllUsers())
+                .Setup(x => x.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(new List<DbUser>() { dbUser });
 
             mapperMock
                 .Setup(x => x.Map(dbUser))
                 .Throws(new BadRequestException());
 
-            Assert.Throws<BadRequestException>(() => command.Execute());
+            Assert.Throws<BadRequestException>(() => command.Execute(0, 1, ""));
         }
 
         [Test]
         public void ShouldReturnUsers()
         {
             repositoryMock
-                .Setup(x => x.GetAllUsers())
+                .Setup(x => x.GetAllUsers(0, 1, ""))
                 .Returns(new List<DbUser>() { dbUser });
 
             mapperMock
                 .Setup(x => x.Map(It.IsAny<DbUser>()))
                 .Returns(user);
 
-            Assert.DoesNotThrow(() => command.Execute());
+            Assert.DoesNotThrow(() => command.Execute(0, 1, ""));
         }
     }
 }

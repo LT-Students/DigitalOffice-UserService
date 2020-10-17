@@ -249,15 +249,13 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUsersNotFound()
         {
-            provider.Users = null;
-
-            Assert.Throws<NotFoundException>(() => repository.GetAllUsers());
+            Assert.Throws<NotFoundException>(() => repository.GetAllUsers(100, 100, "123456789"));
         }
 
         [Test]
         public void ShouldReturnUsers()
         {
-            var result = repository.GetAllUsers();
+            var result = repository.GetAllUsers(0, 1, "Example");
 
             Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
             Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
