@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Business
             this.accessValidator = accessValidator;
         }
 
-        public void Execute(Guid userId, Guid requestingUserId)
+        public void Execute(Guid userId)
         {
             const int rightId = 1;
 

@@ -34,10 +34,9 @@ namespace LT.DigitalOffice.UserService.Controllers
         [HttpDelete("disableUserById")]
         public void DisableUserById(
             [FromServices] IDisableUserByIdCommand command,
-            [FromQuery] Guid userId,
-            [FromHeader] Guid requestingUser)
+            [FromQuery] Guid userId)
         {
-            command.Execute(userId, requestingUser);
+            command.Execute(userId);
         }
 
         [HttpGet("forgotPassword")]

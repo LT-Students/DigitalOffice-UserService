@@ -18,7 +18,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
         private Guid userId;
         private DbUser newDbUser;
-        private Guid requestingUserId;
         #endregion
 
         #region Setup
@@ -26,7 +25,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void OneTimeSetUp()
         {
             userId = Guid.NewGuid();
-            requestingUserId = Guid.NewGuid();
 
             newDbUser = new DbUser
             {
@@ -65,7 +63,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.GetUserInfoById(userId))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => command.Execute(userId, requestingUserId));
+            Assert.Throws<Exception>(() => command.Execute(userId));
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
         }
@@ -89,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => command.Execute(userId, requestingUserId));
+            Assert.Throws<Exception>(() => command.Execute(userId));
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
         }
@@ -113,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Returns(true);
 
-            Assert.DoesNotThrow(() => command.Execute(userId, requestingUserId));
+            Assert.DoesNotThrow(() => command.Execute(userId));
 
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
@@ -134,11 +132,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Returns(true);
 
-            command.Execute(userId, requestingUserId);
+            command.Execute(userId);
 
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
-            Assert.DoesNotThrow(() => command.Execute(userId, requestingUserId));
+            Assert.DoesNotThrow(() => command.Execute(userId));
         }
 
         [Test]
@@ -160,7 +158,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Returns(true);
 
-            Assert.DoesNotThrow(() => command.Execute(userId, requestingUserId));
+            Assert.DoesNotThrow(() => command.Execute(userId));
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
         }
@@ -176,7 +174,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
 
-            Assert.That(() => command.Execute(userId, requestingUserId),
+            Assert.That(() => command.Execute(userId),
                 Throws.InstanceOf<Exception>().And.Message.EqualTo("Not enough rights."));
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Never);
             repositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
