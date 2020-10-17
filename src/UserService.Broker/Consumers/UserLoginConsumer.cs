@@ -39,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             if (!IsEmail(request.LoginData))
             {
                 dbUserCredentials = _credentialsRepository.GetUserCredentialsByLogin(request.LoginData);
+
                 if (dbUserCredentials == null)
                 {
                     throw new NotFoundException($"User credentials for user with login: '{request.LoginData}' was not found.");
@@ -47,23 +48,25 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             else
             {
                 var dbUser = _userRepository.GetUserByEmail(request.LoginData);
+
                 if (dbUser == null)
                 {
                     throw new NotFoundException($"User with email: '{request.LoginData}' was not found.");
                 }
 
                 dbUserCredentials = _credentialsRepository.GetUserCredentialsByUserId(dbUser.Id);
+
                 if (dbUserCredentials == null)
                 {
                     throw new NotFoundException($"User credentials for user with email: '{request.LoginData}' was not found.");
                 }
             }
 
-            return new
-            {
+            return IUserCredentialsResponse.CreateObj(
                 dbUserCredentials.UserId,
-                dbUserCredentials.PasswordHash
-            };
+                dbUserCredentials.PasswordHash,
+                dbUserCredentials.Salt,
+                dbUserCredentials.Login);
         }
 
         private bool IsEmail(string value)

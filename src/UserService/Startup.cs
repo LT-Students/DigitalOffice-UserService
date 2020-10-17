@@ -6,7 +6,6 @@ using LT.DigitalOffice.Kernel;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
-using LT.DigitalOffice.UserService.Broker.Requests;
 using LT.DigitalOffice.UserService.Business;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -118,10 +117,10 @@ namespace LT.DigitalOffice.UserService
 
             UpdateDatabase(app);
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseRouting();
 
-            app.UseMiddleware<TokenMiddleware>();
+            //app.UseMiddleware<TokenMiddleware>();
 
             string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
 
