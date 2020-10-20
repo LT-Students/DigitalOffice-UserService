@@ -9,8 +9,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.UserCredentials.Admin;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
