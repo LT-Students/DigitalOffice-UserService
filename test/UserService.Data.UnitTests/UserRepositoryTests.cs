@@ -258,7 +258,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var result = repository.GetAllUsers(0, 1, "Example");
 
             Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
-            Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
+            Assert.AreEqual(result, new[] { firstUser });
         }
         #endregion
     }

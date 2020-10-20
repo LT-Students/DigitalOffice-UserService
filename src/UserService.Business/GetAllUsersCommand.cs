@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             var users = new List<User>();
 
-            foreach(DbUser dbuser in dbUsers)
+            foreach (DbUser dbuser in dbUsers)
             {
                 users.Add(mapper.Map(dbuser));
             }

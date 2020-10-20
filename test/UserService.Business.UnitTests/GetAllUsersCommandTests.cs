@@ -20,9 +20,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Guid userId;
         private User user;
         private DbUser dbUser;
+        private int skipCount;
+        private int takeCount;
+        private string nameFilter;
 
-        [SetUp]
-        public void SetUp()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
             repositoryMock = new Mock<IUserRepository>();
             mapperMock = new Mock<IMapper<DbUser, User>>();
@@ -32,6 +35,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             userId = Guid.NewGuid();
             user = new User { Id = userId };
             dbUser = new DbUser { Id = userId };
+
+            skipCount = 0;
+            takeCount = 1;
+            nameFilter = "";
         }
 
         [Test]
@@ -41,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Throws(new NotFoundException());
 
-            Assert.Throws<NotFoundException>(() => command.Execute(0, 1, ""));
+            Assert.Throws<NotFoundException>(() => command.Execute(skipCount, takeCount, nameFilter));
         }
 
         [Test]
@@ -55,21 +62,21 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(dbUser))
                 .Throws(new BadRequestException());
 
-            Assert.Throws<BadRequestException>(() => command.Execute(0, 1, ""));
+            Assert.Throws<BadRequestException>(() => command.Execute(skipCount, takeCount, nameFilter));
         }
 
         [Test]
         public void ShouldReturnUsers()
         {
             repositoryMock
-                .Setup(x => x.GetAllUsers(0, 1, ""))
+                .Setup(x => x.GetAllUsers(skipCount, takeCount, nameFilter))
                 .Returns(new List<DbUser>() { dbUser });
 
             mapperMock
                 .Setup(x => x.Map(It.IsAny<DbUser>()))
                 .Returns(user);
 
-            Assert.DoesNotThrow(() => command.Execute(0, 1, ""));
+            Assert.DoesNotThrow(() => command.Execute(skipCount, takeCount, nameFilter));
         }
     }
 }
