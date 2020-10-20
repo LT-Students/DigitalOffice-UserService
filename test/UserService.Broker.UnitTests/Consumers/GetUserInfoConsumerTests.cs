@@ -50,7 +50,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         private ConsumerTestHarness<GetUserInfoConsumer> consumerTestHarness;
 
         private InMemoryTestHarness harness;
-        private Mock<IMapper<DbUser, string, object>> mapper;
 
         private Mock<IUserRepository> repository;
         private Mock<IRequestClient<IGetUserPositionRequest>> requestBrokerMock;
@@ -61,14 +60,13 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public void SetUp()
         {
             repository = new Mock<IUserRepository>();
-            mapper = new Mock<IMapper<DbUser, string, object>>();
 
             responseBrokerMock = new Mock<Response<IOperationResult<IUserPositionResponse>>>();
             requestBrokerMock = new Mock<IRequestClient<IGetUserPositionRequest>>();
 
             harness = new InMemoryTestHarness();
             consumerTestHarness = harness.Consumer(() =>
-                new GetUserInfoConsumer(repository.Object, requestBrokerMock.Object, mapper.Object));
+                new GetUserInfoConsumer(repository.Object, requestBrokerMock.Object));
         }
 
         [Test]
@@ -78,23 +76,10 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))
                 .Returns(new DbUser
                 {
+                    Id = userId,
                     FirstName = firstName,
                     LastName = lastName,
                     MiddleName = midName
-                });
-
-            mapper
-                .Setup(x => x.Map(It.IsAny<DbUser>(), It.IsAny<string>()))
-                .Returns(new
-                {
-                    UserId = userId,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    MiddleName = midName,
-                    UserPosition = new
-                    {
-                        UserPositionName = userPositionName
-                    }
                 });
 
             responseBrokerMock
@@ -231,67 +216,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 {
                     IsSuccess = false,
                     Errors = new List<string> {"User with this id not found."},
-                    Body = null as object
-                };
-
-                SerializerAssert.AreEqual(expected, response.Message);
-            }
-            finally
-            {
-                await harness.Stop();
-            }
-        }
-
-        [Test]
-        public async Task ShouldResponseIOperationResultWithExceptionWhenFirstArgumentOfMapperIsNull()
-        {
-            repository
-                .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))
-                .Returns(new DbUser
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    MiddleName = midName
-                });
-
-            mapper
-                .Setup(x => x.Map(It.IsAny<DbUser>(), It.IsAny<string>()))
-                .Throws(new ArgumentNullException(nameof(DbUser)));
-
-            responseBrokerMock
-                .Setup(x => x.Message)
-                .Returns(new OperationResult<IUserPositionResponse>
-                {
-                    Body = new UserPositionResponse
-                    {
-                        UserPositionName = userPositionName
-                    },
-                    IsSuccess = true,
-                    Errors = null
-                });
-
-            requestBrokerMock.Setup(
-                    x => x.GetResponse<IOperationResult<IUserPositionResponse>>(
-                        It.IsAny<object>(), default, default))
-                .Returns(Task.FromResult(responseBrokerMock.Object));
-
-            await harness.Start();
-
-            try
-            {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
-
-                var response = await requestClient.GetResponse<IOperationResult<IUserInfoResponse>>(new
-                {
-                    UserId = userId
-                });
-
-                var expection = new ArgumentNullException(nameof(DbUser));
-
-                var expected = new
-                {
-                    IsSuccess = false,
-                    Errors = new List<string> {expection.Message},
                     Body = null as object
                 };
 
