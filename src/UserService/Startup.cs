@@ -158,7 +158,6 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
-            services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
             services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
         }
 

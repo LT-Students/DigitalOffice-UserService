@@ -17,17 +17,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     public class GetUserInfoConsumer : IConsumer<IGetUserInfoRequest>
     {
         private readonly IRequestClient<IGetUserPositionRequest> client;
-        private readonly IMapper<DbUser, string, object> mapper;
         private readonly IUserRepository repository;
 
         public GetUserInfoConsumer(
             [FromServices] IUserRepository repository,
-            [FromServices] IRequestClient<IGetUserPositionRequest> client,
-            [FromServices] IMapper<DbUser, string, object> mapper)
+            [FromServices] IRequestClient<IGetUserPositionRequest> client)
         {
             this.repository = repository;
             this.client = client;
-            this.mapper = mapper;
         }
 
         public async Task Consume(ConsumeContext<IGetUserInfoRequest> context)
@@ -50,10 +47,17 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 throw new Exception(string.Join(", ", response.Message.Errors));
             }
 
-            var userPosition = response.Message.Body.UserPositionName;
+            var userPosition = response.Message.Body;
             var dbUser = repository.GetUserInfoById(userId);
 
-            return mapper.Map(dbUser, userPosition);
+            return new
+            {
+                UserId = dbUser.Id,
+                FirstName = dbUser.FirstName,
+                LastName = dbUser.LastName,
+                MiddleName = dbUser.MiddleName,
+                UserPosition = userPosition
+            };
         }
     }
 }
