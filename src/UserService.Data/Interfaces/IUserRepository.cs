@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         /// <param name="skipCount">Number of pages to skip.</param>
         /// <param name="takeCount">Number of users on one page.</param>
-        /// <param name="nameFilter">Full name or its part that is wanted to be found.</param>
+        /// <param name="nameFilter">User full name or its part that is wanted to be found.</param>
         /// <returns>List of user models.</returns>
         IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string nameFilter);
     }
