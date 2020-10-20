@@ -29,15 +29,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DbUserAchievement", x => new { x.UserId, x.AchievementId });
+                    table.PrimaryKey("PK_UserAchievement", x => new { x.UserId, x.AchievementId });
                     table.ForeignKey(
-                        name: "FK_DbUserAchievement_Achievements_AchievementId",
+                        name: "FK_UserAchievement_Achievements_AchievementId",
                         column: x => x.AchievementId,
                         principalTable: "Achievements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DbUserAchievement_Users_UserId",
+                        name: "FK_UserAchievement_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -53,9 +53,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DbUserCertificateFile", x => new { x.UserId, x.CertificateId });
+                    table.PrimaryKey("PK_UserCertificateFile", x => new { x.UserId, x.CertificateId });
                     table.ForeignKey(
-                        name: "FK_DbUserCertificateFile_Users_UserId",
+                        name: "FK_UserCertificateFile_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DbUserAchievement_AchievementId",
+                name: "IX_UserAchievement_AchievementId",
                 table: "UserAchievement",
                 column: "AchievementId");
         }
