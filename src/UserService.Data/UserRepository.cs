@@ -75,6 +75,20 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             var dbUsers = _provider.Users.Where(user => usersIds.Contains(user.Id)).ToList();
+            
+            if (!dbUsers.Any())
+            {
+                throw new NotFoundException("Users were not found.");
+            }
+
+            return dbUsers;
+        }
+
+        public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter)
+        {
+            var dbUsers =  _provider.Users.Skip(skipCount*takeCount).Take(takeCount)
+                                          .Where(user => $"{user.FirstName}{user.LastName}{user.MiddleName}"
+                                          .Contains(userNameFilter)).AsEnumerable();
 
             if (!dbUsers.Any())
             {

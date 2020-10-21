@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UserService.UserCredentials.Admin;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
@@ -105,9 +106,9 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             Assert.IsNotNull(resultUserModel);
             Assert.IsInstanceOf<User>(resultUserModel);
 
-            Assert.AreEqual(achievementId, resultUserModel.Achievements.ToList()[0].Id);
-            Assert.AreEqual(Message, resultUserModel.Achievements.ToList()[0].Message);
-            Assert.AreEqual(pictureFileId, resultUserModel.Achievements.ToList()[0].PictureFileId);
+            Assert.AreEqual(achievementId, resultUserModel.AchievementsIds.ToList()[0].Id);
+            Assert.AreEqual(Message, resultUserModel.AchievementsIds.ToList()[0].Message);
+            Assert.AreEqual(pictureFileId, resultUserModel.AchievementsIds.ToList()[0].PictureFileId);
 
             Assert.AreEqual(certificateFileId, resultUserModel.CertificatesIds.ToList()[0]);
             Assert.AreEqual(userId, resultUserModel.Id);
@@ -115,7 +116,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             Assert.AreEqual(LastName, resultUserModel.LastName);
             Assert.IsNull(resultUserModel.MiddleName);
             Assert.AreEqual(Status, resultUserModel.Status);
-            Assert.AreEqual(avatarFileId, resultUserModel.AvatarId);
+            Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
         }
         #endregion

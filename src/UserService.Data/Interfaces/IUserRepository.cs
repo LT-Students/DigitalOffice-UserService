@@ -46,5 +46,14 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="usersIds">List of specified ids.</param>
         /// <returns>List of DbUser models.</returns>
         IEnumerable<DbUser> GetUsersByIds(IEnumerable<Guid> usersIds);
+      
+        /// <summary>
+        /// Returns the list of user models using pagination and filter by full name.
+        /// </summary>
+        /// <param name="skipCount">Number of pages to skip.</param>
+        /// <param name="takeCount">Number of users on one page.</param>
+        /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
+        /// <returns>List of user models.</returns>
+        IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
     }
 }

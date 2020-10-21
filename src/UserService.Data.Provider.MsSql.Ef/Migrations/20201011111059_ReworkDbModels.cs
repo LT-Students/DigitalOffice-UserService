@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using LT.DigitalOffice.UserService.UserCredentials.Admin;
+using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
@@ -21,10 +23,60 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 table: "UserCredentials",
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[]
+                {
+                    "Id",
+                    "Email",
+                    "FirstName",
+                    "LastName",
+                    "IsActive",
+                    "IsAdmin"
+                },
+                values: new object[]
+                {
+                    new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                    AdminCredentials.EMAIL,
+                    AdminCredentials.FIRST_NAME,
+                    AdminCredentials.LAST_NAME,
+                    true,
+                    true
+                });
+
+            migrationBuilder.InsertData(
+                table: "UserCredentials",
+                columns: new[]
+                {
+                    "Id",
+                    "UserId",
+                    "Login",
+                    "PasswordHash",
+                    "Salt"
+                },
+                values: new object[]
+                {
+                    new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"),
+                    new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                    AdminCredentials.LOGIN,
+                    AdminCredentials.GetPasswordHash(),
+                    AdminCredentials.salt
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DeleteData(
+                table: "UserCredentials",
+                keyColumn: "Id",
+                keyValue: new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"));
+
+            migrationBuilder.DeleteData(
+                table: "Users",
+                keyColumn: "Id",
+                keyValue: new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"));
+
             migrationBuilder.DropColumn(
                 name: "Email",
                 table: "Users");

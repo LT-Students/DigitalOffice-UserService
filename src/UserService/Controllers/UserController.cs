@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         public User GetUserById([FromServices] IGetUserByIdCommand getUserInfoByIdCommand, [FromQuery] Guid userId)
             => getUserInfoByIdCommand.Execute(userId);
 
-        [HttpPost("register")]
+        [HttpPost("createUser")]
         public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
         {
             return command.Execute(request);
@@ -43,10 +43,9 @@ namespace LT.DigitalOffice.UserService.Controllers
         [HttpDelete("disableUserById")]
         public void DisableUserById(
             [FromServices] IDisableUserByIdCommand command,
-            [FromQuery] Guid userId,
-            [FromHeader] Guid requestingUser)
+            [FromQuery] Guid userId)
         {
-            command.Execute(userId, requestingUser);
+            command.Execute(userId);
         }
 
         [HttpGet("forgotPassword")]
@@ -54,6 +53,16 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromQuery] string userEmail)
         {
             command.Execute(userEmail);
+        }
+
+        [HttpGet("getAllUsers")]
+        public IEnumerable<User> GetAllUsers(
+            [FromServices] IGetAllUsersCommand command,
+            [FromQuery] int skipCount,
+            [FromQuery] int takeCount,
+            [FromQuery] string userNameFilter)
+        {
+            return command.Execute(skipCount, takeCount, userNameFilter);
         }
     }
 }

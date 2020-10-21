@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.UnitTestLibrary;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
@@ -11,7 +12,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using LT.DigitalOffice.Kernel.Exceptions;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -267,6 +267,23 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
             Assert.That(provider.Users, Is.EquivalentTo(new[] { firstUser }));
             Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
+        }
+        #endregion
+          
+        #region GetAllUsers
+        [Test]
+        public void ShouldThrowExceptionWhenUsersNotFound()
+        {
+            Assert.Throws<NotFoundException>(() => repository.GetAllUsers(100, 100, "123456789"));
+        }
+
+        [Test]
+        public void ShouldReturnUsers()
+        {
+            var result = repository.GetAllUsers(0, 1, "Example");
+
+            Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
+            Assert.AreEqual(result, new[] { firstUser });
         }
         #endregion
     }

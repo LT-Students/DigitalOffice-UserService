@@ -2,10 +2,9 @@
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using NUnit.Framework;
 using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
@@ -13,7 +12,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
     {
         private IMapper<UserRequest, DbUserCredentials> _mapper;
 
-        private DbUserCredentials dbUserCredentials;
         private UserRequest editUserRequest;
 
         private string password;
@@ -30,14 +28,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             email = "example@gmail.com";
             password = "ExamplePassword";
             login = "Example";
-
-            dbUserCredentials = new DbUserCredentials
-            {
-                UserId = _userId,
-                Login = login,
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(password)))
-            };
         }
 
         [Test]
@@ -76,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
             Assert.AreNotEqual(Guid.Empty, result.Id);
             Assert.AreEqual(_userId, result.UserId);
-            Assert.AreEqual(dbUserCredentials.PasswordHash, result.PasswordHash);
+            Assert.AreEqual(UserPassword.GetPasswordHash(login, result.Salt, password), result.PasswordHash);
             Assert.AreEqual(login, result.Login);
         }
     }

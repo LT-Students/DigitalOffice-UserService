@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UserService.Broker\UserService.Broker.csproj" />
+    <ProjectReference Include="..\..\src\UserService.Models.Broker\UserService.Models.Broker.csproj" />
   </ItemGroup>
 
 </Project>

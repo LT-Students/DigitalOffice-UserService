@@ -2,9 +2,8 @@
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Mappers
 {
@@ -21,14 +20,15 @@ namespace LT.DigitalOffice.UserService.Mappers
                 throw new BadRequestException();
             }
 
+            var salt = $"{ Guid.NewGuid() }{ Guid.NewGuid() }";
+
             return new DbUserCredentials
             {
                 Id = Guid.NewGuid(),
                 UserId = value.Id.Value,
                 Login = value.Login,
-                Salt = $"{Guid.NewGuid()}{Guid.NewGuid()}",
-                PasswordHash = Encoding.UTF8.GetString(new SHA512Managed().ComputeHash(
-                    Encoding.UTF8.GetBytes(value.Password)))
+                Salt = salt,
+                PasswordHash = UserPassword.GetPasswordHash(value.Login, salt, value.Password)
             };
         }
     }

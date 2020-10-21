@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
