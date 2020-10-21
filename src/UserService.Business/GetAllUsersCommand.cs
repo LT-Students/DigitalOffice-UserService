@@ -22,9 +22,9 @@ namespace LT.DigitalOffice.UserService.Business
             this.mapper = mapper;
         }
 
-        public IEnumerable<User> Execute(int skipCount, int takeCount, string nameFilter)
+        public IEnumerable<User> Execute(int skipCount, int takeCount, string userNameFilter)
         {
-            var dbUsers = repository.GetAllUsers(skipCount, takeCount, nameFilter);
+            var dbUsers = repository.GetAllUsers(skipCount, takeCount, userNameFilter);
 
             var users = new List<User>();
 

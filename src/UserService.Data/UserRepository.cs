@@ -66,11 +66,11 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUser;
         }
 
-        public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string nameFilter)
+        public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter)
         {
             var dbUsers =  _provider.Users.Skip(skipCount*takeCount).Take(takeCount)
                                           .Where(user => $"{user.FirstName}{user.LastName}{user.MiddleName}"
-                                          .Contains(nameFilter)).AsEnumerable();
+                                          .Contains(userNameFilter)).AsEnumerable();
 
             if (!dbUsers.Any())
             {

@@ -14,8 +14,8 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// </summary>
         /// <param name="skipCount">Number of pages to skip.</param>
         /// <param name="takeCount">Number of users on one page.</param>
-        /// <param name="nameFilter">User full name or its part that is wanted to be found.</param>
+        /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
         /// <returns>List of user models.</returns>
-        IEnumerable<User> Execute(int skipCount, int takeCount, string nameFilter);
+        IEnumerable<User> Execute(int skipCount, int takeCount, string userNameFilter);
     }
 }

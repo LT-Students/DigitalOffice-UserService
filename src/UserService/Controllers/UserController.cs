@@ -53,9 +53,9 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromServices] IGetAllUsersCommand command,
             [FromQuery] int skipCount,
             [FromQuery] int takeCount,
-            [FromQuery] string nameFilter)
+            [FromQuery] string userNameFilter)
         {
-            return command.Execute(skipCount, takeCount, nameFilter);
+            return command.Execute(skipCount, takeCount, userNameFilter);
         }
     }
 }

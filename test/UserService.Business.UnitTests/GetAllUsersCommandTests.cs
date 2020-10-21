@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private DbUser dbUser;
         private int skipCount;
         private int takeCount;
-        private string nameFilter;
+        private string userNameFilter;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             skipCount = 0;
             takeCount = 1;
-            nameFilter = "";
+            userNameFilter = "";
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.GetAllUsers(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Throws(new NotFoundException());
 
-            Assert.Throws<NotFoundException>(() => command.Execute(skipCount, takeCount, nameFilter));
+            Assert.Throws<NotFoundException>(() => command.Execute(skipCount, takeCount, userNameFilter));
         }
 
         [Test]
@@ -62,21 +62,21 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(dbUser))
                 .Throws(new BadRequestException());
 
-            Assert.Throws<BadRequestException>(() => command.Execute(skipCount, takeCount, nameFilter));
+            Assert.Throws<BadRequestException>(() => command.Execute(skipCount, takeCount, userNameFilter));
         }
 
         [Test]
         public void ShouldReturnUsers()
         {
             repositoryMock
-                .Setup(x => x.GetAllUsers(skipCount, takeCount, nameFilter))
+                .Setup(x => x.GetAllUsers(skipCount, takeCount, userNameFilter))
                 .Returns(new List<DbUser>() { dbUser });
 
             mapperMock
                 .Setup(x => x.Map(It.IsAny<DbUser>()))
                 .Returns(user);
 
-            Assert.DoesNotThrow(() => command.Execute(skipCount, takeCount, nameFilter));
+            Assert.DoesNotThrow(() => command.Execute(skipCount, takeCount, userNameFilter));
         }
     }
 }
