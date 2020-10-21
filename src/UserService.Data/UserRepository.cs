@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -63,6 +64,20 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             return dbUser;
+        }
+
+        public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter)
+        {
+            var dbUsers =  _provider.Users.Skip(skipCount*takeCount).Take(takeCount)
+                                          .Where(user => $"{user.FirstName}{user.LastName}{user.MiddleName}"
+                                          .Contains(userNameFilter)).AsEnumerable();
+
+            if (!dbUsers.Any())
+            {
+                throw new NotFoundException("Users were not found.");
+            }
+
+            return dbUsers;
         }
     }
 }
