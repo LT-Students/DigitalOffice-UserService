@@ -58,8 +58,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public void ChangePassword(string login, string newPassword)
         {
-            if (login == string.Empty || newPassword == string.Empty ||
-                login == null || newPassword == null)
+            if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(newPassword))
             {
                 throw new BadRequestException();
             }
