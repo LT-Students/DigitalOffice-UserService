@@ -117,10 +117,13 @@ namespace LT.DigitalOffice.UserService
 
             UpdateDatabase(app);
 
-            //app.UseHttpsRedirection();
+#if RELEASE
+            app.UseHttpsRedirection();
+#endif
+
             app.UseRouting();
 
-            //app.UseMiddleware<TokenMiddleware>();
+            app.UseMiddleware<TokenMiddleware>();
 
             string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
 
