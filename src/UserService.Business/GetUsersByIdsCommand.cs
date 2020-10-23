@@ -22,11 +22,12 @@ namespace LT.DigitalOffice.UserService.Business
             this.mapper = mapper;
         }
 
-        public List<User> Execute(IEnumerable<Guid> usersIds)
+        public IEnumerable<User> Execute(IEnumerable<Guid> usersIds)
         {
             var dbUsers = repository.GetUsersByIds(usersIds);
 
             var users = new List<User>();
+
             foreach (DbUser dbUser in dbUsers)
             {
                 users.Add(mapper.Map(dbUser));

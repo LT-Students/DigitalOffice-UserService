@@ -15,6 +15,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// </summary>
         /// <param name="usersIds">Specified ids of users.</param>
         /// <returns>List of users models with specified ids.</returns>
-        List<User> Execute(IEnumerable<Guid> usersIds);
+        IEnumerable<User> Execute(IEnumerable<Guid> usersIds);
     }
 }

@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpGet("getUsersByIds")]
-        public List<User> GetUsersByIds(
+        public IEnumerable<User> GetUsersByIds(
             [FromServices] IGetUsersByIdsCommand command,
             [FromQuery] IEnumerable<Guid> usersIds)
         {

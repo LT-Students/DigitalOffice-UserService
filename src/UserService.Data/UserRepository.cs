@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             var dbUsers = _provider.Users.Where(user => usersIds.Contains(user.Id)).ToList();
-            
+
             if (!dbUsers.Any())
             {
                 throw new NotFoundException("Users were not found.");
