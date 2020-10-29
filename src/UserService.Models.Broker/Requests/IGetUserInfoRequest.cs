@@ -2,11 +2,16 @@
 
 namespace LT.DigitalOffice.Broker.Requests
 {
-    /// <summary>
-    /// DTO for getting user information through a message broker.
-    /// </summary>
-    public interface IGetUserInfoRequest
+    public interface IGetUserRequest
     {
         Guid UserId { get; }
+
+        static object CreateObj(Guid userId)
+        {
+            return new
+            {
+                UserId = userId
+            };
+        }
     }
 }

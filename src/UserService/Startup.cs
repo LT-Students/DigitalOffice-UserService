@@ -103,7 +103,8 @@ namespace LT.DigitalOffice.UserService
                     new Uri("rabbitmq://localhost/CompanyService"));
                 x.AddRequestClient<IGetFileRequest>(
                     new Uri("rabbitmq://localhost/FileService"));
-                x.AddRequestClient<IUserJwtRequest>(new Uri("rabbitmq://localhost/AuthenticationService_ValidationJwt"));
+                x.AddRequestClient<ICheckTokenRequest>(
+                    new Uri("rabbitmq://localhost/AuthenticationService_ValidationJwt"));
 
                 x.ConfigureKernelMassTransit(rabbitmqOptions);
             });
@@ -117,10 +118,13 @@ namespace LT.DigitalOffice.UserService
 
             UpdateDatabase(app);
 
-            //app.UseHttpsRedirection();
+#if RELEASE
+            app.UseHttpsRedirection();
+#endif
+
             app.UseRouting();
 
-            //app.UseMiddleware<TokenMiddleware>();
+            app.UseMiddleware<TokenMiddleware>();
 
             string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
 
@@ -168,6 +172,7 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
             services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
+            services.AddTransient<IGetAllUsersCommand, GetAllUsersCommand>();
         }
 
         private void ConfigureValidators(IServiceCollection services)
