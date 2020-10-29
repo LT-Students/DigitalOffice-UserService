@@ -20,12 +20,10 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
         private const string Message = "smth";
         private const string FirstName = "Ivan";
-        private const string MiddleName = "Ivanovich";
         private const string LastName = "Dudikov";
         private const bool IsActive = true;
         private const string Status = "Hello, world!";
         private const bool IsAdmin = false;
-        private const string UserPositionName = "Software Engineer";
 
         private Guid userId;
         private Guid achievementId;
@@ -37,7 +35,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private DbUserAchievement dbUserAchievement;
         private DbUser dbUser;
         private DbUserCertificateFile dbUserCertificateFile;
-        private IUserPositionResponse userPosition;
 
         [SetUp]
         public void SetUp()
