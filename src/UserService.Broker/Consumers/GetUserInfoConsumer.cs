@@ -49,7 +49,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             //}
 
             //var userPosition = response.Message.Body.UserPositionName;
+
             var dbUser = repository.GetUserInfoById(request.UserId);
+
             if (dbUser == null)
             {
                 throw new NotFoundException();
