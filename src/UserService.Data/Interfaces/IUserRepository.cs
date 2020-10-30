@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Db;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
@@ -40,12 +41,19 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         DbUser GetUserByEmail(string userEmail);
 
         /// <summary>
-        /// Returns the list of user models using pagination and filter by full name.
+        /// Returns the collection of DbUsers with the specified ids from database.
+        /// </summary>
+        /// <param name="usersIds">List of specified ids.</param>
+        /// <returns>Collection of DbUser models.</returns>
+        IEnumerable<DbUser> GetUsersByIds(IEnumerable<Guid> usersIds);
+
+        /// <summary>
+        /// Returns the collection of user models using pagination and filter by full name.
         /// </summary>
         /// <param name="skipCount">Number of pages to skip.</param>
         /// <param name="takeCount">Number of users on one page.</param>
         /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
-        /// <returns>List of user models.</returns>
+        /// <returns>Collection of user models.</returns>
         IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
     }
 }

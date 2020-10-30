@@ -19,21 +19,22 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
     {
         private IDataProvider provider;
         private IUserRepository repository;
-
+        private Guid firstUserId;
         private DbUser firstUser;
         private DbUser secondUser;
         private DbUserCredentials firstUserCredentials;
         private DbUserCredentials secondUserCredentials;
 
-        private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            firstUserId = Guid.NewGuid();
+
             firstUser = new DbUser
             {
-                Id = Guid.NewGuid(),
+                Id = firstUserId,
                 Email = "Example@gmail.com",
                 FirstName = "Example",
                 LastName = "Example",
@@ -114,8 +115,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenUserWithRequiredIdDoesNotExist()
         {
-            Assert.That(() => repository.GetUserInfoById(Guid.Empty),
-                Throws.TypeOf<Exception>().And.Message.EqualTo(UserNotFoundExceptionMessage));
+            Assert.Throws<NotFoundException>(() => repository.GetUserInfoById(Guid.Empty));
         }
 
         [Test]
@@ -135,7 +135,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExist()
         {
-            Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
+            Assert.Throws<NotFoundException>(() => repository.GetUserByEmail(string.Empty));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
@@ -155,7 +155,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldThrowExceptionIfUserWithRequiredEmailDoesNotExistWhileGettingUserByEmail()
         {
-            Assert.Throws<Exception>(() => repository.GetUserByEmail(string.Empty));
+            Assert.Throws<NotFoundException>(() => repository.GetUserByEmail(string.Empty));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
 
@@ -188,7 +188,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 AchievementsIds = new Collection<DbUserAchievement>()
             };
 
-            Assert.Throws<Exception>(() => repository.EditUser(user));
+            Assert.Throws<NotFoundException>(() => repository.EditUser(user));
             Assert.That(provider.Users.Find(firstUser.Id).Equals(firstUser));
             Assert.That(provider.Users, Is.EquivalentTo(new List<DbUser> { firstUser }));
         }
@@ -242,6 +242,30 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 EmailAlreadyTakenExceptionMessage);
 
             Assert.Contains(firstUser, provider.Users.ToArray());
+        }
+        #endregion
+
+        #region GetUsersByIds
+        [Test]
+        public void ShouldThrowExceptionWhenUsersIdsAreEmpty()
+        {
+            Assert.Throws<BadRequestException>(() => repository.GetUsersByIds(new List<Guid>()));
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenAnyUserWithRequiredIdDoesNotExist()
+        {
+            Assert.Throws<NotFoundException>(() => repository.GetUsersByIds(new List<Guid>() { Guid.NewGuid() }));
+        }
+
+        [Test]
+        public void ShouldReturnDbUsersList()
+        {
+            var result = repository.GetUsersByIds(new List<Guid>() { firstUserId });
+
+            Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
+            Assert.AreEqual(provider.Users, new[] { firstUser });
+            Assert.AreEqual(result, new[] { firstUser });
         }
         #endregion
 

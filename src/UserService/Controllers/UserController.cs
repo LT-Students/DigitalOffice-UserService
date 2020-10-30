@@ -32,6 +32,14 @@ namespace LT.DigitalOffice.UserService.Controllers
             return command.Execute(userEmail);
         }
 
+        [HttpGet("getUsersByIds")]
+        public IEnumerable<User> GetUsersByIds(
+            [FromServices] IGetUsersByIdsCommand command,
+            [FromQuery] IEnumerable<Guid> usersIds)
+        {
+            return command.Execute(usersIds);
+        }
+
         [HttpDelete("disableUserById")]
         public void DisableUserById(
             [FromServices] IDisableUserByIdCommand command,
