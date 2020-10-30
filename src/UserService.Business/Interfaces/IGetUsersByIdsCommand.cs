@@ -11,10 +11,10 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
     public interface IGetUsersByIdsCommand
     {
         /// <summary>
-        /// Returns list of users models with specified ids.
+        /// Returns collection of users models with specified ids.
         /// </summary>
         /// <param name="usersIds">Specified ids of users.</param>
-        /// <returns>List of users models with specified ids.</returns>
+        /// <returns>Collection of users models with specified ids.</returns>
         IEnumerable<User> Execute(IEnumerable<Guid> usersIds);
     }
 }

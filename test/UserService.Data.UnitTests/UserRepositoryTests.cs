@@ -25,7 +25,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private DbUserCredentials firstUserCredentials;
         private DbUserCredentials secondUserCredentials;
 
-        private const string UserNotFoundExceptionMessage = "User with this id not found.";
         private const string EmailAlreadyTakenExceptionMessage = "Email is already taken.";
 
         [OneTimeSetUp]
@@ -265,11 +264,11 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var result = repository.GetUsersByIds(new List<Guid>() { firstUserId });
 
             Assert.IsInstanceOf<IEnumerable<DbUser>>(result);
-            Assert.That(provider.Users, Is.EquivalentTo(new[] { firstUser }));
-            Assert.That(result, Is.EquivalentTo(new[] { firstUser }));
+            Assert.AreEqual(provider.Users, new[] { firstUser });
+            Assert.AreEqual(result, new[] { firstUser });
         }
         #endregion
-          
+
         #region GetAllUsers
         [Test]
         public void ShouldThrowExceptionWhenUsersNotFound()

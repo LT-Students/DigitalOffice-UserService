@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -26,14 +27,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var dbUsers = repository.GetUsersByIds(usersIds);
 
-            var users = new List<User>();
-
-            foreach (DbUser dbUser in dbUsers)
-            {
-                users.Add(mapper.Map(dbUser));
-            }
-
-            return users;
+            return dbUsers.Select((dbUser) => mapper.Map(dbUser));
         }
     }
 }

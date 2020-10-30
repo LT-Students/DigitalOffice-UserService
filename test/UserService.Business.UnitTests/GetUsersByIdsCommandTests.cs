@@ -24,8 +24,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private List<User> usersList;
         private DbUser dbUser;
 
-        [SetUp]
-        public void SetUp()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
             repositoryMock = new Mock<IUserRepository>();
             mapperMock = new Mock<IMapper<DbUser, User>>();
@@ -41,8 +41,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldReturnModelOfUser()
         {
-            repositoryMock.Setup(repository => repository.GetUsersByIds(usersIdsList)).Returns(new List<DbUser>() { dbUser }).Verifiable();
-            mapperMock.Setup(mapper => mapper.Map(dbUser)).Returns(user).Verifiable();
+            repositoryMock
+                .Setup(repository => repository.GetUsersByIds(usersIdsList))
+                .Returns(new List<DbUser>() { dbUser }).Verifiable();
+
+            mapperMock
+                .Setup(mapper => mapper.Map(dbUser))
+                .Returns(user).Verifiable();
 
             SerializerAssert.AreEqual(usersList, command.Execute(usersIdsList));
             repositoryMock.Verify();
@@ -50,25 +55,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenMapperThrowsException()
-        {
-            repositoryMock.Setup(repository => repository.GetUsersByIds(It.IsAny<IEnumerable<Guid>>())).Returns(new List<DbUser>() { dbUser }).Verifiable();
-            mapperMock.Setup(mapper => mapper.Map(It.IsAny<DbUser>())).Throws<BadRequestException>().Verifiable();
-
-            Assert.Throws<BadRequestException>(() => command.Execute(usersIdsList));
-            mapperMock.Verify();
-            repositoryMock.Verify();
-        }
-
-        [Test]
         public void ShouldThrowExceptionWhenRepositoryThrowsException()
         {
-            repositoryMock.Setup(repository => repository.GetUsersByIds(usersIdsList)).Throws(new NotFoundException()).Verifiable();
-            mapperMock.Setup(mapper => mapper.Map(dbUser)).Returns(user);
+            repositoryMock
+                .Setup(repository => repository.GetUsersByIds(usersIdsList))
+                .Throws(new NotFoundException()).Verifiable();
 
             Assert.Throws<NotFoundException>(() => command.Execute(usersIdsList));
             repositoryMock.Verify();
-            mapperMock.Verify(mapper => mapper.Map(It.IsAny<DbUser>()), Times.Never);
         }
     }
 }
