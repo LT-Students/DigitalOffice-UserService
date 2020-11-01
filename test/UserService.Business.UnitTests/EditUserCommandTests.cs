@@ -2,7 +2,7 @@
 using FluentValidation.Results;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
@@ -17,9 +17,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IUserRepository> userRepositoryMock;
         private Mock<IValidator<UserRequest>> validatorMock;
         private Mock<ValidationResult> validationResultIsValidMock;
-        private Mock<IMapper<UserRequest, DbUser>> mapperUserMock;
+        private Mock<IUserRequestMapper> mapperUserMock;
         private Mock<IUserCredentialsRepository> userCredentialsRepositoryMock;
-        private Mock<IMapper<UserRequest, DbUserCredentials>> mapperUserCredentialsMock;
+        private Mock<IUserCredentialsRequestMapper> mapperUserCredentialsMock;
 
         private DbUser dbUser;
         private UserRequest request;
@@ -83,8 +83,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             userRepositoryMock = new Mock<IUserRepository>();
             userCredentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
 
-            mapperUserMock = new Mock<IMapper<UserRequest, DbUser>>();
-            mapperUserCredentialsMock = new Mock<IMapper<UserRequest, DbUserCredentials>>();
+            mapperUserMock = new Mock<IUserRequestMapper>();
+            mapperUserCredentialsMock = new Mock<IUserCredentialsRequestMapper>();
 
             validatorMock = new Mock<IValidator<UserRequest>>();
 

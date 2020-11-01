@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using NUnit.Framework;
@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     class UserCredentialsMapperTests
     {
-        private IMapper<UserRequest, DbUserCredentials> _mapper;
+        private IUserCredentialsRequestMapper _mapper;
 
         private UserRequest editUserRequest;
 
@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [SetUp]
         public void SetUp()
         {
-            _mapper = new UserCredentialsMapper();
+            _mapper = new UserCredentialsRequestMapper();
 
             email = "example@gmail.com";
             password = "ExamplePassword";
