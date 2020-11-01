@@ -1,17 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using System;
 
-namespace LT.DigitalOffice.UserService.Mappers
+namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
 {
-    /// <summary>
-    /// Represents mapper. Provides methods for converting an object of user value <see cref="UserRequest"/>
-    /// type into an object of <see cref="DbUserCredentials"/> type according to some rule.
-    /// </summary>
-    public class UserCredentialsMapper : IMapper<UserRequest, DbUserCredentials>
+    public class UserCredentialsRequestMapper : IUserCredentialsRequestMapper
     {
         public DbUserCredentials Map(UserRequest value)
         {

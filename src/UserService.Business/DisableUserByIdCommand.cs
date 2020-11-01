@@ -8,6 +8,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Business
 {
+    /// <inheritdoc/>
     public class DisableUserByIdCommand : IDisableUserByIdCommand
     {
         private readonly IUserRepository repository;
@@ -21,6 +22,7 @@ namespace LT.DigitalOffice.UserService.Business
             this.accessValidator = accessValidator;
         }
 
+        /// <inheritdoc/>
         public void Execute(Guid userId)
         {
             const int rightId = 1;
