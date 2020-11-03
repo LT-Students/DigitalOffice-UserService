@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Validation
             RuleFor(request => request.Login)
                 .NotEmpty()
                 .MinimumLength(5)
-                .MaximumLength(15);
+                .MaximumLength(16).WithMessage("Login is too long.");
         }
     }
 }
