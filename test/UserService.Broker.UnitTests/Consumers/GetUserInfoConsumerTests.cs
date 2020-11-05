@@ -25,13 +25,12 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public T Body { get; set; }
     }
 
-    internal class UserInfoResponse : IUserInfoResponse
+    internal class UserInfoResponse : IGetUserResponse
     {
-        public Guid UserId { get; set; }
+        public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
-        public IUserPositionResponse UserPosition { get; set; }
     }
 
     internal class UserPositionResponse : IUserPositionResponse
@@ -50,7 +49,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         private ConsumerTestHarness<GetUserInfoConsumer> consumerTestHarness;
 
         private InMemoryTestHarness harness;
-        private Mock<IMapper<DbUser, string, object>> mapper;
 
         private Mock<IUserRepository> repository;
         private Mock<IRequestClient<IGetUserPositionRequest>> requestBrokerMock;
@@ -61,94 +59,89 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public void SetUp()
         {
             repository = new Mock<IUserRepository>();
-            mapper = new Mock<IMapper<DbUser, string, object>>();
 
             responseBrokerMock = new Mock<Response<IOperationResult<IUserPositionResponse>>>();
             requestBrokerMock = new Mock<IRequestClient<IGetUserPositionRequest>>();
 
             harness = new InMemoryTestHarness();
             consumerTestHarness = harness.Consumer(() =>
-                new GetUserInfoConsumer(repository.Object, requestBrokerMock.Object, mapper.Object));
+                new GetUserInfoConsumer(repository.Object, requestBrokerMock.Object));
         }
 
-        [Test]
-        public async Task ShouldResponseUserInfoResponse()
-        {
-            repository
-                .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))
-                .Returns(new DbUser
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    MiddleName = midName
-                });
+        //[Test]
+        //public async Task ShouldResponseUserInfoResponse()
+        //{
+        //    repository
+        //        .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))
+        //        .Returns(new DbUser
+        //        {
+        //            FirstName = firstName,
+        //            LastName = lastName,
+        //            MiddleName = midName
+        //        });
 
-            mapper
-                .Setup(x => x.Map(It.IsAny<DbUser>(), It.IsAny<string>()))
-                .Returns(new
-                {
-                    UserId = userId,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    MiddleName = midName,
-                    UserPosition = new
-                    {
-                        UserPositionName = userPositionName
-                    }
-                });
+        //    mapper
+        //        .Setup(x => x.Map(It.IsAny<DbUser>(), It.IsAny<string>()))
+        //        .Returns(new
+        //        {
+        //            UserId = userId,
+        //            FirstName = firstName,
+        //            LastName = lastName,
+        //            MiddleName = midName,
+        //            UserPosition = new
+        //            {
+        //                UserPositionName = userPositionName
+        //            }
+        //        });
 
-            responseBrokerMock
-                .Setup(x => x.Message)
-                .Returns(new OperationResult<IUserPositionResponse>
-                {
-                    Body = new UserPositionResponse
-                    {
-                        UserPositionName = userPositionName
-                    },
-                    IsSuccess = true,
-                    Errors = null
-                });
+        //    responseBrokerMock
+        //        .Setup(x => x.Message)
+        //        .Returns(new OperationResult<IUserPositionResponse>
+        //        {
+        //            Body = new UserPositionResponse
+        //            {
+        //                UserPositionName = userPositionName
+        //            },
+        //            IsSuccess = true,
+        //            Errors = null
+        //        });
 
-            requestBrokerMock.Setup(
-                    x => x.GetResponse<IOperationResult<IUserPositionResponse>>(
-                        It.IsAny<object>(), default, default))
-                .Returns(Task.FromResult(responseBrokerMock.Object));
+        //    requestBrokerMock.Setup(
+        //            x => x.GetResponse<IOperationResult<IUserPositionResponse>>(
+        //                It.IsAny<object>(), default, default))
+        //        .Returns(Task.FromResult(responseBrokerMock.Object));
 
-            await harness.Start();
+        //    await harness.Start();
 
-            try
-            {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
+        //    try
+        //    {
+        //        var requestClient = await harness.ConnectRequestClient<IGetUserRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IUserInfoResponse>>(new
-                {
-                    UserId = userId
-                });
+        //        var response = await requestClient.GetResponse<IOperationResult<IGetUserResponse>>(new
+        //        {
+        //            UserId = userId
+        //        });
 
-                var expected = new
-                {
-                    IsSuccess = true,
-                    Errors = null as List<string>,
-                    Body = new
-                    {
-                        UserId = userId,
-                        FirstName = firstName,
-                        LastName = lastName,
-                        MiddleName = midName,
-                        UserPosition = new
-                        {
-                            UserPositionName = userPositionName
-                        }
-                    }
-                };
+        //        var expected = new
+        //        {
+        //            IsSuccess = true,
+        //            Errors = null as List<string>,
+        //            Body = new
+        //            {
+        //                Id = userId,
+        //                FirstName = firstName,
+        //                LastName = lastName,
+        //                MiddleName = midName,
+        //            }
+        //        };
 
-                SerializerAssert.AreEqual(expected, response.Message);
-            }
-            finally
-            {
-                await harness.Stop();
-            }
-        }
+        //        SerializerAssert.AreEqual(expected, response.Message);
+        //    }
+        //    finally
+        //    {
+        //        await harness.Stop();
+        //    }
+        //}
 
         [Test]
         public async Task ShouldResponseIOperationResultWithExceptionWhenIRequestClientResponseError()
@@ -158,7 +151,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 .Returns(new OperationResult<IUserPositionResponse>
                 {
                     IsSuccess = false,
-                    Errors = new List<string> {exceptionFromCompanyService}
+                    Errors = new List<string> { exceptionFromCompanyService }
                 });
 
             requestBrokerMock.Setup(
@@ -170,9 +163,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IUserInfoResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserResponse>>(new
                 {
                     UserId = userId
                 });
@@ -180,7 +173,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 var expected = new
                 {
                     IsSuccess = false,
-                    Errors = new List<string> {exceptionFromCompanyService},
+                    Errors = new List<string> { "Exception of type 'LT.DigitalOffice.Kernel.Exceptions.NotFoundException' was thrown." },
                     Body = null as object
                 };
 
@@ -220,9 +213,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IUserInfoResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserResponse>>(new
                 {
                     UserId = userId
                 });
@@ -230,68 +223,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 var expected = new
                 {
                     IsSuccess = false,
-                    Errors = new List<string> {"User with this id not found."},
-                    Body = null as object
-                };
-
-                SerializerAssert.AreEqual(expected, response.Message);
-            }
-            finally
-            {
-                await harness.Stop();
-            }
-        }
-
-        [Test]
-        public async Task ShouldResponseIOperationResultWithExceptionWhenFirstArgumentOfMapperIsNull()
-        {
-            repository
-                .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))
-                .Returns(new DbUser
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    MiddleName = midName
-                });
-
-            mapper
-                .Setup(x => x.Map(It.IsAny<DbUser>(), It.IsAny<string>()))
-                .Throws(new ArgumentNullException(nameof(DbUser)));
-
-            responseBrokerMock
-                .Setup(x => x.Message)
-                .Returns(new OperationResult<IUserPositionResponse>
-                {
-                    Body = new UserPositionResponse
-                    {
-                        UserPositionName = userPositionName
-                    },
-                    IsSuccess = true,
-                    Errors = null
-                });
-
-            requestBrokerMock.Setup(
-                    x => x.GetResponse<IOperationResult<IUserPositionResponse>>(
-                        It.IsAny<object>(), default, default))
-                .Returns(Task.FromResult(responseBrokerMock.Object));
-
-            await harness.Start();
-
-            try
-            {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
-
-                var response = await requestClient.GetResponse<IOperationResult<IUserInfoResponse>>(new
-                {
-                    UserId = userId
-                });
-
-                var expection = new ArgumentNullException(nameof(DbUser));
-
-                var expected = new
-                {
-                    IsSuccess = false,
-                    Errors = new List<string> {expection.Message},
+                    Errors = new List<string> { "User with this id not found." },
                     Body = null as object
                 };
 

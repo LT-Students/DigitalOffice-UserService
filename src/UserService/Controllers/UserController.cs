@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -37,6 +38,14 @@ namespace LT.DigitalOffice.UserService.Controllers
             return command.Execute(userEmail);
         }
 
+        [HttpGet("getUsersByIds")]
+        public IEnumerable<User> GetUsersByIds(
+            [FromServices] IGetUsersByIdsCommand command,
+            [FromQuery] IEnumerable<Guid> usersIds)
+        {
+            return command.Execute(usersIds);
+        }
+
         [HttpDelete("disableUserById")]
         public void DisableUserById(
             [FromServices] IDisableUserByIdCommand command,
@@ -50,6 +59,16 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromQuery] string userEmail)
         {
             command.Execute(userEmail);
+        }
+
+        [HttpGet("getAllUsers")]
+        public IEnumerable<User> GetAllUsers(
+            [FromServices] IGetAllUsersCommand command,
+            [FromQuery] int skipCount,
+            [FromQuery] int takeCount,
+            [FromQuery] string userNameFilter)
+        {
+            return command.Execute(skipCount, takeCount, userNameFilter);
         }
     }
 }

@@ -16,16 +16,13 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
     {
         private IMapper<DbUser, User> mapper;
         private IMapper<UserRequest, DbUser> mapperEditUserRequest;
-        private IMapper<DbUser, string, object> mapper2;
 
         private const string Message = "smth";
         private const string FirstName = "Ivan";
-        private const string MiddleName = "Ivanovich";
         private const string LastName = "Dudikov";
         private const bool IsActive = true;
         private const string Status = "Hello, world!";
         private const bool IsAdmin = false;
-        private const string UserPositionName = "Software Engineer";
 
         private Guid userId;
         private Guid achievementId;
@@ -37,14 +34,12 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private DbUserAchievement dbUserAchievement;
         private DbUser dbUser;
         private DbUserCertificateFile dbUserCertificateFile;
-        private IUserPositionResponse userPosition;
 
         [SetUp]
         public void SetUp()
         {
             mapper = new UserMapper();
             mapperEditUserRequest = new UserMapper();
-            mapper2 = new UserMapper();
 
             userId = Guid.NewGuid();
             achievementId = Guid.NewGuid();
@@ -163,44 +158,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             UserRequest request = null;
 
             Assert.Throws<BadRequestException>(() => mapperEditUserRequest.Map(request));
-        }
-        #endregion
-
-        #region ITwoModelsMapper<DbUser, IUserPositionResponse, object>
-        [Test]
-        public void ShouldThrowArgumentNullExceptionWhenFirstArgumentIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => mapper2.Map(dbUser, null));
-        }
-
-        [Test]
-        public void ShouldThrowArgumentNullExceptionWhenSecondArgumentIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => mapper2.Map(dbUser, null));
-        }
-
-        [Test]
-        public void ShouldReturnModel()
-        {
-            userPosition = new InheritedUserPositionResponse
-            {
-                UserPositionName = UserPositionName
-            };
-
-            dbUser.MiddleName = MiddleName;
-
-            var expectedResult = new
-            {
-                UserId = userId,
-                FirstName = FirstName,
-                LastName = LastName,
-                MiddleName = MiddleName,
-                UserPosition = userPosition.UserPositionName
-            };
-
-            var result = mapper2.Map(dbUser, userPosition.UserPositionName);
-
-            SerializerAssert.AreEqual(expectedResult, result);
         }
         #endregion
     }

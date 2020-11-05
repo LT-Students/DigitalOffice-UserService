@@ -11,8 +11,7 @@ namespace LT.DigitalOffice.UserService.Mappers
     /// Represents mapper. Provides methods for converting an object of <see cref="DbUser"/>
     /// type into an object of <see cref="User"/> type according to some rule.
     /// </summary>
-    public class UserMapper : IMapper<DbUser, User>, IMapper<DbUser, string, object>,
-        IMapper<UserRequest, DbUser>
+    public class UserMapper : IMapper<DbUser, User>, IMapper<UserRequest, DbUser>
     {
         public User Map(DbUser value)
         {
@@ -61,28 +60,6 @@ namespace LT.DigitalOffice.UserService.Mappers
                 AvatarFileId = value.AvatarFileId,
                 IsActive = value.IsActive,
                 IsAdmin = value.IsAdmin
-            };
-        }
-
-        public object Map(DbUser user, string position)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(User));
-            }
-
-            if (position == null)
-            {
-                throw new ArgumentNullException(nameof(position));
-            }
-
-            return new
-            {
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                MiddleName = user.MiddleName,
-                UserPosition = position
             };
         }
     }
