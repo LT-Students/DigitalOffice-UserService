@@ -55,5 +55,12 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
         /// <returns>Collection of user models.</returns>
         IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
+
+        /// <summary>
+        /// Check if user exists.
+        /// </summary>
+        /// <param name="userId">Id of dbUser.</param>
+        /// <returns>True if user exist, otherwise false.</returns>
+        bool IsUserExists(Guid userId);
     }
 }

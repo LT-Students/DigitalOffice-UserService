@@ -97,5 +97,10 @@ namespace LT.DigitalOffice.UserService.Data
 
             return dbUsers;
         }
+
+        public bool IsUserExists(Guid userId)
+        {
+            return _provider.Users.FirstOrDefault(x => x.Id == userId) != null;
+        }
     }
 }

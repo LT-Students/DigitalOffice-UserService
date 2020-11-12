@@ -285,5 +285,19 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.AreEqual(result, new[] { firstUser });
         }
         #endregion
+
+        #region IsUserExists
+        [Test]
+        public void ShouldReturnFalseIfUserNotExists()
+        {
+            Assert.IsFalse(repository.IsUserExists(Guid.NewGuid()));
+        }
+
+        [Test]
+        public void ShouldReturnTrueIfUserExists()
+        {
+            Assert.IsTrue(repository.IsUserExists(firstUserId));
+        }
+        #endregion
     }
 }
