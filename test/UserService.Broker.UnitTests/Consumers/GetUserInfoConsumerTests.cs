@@ -1,11 +1,9 @@
 ﻿using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.UnitTestLibrary;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using MassTransit.Testing;
 using Moq;

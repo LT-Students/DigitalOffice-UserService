@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
+
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>LT.DigitalOffice.UserService.Data</AssemblyName>
     <RootNamespace>LT.DigitalOffice.UserService.Data</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.10" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UserService.Data.Provider.MsSql.Ef\UserService.Data.Provider.MsSql.Ef.csproj" />

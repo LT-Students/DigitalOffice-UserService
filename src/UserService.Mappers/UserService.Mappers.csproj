@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
+
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>LT.DigitalOffice.UserService.Mappers</AssemblyName>
     <RootNamespace>LT.DigitalOffice.UserService.Mappers</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.10" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />

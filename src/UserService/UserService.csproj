@@ -1,22 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>LT.DigitalOffice.UserService</AssemblyName>
-    <RootNamespace>LT.DigitalOffice.UserService</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="4.0.0" />
-    <PackageReference Include="LT.DigitalOffice.Kernel" Version="1.0.10" />
-    <PackageReference Include="MassTransit" Version="7.0.4" />
-    <PackageReference Include="MassTransit.AspNetCore" Version="7.0.4" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
-
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UserService.Broker\UserService.Broker.csproj" />
