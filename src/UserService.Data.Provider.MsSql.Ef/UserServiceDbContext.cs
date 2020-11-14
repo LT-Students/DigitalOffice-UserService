@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Database;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -32,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
             return Entry(obj).State;
         }
 
-        void IDataProvider.Save()
+        void IBaseDataProvider.Save()
         {
             SaveChanges();
         }
