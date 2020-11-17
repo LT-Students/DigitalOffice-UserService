@@ -154,6 +154,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureRepositories(IServiceCollection services)
         {
             services.AddTransient<IDataProvider, UserServiceDbContext>();
+
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IUserCredentialsRepository, UserCredentialsRepository>();
         }
@@ -162,7 +163,6 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
             services.AddTransient<IMapper<DbUser, User>, UserMapper>();
-            services.AddTransient<IMapper<DbUser, string, object>, UserMapper>();
             services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
         }
 
@@ -172,6 +172,7 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
+            services.AddTransient<IGetUsersByIdsCommand, GetUsersByIdsCommand>();
             services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
             services.AddTransient<IGetAllUsersCommand, GetAllUsersCommand>();
         }
