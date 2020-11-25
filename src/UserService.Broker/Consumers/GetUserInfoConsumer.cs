@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 throw new NotFoundException();
             }
 
-            return IGetUserResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName); //mapper.Map(dbUser, userPosition);
+            return IGetUserResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive); //mapper.Map(dbUser, userPosition);
         }
     }
 }
