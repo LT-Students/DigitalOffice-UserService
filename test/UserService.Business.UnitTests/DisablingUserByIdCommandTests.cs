@@ -45,12 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             accessValidatorMock = new Mock<IAccessValidator>();
             repositoryMock = new Mock<IUserRepository>();
             command = new DisableUserByIdCommand(repositoryMock.Object, accessValidatorMock.Object);
-        }
-        #endregion
 
-        [Test]
-        public void ShouldThrowExceptionWhenUserIdNotFoundInDb()
-        {
             accessValidatorMock
                 .Setup(x => x.IsAdmin())
                 .Returns(true);
@@ -59,6 +54,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(true);
 
+            repositoryMock
+                .Setup(x => x.GetUserInfoById(userId))
+                .Returns(newDbUser);
+
+            repositoryMock
+                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
+                .Returns(true);
+        }
+        #endregion
+
+        [Test]
+        public void ShouldThrowExceptionWhenUserIdNotFoundInDb()
+        {
             repositoryMock
                 .Setup(x => x.GetUserInfoById(userId))
                 .Throws(new Exception());
@@ -71,18 +79,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenEditingUserInDb()
         {
-            accessValidatorMock
-                .Setup(x => x.IsAdmin())
-                .Returns(true);
-
-            accessValidatorMock
-                .Setup(x => x.HasRights(It.IsAny<int>()))
-                .Returns(true);
-
-            repositoryMock
-                .Setup(x => x.GetUserInfoById(userId))
-                .Returns(newDbUser);
-
             repositoryMock
                 .Setup(x => x.EditUser(It.IsAny<DbUser>()))
                 .Throws(new Exception());
@@ -95,22 +91,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldUserDisabledSuccess()
         {
-            accessValidatorMock
-                .Setup(x => x.IsAdmin())
-                .Returns(true);
-
-            accessValidatorMock
-                .Setup(x => x.HasRights(It.IsAny<int>()))
-                .Returns(true);
-
-            repositoryMock
-                .Setup(x => x.GetUserInfoById(userId))
-                .Returns(newDbUser);
-
-            repositoryMock
-                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
-                .Returns(true);
-
             Assert.DoesNotThrow(() => command.Execute(userId));
 
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);
@@ -121,16 +101,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldUserDisabledSuccessWhenUserIsAdmin()
         {
             accessValidatorMock
-                .Setup(x => x.IsAdmin())
-                .Returns(true);
-
-            repositoryMock
-                .Setup(x => x.GetUserInfoById(userId))
-                .Returns(newDbUser);
-
-            repositoryMock
-                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
-                .Returns(true);
+                .Setup(x => x.HasRights(It.IsAny<int>()))
+                .Returns(false);
 
             command.Execute(userId);
 
@@ -145,18 +117,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             accessValidatorMock
                 .Setup(x => x.IsAdmin())
                 .Returns(false);
-
-            accessValidatorMock
-                .Setup(x => x.HasRights(It.IsAny<int>()))
-                .Returns(true);
-
-            repositoryMock
-                .Setup(x => x.GetUserInfoById(userId))
-                .Returns(newDbUser);
-
-            repositoryMock
-                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
-                .Returns(true);
 
             Assert.DoesNotThrow(() => command.Execute(userId));
             repositoryMock.Verify(repository => repository.GetUserInfoById(userId), Times.Once);

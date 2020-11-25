@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
@@ -20,6 +21,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<ValidationResult> validationResultIsValidMock;
         private Mock<IMapper<UserRequest, DbUser>> mapperUserMock;
         private Mock<IMapper<UserRequest, DbUserCredentials>> mapperUserCredentialsMock;
+        private Mock<IAccessValidator> accessValidatorMock;
 
         private Guid userId;
         private ValidationResult validationResultError;
@@ -75,41 +77,23 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             mapperUserCredentialsMock = new Mock<IMapper<UserRequest, DbUserCredentials>>();
 
             validatorMock = new Mock<IValidator<UserRequest>>();
+            accessValidatorMock = new Mock<IAccessValidator>();
 
             command = new CreateUserCommand(
                 userRepositoryMock.Object,
                 validatorMock.Object,
                 mapperUserMock.Object,
-                mapperUserCredentialsMock.Object);
-        }
+                mapperUserCredentialsMock.Object,
+                accessValidatorMock.Object);
 
-        [Test]
-        public void ShouldThrowExceptionWhenRepositoryThrowsException()
-        {
-            validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(validationResultIsValidMock.Object);
+            accessValidatorMock
+                .Setup(x => x.IsAdmin())
+                .Returns(true);
 
-            mapperUserMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserRequest>()))
-                .Returns(new DbUser())
-                .Verifiable();
+            accessValidatorMock
+                .Setup(x => x.HasRights(It.IsAny<int>()))
+                .Returns(true);
 
-            mapperUserCredentialsMock
-                .Setup(mapper => mapper.Map(It.IsAny<UserRequest>()))
-                .Returns(new DbUserCredentials())
-                .Verifiable();
-
-            userRepositoryMock
-                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
-                .Throws(new Exception());
-
-            Assert.Throws<Exception>(() => command.Execute(request));
-        }
-
-        [Test]
-        public void ShouldCreateUserWhenUserDataIsValid()
-        {
             validatorMock
                 .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
                 .Returns(validationResultIsValidMock.Object);
@@ -128,6 +112,48 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(mapper => mapper.Map(It.IsAny<UserRequest>()))
                 .Returns(new DbUserCredentials())
                 .Verifiable();
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenRepositoryThrowsException()
+        {
+            userRepositoryMock
+                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
+                .Throws(new Exception());
+
+            Assert.Throws<Exception>(() => command.Execute(request));
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenUserDataIsValid()
+        {
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserIsAdmin()
+        {
+            accessValidatorMock
+                .Setup(x => x.HasRights(It.IsAny<int>()))
+                .Returns(false);
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserHasRighhts()
+        {
+            accessValidatorMock
+                .Setup(x => x.IsAdmin())
+                .Returns(false);
 
             Assert.That(command.Execute(request), Is.EqualTo(userId));
             mapperUserMock.Verify();
@@ -139,10 +165,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenMapperThrowsException()
         {
-            validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(validationResultIsValidMock.Object);
-
             mapperUserMock
                 .Setup(mapper => mapper.Map(It.IsAny<UserRequest>()))
                 .Throws<Exception>().Verifiable();
@@ -150,10 +172,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             mapperUserCredentialsMock
                 .Setup(mapper => mapper.Map(It.IsAny<UserRequest>()))
                 .Throws<Exception>().Verifiable();
-
-            userRepositoryMock
-                .Setup(x => x.CreateUser(It.IsAny<DbUser>(), It.IsAny<DbUserCredentials>()))
-                .Returns(userId);
 
             Assert.Throws<Exception>(() => command.Execute(request));
             validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
