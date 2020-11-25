@@ -39,7 +39,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Data.Provider",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.Models.Broker", "src\UserService.Models.Broker\UserService.Models.Broker.csproj", "{CE95382B-A6A0-48E5-86CC-0EBCA7E42F8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.UserCredentials", "src\UserService.UserCredentials\UserService.UserCredentials.csproj", "{E52D5932-1A40-4EB4-B69D-B975B425EE6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.UserCredentials", "src\UserService.UserCredentials\UserService.UserCredentials.csproj", "{E52D5932-1A40-4EB4-B69D-B975B425EE6C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{C29D4B76-BD9C-4F2C-B87B-F8EFDE707FB1}"
+	ProjectSection(SolutionItems) = preProject
+		Common.Configurations.targets = Common.Configurations.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
