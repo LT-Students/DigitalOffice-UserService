@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business
 
 			var dbUser = repository.GetUserByEmail(userEmail);
 
-			var generatedId = SetGuidInCache(Guid.NewGuid());
+			var generatedId = SetGuidInCache(dbUser.Id);
 
 			return SentRequestInMessageService(dbUser, generatedId);
 		}

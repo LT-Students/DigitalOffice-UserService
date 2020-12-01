@@ -4,7 +4,6 @@ using LT.DigitalOffice.Kernel.UnitTestLibrary;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -119,12 +118,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldThrowExceptionWhenUserCredentialsDoesNotFound()
         {
             Assert.Throws<NotFoundException>(() => repository.ChangePassword("login12345", "newPassword"));
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenRequestDataIsEmpty()
-        {
-            Assert.Throws<BadRequestException>(() => repository.ChangePassword(null, "newPassword"));
         }
 
         [Test]
