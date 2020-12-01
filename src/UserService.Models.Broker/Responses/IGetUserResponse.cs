@@ -8,15 +8,17 @@ namespace LT.DigitalOffice.Broker.Responses
         string FirstName { get; }
         string MiddleName { get; }
         string LastName { get; set; }
+        bool IsActive { get; set; }
 
-        static object CreateObj(Guid id, string firstName, string middleName, string lastName)
+        static object CreateObj(Guid id, string firstName, string middleName, string lastName, bool isActive)
         {
             return new
             {
                 Id = id,
                 FirstName = firstName,
                 MiddleName = middleName,
-                LastName = lastName
+                LastName = lastName,
+                IsActive = isActive
             };
         }
     }

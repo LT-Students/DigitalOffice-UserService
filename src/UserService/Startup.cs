@@ -9,6 +9,7 @@ using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Business;
 using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Configuration;
 using LT.DigitalOffice.UserService.Data;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
@@ -70,7 +71,7 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMassTransit(IServiceCollection services)
         {
-            var rabbitmqOptions = Configuration.GetSection(RabbitMQOptions.RabbitMQ).Get<RabbitMQOptions>();
+            var rabbitmqOptions = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
 
             services.AddMassTransit(x =>
             {
@@ -101,16 +102,15 @@ namespace LT.DigitalOffice.UserService
                     });
                 });
 
-                x.AddRequestClient<IUserDescriptionRequest>(new Uri("rabbitmq://localhost/MessageService"));
-                x.AddRequestClient<IGetUserPositionRequest>(
-                    new Uri("rabbitmq://localhost/CompanyService"));
-                x.AddRequestClient<IGetFileRequest>(
-                    new Uri("rabbitmq://localhost/FileService"));
-                x.AddRequestClient<ICheckTokenRequest>(
-                    new Uri("rabbitmq://localhost/AuthenticationService_ValidationJwt"));
+                x.AddRequestClient<IUserDescriptionRequest>(new Uri(rabbitmqOptions.UserDescriptionUrl));
+                x.AddRequestClient<IGetUserPositionRequest>(new Uri(rabbitmqOptions.CompanyServiceUrl));
+                x.AddRequestClient<IGetFileRequest>(new Uri(rabbitmqOptions.FileServiceUrl));
+                x.AddRequestClient<ICheckTokenRequest>(new Uri(rabbitmqOptions.AuthenticationServiceValidationUrl));
 
                 x.ConfigureKernelMassTransit(rabbitmqOptions);
             });
+
+            services.AddMassTransitHostedService();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -157,6 +157,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureRepositories(IServiceCollection services)
         {
             services.AddTransient<IDataProvider, UserServiceDbContext>();
+
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IUserCredentialsRepository, UserCredentialsRepository>();
         }
@@ -174,6 +175,7 @@ namespace LT.DigitalOffice.UserService
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
+            services.AddTransient<IGetUsersByIdsCommand, GetUsersByIdsCommand>();
             services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
             services.AddTransient<IGetAllUsersCommand, GetAllUsersCommand>();
         }

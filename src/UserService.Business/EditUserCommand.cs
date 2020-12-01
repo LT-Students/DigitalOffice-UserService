@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -16,6 +18,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserCredentialsRepository userCredentialsRepository;
         private readonly IUserRequestMapper mapperUser;
         private readonly IUserCredentialsRequestMapper mapperUserCredentials;
+        private readonly IAccessValidator accessValidator;
 
         public EditUserCommand(
             [FromServices] IValidator<UserRequest> validator,
@@ -23,17 +26,26 @@ namespace LT.DigitalOffice.UserService.Business
             [FromServices] IUserCredentialsRepository userCredentialsRepository,
             [FromServices] IUserRequestMapper mapperUser,
             [FromServices] IUserCredentialsRequestMapper mapperUserCredentials)
+            [FromServices] IAccessValidator accessValidator)
         {
             this.validator = validator;
             this.userRepository = userRepository;
             this.mapperUser = mapperUser;
             this.mapperUserCredentials = mapperUserCredentials;
             this.userCredentialsRepository = userCredentialsRepository;
+            this.accessValidator = accessValidator;
         }
 
         /// <inheritdoc/>
         public bool Execute(UserRequest request)
         {
+            const int rightId = 1;
+
+            if (!(accessValidator.IsAdmin() || accessValidator.HasRights(rightId)))
+            {
+                throw new ForbiddenException("Not enough rights.");
+            }
+
             validator.ValidateAndThrowCustom(request);
 
             var dbUser = mapperUser.Map(request);

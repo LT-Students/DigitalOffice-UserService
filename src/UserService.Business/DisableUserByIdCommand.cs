@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;

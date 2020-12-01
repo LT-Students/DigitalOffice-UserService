@@ -1,4 +1,5 @@
-using LT.DigitalOffice.Kernel.UnitTestLibrary;
+using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
@@ -57,10 +58,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRepositoryThrowsException()
         {
-            repositoryMock.Setup(repository => repository.GetUserInfoById(userId)).Throws<Exception>().Verifiable();
+            repositoryMock.Setup(repository => repository.GetUserInfoById(userId)).Throws<NotFoundException>().Verifiable();
             mapperMock.Setup(mapper => mapper.Map(dbUser)).Returns(user);
 
-            Assert.Throws<Exception>(() => getUserInfoByIdCommand.Execute(userId));
+            Assert.Throws<NotFoundException>(() => getUserInfoByIdCommand.Execute(userId));
             repositoryMock.Verify();
             mapperMock.Verify(mapper => mapper.Map(It.IsAny<DbUser>()), Times.Never);
         }

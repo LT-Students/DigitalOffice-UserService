@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,7 +54,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 throw new NotFoundException();
             }
 
-            return IGetUserResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName); //mapper.Map(dbUser, userPosition);
+            return IGetUserResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive); //mapper.Map(dbUser, userPosition);
         }
     }
 }
