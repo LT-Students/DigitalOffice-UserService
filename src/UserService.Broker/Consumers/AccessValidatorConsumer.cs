@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidator.Requests;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Requests;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using MassTransit;
