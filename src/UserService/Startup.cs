@@ -47,12 +47,13 @@ namespace LT.DigitalOffice.UserService
             });
 
             services.AddControllers();
-            services.AddKernelExtensions();
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
 
             services.AddMemoryCache();
+
+            services.AddKernelExtensions();
 
             ConfigureCommands(services);
             ConfigureRepositories(services);
@@ -164,6 +165,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureCommands(IServiceCollection services)
         {
             services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+            services.AddTransient<IChangePasswordCommand, ChangePasswordCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();

@@ -1,3 +1,6 @@
+using LT.DigitalOffice.Broker.Responses;
+using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
@@ -5,8 +8,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UnitTestKernel;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {

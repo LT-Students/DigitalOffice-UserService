@@ -4,7 +4,8 @@ using System.Text;
 
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Data.UnitTests"),
            InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests"),
-           InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers")]
+           InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers"),
+           InternalsVisibleTo("LT.DigitalOffice.UserService.Data")]
 
 namespace LT.DigitalOffice.UserService.UserCredentials
 {
