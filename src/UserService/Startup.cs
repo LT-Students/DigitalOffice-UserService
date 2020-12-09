@@ -47,7 +47,6 @@ namespace LT.DigitalOffice.UserService
             });
 
             services.AddControllers();
-            services.AddKernelExtensions();
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
