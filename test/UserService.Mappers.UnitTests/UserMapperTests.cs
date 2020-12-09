@@ -1,6 +1,6 @@
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.Kernel.UnitTestLibrary;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;

@@ -61,8 +61,6 @@ namespace LT.DigitalOffice.UserService
             ConfigureMappers(services);
             ConfigureMassTransit(services);
 
-            services.AddMassTransitHostedService();
-
             services.AddKernelExtensions();
         }
 
