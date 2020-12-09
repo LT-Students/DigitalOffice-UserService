@@ -55,13 +55,13 @@ namespace LT.DigitalOffice.UserService
 
             services.AddMemoryCache();
 
+            services.AddKernelExtensions();
+
             ConfigureCommands(services);
             ConfigureRepositories(services);
             ConfigureValidators(services);
             ConfigureMappers(services);
             ConfigureMassTransit(services);
-
-            services.AddKernelExtensions();
         }
 
         private void ConfigureMassTransit(IServiceCollection services)
