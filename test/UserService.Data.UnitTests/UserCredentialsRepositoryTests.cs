@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.Kernel.UnitTestLibrary;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;

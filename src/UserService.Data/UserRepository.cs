@@ -3,7 +3,6 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 

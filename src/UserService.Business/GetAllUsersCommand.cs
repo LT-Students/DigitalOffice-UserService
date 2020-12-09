@@ -4,7 +4,6 @@ using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business
