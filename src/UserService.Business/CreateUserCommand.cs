@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.Kernel.AccessValidator.Interfaces;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -24,8 +24,8 @@ namespace LT.DigitalOffice.UserService.Business
             [FromServices] IUserRepository userRepository,
             [FromServices] IValidator<UserRequest> validator,
             [FromServices] IUserRequestMapper mapperUser,
+            [FromServices] IAccessValidator accessValidator,
             [FromServices] IUserCredentialsRequestMapper mapperUserCredentials)
-            [FromServices] IAccessValidator accessValidator)
         {
             _validator = validator;
             _userRepository = userRepository;
