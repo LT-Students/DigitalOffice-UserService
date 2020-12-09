@@ -41,14 +41,13 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddHealthChecks();
 
-            services.AddControllers();
-
             services.AddDbContext<UserServiceDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
             });
 
             services.AddControllers();
+            services.AddKernelExtensions();
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
