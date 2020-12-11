@@ -3,7 +3,6 @@ using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
@@ -84,8 +83,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 userRepositoryMock.Object,
                 validatorMock.Object,
                 mapperUserMock.Object,
-                mapperUserCredentialsMock.Object,
-                accessValidatorMock.Object);
+                accessValidatorMock.Object,
+                mapperUserCredentialsMock.Object);
 
             accessValidatorMock
                 .Setup(x => x.IsAdmin())
