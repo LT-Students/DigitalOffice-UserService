@@ -1,34 +1,15 @@
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Mappers.RequestsMappers;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
 using System;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests
+namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
 {
-    public class UserMapperTests
+    internal class UserRequestMapperTests
     {
         private UserRequestMapper userRequestMapper;
-
-        private const string Message = "smth";
-        private const string FirstName = "Ivan";
-        private const string LastName = "Dudikov";
-        private const bool IsActive = true;
-        private const string Status = "Hello, world!";
-        private const bool IsAdmin = false;
-
-        private Guid userId;
-        private Guid achievementId;
-        private Guid certificateFileId;
-        private Guid pictureFileId;
-        private Guid avatarFileId;
-
-        private DbAchievement achievement;
-        private DbUserAchievement dbUserAchievement;
-        private DbUser dbUser;
-        private DbUserCertificateFile dbUserCertificateFile;
 
         [SetUp]
         public void SetUp()

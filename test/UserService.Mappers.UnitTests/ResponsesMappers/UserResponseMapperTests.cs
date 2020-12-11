@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Mappers.ResponsesMappers;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
@@ -7,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests.ResponsesMapper
+namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 {
     internal class UserResponseMapperTests
     {

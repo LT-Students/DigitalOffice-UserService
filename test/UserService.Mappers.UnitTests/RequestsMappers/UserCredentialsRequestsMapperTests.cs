@@ -1,14 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Mappers.RequestsMappers;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using NUnit.Framework;
 using System;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests
+namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
 {
-    class UserCredentialsMapperTests
+    internal class UserCredentialsRequestsMapperTests
     {
         private IUserCredentialsRequestMapper _mapper;
 
