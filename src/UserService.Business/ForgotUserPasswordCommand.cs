@@ -16,7 +16,8 @@ using System.Text;
 
 namespace LT.DigitalOffice.UserService.Business
 {
-    public class ForgotUserPasswordCommand : IForgotPasswordCommand
+	/// <inheritdoc/>
+	public class ForgotUserPasswordCommand : IForgotPasswordCommand
 	{
 		private readonly IRequestClient<IUserDescriptionRequest> requestClientMS;
 		private readonly IOptions<CacheOptions> cacheOptions;
@@ -38,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Business
 			this.cache = cache;
 		}
 
+		/// <inheritdoc/>
 		public bool Execute(string userEmail)
 		{
 			validator.ValidateAndThrowCustom(userEmail);

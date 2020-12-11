@@ -1,7 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
 
@@ -13,14 +12,14 @@ namespace LT.DigitalOffice.UserService.Business
     public class GetUserByIdCommand : IGetUserByIdCommand
     {
         private readonly IUserRepository repository;
-        private readonly IMapper<DbUser, User> mapper;
+        private readonly IUserResponseMapper mapper;
 
         /// <summary>
         /// Initialize new instance of <see cref="GetUserByIdCommand"/> class with specified repository.
         /// </summary>
         /// <param name="repository">Specified repository.</param>
         /// <param name="mapper">Specified mapper that convert user model from database to user model for response.</param>
-        public GetUserByIdCommand(IUserRepository repository, IMapper<DbUser, User> mapper)
+        public GetUserByIdCommand(IUserRepository repository, IUserResponseMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;

@@ -2,7 +2,7 @@
 using FluentValidation.Results;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
@@ -15,7 +15,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
     public class GetUserByEmailCommandTests
     {
         private Mock<IUserRepository> repositoryMock;
-        private Mock<IMapper<DbUser, User>> mapperMock;
+        private Mock<IUserResponseMapper> mapperMock;
         private Mock<IValidator<string>> validatorMock;
         private Mock<ValidationResult> validationResultIsValidMock;
 
@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             validatorMock = new Mock<IValidator<string>>();
             repositoryMock = new Mock<IUserRepository>();
-            mapperMock = new Mock<IMapper<DbUser, User>>();
+            mapperMock = new Mock<IUserResponseMapper>();
 
             command = new GetUserByEmailCommand(validatorMock.Object, repositoryMock.Object, mapperMock.Object);
         }

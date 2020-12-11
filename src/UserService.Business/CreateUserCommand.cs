@@ -4,8 +4,7 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,16 +16,16 @@ namespace LT.DigitalOffice.UserService.Business
     {
         private readonly IUserRepository _userRepository;
         private readonly IValidator<UserRequest> _validator;
-        private readonly IMapper<UserRequest, DbUser> _mapperUser;
-        private readonly IMapper<UserRequest, DbUserCredentials> _mapperUserCredentials;
+        private readonly IUserRequestMapper _mapperUser;
+        private readonly IUserCredentialsRequestMapper _mapperUserCredentials;
         private readonly IAccessValidator _accessValidator;
 
         public CreateUserCommand(
             [FromServices] IUserRepository userRepository,
             [FromServices] IValidator<UserRequest> validator,
-            [FromServices] IMapper<UserRequest, DbUser> mapperUser,
-            [FromServices] IMapper<UserRequest, DbUserCredentials> mapperUserCredentials,
-            [FromServices] IAccessValidator accessValidator)
+            [FromServices] IUserRequestMapper mapperUser,
+            [FromServices] IAccessValidator accessValidator,
+            [FromServices] IUserCredentialsRequestMapper mapperUserCredentials)
         {
             _validator = validator;
             _userRepository = userRepository;

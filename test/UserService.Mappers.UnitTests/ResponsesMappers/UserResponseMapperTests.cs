@@ -1,7 +1,4 @@
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
@@ -9,12 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests
+namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 {
-    public class UserMapperTests
+    internal class UserResponseMapperTests
     {
-        private IMapper<DbUser, User> mapper;
-        private IMapper<UserRequest, DbUser> mapperEditUserRequest;
+        private UserResponseMapper userResponseMapper;
 
         private const string Message = "smth";
         private const string FirstName = "Ivan";
@@ -37,8 +33,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [SetUp]
         public void SetUp()
         {
-            mapper = new UserMapper();
-            mapperEditUserRequest = new UserMapper();
+            userResponseMapper = new UserResponseMapper();
 
             userId = Guid.NewGuid();
             achievementId = Guid.NewGuid();
@@ -83,18 +78,16 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             };
         }
 
-        #region IMapper<DbUser, User>
-
         [Test]
         public void ShouldThrowBadRequestExceptionWhenDbUserIsNull()
         {
-            Assert.Throws<BadRequestException>(() => mapper.Map(null));
+            Assert.Throws<BadRequestException>(() => userResponseMapper.Map(null));
         }
 
         [Test]
         public void ShouldReturnUserModelWhenMappingValidDbUser()
         {
-            var resultUserModel = mapper.Map(dbUser);
+            var resultUserModel = userResponseMapper.Map(dbUser);
 
             Assert.IsNotNull(resultUserModel);
             Assert.IsInstanceOf<User>(resultUserModel);
@@ -112,52 +105,5 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
         }
-        #endregion
-
-        #region EditUserRequest to DbUser
-        [Test]
-        public void ShouldReturnNewDbUserWhenDataCorrect()
-        {
-            var request = new UserRequest()
-            {
-                Id = Guid.NewGuid(),
-                Email = "Example@gmail.com",
-                Login = "Example",
-                FirstName = "Example",
-                LastName = "Example",
-                MiddleName = "Example",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                IsActive = true,
-                AvatarFileId = Guid.NewGuid()
-            };
-
-            var result = mapperEditUserRequest.Map(request);
-
-            var user = new DbUser()
-            {
-                Id = (Guid)request.Id,
-                Email = "Example@gmail.com",
-                FirstName = "Example",
-                LastName = "Example",
-                MiddleName = "Example",
-                Status = "Example",
-                IsAdmin = false,
-                IsActive = true,
-                AvatarFileId = request.AvatarFileId
-            };
-
-            SerializerAssert.AreEqual(user, result);
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenRequestIsNull()
-        {
-            UserRequest request = null;
-
-            Assert.Throws<BadRequestException>(() => mapperEditUserRequest.Map(request));
-        }
-        #endregion
     }
 }

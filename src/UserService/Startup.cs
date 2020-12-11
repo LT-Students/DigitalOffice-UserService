@@ -13,9 +13,10 @@ using LT.DigitalOffice.UserService.Configuration;
 using LT.DigitalOffice.UserService.Data;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Mappers;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers;
+using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation;
 using MassTransit;
@@ -157,9 +158,9 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMappers(IServiceCollection services)
         {
-            services.AddTransient<IMapper<UserRequest, DbUser>, UserMapper>();
-            services.AddTransient<IMapper<DbUser, User>, UserMapper>();
-            services.AddTransient<IMapper<UserRequest, DbUserCredentials>, UserCredentialsMapper>();
+            services.AddTransient<IUserRequestMapper, UserRequestMapper>();
+            services.AddTransient<IUserResponseMapper, UserResponseMapper>();
+            services.AddTransient<IUserCredentialsRequestMapper, UserCredentialsRequestMapper>();
         }
 
         private void ConfigureCommands(IServiceCollection services)

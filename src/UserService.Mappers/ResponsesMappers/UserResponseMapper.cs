@@ -1,17 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using System;
 using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Mappers
+namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
 {
-    /// <summary>
-    /// Represents mapper. Provides methods for converting an object of <see cref="DbUser"/>
-    /// type into an object of <see cref="User"/> type according to some rule.
-    /// </summary>
-    public class UserMapper : IMapper<DbUser, User>, IMapper<UserRequest, DbUser>
+    public class UserResponseMapper : IUserResponseMapper
     {
         public User Map(DbUser value)
         {
@@ -36,29 +31,6 @@ namespace LT.DigitalOffice.UserService.Mappers
                 LastName = value.LastName,
                 MiddleName = value.MiddleName,
                 Status = value.Status,
-                IsAdmin = value.IsAdmin
-            };
-        }
-
-        public DbUser Map(UserRequest value)
-        {
-            if (value == null)
-            {
-                throw new BadRequestException();
-            }
-
-            value.Id ??= Guid.NewGuid();
-
-            return new DbUser
-            {
-                Id = value.Id.Value,
-                Email = value.Email,
-                FirstName = value.FirstName,
-                LastName = value.LastName,
-                MiddleName = value.MiddleName,
-                Status = value.Status,
-                AvatarFileId = value.AvatarFileId,
-                IsActive = value.IsActive,
                 IsAdmin = value.IsAdmin
             };
         }

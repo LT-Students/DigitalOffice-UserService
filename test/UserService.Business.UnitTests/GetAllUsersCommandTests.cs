@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Moq;
@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
     public class GetAllUsersCommandTests
     {
         private Mock<IUserRepository> repositoryMock;
-        private Mock<IMapper<DbUser, User>> mapperMock;
+        private Mock<IUserResponseMapper> mapperMock;
         private IGetAllUsersCommand command;
 
         private Guid userId;
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void OneTimeSetUp()
         {
             repositoryMock = new Mock<IUserRepository>();
-            mapperMock = new Mock<IMapper<DbUser, User>>();
+            mapperMock = new Mock<IUserResponseMapper>();
 
             command = new GetAllUsersCommand(repositoryMock.Object, mapperMock.Object);
 
