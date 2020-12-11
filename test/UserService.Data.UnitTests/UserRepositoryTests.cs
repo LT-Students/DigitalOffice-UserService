@@ -4,14 +4,14 @@ using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -51,8 +51,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 UserId = firstUser.Id,
                 Login = "Example",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example"))),
+                PasswordHash = UserPassword.GetPasswordHash("Example", "Example_salt", "Password"),
                 Salt = "Example_Salt"
             };
 
@@ -75,8 +74,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 UserId = secondUser.Id,
                 Login = "Example2",
-                PasswordHash = Encoding.Default.GetString(new SHA512Managed()
-                    .ComputeHash(Encoding.Default.GetBytes("Example2"))),
+                PasswordHash = UserPassword.GetPasswordHash("Example", "Example_salt", "Password2"),
                 Salt = "Example_Salt2"
             };
         }

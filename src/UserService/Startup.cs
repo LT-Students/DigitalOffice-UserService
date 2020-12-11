@@ -44,8 +44,6 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddHealthChecks();
 
-            services.AddControllers();
-
             services.AddDbContext<UserServiceDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
@@ -58,15 +56,13 @@ namespace LT.DigitalOffice.UserService
 
             services.AddMemoryCache();
 
+            services.AddKernelExtensions();
+
             ConfigureCommands(services);
             ConfigureRepositories(services);
             ConfigureValidators(services);
             ConfigureMappers(services);
             ConfigureMassTransit(services);
-
-            services.AddMassTransitHostedService();
-
-            services.AddKernelExtensions();
         }
 
         private void ConfigureMassTransit(IServiceCollection services)
@@ -172,6 +168,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureCommands(IServiceCollection services)
         {
             services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+            services.AddTransient<IChangePasswordCommand, ChangePasswordCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
             services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();

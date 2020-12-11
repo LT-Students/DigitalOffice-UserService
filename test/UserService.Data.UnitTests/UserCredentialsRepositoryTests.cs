@@ -11,7 +11,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
-    class UserCredentialsRepositoryTests
+    public class UserCredentialsRepositoryTests
     {
         private IDataProvider provider;
         private IUserCredentialsRepository repository;
@@ -65,6 +65,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             }
         }
 
+        #region GetUserCredentialsByUserId
         [Test]
         public void ShouldThrowExceptionWhenGotUserCredentialsUserIdDoesNotFound()
         {
@@ -78,7 +79,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             SerializerAssert.AreEqual(userCredentials, repository.GetUserCredentialsByUserId(userId));
         }
+        #endregion
 
+        #region GetUserCredentialsByLogin
         [Test]
         public void ShouldThrowExceptionWhenUserLoginDoesNotFound()
         {
@@ -90,7 +93,9 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             SerializerAssert.AreEqual(userCredentials, repository.GetUserCredentialsByLogin(userCredentials.Login));
         }
+        #endregion
 
+        #region EditUserCredentials
         [Test]
         public void ShouldThrowExceptionWhenEditedUserCredentialsFieldUserIdDoesNotFound()
         {
@@ -106,5 +111,23 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             Assert.That(repository.EditUserCredentials(userCredentials), Is.True);
         }
+        #endregion
+
+        #region ChangePassword
+        [Test]
+        public void ShouldThrowExceptionWhenUserCredentialsDoesNotFound()
+        {
+            Assert.Throws<NotFoundException>(() => repository.ChangePassword("login12345", "newPassword"));
+        }
+
+        [Test]
+        public void ShouldChangePassword()
+        {
+            var newPassword = "newPassword";
+
+            Assert.DoesNotThrow(() => repository.ChangePassword(userCredentials.Login, newPassword));
+            Assert.AreEqual(UserPassword.GetPasswordHash(userCredentials.Login, userCredentials.Salt, newPassword), userCredentials.PasswordHash);
+        }
+        #endregion
     }
 }
