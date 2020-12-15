@@ -11,13 +11,13 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid Id { get; set; }
         [Required]
         public Guid UserId { get; set; }
-        public virtual DbUser User { get; set; }
         [Required]
         public string Login { get; set; }
         [Required]
         public string PasswordHash { get; set; }
         [Required]
         public string Salt { get; set; }
+        public virtual DbUser User { get; set; }
     }
 
     public class UserCredentialsConfiguration : IEntityTypeConfiguration<DbUserCredentials>
@@ -27,6 +27,14 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.HasOne(uc => uc.User)
                 .WithOne(u => u.UserCredentials)
                 .HasForeignKey<DbUserCredentials>(uc => uc.UserId);
+
+            builder.Property(u => u.UserId).IsRequired();
+
+            builder.Property(u => u.Login)
+                .IsRequired()
+                .HasMaxLength(16);
+
+            builder.Property(u => u.Salt).IsRequired();
         }
     }
 }
