@@ -85,16 +85,24 @@ namespace LT.DigitalOffice.UserService.Data
 
         public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter)
         {
-            var dbUsers =  _provider.Users.Skip(skipCount*takeCount).Take(takeCount)
-                                          .Where(user => $"{user.FirstName}{user.LastName}{user.MiddleName}"
-                                          .Contains(userNameFilter)).AsEnumerable();
-
-            if (!dbUsers.Any())
+            if (userNameFilter != null)
             {
-                throw new NotFoundException("Users were not found.");
+                var filterDbUsers = _provider.Users
+                    .Select(user => new { Id = user.Id, FIO = $"{user.LastName} {user.FirstName} {user.MiddleName}", Info = user })
+                    .AsEnumerable()
+                    .Where(user => user.FIO.Contains(userNameFilter))
+                    .Select(user => user.Info)
+                    .Skip(skipCount)
+                    .Take(takeCount)
+                    .AsEnumerable();
+                return filterDbUsers;
             }
 
-            return dbUsers;
+            var allDbUsers = _provider.Users
+                .Skip(skipCount)
+                .Take(takeCount)
+                .AsEnumerable();
+            return allDbUsers;
         }
     }
 }
