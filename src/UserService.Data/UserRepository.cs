@@ -88,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Data
             if (userNameFilter != null)
             {
                 var filterDbUsers = _provider.Users
-                    .Select(user => new { Id = user.Id, FIO = $"{user.LastName} {user.FirstName} {user.MiddleName}", Info = user })
+                    .Select(user => new { user.Id, FIO = $"{user.LastName} {user.FirstName} {user.MiddleName}", Info = user })
                     .AsEnumerable()
                     .Where(user => user.FIO.Contains(userNameFilter))
                     .Select(user => user.Info)
