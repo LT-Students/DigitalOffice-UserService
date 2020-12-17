@@ -268,11 +268,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         #endregion
 
         #region GetAllUsers
-        [Test]
-        public void ShouldThrowExceptionWhenUsersNotFound()
-        {
-            Assert.Throws<NotFoundException>(() => repository.GetAllUsers(100, 100, "123456789"));
-        }
 
         [Test]
         public void ShouldReturnUsers()
