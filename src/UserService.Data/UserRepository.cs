@@ -87,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Data
         {
             if (userNameFilter != null)
             {
-                var filterDbUsers = _provider.Users
+               return _provider.Users
                     .Select(user => new { user.Id, FIO = $"{user.LastName} {user.FirstName} {user.MiddleName}", Info = user })
                     .AsEnumerable()
                     .Where(user => user.FIO.Contains(userNameFilter))
@@ -95,14 +95,12 @@ namespace LT.DigitalOffice.UserService.Data
                     .Skip(skipCount)
                     .Take(takeCount)
                     .AsEnumerable();
-                return filterDbUsers;
             }
 
-            var allDbUsers = _provider.Users
+            return _provider.Users
                 .Skip(skipCount)
                 .Take(takeCount)
                 .AsEnumerable();
-            return allDbUsers;
         }
     }
 }
