@@ -128,6 +128,7 @@ namespace LT.DigitalOffice.UserService
             app.UseCors(builder =>
                 builder
                     .WithOrigins(corsUrl)
+                    .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .AllowAnyMethod());
 
