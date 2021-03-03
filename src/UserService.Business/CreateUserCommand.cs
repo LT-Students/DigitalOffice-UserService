@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -46,9 +47,13 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(request);
 
-            return _userRepository.CreateUser(
-                _mapperUser.Map(request),
-                _mapperUserCredentials.Map(request));
+            var dbUser = _mapperUser.Map(request);
+            var dbUserCredentials = _mapperUserCredentials.Map(request);
+
+            dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
+                request.Login, dbUserCredentials.Salt, request.Password);
+
+            return _userRepository.CreateUser(dbUser, dbUserCredentials);
         }
     }
 }

@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -31,10 +32,14 @@ namespace LT.DigitalOffice.UserService.Business
 
             UserIdVerificationInMemoryCache(request.GeneratedId, request.UserId);
 
-            repository.ChangePassword(request.Login, request.NewPassword);
+            var dbUserCredentials = repository.GetUserCredentialsByLogin(request.Login);
+
+            dbUserCredentials.PasswordHash = GetNewUserPasswordHash(request);
+
+            repository.EditUserCredentials(dbUserCredentials);
         }
 
-        public void UserIdVerificationInMemoryCache(Guid generatedId, Guid userId)
+        private void UserIdVerificationInMemoryCache(Guid generatedId, Guid userId)
         {
 
             if (!cache.TryGetValue(generatedId, out Guid savedUserId))
@@ -46,6 +51,13 @@ namespace LT.DigitalOffice.UserService.Business
             {
                 throw new ForbiddenException("Invalid user data");
             }
+        }
+
+        private string GetNewUserPasswordHash(ChangePasswordRequest request)
+        {
+            string salt = $"{ Guid.NewGuid() }{ Guid.NewGuid() }";
+
+            return UserPasswordHash.GetPasswordHash(request.Login, salt, request.NewPassword);
         }
     }
 }

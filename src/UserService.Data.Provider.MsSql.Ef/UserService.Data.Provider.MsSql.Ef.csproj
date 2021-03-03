@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\UserService.Data.Provider\UserService.Data.Provider.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
-    <ProjectReference Include="..\UserService.UserCredentials\UserService.UserCredentials.csproj" />
   </ItemGroup>
 
 </Project>

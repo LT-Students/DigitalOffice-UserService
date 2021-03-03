@@ -2,7 +2,6 @@
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.UserCredentials;
 using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
@@ -23,8 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
                 Id = Guid.NewGuid(),
                 UserId = value.Id.Value,
                 Login = value.Login,
-                Salt = salt,
-                PasswordHash = UserPassword.GetPasswordHash(value.Login, salt, value.Password)
+                Salt = salt
             };
         }
     }
