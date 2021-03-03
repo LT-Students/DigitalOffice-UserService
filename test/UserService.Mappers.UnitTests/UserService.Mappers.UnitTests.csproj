@@ -11,7 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\UserService.Broker\UserService.Broker.csproj" />
     <ProjectReference Include="..\..\src\UserService.Mappers\UserService.Mappers.csproj" />
-    <ProjectReference Include="..\..\src\UserService.UserCredentials\UserService.UserCredentials.csproj" />
   </ItemGroup>
 
 </Project>

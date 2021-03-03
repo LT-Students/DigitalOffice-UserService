@@ -1,7 +1,9 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using NUnit.Framework;
@@ -16,6 +18,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
         private IMemoryCache cache;
         private ChangePasswordRequest changePasswordRequest;
+        private DbUserCredentials dbUserCredentials;
 
         private Guid generatedId;
         private Guid userId;
@@ -38,6 +41,17 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 UserId = userId,
                 Login = "Login",
                 NewPassword = "NewPassword"
+            };
+
+            string salt = $"{Guid.NewGuid()}";
+
+            dbUserCredentials = new DbUserCredentials
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                PasswordHash = UserPasswordHash.GetPasswordHash(
+                    changePasswordRequest.Login, salt, changePasswordRequest.NewPassword),
+                Salt = salt
             };
 
             cache.Set(generatedId, userId, new MemoryCacheEntryOptions
@@ -101,7 +115,22 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldThrowNotFoundExceptionWhenLoginWasNotFound()
         {
             repositoryMock
-                .Setup(x => x.ChangePassword(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.GetUserCredentialsByLogin(changePasswordRequest.Login))
+                .Throws<NotFoundException>();
+
+            Assert.Throws<NotFoundException>(() => command.Execute(changePasswordRequest));
+        }
+
+        [Test]
+        public void ShouldThrowNotFoundExceptionWhenUserCredentialsDoesNotFound()
+        {
+            repositoryMock
+                .Setup(x => x.GetUserCredentialsByLogin(changePasswordRequest.Login))
+                .Returns(dbUserCredentials)
+                .Verifiable();
+
+            repositoryMock
+                .Setup(x => x.EditUserCredentials(It.IsAny<DbUserCredentials>()))
                 .Throws<NotFoundException>();
 
             Assert.Throws<NotFoundException>(() => command.Execute(changePasswordRequest));
@@ -111,10 +140,17 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldChangePassword()
         {
             repositoryMock
-                .Setup(x => x.ChangePassword(It.IsAny<string>(), It.IsAny<string>()));
+                .Setup(x => x.GetUserCredentialsByLogin(changePasswordRequest.Login))
+                .Returns(dbUserCredentials)
+                .Verifiable();
+
+            repositoryMock
+                .Setup(x => x.EditUserCredentials(It.IsAny<DbUserCredentials>()))
+                .Returns(true)
+                .Verifiable();
 
             Assert.DoesNotThrow(() => command.Execute(changePasswordRequest));
-            repositoryMock.Verify(repository => repository.ChangePassword(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            repositoryMock.Verify();
         }
     }
 }
