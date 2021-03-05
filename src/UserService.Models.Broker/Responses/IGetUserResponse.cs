@@ -6,8 +6,8 @@ namespace LT.DigitalOffice.Broker.Responses
     {
         Guid Id { get; }
         string FirstName { get; }
-        string MiddleName { get; }
         string LastName { get; set; }
+        string MiddleName { get; }
         bool IsActive { get; set; }
 
         static object CreateObj(Guid id, string firstName, string middleName, string lastName, bool isActive)
@@ -16,8 +16,8 @@ namespace LT.DigitalOffice.Broker.Responses
             {
                 Id = id,
                 FirstName = firstName,
-                MiddleName = middleName,
                 LastName = lastName,
+                MiddleName = middleName,
                 IsActive = isActive
             };
         }
