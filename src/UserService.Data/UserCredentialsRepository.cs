@@ -2,7 +2,6 @@
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.UserCredentials;
 using System;
 using System.Linq;
 
@@ -53,21 +52,6 @@ namespace LT.DigitalOffice.UserService.Data
             _provider.Save();
 
             return true;
-        }
-
-        public void ChangePassword(string login, string newPassword)
-        {
-            DbUserCredentials userCredentials = _provider.UserCredentials.FirstOrDefault(uc => uc.Login == login);
-
-            if (userCredentials == null)
-            {
-                throw new NotFoundException($"User credentials with user login: '{login}' was not found.");
-            }
-
-            userCredentials.PasswordHash = UserPassword.GetPasswordHash(login, userCredentials.Salt, newPassword);
-
-            _provider.UserCredentials.Update(userCredentials);
-            _provider.Save();
         }
     }
 }

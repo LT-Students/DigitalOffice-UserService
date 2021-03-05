@@ -29,12 +29,5 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userCredentials">User credentials to edit.</param>
         /// <returns>Whether it was successful to edit.</returns>
         bool EditUserCredentials(DbUserCredentials userCredentials);
-
-        /// <summary>
-        /// Change password of the specified user.
-        /// </summary>
-        /// <param name="login">User login.</param>
-        /// <param name="newPassword">New user password.</param>
-        void ChangePassword(string login, string newPassword);
     }
 }
