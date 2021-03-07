@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,18 @@ namespace LT.DigitalOffice.UserService.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public UserController([FromServices] IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
         [HttpGet("getUserById")]
         public User GetUserById([FromServices] IGetUserByIdCommand getUserInfoByIdCommand, [FromQuery] Guid userId)
-            => getUserInfoByIdCommand.Execute(userId);
+        {
+            return getUserInfoByIdCommand.Execute(userId);
+        }
 
         [HttpPost("createUser")]
         public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)

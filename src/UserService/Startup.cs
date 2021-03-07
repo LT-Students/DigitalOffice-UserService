@@ -42,6 +42,8 @@ namespace LT.DigitalOffice.UserService
         {
             services.AddHealthChecks();
 
+            services.AddHttpContextAccessor();
+
             services.AddDbContext<UserServiceDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
