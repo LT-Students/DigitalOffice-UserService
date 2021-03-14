@@ -13,4 +13,6 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="schema" /></VisualStudio></ProjectExtensions>
+
 </Project>
