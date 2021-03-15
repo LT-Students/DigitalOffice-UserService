@@ -8,5 +8,7 @@ namespace LT.DigitalOffice.UserService.Configuration
         public string CompanyServiceUrl { get; set; }
         public string FileServiceUrl { get; set; }
         public string AuthenticationServiceValidationUrl { get; set; }
+        public string AccessValidatorUserServiceEndpoint { get; set; }
+        public string UserServiceCredentialsEndpoint { get; set; }
     }
 }

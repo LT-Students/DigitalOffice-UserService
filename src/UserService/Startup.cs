@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMassTransit(IServiceCollection services)
         {
-            var rabbitmqOptions = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
+            var rabbitMqConfig = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
 
             services.AddMassTransit(x =>
             {
@@ -77,19 +77,19 @@ namespace LT.DigitalOffice.UserService
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(rabbitmqOptions.Host, "/", host =>
+                    cfg.Host(rabbitMqConfig.Host, "/", host =>
                     {
-                        host.Username($"{rabbitmqOptions.Username}_{rabbitmqOptions.Password}");
-                        host.Password(rabbitmqOptions.Password);
+                        host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
+                        host.Password(rabbitMqConfig.Password);
                     });
 
-                    cfg.ReceiveEndpoint("UserService", ep =>
+                    cfg.ReceiveEndpoint(rabbitMqConfig.AccessValidatorUserServiceEndpoint, ep =>
                     {
                         ep.ConfigureConsumer<GetUserInfoConsumer>(context);
                         ep.ConfigureConsumer<AccessValidatorConsumer>(context);
                     });
 
-                    cfg.ReceiveEndpoint("UserService_AuthenticationService", ep =>
+                    cfg.ReceiveEndpoint(rabbitMqConfig.UserServiceCredentialsEndpoint, ep =>
                     {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(r => r.Interval(2, 100));
@@ -98,12 +98,12 @@ namespace LT.DigitalOffice.UserService
                     });
                 });
 
-                x.AddRequestClient<IUserDescriptionRequest>(new Uri(rabbitmqOptions.UserDescriptionUrl));
-                x.AddRequestClient<IGetUserPositionRequest>(new Uri(rabbitmqOptions.CompanyServiceUrl));
-                x.AddRequestClient<IGetFileRequest>(new Uri(rabbitmqOptions.FileServiceUrl));
-                x.AddRequestClient<ICheckTokenRequest>(new Uri(rabbitmqOptions.AuthenticationServiceValidationUrl));
+                x.AddRequestClient<IUserDescriptionRequest>(new Uri(rabbitMqConfig.UserDescriptionUrl));
+                x.AddRequestClient<IGetUserPositionRequest>(new Uri(rabbitMqConfig.CompanyServiceUrl));
+                x.AddRequestClient<IGetFileRequest>(new Uri(rabbitMqConfig.FileServiceUrl));
+                x.AddRequestClient<ICheckTokenRequest>(new Uri(rabbitMqConfig.AuthenticationServiceValidationUrl));
 
-                x.ConfigureKernelMassTransit(rabbitmqOptions);
+                x.ConfigureKernelMassTransit(rabbitMqConfig);
             });
 
             services.AddMassTransitHostedService();
