@@ -20,6 +20,7 @@ using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation;
 using MassTransit;
+using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,24 @@ namespace LT.DigitalOffice.UserService
             ConfigureMassTransit(services);
         }
 
+        private void ConfigureEndpoints(
+            IBusRegistrationContext context,
+            IRabbitMqBusFactoryConfigurator cfg,
+            RabbitMqConfig rabbitMqConfig)
+        {
+            cfg.ReceiveEndpoint(rabbitMqConfig.CheckUserIsAdminEndpoint, ep =>
+            {
+                // TODO Rename
+                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
+                ep.ConfigureConsumer<AccessValidatorConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<UserLoginConsumer>(context);
+            });
+        }
+
         private void ConfigureMassTransit(IServiceCollection services)
         {
             var rabbitMqConfig = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
@@ -83,25 +102,17 @@ namespace LT.DigitalOffice.UserService
                         host.Password(rabbitMqConfig.Password);
                     });
 
-                    cfg.ReceiveEndpoint(rabbitMqConfig.AccessValidatorUserServiceEndpoint, ep =>
-                    {
-                        ep.ConfigureConsumer<GetUserInfoConsumer>(context);
-                        ep.ConfigureConsumer<AccessValidatorConsumer>(context);
-                    });
-
-                    cfg.ReceiveEndpoint(rabbitMqConfig.UserServiceCredentialsEndpoint, ep =>
-                    {
-                        ep.PrefetchCount = 16;
-                        ep.UseMessageRetry(r => r.Interval(2, 100));
-
-                        ep.ConfigureConsumer<UserLoginConsumer>(context);
-                    });
+                    ConfigureEndpoints(context, cfg, rabbitMqConfig);
                 });
 
-                x.AddRequestClient<IUserDescriptionRequest>(new Uri(rabbitMqConfig.UserDescriptionUrl));
-                x.AddRequestClient<IGetUserPositionRequest>(new Uri(rabbitMqConfig.CompanyServiceUrl));
-                x.AddRequestClient<IGetFileRequest>(new Uri(rabbitMqConfig.FileServiceUrl));
-                x.AddRequestClient<ICheckTokenRequest>(new Uri(rabbitMqConfig.AuthenticationServiceValidationUrl));
+                x.AddRequestClient<IUserDescriptionRequest>(
+                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.UserDescriptionUrl}"));
+
+                x.AddRequestClient<IGetUserPositionRequest>(
+                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.CompanyServiceUrl}"));
+
+                x.AddRequestClient<ICheckTokenRequest>(
+                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
 
                 x.ConfigureKernelMassTransit(rabbitMqConfig);
             });

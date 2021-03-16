@@ -2,10 +2,6 @@
 
   <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\..\src\UserService.Models.Dto\UserService.Models.Dto.csproj" />

@@ -9,8 +9,4 @@
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <LangVersion>preview</LangVersion>
-  </PropertyGroup>
-
 </Project>
