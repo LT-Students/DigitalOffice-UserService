@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
@@ -15,5 +16,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public bool IsAdmin { get; set; }
         public bool IsActive { get; set; }
         public Guid? AvatarFileId { get; set; }
+        public IEnumerable<string> Skills { get; set; }
     }
 }
