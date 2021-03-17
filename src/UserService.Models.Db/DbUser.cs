@@ -60,8 +60,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.Property(u => u.IsActive);
 
             builder
-                .Property(u => u.IsAdmin)
-                .IsRequired(false);
+                .Property(u => u.IsAdmin);
 
             builder
                 .HasMany(u => u.Skills)

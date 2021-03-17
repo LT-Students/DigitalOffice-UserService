@@ -21,13 +21,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Skill", x => x.Id);
-
-                    table.ForeignKey(
-                        name: "FK_Skill_UserSkills_SkillId",
-                        column: x => x.Id,
-                        principalTable: DbUserSkills.TableName,
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
         }
 
@@ -73,11 +66,24 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 );
         }
 
+        private void AddFKSkillsToUserSkill(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddForeignKey(
+                name: "FK_Skill_UserSkills_SkillId",
+                table: DbSkill.TableName,
+                column: "Id",
+                principalTable: DbUserSkills.TableName,
+                principalColumn: "SkillId",
+                onDelete: ReferentialAction.Cascade
+                );
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             CreateSkillsTable(migrationBuilder);
             CreateUsersSkillsTable(migrationBuilder);
-            AddFKUsersToUserSkills(migrationBuilder);
+            //AddFKUsersToUserSkills(migrationBuilder);
+            //AddFKSkillsToUserSkill(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -87,6 +93,10 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Users_UserSkills_UserId",
                 table: "Users"
+                );
+            migrationBuilder.DropForeignKey(
+                name: "FK_Skill_UserSkills_SkillId",
+                table: DbSkill.TableName
                 );
         }
     }
