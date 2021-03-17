@@ -34,6 +34,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbUser> builder)
         {
+            builder.ToTable("Users");
+
             builder.HasKey(u => u.Id);
 
             builder.Property(u => u.Email);

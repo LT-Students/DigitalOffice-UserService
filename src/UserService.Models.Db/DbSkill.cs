@@ -7,6 +7,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbSkill
     {
+        public const string TableName = "Skills";
+
         public Guid Id { get; set; }
         public string SkillName { get; set; }
 
@@ -22,6 +24,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbSkill> builder)
         {
+            builder.ToTable(DbSkill.TableName);
+
             builder.HasKey(s => s.Id);
 
             builder.Property(s => s.SkillName);
