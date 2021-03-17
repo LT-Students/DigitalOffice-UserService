@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
@@ -10,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public string LastName { get; set; }
         public string MiddleName { get; set; }
         public string Email { get; set; }
-        public string Status { get; set; }
+        public UserStatus Status { get; set; }
         public Guid? AvatarFileId { get; set; }
         public bool IsAdmin { get; set; }
         public IEnumerable<Guid> CertificatesIds { get; set; }

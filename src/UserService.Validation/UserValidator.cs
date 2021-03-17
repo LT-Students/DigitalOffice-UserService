@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Validation
                 .EmailAddress().WithMessage("Email is invalid.");
 
             RuleFor(user => user.Status)
-                .MaximumLength(300).WithMessage("Status is too long.");
+                .IsInEnum().WithMessage("Wrong status value.");
 
             RuleFor(user => user.Password)
                 .NotEmpty();

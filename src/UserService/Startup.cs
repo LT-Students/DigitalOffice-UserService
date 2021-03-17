@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -51,6 +52,12 @@ namespace LT.DigitalOffice.UserService
             });
 
             services.AddControllers();
+            
+            services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+            
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));

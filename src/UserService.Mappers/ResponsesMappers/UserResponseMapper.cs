@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
@@ -30,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
                 FirstName = value.FirstName,
                 LastName = value.LastName,
                 MiddleName = value.MiddleName,
-                Status = value.Status,
+                Status = (UserStatus)value.Status,
                 IsAdmin = value.IsAdmin
             };
         }

@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.UserCredentials;
 using NUnit.Framework;
 using System;
@@ -54,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = password,
                 IsAdmin = false,
                 IsActive = true,
