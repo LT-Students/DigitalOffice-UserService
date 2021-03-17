@@ -110,7 +110,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbSkill CreateSkill(string name)
         {
-            if (FindSkillByName(name) == null)
+            if (FindSkillByName(name) != null)
             {
                 throw new BadRequestException();
             }
