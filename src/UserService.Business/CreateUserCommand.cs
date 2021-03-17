@@ -5,6 +5,7 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,14 @@ namespace LT.DigitalOffice.UserService.Business
             _validator.ValidateAndThrowCustom(request);
 
             var dbUser = _mapperUser.Map(request);
+
+            // here I find all exists skills
+            foreach (var skillName in request.Skills)
+            {
+                var dbSkill = _userRepository.FindSkillByName(skillName) ?? _userRepository.CreateSkill(skillName);
+                dbUser.Skills.Add(new DbUserSkills { Id = Guid.NewGuid(), UserId = dbUser.Id, SkillId = dbSkill.Id });
+            }
+
             var dbUserCredentials = _mapperUserCredentials.Map(request);
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(

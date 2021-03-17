@@ -23,7 +23,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public ICollection<DbUserAchievement> AchievementsIds { get; set; }
         public ICollection<DbUserSkills> Skills { get; set; }
 
-        public DbUser() {
+        public DbUser() 
+        {
             CertificatesFilesIds = new HashSet<DbUserCertificateFile>();
             AchievementsIds = new HashSet<DbUserAchievement>();
             Skills = new HashSet<DbUserSkills>();

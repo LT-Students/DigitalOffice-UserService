@@ -54,5 +54,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
         /// <returns>Collection of user models.</returns>
         IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
+        
+        public DbSkill FindSkillByName(string name);
+
+        public DbSkill CreateSkill(string name);
     }
 }

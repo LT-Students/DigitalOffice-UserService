@@ -49,8 +49,7 @@ namespace LT.DigitalOffice.UserService.Validation
 
             RuleForEach(request => request.Skills)
                 .NotEmpty()
-                .MaximumLength(30).WithMessage("Skill name is too long")
-                .Matches("^[A-Za-z0-9]+$|^[А-ЯЁа-яё0-9]+$").WithMessage("Skill name with error.");
+                .MaximumLength(30).WithMessage("Skill name is too long");
         }
     }
 }
