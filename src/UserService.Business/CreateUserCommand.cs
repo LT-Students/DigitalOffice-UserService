@@ -40,10 +40,10 @@ namespace LT.DigitalOffice.UserService.Business
         {
             const int rightId = 1;
 
-            if (!(_accessValidator.IsAdmin() || _accessValidator.HasRights(rightId)))
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
+            // if (!(_accessValidator.IsAdmin() || _accessValidator.HasRights(rightId)))
+            // {
+            //     throw new ForbiddenException("Not enough rights.");
+            // }
 
             _validator.ValidateAndThrowCustom(request);
 
@@ -52,6 +52,8 @@ namespace LT.DigitalOffice.UserService.Business
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
                 request.Login, dbUserCredentials.Salt, request.Password);
+
+            dbUser.CreatedAt = DateTime.Now;
 
             return _userRepository.CreateUser(dbUser, dbUserCredentials);
         }
