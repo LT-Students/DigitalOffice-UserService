@@ -1,13 +1,10 @@
 ﻿using LT.DigitalOffice.UserService.Business.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business
 {
-    class GeneratePasswordCommand : IGeneratePasswordCommand
+    public class GeneratePasswordCommand : IGeneratePasswordCommand
     {
         private const string Digits = "1234567890";
         private const string UpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
