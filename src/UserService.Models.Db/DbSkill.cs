@@ -12,11 +12,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid Id { get; set; }
         public string SkillName { get; set; }
 
-        public ICollection<DbUserSkills> Users { get; set; }
+        public ICollection<DbUserSkills> UserSkills { get; set; }
 
         public DbSkill()
         {
-            Users = new HashSet<DbUserSkills>();
+            UserSkills = new HashSet<DbUserSkills>();
         }
     }
 
@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.Property(s => s.SkillName);
 
             builder
-                .HasMany(s => s.Users)
+                .HasMany(s => s.UserSkills)
                 .WithOne(us => us.Skill)
                 .HasForeignKey(us => us.SkillId);
         }

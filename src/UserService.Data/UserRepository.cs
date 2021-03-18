@@ -108,15 +108,19 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Skills.FirstOrDefault(s => s.SkillName == name);
         }
 
-        public DbSkill CreateSkill(string name)
+        public Guid CreateSkill(string name)
         {
-            if (FindSkillByName(name) != null)
+            var dbSkill = _provider.Skills.FirstOrDefault(s => s.SkillName == name);
+
+            if (dbSkill != null)
             {
                 throw new BadRequestException();
             }
+
             var skill = new DbSkill { Id = Guid.NewGuid(), SkillName = name };
             _provider.Skills.Add(skill);
-            return skill;
+            _provider.Save();
+            return skill.Id;
         }
     }
 }

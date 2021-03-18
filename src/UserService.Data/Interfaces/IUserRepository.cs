@@ -57,6 +57,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         
         public DbSkill FindSkillByName(string name);
 
-        public DbSkill CreateSkill(string name);
+        public Guid CreateSkill(string name);
     }
 }

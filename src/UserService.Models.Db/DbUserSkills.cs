@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasOne(us => us.Skill)
-                .WithMany(s => s.Users)
+                .WithMany(s => s.UserSkills)
                 .HasForeignKey(us => us.SkillId);
         }
     }

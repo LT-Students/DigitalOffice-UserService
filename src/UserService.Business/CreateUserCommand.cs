@@ -50,19 +50,41 @@ namespace LT.DigitalOffice.UserService.Business
 
             var dbUser = _mapperUser.Map(request);
 
-            // here I find all exists skills
-            foreach (var skillName in request.Skills)
-            {
-                var dbSkill = _userRepository.FindSkillByName(skillName) ?? _userRepository.CreateSkill(skillName);
-                dbUser.Skills.Add(new DbUserSkills { Id = Guid.NewGuid(), UserId = dbUser.Id, SkillId = dbSkill.Id });
-            }
-
+            AddUserSkillsToDbUser(dbUser, request);
+            
             var dbUserCredentials = _mapperUserCredentials.Map(request);
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
                 request.Login, dbUserCredentials.Salt, request.Password);
 
             return _userRepository.CreateUser(dbUser, dbUserCredentials);
+        }
+
+        private void AddUserSkillsToDbUser(DbUser dbUser, UserRequest request)
+        {
+            foreach (var skillName in request.Skills)
+            {
+                var dbSkill = _userRepository.FindSkillByName(skillName);
+                if (dbUser != null)
+                {
+                    dbUser.Skills.Add(
+                        new DbUserSkills { 
+                            Id = Guid.NewGuid(), 
+                            UserId = dbUser.Id, 
+                            SkillId = dbSkill.Id 
+                        });
+                } 
+                else
+                {
+                    dbUser.Skills.Add(
+                        new DbUserSkills
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = dbUser.Id,
+                            SkillId = _userRepository.CreateSkill(skillName)
+                        });
+                }
+            }
         }
     }
 }
