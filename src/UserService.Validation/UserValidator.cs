@@ -47,6 +47,9 @@ namespace LT.DigitalOffice.UserService.Validation
                 .MinimumLength(5)
                 .MaximumLength(15);
 
+            RuleFor(request => request.Skills)
+                .NotNull();
+
             RuleForEach(request => request.Skills)
                 .NotEmpty()
                 .MaximumLength(30).WithMessage("Skill name is too long");

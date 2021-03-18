@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business
             foreach (var skillName in request.Skills)
             {
                 var dbSkill = _userRepository.FindSkillByName(skillName);
-                if (dbUser != null)
+                if (dbSkill != null)
                 {
                     dbUser.Skills.Add(
                         new DbUserSkills { 

@@ -42,7 +42,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>() { "C#", "C/C++" }
             };
 
             dbUser = new DbUser

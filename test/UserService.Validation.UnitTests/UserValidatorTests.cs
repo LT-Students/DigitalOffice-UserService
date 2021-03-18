@@ -134,7 +134,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -152,7 +153,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -171,7 +173,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -208,12 +211,14 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
 
+        [Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
             var request = new UserRequest
@@ -221,13 +226,52 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
+                Login = "admin",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                Skills = new List<string>()
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenSkillsIsNull()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Login = "admin",
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
                 IsAdmin = false
             };
 
-            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Skills);
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenSkillNameIsTooLong()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Login = "admin",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                Skills = new List<string>() { "C#", "some very looooooooooong name skill" }
+            };
+
+            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Skills);
         }
     }
 }
