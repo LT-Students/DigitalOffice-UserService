@@ -4,6 +4,8 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
 {
@@ -33,11 +35,19 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 Password = "Example",
                 IsAdmin = false,
                 IsActive = true,
-                AvatarFileId = Guid.NewGuid()
+                AvatarFileId = Guid.NewGuid(),
+                Connection = new List<UserConnection>() 
+                { 
+                    new UserConnection()
+                    { 
+                        Type = ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             var result = userRequestMapper.Map(request);
-
+            var conId = result.Connections.FirstOrDefault().Id;
             var user = new DbUser()
             {
                 Id = (Guid)request.Id,
@@ -48,7 +58,17 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 Status = "Example",
                 IsAdmin = false,
                 IsActive = true,
-                AvatarFileId = request.AvatarFileId
+                AvatarFileId = request.AvatarFileId,
+                Connections = new List<DbConnection> 
+                { 
+                    new DbConnection()
+                    { 
+                        Id = conId,
+                        Type = (int)ConnectionType.Email,
+                        Value = "Ex@mail.ru",
+                        UserId = (Guid)request.Id
+                    }
+                }
             };
 
             SerializerAssert.AreEqual(user, result);
