@@ -19,6 +19,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         private const string Status = "Hello, world!";
         private const bool IsAdmin = false;
 
+        private DateTime createdAt;
         private Guid userId;
         private Guid achievementId;
         private Guid certificateFileId;
@@ -35,6 +36,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         {
             userResponseMapper = new UserResponseMapper();
 
+            createdAt = DateTime.Now;
             userId = Guid.NewGuid();
             achievementId = Guid.NewGuid();
             certificateFileId = Guid.NewGuid();
@@ -74,7 +76,8 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsAdmin = IsAdmin,
                 LastName = LastName,
                 Status = Status,
-                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile }
+                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile },
+                CreatedAt = createdAt
             };
         }
 
@@ -104,6 +107,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             Assert.AreEqual(Status, resultUserModel.Status);
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
+            Assert.AreEqual(createdAt, resultUserModel.CreatedAt);
         }
     }
 }

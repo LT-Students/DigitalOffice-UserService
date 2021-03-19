@@ -1,4 +1,5 @@
 using System;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.UserCredentials.Admin;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -14,18 +15,18 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Users",
+                name: nameof(DbUser.CreatedAt),
+                table: DbUser.TableName,
                 nullable: false,
-                defaultValue: new DateTime(2021, 3, 17, 14, 40, 51)
+                defaultValue: DateTime.Now
             );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Users"
+                name: nameof(DbUser.CreatedAt),
+                table: DbUser.TableName
             );
         }
 

@@ -40,21 +40,21 @@ namespace LT.DigitalOffice.UserService.Business
         {
             const int rightId = 1;
 
-            // if (!(_accessValidator.IsAdmin() || _accessValidator.HasRights(rightId)))
-            // {
-            //     throw new ForbiddenException("Not enough rights.");
-            // }
+            if (!(_accessValidator.IsAdmin() || _accessValidator.HasRights(rightId)))
+            {
+                throw new ForbiddenException("Not enough rights.");
+            }
 
             _validator.ValidateAndThrowCustom(request);
 
             var dbUser = _mapperUser.Map(request);
+            dbUser.CreatedAt = DateTime.Now;
+
             var dbUserCredentials = _mapperUserCredentials.Map(request);
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
                 request.Login, dbUserCredentials.Salt, request.Password);
-
-            dbUser.CreatedAt = DateTime.Now;
-
+            
             return _userRepository.CreateUser(dbUser, dbUserCredentials);
         }
     }
