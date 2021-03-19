@@ -39,65 +39,33 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     table.PrimaryKey("PK_UserSkill", x => x.Id);
 
                     table.ForeignKey(
-                        name: "FK_UserSkills_Users_UserId",
+                        name: "FK_UserSkills_Users",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: DbUser.TableName,
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.NoAction
+                    );
 
                     table.ForeignKey(
-                        name: "FK_UserSkills_Skills_SkillId",
+                        name: "FK_UserSkills_Skills",
                         column: x => x.SkillId,
                         principalTable: DbSkill.TableName,
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.NoAction
+                    );
                 });
-        }
-
-        private void AddFKUsersToUserSkills(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddForeignKey(
-                name: "FK_Users_UserSkills_UserId",
-                table: "Users",
-                column: "Id",
-                principalTable: DbUserSkills.TableName,
-                principalColumn: "UserId",
-                onDelete: ReferentialAction.Cascade
-                );
-        }
-
-        private void AddFKSkillsToUserSkill(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddForeignKey(
-                name: "FK_Skill_UserSkills_SkillId",
-                table: DbSkill.TableName,
-                column: "Id",
-                principalTable: DbUserSkills.TableName,
-                principalColumn: "SkillId",
-                onDelete: ReferentialAction.Cascade
-                );
         }
 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             CreateSkillsTable(migrationBuilder);
-            CreateUsersSkillsTable(migrationBuilder);
-            //AddFKUsersToUserSkills(migrationBuilder);
-            //AddFKSkillsToUserSkill(migrationBuilder);
+            CreateUsersSkillsTable(migrationBuilder);    
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(DbSkill.TableName);
             migrationBuilder.DropTable(DbUserSkills.TableName);
-            migrationBuilder.DropForeignKey(
-                name: "FK_Users_UserSkills_UserId",
-                table: "Users"
-                );
-            migrationBuilder.DropForeignKey(
-                name: "FK_Skill_UserSkills_SkillId",
-                table: DbSkill.TableName
-                );
         }
     }
 }

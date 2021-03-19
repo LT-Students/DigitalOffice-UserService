@@ -8,6 +8,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbUser
     {
+        public const string TableName = "Users";
+
         public Guid Id { get; set; }
         public string Email { get; set; }
         public string FirstName { get; set; }
@@ -35,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbUser> builder)
         {
-            builder.ToTable("Users");
+            builder.ToTable(DbUser.TableName);
 
             builder.HasKey(u => u.Id);
 
@@ -59,8 +61,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder.Property(u => u.IsActive);
 
-            builder
-                .Property(u => u.IsAdmin);
+            builder.Property(u => u.IsAdmin);
 
             builder
                 .HasMany(u => u.Skills)

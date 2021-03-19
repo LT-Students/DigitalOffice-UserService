@@ -1,15 +1,12 @@
-﻿using FluentValidation;
-using FluentValidation.TestHelper;
-using LT.DigitalOffice.CompanyService.Data.Provider;
+﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
@@ -77,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldFindExistSkillByName()
         {
             var result = _repository.FindSkillByName(_dbSkillInDb.SkillName);
-            Assert.AreEqual(_dbSkillInDb, result);
+            SerializerAssert.AreEqual(_dbSkillInDb, result);
         }
 
         [Test]
