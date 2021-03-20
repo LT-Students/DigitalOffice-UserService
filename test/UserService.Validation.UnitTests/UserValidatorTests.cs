@@ -242,7 +242,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = "Example",
                 Password = "Example",
                 IsAdmin = false,
-                Connection = new List<UserConnection>(),
+                Connections = new List<UserConnection>(),
                 Login = "Example"
             };
 
@@ -260,7 +260,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = "Example",
                 Password = "Example",
                 IsAdmin = false,
-                Connection = new List<UserConnection>()
+                Connections = new List<UserConnection>()
                  {
                     new UserConnection()
                     {
@@ -285,7 +285,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = "Example",
                 Password = "Example",
                 IsAdmin = false,
-                Connection = new List<UserConnection>()
+                Connections = new List<UserConnection>()
                 {
                     new UserConnection()
                     {

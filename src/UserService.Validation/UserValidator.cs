@@ -48,9 +48,9 @@ namespace LT.DigitalOffice.UserService.Validation
                 .MinimumLength(5)
                 .MaximumLength(15);
 
-            When(user => user.Connection != null && user.Connection.Any(), () =>
+            When(user => user.Connections != null && user.Connections.Any(), () =>
             {
-                RuleForEach(user => user.Connection).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
+                RuleForEach(user => user.Connections).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
             });
       
 

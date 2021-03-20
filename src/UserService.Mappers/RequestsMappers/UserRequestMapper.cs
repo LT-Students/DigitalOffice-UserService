@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
                 AvatarFileId = value.AvatarFileId,
                 IsActive = value.IsActive,
                 IsAdmin = value.IsAdmin,
-                Connections = value.Connection?.Select(x => new DbConnection
+                Connections = value.Connections?.Select(x => new DbConnection
                 {
                     Id =Guid.NewGuid(),
                     Type = (int)x.Type,

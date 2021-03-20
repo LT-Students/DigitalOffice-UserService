@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = Guid.NewGuid(),
-                Connection = new List<UserConnection>() 
+                Connections = new List<UserConnection>() 
                 { 
                     new UserConnection()
                     { 
