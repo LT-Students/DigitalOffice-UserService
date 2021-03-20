@@ -28,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
                 .ToArray());
 
             var result = new char[fillerLength + 4];
+
             // randomly merging needed & filler into result
             for (int i = 0, neededIndex = 0, fillerIndex = 0; i < result.Length; i++)
             {
