@@ -33,8 +33,8 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
                 {
                     Id =Guid.NewGuid(),
                     Type = (int)x.Type,
-                   Value = x.Value,
-                   UserId = value.Id.Value
+                    Value = x.Value,
+                    UserId = value.Id.Value
                 }).ToList()
             };
         }
