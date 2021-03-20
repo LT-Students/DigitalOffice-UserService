@@ -45,9 +45,17 @@ namespace LT.DigitalOffice.UserService
 
             services.AddHttpContextAccessor();
 
+            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
+            if (string.IsNullOrEmpty(connStr))
+            {
+                connStr = Configuration.GetConnectionString("SQLConnectionString");
+            }
+
+            Console.WriteLine(connStr);
+
             services.AddDbContext<UserServiceDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
+                options.UseSqlServer(connStr);
             });
 
             services.AddControllers();
@@ -120,15 +128,11 @@ namespace LT.DigitalOffice.UserService
             services.AddMassTransitHostedService();
         }
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory logger)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseHealthChecks("/api/healthcheck");
 
             app.UseExceptionHandler(tempApp => tempApp.Run(CustomExceptionHandler.HandleCustomException));
-
-            var log = logger.CreateLogger<Startup>();
-
-            log.LogInformation("Start DB migration.");
 
             UpdateDatabase(app);
 

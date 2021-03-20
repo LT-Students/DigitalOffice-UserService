@@ -17,11 +17,11 @@
     },
     "UserService": {
       "commandName": "Project",
-      "launchBrowser": false,
-      "applicationUrl": "https://localhost:9801;http://localhost:9802",
       "environmentVariables": {
+        "ConnectionString": "Server=0.0.0.0,20340;User=sa;Password=User_1234;Database=UserDB;",
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:9801;http://localhost:9802"
     }
   }
 }
