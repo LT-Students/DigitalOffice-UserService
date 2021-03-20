@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Skill", x => x.Id);
+                    table.PrimaryKey("PK_Skills", x => x.Id);
                 });
         }
 
@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserSkill", x => x.Id);
+                    table.PrimaryKey("PK_UserSkills", x => x.Id);
 
                     table.ForeignKey(
                         name: "FK_UserSkills_Users",
