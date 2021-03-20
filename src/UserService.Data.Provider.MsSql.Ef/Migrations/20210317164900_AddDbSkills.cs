@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                         column: x => x.UserId,
                         principalTable: DbUser.TableName,
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction
+                        onDelete: ReferentialAction.Cascade
                     );
 
                     table.ForeignKey(
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                         column: x => x.SkillId,
                         principalTable: DbSkill.TableName,
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction
+                        onDelete: ReferentialAction.Cascade
                     );
                 });
         }
