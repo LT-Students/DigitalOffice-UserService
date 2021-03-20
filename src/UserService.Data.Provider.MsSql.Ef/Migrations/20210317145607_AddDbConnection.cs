@@ -36,8 +36,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         {
             migrationBuilder.DropTable(
                 name: "UserConnections");
-
-           
         }
     }
 }
