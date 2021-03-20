@@ -1,5 +1,4 @@
 using FluentValidation;
-using GreenPipes;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel;
@@ -26,11 +25,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace LT.DigitalOffice.UserService
 {
-    public class Startup
+  public class Startup
     {
         public IConfiguration Configuration { get; }
 
@@ -120,11 +120,15 @@ namespace LT.DigitalOffice.UserService
             services.AddMassTransitHostedService();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILoggerFactory logger)
         {
             app.UseHealthChecks("/api/healthcheck");
 
             app.UseExceptionHandler(tempApp => tempApp.Run(CustomExceptionHandler.HandleCustomException));
+
+            var log = logger.CreateLogger<Startup>();
+
+            log.LogInformation("Start DB migration.");
 
             UpdateDatabase(app);
 
