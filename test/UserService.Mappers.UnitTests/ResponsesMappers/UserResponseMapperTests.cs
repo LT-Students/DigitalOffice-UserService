@@ -17,8 +17,8 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         private const string FirstName = "Ivan";
         private const string LastName = "Dudikov";
         private const bool IsActive = true;
-        private const int dbStatus = 1;
-        private const UserStatus status = UserStatus.Sick;
+        private const int DbStatus = 1;
+        private const UserStatus Status = UserStatus.Sick;
         private const bool IsAdmin = false;
 
         private Guid userId;
@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsActive = IsActive,
                 IsAdmin = IsAdmin,
                 LastName = LastName,
-                Status = dbStatus,
+                Status = DbStatus,
                 CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile }
             };
         }
@@ -103,7 +103,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             Assert.AreEqual(FirstName, resultUserModel.FirstName);
             Assert.AreEqual(LastName, resultUserModel.LastName);
             Assert.IsNull(resultUserModel.MiddleName);
-            Assert.AreEqual(status, resultUserModel.Status);
+            Assert.AreEqual(Status, resultUserModel.Status);
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
         }
