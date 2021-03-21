@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpPost("createUser")]
-        public Guid CreateUser([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
+        public Guid Create([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
         {
             return command.Execute(request);
         }

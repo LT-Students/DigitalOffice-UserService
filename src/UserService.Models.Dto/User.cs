@@ -15,6 +15,5 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public bool IsAdmin { get; set; }
         public IEnumerable<Guid> CertificatesIds { get; set; }
         public IEnumerable<Achievement> AchievementsIds { get; set; }
-        public IEnumerable<string> Skills { get; set; }
      }
 }
