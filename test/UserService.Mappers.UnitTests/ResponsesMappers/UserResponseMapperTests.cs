@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Achievement = achievement,
                 AchievementId = achievementId,
                 User = dbUser,
-                Time = DateTime.Now,
+                Time = DateTime.UtcNow,
                 UserId = userId
             };
 

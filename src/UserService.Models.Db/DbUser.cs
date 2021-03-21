@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -42,8 +41,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             
             builder.
                 HasKey(p => p.Id);
-            builder.HasIndex(x => x.CreatedAt);
-            
+
             builder
                 .Property(p => p.Email)
                 .IsRequired();
