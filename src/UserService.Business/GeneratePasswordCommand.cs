@@ -6,13 +6,21 @@ namespace LT.DigitalOffice.UserService.Business
 {
     public class GeneratePasswordCommand : IGeneratePasswordCommand
     {
+        public string Execute()
+        {
+            return PasswordGenerationLogic.GetPassword();
+        }
+    }
+
+    internal class PasswordGenerationLogic
+    {
         private const string Digits = "1234567890";
         private const string UpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string LowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
         private const string SpecialSymbols = "@!$_*#";
         private const string TotalAlphabet = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@!$_*#";
 
-        public string Execute()
+        private static string Generate()
         {
             var random = new Random();
 
@@ -46,6 +54,11 @@ namespace LT.DigitalOffice.UserService.Business
             }
 
             return string.Concat(result);
+        }
+
+        internal static string GetPassword()
+        {
+            return Generate();
         }
     }
 }

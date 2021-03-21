@@ -26,7 +26,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             for (int i = 0; i < 250; i++)
             {
                 Assert.IsTrue(Regex.IsMatch(command.Execute(), "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@!$_*#]).{8,12}$"));
-
             }
         }
     }
