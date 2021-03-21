@@ -6,6 +6,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbUser
     {
+        public const string TableName = "Users";
+
         [Key]
         public Guid Id { get; set; }
         [Required]

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
@@ -15,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable("Connections", table => new
+            migrationBuilder.CreateTable(DbConnection.TableName, table => new
             {
                 Id = table.Column<Guid>(nullable: false),
                 Value = table.Column<string>(nullable: false),
@@ -28,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                  table.ForeignKey(
                          name: "FK_Connections_Users",
                          column: x => x.UserId,
-                         principalTable: "Users",
+                         principalTable: DbUser.TableName,
                          principalColumn: nameof(DbUser.Id),
                          onDelete: ReferentialAction.Cascade);
              });
@@ -37,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Connections");
+                name: DbConnection.TableName);
         }
     }
 }
