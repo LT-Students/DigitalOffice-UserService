@@ -9,8 +9,4 @@
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UserCredentials\" />
-  </ItemGroup>
-
 </Project>
