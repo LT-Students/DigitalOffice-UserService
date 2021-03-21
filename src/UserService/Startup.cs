@@ -98,7 +98,9 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMassTransit(IServiceCollection services)
         {
-            var rabbitMqConfig = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
+            var rabbitMqConfig = Configuration
+                .GetSection(BaseRabbitMqOptions.RabbitMqSectionName)
+                .Get<RabbitMqConfig>();
 
             services.AddMassTransit(x =>
             {
