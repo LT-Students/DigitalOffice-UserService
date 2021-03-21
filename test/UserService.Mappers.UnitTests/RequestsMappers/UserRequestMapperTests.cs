@@ -105,7 +105,11 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 AvatarFileId = request.AvatarFileId,
                 Connections = null
             };
-            SerializerAssert.AreEqual(user, request);
+
+            var dbUser = userRequestMapper.Map(request);
+            user.Id = dbUser.Id;
+
+            SerializerAssert.AreEqual(user, dbUser);
         }
 
         [Test]
