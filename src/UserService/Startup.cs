@@ -82,8 +82,12 @@ namespace LT.DigitalOffice.UserService
             cfg.ReceiveEndpoint(rabbitMqConfig.CheckUserIsAdminEndpoint, ep =>
             {
                 // TODO Rename
-                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
             });
 
             cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
