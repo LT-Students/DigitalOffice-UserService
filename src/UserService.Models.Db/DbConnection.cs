@@ -11,6 +11,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
     public class DbConnection
     {
+        public const string TableName = "Connections";
+
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public int Type { get; set; }
@@ -22,12 +24,14 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbConnection> builder)
         {
-            builder.ToTable("UserConnections");
-            
-            builder.HasKey(pm => new {pm.UserId, pm.Id});
-            builder.HasOne(pm => pm.User)
-                .WithMany(pm => pm.Connections)
-                .HasForeignKey(pm => pm.UserId);
+            builder
+                .ToTable(DbConnection.TableName);
+
+            builder.HasKey(id => new {id.UserId, id.Id});
+
+            builder.HasOne(us => us.User)
+                .WithMany(con => con.Connections)
+                .HasForeignKey(id => id.UserId);
         }
     }
 }

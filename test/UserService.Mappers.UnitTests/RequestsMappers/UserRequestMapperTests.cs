@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
             };
 
             var result = userRequestMapper.Map(request);
-            var conId = result.Connections.FirstOrDefault().Id;
+            var connectionId = result.Connections.FirstOrDefault().Id;
             var user = new DbUser()
             {
                 Id = (Guid)request.Id,
@@ -59,19 +59,53 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = request.AvatarFileId,
-                Connections = new List<DbConnection> 
-                { 
+                Connections = new List<DbConnection>
+                {
                     new DbConnection()
-                    { 
-                        Id = conId,
+                    {
+                        Id = connectionId,
                         Type = (int)ConnectionType.Email,
                         Value = "Ex@mail.ru",
                         UserId = (Guid)request.Id
                     }
                 }
             };
-
             SerializerAssert.AreEqual(user, result);
+        }
+
+        [Test]
+        public void ShouldReturnNewDbUserWhenDataWithEmptyConnections()
+        {
+            var request = new UserRequest()
+            {
+                Id = Guid.NewGuid(),
+                Email = "Example@gmail.com",
+                Login = "Example",
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                IsActive = true,
+                AvatarFileId = Guid.NewGuid(),
+                Connections = null
+            };
+
+            var user = new DbUser()
+            {
+                Id = (Guid)request.Id,
+                Email = "Example@gmail.com",
+                FirstName = "Example",
+                LastName = "Example",
+                MiddleName = "Example",
+                Status = "Example",
+                IsAdmin = false,
+                IsActive = true,
+                AvatarFileId = request.AvatarFileId,
+                Connections = null
+            };
+            SerializerAssert.AreEqual(user, request);
         }
 
         [Test]

@@ -261,7 +261,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()
-                 {
+                {
                     new UserConnection()
                     {
                         Type = ConnectionType.Email,
