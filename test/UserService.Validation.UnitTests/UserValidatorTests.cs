@@ -221,20 +221,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Login = "admin",
-                Email = "Example@gmail.com",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>()
-            };
+            string middleName = null;
 
-            validator.TestValidate(request).ShouldNotHaveValidationErrorFor(r => r.MiddleName);
+            validator.ShouldNotHaveValidationErrorFor(x => x.MiddleName, middleName);
         }
 
         [Test]
