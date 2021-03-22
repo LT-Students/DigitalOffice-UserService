@@ -54,5 +54,4 @@ namespace LT.DigitalOffice.UserService.Business
             return string.Concat(result);
         }
     }
-
 }
