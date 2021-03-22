@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.TestHelper;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -101,9 +102,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldThrowValidationExceptionWhenStatusTooLong()
+        public void ShouldThrowValidationExceptionWhenStatusNull()
         {
-            var status = new string('a', 300) + "@gmail.com";
+            var status = (UserStatus)5;
             validator.ShouldHaveValidationErrorFor(x => x.Status, status);
         }
 
@@ -132,7 +133,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Login = "admin",
                 MiddleName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Skills = new List<string>()
@@ -151,7 +152,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Example",
                 Login = "admin",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Skills = new List<string>()
@@ -171,7 +172,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Example",
                 Login = "admin",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
             };
@@ -189,7 +190,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 LastName = "Example",
                 MiddleName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
             };
@@ -208,7 +209,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Пример",
                 Login = "админ",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
             };
@@ -249,6 +250,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>(),
@@ -267,6 +269,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()
@@ -292,7 +295,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()

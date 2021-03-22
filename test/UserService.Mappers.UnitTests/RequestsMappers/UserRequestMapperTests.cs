@@ -2,6 +2,7 @@ using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 IsActive = true,
@@ -55,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = 1,
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = request.AvatarFileId,
@@ -84,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 IsActive = true,
@@ -99,7 +100,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = 1,
                 IsAdmin = false,
                 IsActive = true,
                 AvatarFileId = request.AvatarFileId,

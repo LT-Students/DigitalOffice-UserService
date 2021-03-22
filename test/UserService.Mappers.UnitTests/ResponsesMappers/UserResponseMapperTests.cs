@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,8 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         private const string FirstName = "Ivan";
         private const string LastName = "Dudikov";
         private const bool IsActive = true;
-        private const string Status = "Hello, world!";
+        private const int DbStatus = 1;
+        private const UserStatus Status = UserStatus.Sick;
         private const bool IsAdmin = false;
 
         private DateTime createdAt;
@@ -75,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsActive = IsActive,
                 IsAdmin = IsAdmin,
                 LastName = LastName,
-                Status = Status,
+                Status = 1,
                 CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile },
                 CreatedAt = createdAt
             };

@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
         public Guid? AvatarFileId { get; set; }
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
@@ -60,8 +60,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .IsRequired(false);
 
             builder
-                .Property(u => u.Status)
-                .IsRequired(false);
+                .Property(u => u.Status);
 
             builder
                 .Property(u => u.AvatarFileId)

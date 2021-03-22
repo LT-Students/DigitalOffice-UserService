@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System;
 using System.Linq;
 
@@ -25,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
                 FirstName = value.FirstName,
                 LastName = value.LastName,
                 MiddleName = value.MiddleName,
-                Status = value.Status,
+                Status = (int)value.Status,
                 AvatarFileId = value.AvatarFileId,
                 IsActive = value.IsActive,
                 IsAdmin = value.IsAdmin,

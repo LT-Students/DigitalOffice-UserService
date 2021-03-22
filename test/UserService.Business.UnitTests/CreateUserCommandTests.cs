@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -40,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 LastName = "Example",
                 MiddleName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()
@@ -60,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = 1,
                 IsAdmin = false,
                 Connections = new List<DbConnection>
                 {
