@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
@@ -27,11 +22,13 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder
                 .ToTable(DbConnection.TableName);
 
-            builder.HasKey(id => new {id.UserId, id.Id});
+            builder
+                .HasKey(conn =>  conn.Id);
 
-            builder.HasOne(us => us.User)
-                .WithMany(con => con.Connections)
-                .HasForeignKey(id => id.UserId);
+            builder
+                .HasOne(conn => conn.User)
+                .WithMany(u => u.Connections)
+                .HasForeignKey(conn => conn.UserId);
         }
     }
 }

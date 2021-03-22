@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers
                 IsAdmin = value.IsAdmin,
                 Connections = value.Connections?.Select(x => new DbConnection
                 {
-                    Id =Guid.NewGuid(),
+                    Id = Guid.NewGuid(),
                     Type = (int)x.Type,
                     Value = x.Value,
                     UserId = value.Id.Value
