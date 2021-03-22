@@ -33,7 +33,6 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var random = new Random();
             var result = new char[filler.Length + 4];
-
             var neededIndex = 0;
             var fillerIndex = 0;
 
