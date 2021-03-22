@@ -19,6 +19,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
 
+        public DateTime CreatedAt { get; set; }
         public DbUserCredentials UserCredentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFiles { get; set; }
         public ICollection<DbUserAchievement> Achievements { get; set; }
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder
                 .Property(u => u.CreatedAt)
                 .HasDefaultValue(new DateTime(2021, 1, 1));
-            
+
             builder.
                 HasKey(p => p.Id);
 
