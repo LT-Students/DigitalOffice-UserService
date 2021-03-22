@@ -48,6 +48,8 @@ namespace LT.DigitalOffice.UserService.Business
             _validator.ValidateAndThrowCustom(request);
 
             var dbUser = _mapperUser.Map(request);
+            dbUser.CreatedAt = DateTime.UtcNow;
+
             var dbUserCredentials = _mapperUserCredentials.Map(request);
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
