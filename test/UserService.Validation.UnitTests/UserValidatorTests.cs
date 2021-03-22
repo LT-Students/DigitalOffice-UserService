@@ -234,7 +234,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Skills = new List<string>()
             };
 
-            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+            validator.TestValidate(request).ShouldNotHaveValidationErrorFor(r => r.MiddleName);
         }
 
         [Test]
