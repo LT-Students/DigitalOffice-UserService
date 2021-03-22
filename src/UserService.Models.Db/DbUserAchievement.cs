@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         {
             builder.HasKey(pm => new { pm.UserId, pm.AchievementId });
             builder.HasOne(pm => pm.User)
-                .WithMany(p => p.AchievementsIds)
+                .WithMany(p => p.Achievements)
                 .HasForeignKey(pm => pm.UserId);
         }
     }

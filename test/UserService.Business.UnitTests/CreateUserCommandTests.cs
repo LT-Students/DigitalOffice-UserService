@@ -43,6 +43,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Status = "Example",
                 Password = "Example",
                 IsAdmin = false,
+                Connections = new List<UserConnection>()
+                {
+                    new UserConnection()
+                    {
+                        Type = ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
                 Skills = new List<string>() { "C#", "C/C++" }
             };
 
@@ -53,7 +61,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Connections = new List<DbConnection>
+                {
+                    new DbConnection()
+                    {
+                        Id = userId,
+                        Type = (int)ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             validationResultError = new ValidationResult(

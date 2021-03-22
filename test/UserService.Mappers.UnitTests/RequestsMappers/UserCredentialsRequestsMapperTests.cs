@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.UserCredentials;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.RequestsMappers.UnitTests
 {

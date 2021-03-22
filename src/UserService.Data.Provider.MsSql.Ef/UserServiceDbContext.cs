@@ -20,6 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
         public DbSet<DbUser> Users { get; set; }
         public DbSet<DbUserCredentials> UserCredentials { get; set; }
         public DbSet<DbAchievement> Achievements { get; set; }
+        public DbSet<DbConnection> Connections { get; set; }
         public DbSet<DbUserSkills> UserSkills { get; set; }
         public DbSet<DbSkill> Skills { get; set; }
 
