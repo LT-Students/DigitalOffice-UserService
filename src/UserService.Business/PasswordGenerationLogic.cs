@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var random = new Random();
 
-            var needed = new StringBuilder(4);
+            var needed = new char[4];
             needed[0] = Digits[random.Next(Digits.Length)];
             needed[1] = UpperCaseLetters[random.Next(UpperCaseLetters.Length)];
             needed[2] = LowerCaseLetters[random.Next(LowerCaseLetters.Length)];
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business
             return MergeStrings(needed, filler);
         }
 
-        private static string MergeStrings(StringBuilder needed, string filler)
+        private static string MergeStrings(char[] needed, string filler)
         {
             var random = new Random();
             var result = new char[filler.Length + 4];
