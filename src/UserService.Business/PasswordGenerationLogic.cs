@@ -26,16 +26,17 @@ namespace LT.DigitalOffice.UserService.Business
                 .Select(s => s[random.Next(s.Length)])
                 .ToArray());
 
-            return MergeStrings(needed, filler);
+            return GetMergedString(needed, filler);
         }
 
-        private static string MergeStrings(char[] needed, string filler)
+        private static string GetMergedString(char[] needed, string filler)
         {
             var random = new Random();
             var result = new char[filler.Length + 4];
 
             var neededIndex = 0;
             var fillerIndex = 0;
+
             for (int i = 0; i < result.Length; i++)
             {
                 if (random.Next() % 2 == 1 && fillerIndex != filler.Length
