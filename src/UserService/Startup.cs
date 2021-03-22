@@ -1,5 +1,4 @@
 using FluentValidation;
-using GreenPipes;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel;
@@ -26,11 +25,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
 {
-    public class Startup
+  public class Startup
     {
         public IConfiguration Configuration { get; }
 
@@ -45,9 +46,17 @@ namespace LT.DigitalOffice.UserService
 
             services.AddHttpContextAccessor();
 
+            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
+            if (string.IsNullOrEmpty(connStr))
+            {
+                connStr = Configuration.GetConnectionString("SQLConnectionString");
+            }
+
+            Console.WriteLine(connStr);
+
             services.AddDbContext<UserServiceDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("SQLConnectionString"));
+                options.UseSqlServer(connStr);
             });
 
             services.AddControllers();
@@ -64,6 +73,11 @@ namespace LT.DigitalOffice.UserService
             ConfigureValidators(services);
             ConfigureMappers(services);
             ConfigureMassTransit(services);
+
+            services.AddControllers().AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         private void ConfigureEndpoints(
@@ -74,8 +88,12 @@ namespace LT.DigitalOffice.UserService
             cfg.ReceiveEndpoint(rabbitMqConfig.CheckUserIsAdminEndpoint, ep =>
             {
                 // TODO Rename
-                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
             });
 
             cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
@@ -86,7 +104,9 @@ namespace LT.DigitalOffice.UserService
 
         private void ConfigureMassTransit(IServiceCollection services)
         {
-            var rabbitMqConfig = Configuration.GetSection(BaseRabbitMqOptions.RabbitMqSectionName).Get<RabbitMqConfig>();
+            var rabbitMqConfig = Configuration
+                .GetSection(BaseRabbitMqOptions.RabbitMqSectionName)
+                .Get<RabbitMqConfig>();
 
             services.AddMassTransit(x =>
             {
