@@ -37,7 +37,9 @@ namespace LT.DigitalOffice.UserService.Business
             var random = new Random();
             var result = new char[filler.Length + 4];
 
-            for (int i = 0, neededIndex = 0, fillerIndex = 0; i < result.Length; i++)
+            var neededIndex = 0;
+            var fillerIndex = 0;
+            for (int i = 0; i < result.Length; i++)
             {
                 if (random.Next() % 2 == 1 && fillerIndex != filler.Length
                     || neededIndex == needed.Length)
