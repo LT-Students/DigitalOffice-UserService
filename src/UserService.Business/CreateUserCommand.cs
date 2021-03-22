@@ -65,7 +65,9 @@ namespace LT.DigitalOffice.UserService.Business
         private void AddUserSkillsToDbUser(DbUser dbUser, UserRequest request)
         {
             if (request.Skills == null)
+            {
                 return;
+            }
 
             foreach (var skillName in request.Skills)
             {

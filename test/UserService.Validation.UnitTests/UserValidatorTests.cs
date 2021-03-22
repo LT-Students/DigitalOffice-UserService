@@ -243,24 +243,44 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
         {
-            var connections = new List<UserConnection>();
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Password = "Example",
+                IsAdmin = false,
+                Connections = new List<UserConnection>(),
+                Login = "Example"
+            };
 
-            validator.ShouldNotHaveValidationErrorFor(x => x.Connections, connections);
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
 
         [Test]
         public void ShouldPassWhenDataIsValidWithRightConnections()
         {
-            var connections = new List<UserConnection>()
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Password = "Example",
+                IsAdmin = false,
+                Connections = new List<UserConnection>()
                 {
                     new UserConnection()
                     {
                         Type = ConnectionType.Email,
                         Value = "Ex@mail.ru"
                     }
-                };
+                },
+                Login = "Example"
+            };
 
-            validator.ShouldNotHaveValidationErrorFor(x => x.Connections, connections);
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
 
         [Test]
