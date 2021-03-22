@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Example1",
                 LastName = "Example1",
                 MiddleName = "Example1",
-                Status = "normal",
+                Status = 1,
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
                 IsAdmin = false

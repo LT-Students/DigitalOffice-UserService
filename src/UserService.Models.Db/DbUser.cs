@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         
         public string LastName { get; set; }
         public string MiddleName { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
         public Guid? AvatarFileId { get; set; }
         
         public bool IsActive { get; set; }
