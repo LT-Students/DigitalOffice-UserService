@@ -7,7 +7,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public class DbUserSkills
     {
         public const string TableName = "UserSkills";
-        
+
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid SkillId { get; set; }
@@ -24,9 +24,13 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder.HasKey(us => us.Id);
 
-            builder.Property(us => us.UserId);
+            builder
+                .Property(us => us.UserId)
+                .IsRequired();
 
-            builder.Property(us => us.SkillId);
+            builder
+                .Property(us => us.SkillId)
+                .IsRequired();
 
             builder
                 .HasOne(us => us.User)

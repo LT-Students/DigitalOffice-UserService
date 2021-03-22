@@ -39,9 +39,9 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbUser> builder)
         {
-            builder.ToTable(DbUser.TableName);
+            builder.
+                ToTable(DbUser.TableName);
 
-            builder.HasKey(u => u.Id);
             builder
                 .Property(u => u.CreatedAt)
                 .HasDefaultValue(new DateTime(2021, 1, 1));
@@ -49,35 +49,30 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.
                 HasKey(p => p.Id);
 
-            builder.Property(u => u.Email);
-
-            builder.Property(u => u.FirstName);
-
-            builder.Property(u => u.LastName);
+            builder
+                .Property(p => p.Email)
+                .IsRequired();
 
             builder
-                .Property(u => u.MiddleName)
-                .IsRequired(false);
+                .Property(p => p.FirstName)
+                .IsRequired();
 
             builder
-                .Property(u => u.Status);
+                .Property(p => p.LastName)
+                .IsRequired();
 
             builder
-                .Property(u => u.AvatarFileId)
-                .IsRequired(false);
+                .Property(p => p.IsActive)
+                .IsRequired();
 
-            builder.Property(u => u.IsActive);
-
-            builder.Property(u => u.IsAdmin);
+            builder
+                .HasMany(u => u.Connections)
+                .WithOne(conn => conn.User);
 
             builder
                 .HasMany(u => u.UserSkills)
                 .WithOne(us => us.User)
                 .HasForeignKey(us => us.UserId);
-
-            builder
-                .HasMany(u => u.Connections)
-                .WithOne(conn => conn.User);
         }
     }
 }

@@ -28,7 +28,9 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder.HasKey(s => s.Id);
 
-            builder.Property(s => s.SkillName);
+            builder
+                .Property(s => s.SkillName)
+                .IsRequired();
 
             builder
                 .HasMany(s => s.UserSkills)
