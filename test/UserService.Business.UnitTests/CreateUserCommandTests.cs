@@ -167,7 +167,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserHasRighhts()
+        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserHasRights()
         {
             accessValidatorMock
                 .Setup(x => x.IsAdmin())

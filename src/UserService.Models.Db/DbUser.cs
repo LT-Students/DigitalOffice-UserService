@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
@@ -42,6 +41,12 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.ToTable(DbUser.TableName);
 
             builder.HasKey(u => u.Id);
+            builder
+                .Property(u => u.CreatedAt)
+                .HasDefaultValue(new DateTime(2021, 1, 1));
+            
+            builder.
+                HasKey(p => p.Id);
 
             builder.Property(u => u.Email);
 
