@@ -23,13 +23,13 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public DbUserCredentials UserCredentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFilesIds { get; set; }
         public ICollection<DbUserAchievement> AchievementsIds { get; set; }
-        public ICollection<DbUserSkills> Skills { get; set; }
+        public ICollection<DbUserSkills> UserSkills { get; set; }
 
-        public DbUser() 
+        public DbUser()
         {
             CertificatesFilesIds = new HashSet<DbUserCertificateFile>();
             AchievementsIds = new HashSet<DbUserAchievement>();
-            Skills = new HashSet<DbUserSkills>();
+            UserSkills = new HashSet<DbUserSkills>();
         }
     }
 
@@ -42,11 +42,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.HasKey(u => u.Id);
 
             builder.Property(u => u.Email);
-            
+
             builder.Property(u => u.FirstName);
-            
+
             builder.Property(u => u.LastName);
-            
+
             builder
                 .Property(u => u.MiddleName)
                 .IsRequired(false);
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.Property(u => u.IsAdmin);
 
             builder
-                .HasMany(u => u.Skills)
+                .HasMany(u => u.UserSkills)
                 .WithOne(us => us.User)
                 .HasForeignKey(us => us.UserId);
         }

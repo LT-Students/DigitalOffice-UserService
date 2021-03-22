@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Business
             var dbUser = _mapperUser.Map(request);
 
             AddUserSkillsToDbUser(dbUser, request);
-            
+
             var dbUserCredentials = _mapperUserCredentials.Map(request);
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
@@ -65,18 +65,19 @@ namespace LT.DigitalOffice.UserService.Business
             foreach (var skillName in request.Skills)
             {
                 var dbSkill = _userRepository.FindSkillByName(skillName);
+
                 if (dbSkill != null)
                 {
-                    dbUser.Skills.Add(
-                        new DbUserSkills { 
-                            Id = Guid.NewGuid(), 
-                            UserId = dbUser.Id, 
-                            SkillId = dbSkill.Id 
+                    dbUser.UserSkills.Add(
+                        new DbUserSkills {
+                            Id = Guid.NewGuid(),
+                            UserId = dbUser.Id,
+                            SkillId = dbSkill.Id
                         });
-                } 
+                }
                 else
                 {
-                    dbUser.Skills.Add(
+                    dbUser.UserSkills.Add(
                         new DbUserSkills
                         {
                             Id = Guid.NewGuid(),

@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                         name: "FK_UserSkills_Users",
                         column: x => x.UserId,
                         principalTable: DbUser.TableName,
-                        principalColumn: "Id",
+                        principalColumn: nameof(DbUser.Id),
                         onDelete: ReferentialAction.Cascade
                     );
 
@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                         name: "FK_UserSkills_Skills",
                         column: x => x.SkillId,
                         principalTable: DbSkill.TableName,
-                        principalColumn: "Id",
+                        principalColumn: nameof(DbSkill.Id),
                         onDelete: ReferentialAction.Cascade
                     );
                 });
@@ -59,13 +59,13 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             CreateSkillsTable(migrationBuilder);
-            CreateUsersSkillsTable(migrationBuilder);    
+            CreateUsersSkillsTable(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(DbSkill.TableName);
             migrationBuilder.DropTable(DbUserSkills.TableName);
+            migrationBuilder.DropTable(DbSkill.TableName);
         }
     }
 }

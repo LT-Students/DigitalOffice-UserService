@@ -118,8 +118,10 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             var skill = new DbSkill { Id = Guid.NewGuid(), SkillName = name };
+
             _provider.Skills.Add(skill);
             _provider.Save();
+
             return skill.Id;
         }
     }

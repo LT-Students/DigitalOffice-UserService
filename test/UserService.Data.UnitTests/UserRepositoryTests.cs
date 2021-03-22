@@ -61,6 +61,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var nameSkill = "new skill";
             var result = _repository.CreateSkill(nameSkill);
+
             Assert.AreEqual(result, _provider.Skills.FirstOrDefaultAsync(s => s.SkillName == nameSkill).Result.Id);
         }
 
@@ -74,6 +75,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldFindExistSkillByName()
         {
             var result = _repository.FindSkillByName(_dbSkillInDb.SkillName);
+
             SerializerAssert.AreEqual(_dbSkillInDb, result);
         }
 
