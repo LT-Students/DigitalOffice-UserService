@@ -54,7 +54,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
                 request.Login, dbUserCredentials.Salt, request.Password);
-            
+
             return _userRepository.CreateUser(dbUser, dbUserCredentials);
         }
     }

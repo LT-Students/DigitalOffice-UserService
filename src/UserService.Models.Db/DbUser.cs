@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
