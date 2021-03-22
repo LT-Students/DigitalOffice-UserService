@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                         Type = ConnectionType.Email,
                         Value = "Ex@mail.ru"
                     }
-                }
+                },
                 Skills = new List<string>() { "C#", "C/C++" }
             };
 

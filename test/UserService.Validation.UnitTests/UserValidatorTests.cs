@@ -229,83 +229,42 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldThrowValidationExceptionWhenSkillsIsNull()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Login = "admin",
-                Email = "Example@gmail.com",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                Login = "Example"
-            };
+            List<string> skills = null;
 
-            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Skills);
+            validator.ShouldHaveValidationErrorFor(x => x.Skills, skills);
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenSkillNameIsTooLong()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Login = "admin",
-                Email = "Example@gmail.com",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>() { "C#", "some very looooooooooong name skill" }
-            };
+            var skills = new List<string>() { "C#", "some very looooooooooong name skill" };
 
-            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Skills);
+            validator.ShouldHaveValidationErrorFor(x => x.Skills, skills);
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Email = "Example@gmail.com",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                Connections = new List<UserConnection>(),
-                Login = "Example"
-            };
+            var connections = new List<UserConnection>();
 
-            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+            validator.ShouldNotHaveValidationErrorFor(x => x.Connections, connections);
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithRightConnections()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Email = "Example@gmail.com",
-                Status = "Example",
-                Password = "Example",
-                IsAdmin = false,
-                Connections = new List<UserConnection>()
+            var connections = new List<UserConnection>()
                 {
                     new UserConnection()
                     {
                         Type = ConnectionType.Email,
                         Value = "Ex@mail.ru"
                     }
-                },
-                Login = "Example"
-            };
+                };
 
-            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+            validator.ShouldNotHaveValidationErrorFor(x => x.Connections, connections);
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithWrongConnections()
         {
@@ -326,7 +285,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                         Value = ""
                     }
                 },
-                Login = "Example"
+                Login = "Example",
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();

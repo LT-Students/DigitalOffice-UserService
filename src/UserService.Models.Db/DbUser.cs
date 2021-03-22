@@ -24,6 +24,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public ICollection<DbUserCertificateFile> CertificatesFiles { get; set; }
         public ICollection<DbUserAchievement> Achievements { get; set; }
         public ICollection<DbConnection> Connections { get; set; }
+        public ICollection<DbUserSkills> UserSkills { get; set; }
 
         public DbUser()
         {
