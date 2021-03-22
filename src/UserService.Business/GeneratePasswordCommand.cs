@@ -1,6 +1,4 @@
 ﻿using LT.DigitalOffice.UserService.Business.Interfaces;
-using System;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
