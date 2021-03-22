@@ -1,11 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
