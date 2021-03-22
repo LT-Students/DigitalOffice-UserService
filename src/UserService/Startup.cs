@@ -27,6 +27,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -72,6 +73,11 @@ namespace LT.DigitalOffice.UserService
             ConfigureValidators(services);
             ConfigureMappers(services);
             ConfigureMassTransit(services);
+
+            services.AddControllers().AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         private void ConfigureEndpoints(
