@@ -42,7 +42,15 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Connections = new List<UserConnection>()
+                {
+                    new UserConnection()
+                    {
+                        Type = ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             dbUser = new DbUser
@@ -52,7 +60,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 LastName = "Example",
                 MiddleName = "Example",
                 Status = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Connections = new List<DbConnection>
+                {
+                    new DbConnection()
+                    {
+                        Id = userId,
+                        Type = (int)ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             validationResultError = new ValidationResult(

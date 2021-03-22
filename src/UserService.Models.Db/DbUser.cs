@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -24,9 +26,20 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public bool IsAdmin { get; set; }
         public DateTime CreatedAt { get; set; }
         public DbUserCredentials UserCredentials { get; set; }
-        public ICollection<DbUserCertificateFile> CertificatesFilesIds { get; set; }
-        public ICollection<DbUserAchievement> AchievementsIds { get; set; }
+        public ICollection<DbUserCertificateFile> CertificatesFiles { get; set; }
+        public ICollection<DbUserAchievement> Achievements { get; set; }
+        public ICollection<DbConnection> Connections { get; set; }
+
+        public DbUser()
+        {
+            Connections = new HashSet<DbConnection>();
+            Achievements = new HashSet<DbUserAchievement>();
+            CertificatesFiles = new HashSet<DbUserCertificateFile>();
+        }
     }
+            builder
+                .Property(u => u.CreatedAt)
+                .HasDefaultValue(new DateTime(2021, 1, 1));
 
     public class DbUserConfiguration : IEntityTypeConfiguration<DbUser>
     {
@@ -34,29 +47,29 @@ namespace LT.DigitalOffice.UserService.Models.Db
         {
             builder.
                 ToTable(DbUser.TableName);
-            
-            builder
-                .Property(u => u.CreatedAt)
-                .HasDefaultValue(new DateTime(2021, 1, 1));
-            
+
             builder.
                 HasKey(p => p.Id);
 
             builder
                 .Property(p => p.Email)
                 .IsRequired();
-            
+
             builder
                 .Property(p => p.FirstName)
                 .IsRequired();
-            
+
             builder
                 .Property(p => p.LastName)
                 .IsRequired();
-            
+
             builder
                 .Property(p => p.IsActive)
                 .IsRequired();
+
+            builder
+                .HasMany(u => u.Connections)
+                .WithOne(conn => conn.User);
         }
     }
 }

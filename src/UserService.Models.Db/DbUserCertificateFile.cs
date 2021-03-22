@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         {
             builder.HasKey(pm => new { pm.UserId, pm.CertificateId });
             builder.HasOne(pm => pm.User)
-                .WithMany(p => p.CertificatesFilesIds)
+                .WithMany(p => p.CertificatesFiles)
                 .HasForeignKey(pm => pm.UserId);
         }
     }

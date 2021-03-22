@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             dbUser = new DbUser
             {
-                AchievementsIds = new List<DbUserAchievement> { dbUserAchievement },
+                Achievements = new List<DbUserAchievement> { dbUserAchievement },
                 AvatarFileId = avatarFileId,
                 FirstName = FirstName,
                 Id = userId,
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsAdmin = IsAdmin,
                 LastName = LastName,
                 Status = Status,
-                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile },
+                CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile }
                 CreatedAt = createdAt
             };
         }
