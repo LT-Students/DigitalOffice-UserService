@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DbUserCredentials UserCredentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFilesIds { get; set; }
         public ICollection<DbUserAchievement> AchievementsIds { get; set; }
