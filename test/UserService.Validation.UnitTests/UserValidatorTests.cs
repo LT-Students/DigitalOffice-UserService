@@ -173,8 +173,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>()
+                IsAdmin = false
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -211,8 +210,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = "Example",
                 Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>()
+                IsAdmin = false
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -227,11 +225,11 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldThrowValidationExceptionWhenSkillsIsNull()
+        public void ShouldPassWhenSkillsIsNull()
         {
             List<string> skills = null;
 
-            validator.ShouldHaveValidationErrorFor(x => x.Skills, skills);
+            validator.ShouldNotHaveValidationErrorFor(x => x.Skills, skills);
         }
 
         [Test]
@@ -285,8 +283,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                         Value = ""
                     }
                 },
-                Login = "Example",
-                Skills = new List<string>()
+                Login = "Example"
             };
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();

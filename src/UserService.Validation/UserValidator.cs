@@ -52,15 +52,13 @@ namespace LT.DigitalOffice.UserService.Validation
             {
                 RuleForEach(user => user.Connections).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
             });
-      
 
-
-            RuleFor(request => request.Skills)
-                .NotNull();
-
-            RuleForEach(request => request.Skills)
-                .NotEmpty()
-                .MaximumLength(30).WithMessage("Skill name is too long");
+            When(user => user.Skills != null, () =>
+            {
+                RuleForEach(request => request.Skills)
+                    .NotEmpty()
+                    .MaximumLength(30).WithMessage("Skill name is too long");
+            });
         }
     }
 }
