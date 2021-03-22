@@ -36,6 +36,12 @@ namespace LT.DigitalOffice.UserService.Controllers
             return command.Execute(request);
         }
 
+        [HttpGet("generatePassword")]
+        public string GeneratePassword([FromServices] IGeneratePasswordCommand command)
+        {
+            return command.Execute();
+        }
+
         [HttpPost("changePassword")]
         public void ChangePassword([FromServices] IChangePasswordCommand command, [FromBody] ChangePasswordRequest request)
         {

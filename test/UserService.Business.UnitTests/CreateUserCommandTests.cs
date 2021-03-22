@@ -43,7 +43,15 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Connections = new List<UserConnection>()
+                {
+                    new UserConnection()
+                    {
+                        Type = ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             dbUser = new DbUser
@@ -52,8 +60,17 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = 1,
-                IsAdmin = false
+                Status = "Example",
+                IsAdmin = false,
+                Connections = new List<DbConnection>
+                {
+                    new DbConnection()
+                    {
+                        Id = userId,
+                        Type = (int)ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                }
             };
 
             validationResultError = new ValidationResult(
@@ -150,7 +167,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserHasRighhts()
+        public void ShouldCreateUserWhenUserDataIsValidAndCurrentUserHasRights()
         {
             accessValidatorMock
                 .Setup(x => x.IsAdmin())

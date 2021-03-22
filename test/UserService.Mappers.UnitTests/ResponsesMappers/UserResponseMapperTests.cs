@@ -21,6 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         private const UserStatus Status = UserStatus.Sick;
         private const bool IsAdmin = false;
 
+        private DateTime createdAt;
         private Guid userId;
         private Guid achievementId;
         private Guid certificateFileId;
@@ -37,6 +38,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         {
             userResponseMapper = new UserResponseMapper();
 
+            createdAt = DateTime.UtcNow;
             userId = Guid.NewGuid();
             achievementId = Guid.NewGuid();
             certificateFileId = Guid.NewGuid();
@@ -55,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Achievement = achievement,
                 AchievementId = achievementId,
                 User = dbUser,
-                Time = DateTime.Now,
+                Time = DateTime.UtcNow,
                 UserId = userId
             };
 
@@ -68,15 +70,16 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             dbUser = new DbUser
             {
-                AchievementsIds = new List<DbUserAchievement> { dbUserAchievement },
+                Achievements = new List<DbUserAchievement> { dbUserAchievement },
                 AvatarFileId = avatarFileId,
                 FirstName = FirstName,
                 Id = userId,
                 IsActive = IsActive,
                 IsAdmin = IsAdmin,
                 LastName = LastName,
-                Status = DbStatus,
-                CertificatesFilesIds = new List<DbUserCertificateFile> { dbUserCertificateFile }
+                Status = Status,
+                CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile },
+                CreatedAt = createdAt
             };
         }
 
@@ -106,6 +109,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             Assert.AreEqual(Status, resultUserModel.Status);
             Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
             Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
+            Assert.AreEqual(createdAt, resultUserModel.CreatedAt);
         }
     }
 }

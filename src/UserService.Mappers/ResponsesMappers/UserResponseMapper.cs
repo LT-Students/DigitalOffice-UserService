@@ -20,19 +20,20 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
             {
                 Id = value.Id,
                 Email = value.Email,
-                AchievementsIds = value.AchievementsIds?.Select(dbUserAchievement => new Achievement
+                AchievementsIds = value.Achievements?.Select(dbUserAchievement => new Achievement
                 {
                     Id = dbUserAchievement.Achievement.Id,
                     Message = dbUserAchievement.Achievement.Message,
                     PictureFileId = dbUserAchievement.Achievement.PictureFileId
                 }).ToList(),
                 AvatarFileId = value.AvatarFileId,
-                CertificatesIds = value.CertificatesFilesIds?.Select(x => x.CertificateId).ToList(),
+                CertificatesIds = value.CertificatesFiles?.Select(x => x.CertificateId).ToList(),
                 FirstName = value.FirstName,
                 LastName = value.LastName,
                 MiddleName = value.MiddleName,
-                Status = (UserStatus)value.Status,
-                IsAdmin = value.IsAdmin
+                Status = value.Status,
+                IsAdmin = value.IsAdmin,
+                CreatedAt = value.CreatedAt
             };
         }
     }

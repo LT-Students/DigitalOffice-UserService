@@ -214,7 +214,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
-
+        [Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
             var request = new UserRequest
@@ -225,10 +225,79 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Login = "Example"
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+        [Test]
+        public void ShouldPassWhenDataIsValidWithEmptyConnections()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                Connections = new List<UserConnection>(),
+                Login = "Example"
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+        [Test]
+        public void ShouldPassWhenDataIsValidWithRightConnections()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                Connections = new List<UserConnection>()
+                {
+                    new UserConnection()
+                    {
+                        Type = ConnectionType.Email,
+                        Value = "Ex@mail.ru"
+                    }
+                },
+                Login = "Example"
+            };
+
+            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+        }
+        [Test]
+        public void ShouldPassWhenDataIsValidWithWrongConnections()
+        {
+            var request = new UserRequest
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Example",
+                LastName = "Example",
+                Email = "Example@gmail.com",
+                Status = "Example",
+                Password = "Example",
+                IsAdmin = false,
+                Connections = new List<UserConnection>()
+                {
+                    new UserConnection()
+                    {
+                        Type = ConnectionType.Email,
+                        Value = ""
+                    }
+                },
+                Login = "Example"
+            };
+
+            validator.TestValidate(request).ShouldHaveAnyValidationError();
         }
     }
 }

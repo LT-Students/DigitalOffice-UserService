@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
@@ -15,6 +16,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
         public bool IsActive { get; set; }
+        public IEnumerable<UserConnection> Connections { get; set; }
         public Guid? AvatarFileId { get; set; }
     }
 }

@@ -79,6 +79,11 @@ namespace LT.DigitalOffice.UserService
             ConfigureValidators(services);
             ConfigureMappers(services);
             ConfigureMassTransit(services);
+
+            services.AddControllers().AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         private void ConfigureEndpoints(
@@ -200,6 +205,7 @@ namespace LT.DigitalOffice.UserService
         private void ConfigureCommands(IServiceCollection services)
         {
             services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+            services.AddTransient<IGeneratePasswordCommand, GeneratePasswordCommand>();
             services.AddTransient<IChangePasswordCommand, ChangePasswordCommand>();
             services.AddTransient<IEditUserCommand, EditUserCommand>();
             services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();

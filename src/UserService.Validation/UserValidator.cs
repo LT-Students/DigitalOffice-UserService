@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Models.Dto;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Validation
 {
@@ -46,6 +47,13 @@ namespace LT.DigitalOffice.UserService.Validation
                 .NotEmpty()
                 .MinimumLength(5)
                 .MaximumLength(15);
+
+            When(user => user.Connections != null && user.Connections.Any(), () =>
+            {
+                RuleForEach(user => user.Connections).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
+            });
+      
+
         }
     }
 }
