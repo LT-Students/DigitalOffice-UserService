@@ -37,9 +37,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
             CertificatesFiles = new HashSet<DbUserCertificateFile>();
         }
     }
-            builder
-                .Property(u => u.CreatedAt)
-                .HasDefaultValue(new DateTime(2021, 1, 1));
 
     public class DbUserConfiguration : IEntityTypeConfiguration<DbUser>
     {
@@ -48,6 +45,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder.
                 ToTable(DbUser.TableName);
 
+            builder
+                .Property(u => u.CreatedAt)
+                .HasDefaultValue(new DateTime(2021, 1, 1));
+            
             builder.
                 HasKey(p => p.Id);
 

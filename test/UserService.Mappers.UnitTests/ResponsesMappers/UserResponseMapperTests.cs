@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         {
             userResponseMapper = new UserResponseMapper();
 
-            createdAt = DateTime.Now;
+            createdAt = DateTime.UtcNow;
             userId = Guid.NewGuid();
             achievementId = Guid.NewGuid();
             certificateFileId = Guid.NewGuid();
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsAdmin = IsAdmin,
                 LastName = LastName,
                 Status = Status,
-                CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile }
+                CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile },
                 CreatedAt = createdAt
             };
         }
