@@ -240,7 +240,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>(),
@@ -258,7 +258,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()
@@ -283,7 +283,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 Email = "Example@gmail.com",
-                Status = "Example",
+                Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
                 Connections = new List<UserConnection>()

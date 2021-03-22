@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Status = "Example",
+                Status = 1,
                 IsAdmin = false,
                 Connections = new List<DbConnection>
                 {

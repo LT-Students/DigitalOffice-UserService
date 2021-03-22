@@ -77,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsActive = IsActive,
                 IsAdmin = IsAdmin,
                 LastName = LastName,
-                Status = Status,
+                Status = 1,
                 CertificatesFiles = new List<DbUserCertificateFile> { dbUserCertificateFile },
                 CreatedAt = createdAt
             };

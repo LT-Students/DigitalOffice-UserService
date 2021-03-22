@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
                 FirstName = value.FirstName,
                 LastName = value.LastName,
                 MiddleName = value.MiddleName,
-                Status = value.Status,
+                Status = (UserStatus)value.Status,
                 IsAdmin = value.IsAdmin,
                 CreatedAt = value.CreatedAt
             };
