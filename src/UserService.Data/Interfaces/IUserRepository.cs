@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Adds new skill to Database. Returns Id of new DbSkill if it was successful to add
         /// </summary>
         /// <param name="name">Skill name</param>
-        /// <returns> Guid of created DbSkill</returns>
+        /// <returns> Guid of created DbSkill.</returns>
         public Guid CreateSkill(string name);
     }
 }

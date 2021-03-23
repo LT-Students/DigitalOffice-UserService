@@ -114,10 +114,14 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (dbSkill != null)
             {
-                throw new BadRequestException();
+                throw new BadRequestException("Skill name was null");
             }
 
-            var skill = new DbSkill { Id = Guid.NewGuid(), SkillName = name };
+            var skill = new DbSkill
+            {
+                Id = Guid.NewGuid(),
+                SkillName = name
+            };
 
             _provider.Skills.Add(skill);
             _provider.Save();

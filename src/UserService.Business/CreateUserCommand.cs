@@ -51,7 +51,6 @@ namespace LT.DigitalOffice.UserService.Business
             var dbUser = _mapperUser.Map(request);
             dbUser.CreatedAt = DateTime.UtcNow;
 
-
             AddUserSkillsToDbUser(dbUser, request);
 
             var dbUserCredentials = _mapperUserCredentials.Map(request);
