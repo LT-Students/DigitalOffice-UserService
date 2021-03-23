@@ -234,5 +234,41 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
             userRepositoryMock.Verify();
         }
+
+        [Test]
+        public void ShouldCreateUserWhenRepositoryHasThisSkills()
+        {
+            userRepositoryMock
+                .Setup(x => x.FindSkillByName(It.IsAny<string>()))
+                .Returns(new DbSkill());
+
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Returns(Guid.NewGuid());
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenRepositoryDoesNotHaveThisSkills()
+        {
+            userRepositoryMock
+                .Setup(x => x.FindSkillByName(It.IsAny<string>()))
+                .Returns(() => null);
+
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Returns(Guid.NewGuid());
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
     }
 }
