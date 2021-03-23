@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
@@ -51,7 +52,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                         Type = ConnectionType.Email,
                         Value = "Ex@mail.ru"
                     }
-                }
+                },
+                Skills = new List<string>() { "C#", "C/C++" }
             };
 
             dbUser = new DbUser
@@ -207,6 +209,66 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             Assert.Throws<ValidationException>(() => command.Execute(request));
             validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenMethodOfCreateSkillInRepositoryThrowsException()
+        {
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Throws(new BadRequestException());
+
+            Assert.Throws<BadRequestException>(() => command.Execute(request));
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenRepositoryCorrectCreatingSkills()
+        {
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Returns(Guid.NewGuid())
+                .Verifiable();
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenRepositoryHasThisSkills()
+        {
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Returns(Guid.NewGuid())
+                .Verifiable();
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
+        }
+
+        [Test]
+        public void ShouldCreateUserWhenRepositoryDoesNotHaveThisSkills()
+        {
+            userRepositoryMock
+                .Setup(x => x.FindSkillByName(It.IsAny<string>()))
+                .Returns(() => null)
+                .Verifiable();
+
+            userRepositoryMock
+                .Setup(x => x.CreateSkill(It.IsAny<string>()))
+                .Returns(Guid.NewGuid())
+                .Verifiable();
+
+            Assert.That(command.Execute(request), Is.EqualTo(userId));
+            mapperUserMock.Verify();
+            mapperUserCredentialsMock.Verify();
+            validatorMock.Verify(validator => validator.Validate(It.IsAny<IValidationContext>()), Times.Once);
+            userRepositoryMock.Verify();
         }
     }
 }

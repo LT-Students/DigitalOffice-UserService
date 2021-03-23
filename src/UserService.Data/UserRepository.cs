@@ -102,5 +102,31 @@ namespace LT.DigitalOffice.UserService.Data
                 .Take(takeCount)
                 .AsEnumerable();
         }
+
+        public DbSkill FindSkillByName(string name)
+        {
+            return _provider.Skills.FirstOrDefault(s => s.SkillName == name);
+        }
+
+        public Guid CreateSkill(string name)
+        {
+            var dbSkill = _provider.Skills.FirstOrDefault(s => s.SkillName == name);
+
+            if (dbSkill != null)
+            {
+                throw new BadRequestException("Skill name was null");
+            }
+
+            var skill = new DbSkill
+            {
+                Id = Guid.NewGuid(),
+                SkillName = name
+            };
+
+            _provider.Skills.Add(skill);
+            _provider.Save();
+
+            return skill.Id;
+        }
     }
 }

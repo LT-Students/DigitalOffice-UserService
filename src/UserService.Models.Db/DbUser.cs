@@ -8,31 +8,30 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public class DbUser
     {
         public const string TableName = "Users";
-        
+
         public Guid Id { get; set; }
-        
         public string Email { get; set; }
-        
         public string FirstName { get; set; }
-        
         public string LastName { get; set; }
         public string MiddleName { get; set; }
         public int Status { get; set; }
         public Guid? AvatarFileId { get; set; }
-        
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DbUserCredentials UserCredentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFiles { get; set; }
         public ICollection<DbUserAchievement> Achievements { get; set; }
         public ICollection<DbConnection> Connections { get; set; }
+        public ICollection<DbUserSkills> UserSkills { get; set; }
 
         public DbUser()
         {
             Connections = new HashSet<DbConnection>();
             Achievements = new HashSet<DbUserAchievement>();
             CertificatesFiles = new HashSet<DbUserCertificateFile>();
+            UserSkills = new HashSet<DbUserSkills>();
         }
     }
 
@@ -46,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder
                 .Property(u => u.CreatedAt)
                 .HasDefaultValue(new DateTime(2021, 1, 1));
-            
+
             builder.
                 HasKey(p => p.Id);
 
@@ -69,6 +68,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder
                 .HasMany(u => u.Connections)
                 .WithOne(conn => conn.User);
+
+            builder
+                .HasMany(u => u.UserSkills)
+                .WithOne(us => us.User);
         }
     }
 }

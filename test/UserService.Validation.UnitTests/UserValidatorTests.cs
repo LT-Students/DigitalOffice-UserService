@@ -135,7 +135,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -153,7 +154,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Skills = new List<string>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -214,23 +216,31 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
-            var request = new UserRequest
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Example",
-                LastName = "Example",
-                Email = "Example@gmail.com",
-                Status = UserStatus.Sick,
-                Password = "Example",
-                IsAdmin = false,
-                Login = "Example"
-            };
+            string middleName = null;
 
-            validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
+            validator.ShouldNotHaveValidationErrorFor(x => x.MiddleName, middleName);
         }
+
+        [Test]
+        public void ShouldPassWhenSkillsIsNull()
+        {
+            List<string> skills = null;
+
+            validator.ShouldNotHaveValidationErrorFor(x => x.Skills, skills);
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenSkillNameIsTooLong()
+        {
+            var skills = new List<string>() { "C#", "some very looooooooooong name skill" };
+
+            validator.ShouldHaveValidationErrorFor(x => x.Skills, skills);
+        }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
         {
@@ -249,6 +259,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithRightConnections()
         {
@@ -274,6 +285,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
+
         [Test]
         public void ShouldPassWhenDataIsValidWithWrongConnections()
         {
