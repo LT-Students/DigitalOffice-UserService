@@ -56,16 +56,15 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
 
         /// <summary>
-        /// Return DbSkill if it exist in database, else return null
+        /// Return DbSkill if it exist in database, else return null.
         /// </summary>
-        /// <param name="name">Skill name</param>
-        /// <returns></returns>
+        /// <param name="name">Skill name.</param>
         public DbSkill FindSkillByName(string name);
 
         /// <summary>
-        /// Adds new skill to Database. Returns Id of new DbSkill if it was successful to add
+        /// Adds new skill to Database. Returns Id of new DbSkill if it was successful to add.
         /// </summary>
-        /// <param name="name">Skill name</param>
+        /// <param name="name">Skill name.</param>
         /// <returns> Guid of created DbSkill.</returns>
         public Guid CreateSkill(string name);
     }
