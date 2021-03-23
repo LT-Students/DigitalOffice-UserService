@@ -226,7 +226,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             userRepositoryMock
                 .Setup(x => x.CreateSkill(It.IsAny<string>()))
-                .Returns(Guid.NewGuid());
+                .Returns(Guid.NewGuid())
+                .Verifiable();
 
             Assert.That(command.Execute(request), Is.EqualTo(userId));
             mapperUserMock.Verify();
@@ -239,12 +240,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldCreateUserWhenRepositoryHasThisSkills()
         {
             userRepositoryMock
-                .Setup(x => x.FindSkillByName(It.IsAny<string>()))
-                .Returns(new DbSkill());
-
-            userRepositoryMock
                 .Setup(x => x.CreateSkill(It.IsAny<string>()))
-                .Returns(Guid.NewGuid());
+                .Returns(Guid.NewGuid())
+                .Verifiable();
 
             Assert.That(command.Execute(request), Is.EqualTo(userId));
             mapperUserMock.Verify();
@@ -258,11 +256,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             userRepositoryMock
                 .Setup(x => x.FindSkillByName(It.IsAny<string>()))
-                .Returns(() => null);
+                .Returns(() => null)
+                .Verifiable();
 
             userRepositoryMock
                 .Setup(x => x.CreateSkill(It.IsAny<string>()))
-                .Returns(Guid.NewGuid());
+                .Returns(Guid.NewGuid())
+                .Verifiable();
 
             Assert.That(command.Execute(request), Is.EqualTo(userId));
             mapperUserMock.Verify();
