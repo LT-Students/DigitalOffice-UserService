@@ -119,6 +119,7 @@ namespace LT.DigitalOffice.UserService
                 x.AddConsumer<UserLoginConsumer>();
                 x.AddConsumer<GetUserInfoConsumer>();
                 x.AddConsumer<AccessValidatorConsumer>();
+                x.AddConsumer<GetUserNameConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -127,6 +128,8 @@ namespace LT.DigitalOffice.UserService
                         host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
                         host.Password(rabbitMqConfig.Password);
                     });
+
+                    cfg.ReceiveEndpoint(); //path to newsServise?
 
                     ConfigureEndpoints(context, cfg, rabbitMqConfig);
                 });
