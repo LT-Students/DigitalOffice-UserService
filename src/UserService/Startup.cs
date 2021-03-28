@@ -60,12 +60,11 @@ namespace LT.DigitalOffice.UserService
             });
 
             services.AddControllers();
-            
+
             services.AddControllers().AddJsonOptions(opt =>
             {
                 opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-            
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
@@ -119,7 +118,7 @@ namespace LT.DigitalOffice.UserService
                 x.AddConsumer<UserLoginConsumer>();
                 x.AddConsumer<GetUserInfoConsumer>();
                 x.AddConsumer<AccessValidatorConsumer>();
-                x.AddConsumer<GetUserNameConsumer>();
+                x.AddConsumer<GetUserInfoConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -129,7 +128,10 @@ namespace LT.DigitalOffice.UserService
                         host.Password(rabbitMqConfig.Password);
                     });
 
-                    cfg.ReceiveEndpoint(); //path to newsServise?
+                    cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+                    {
+                        ep.ConfigureConsumer<GetUserInfoConsumer>(context);
+                    });
 
                     ConfigureEndpoints(context, cfg, rabbitMqConfig);
                 });
