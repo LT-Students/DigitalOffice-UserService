@@ -4,6 +4,7 @@ using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,19 +26,19 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
             var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message);
 
-            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response);
+            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response); //;
         }
 
         private object GetUserInfo(IGetUserInfoRequest request)
         {
-            var dbUser = repository.GetUserInfoById(request.UserId);
+            DbUser dbUser = repository.GetUserInfoById(request.UserId);
 
             if (dbUser == null)
             {
                 throw new NotFoundException();
             }
 
-            return IGetUserInfoResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
+            return IGetUserInfoResponse.CreateObj(dbUser.Id, dbUser.FirstName, /*dbUser.MiddleName,*/ dbUser.LastName, dbUser.IsActive);
         }
     }
 }

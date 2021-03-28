@@ -96,7 +96,7 @@ namespace LT.DigitalOffice.UserService
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
             });
 
-            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+            cfg.ReceiveEndpoint("UserService_GetUserInfo", ep =>
             {
                 ep.ConfigureConsumer<GetUserInfoConsumer>(context);
             });
@@ -126,11 +126,6 @@ namespace LT.DigitalOffice.UserService
                     {
                         host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
                         host.Password(rabbitMqConfig.Password);
-                    });
-
-                    cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
-                    {
-                        ep.ConfigureConsumer<GetUserInfoConsumer>(context);
                     });
 
                     ConfigureEndpoints(context, cfg, rabbitMqConfig);
