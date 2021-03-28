@@ -96,7 +96,7 @@ namespace LT.DigitalOffice.UserService
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
             });
 
-            cfg.ReceiveEndpoint("UserService_GetUserInfo", ep =>
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
             {
                 ep.ConfigureConsumer<GetUserInfoConsumer>(context);
             });

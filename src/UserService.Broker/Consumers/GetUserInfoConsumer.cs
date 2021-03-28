@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
             var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message);
 
-            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response); //;
+            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response);
         }
 
         private object GetUserInfo(IGetUserInfoRequest request)
