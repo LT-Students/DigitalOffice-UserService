@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public T Body { get; set; }
     }
 
-    internal class UserInfoResponse : IGetUserResponse
+    internal class UserInfoResponse : IGetUserInfoResponse
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; }
@@ -81,9 +81,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IGetUserResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserInfoResponse>>(new
                 {
                     UserId = userId
                 });
@@ -105,8 +105,8 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 Assert.True(response.Message.IsSuccess);
                 Assert.AreEqual(null, response.Message.Errors);
                 SerializerAssert.AreEqual(expected, response.Message);
-                Assert.That(consumerTestHarness.Consumed.Select<IGetUserRequest>().Any(), Is.True);
-                Assert.That(harness.Sent.Select<IOperationResult<IGetUserResponse>>().Any(), Is.True);
+                Assert.That(consumerTestHarness.Consumed.Select<IGetUserInfoRequest>().Any(), Is.True);
+                Assert.That(harness.Sent.Select<IOperationResult<IGetUserInfoResponse>>().Any(), Is.True);
                 repository.Verify();
             }
             finally
@@ -126,9 +126,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IGetUserResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserInfoResponse>>(new
                 {
                     UserId = userId
                 });

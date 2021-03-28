@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     /// <summary>
     /// Consumer for getting information about the user.
     /// </summary>
-    public class GetUserInfoConsumer : IConsumer<IGetUserRequest>
+    public class GetUserInfoConsumer : IConsumer<IGetUserInfoRequest>
     {
         private readonly IUserRepository repository;
 
@@ -21,14 +21,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             this.repository = repository;
         }
 
-        public async Task Consume(ConsumeContext<IGetUserRequest> context)
+        public async Task Consume(ConsumeContext<IGetUserInfoRequest> context)
         {
             var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message);
 
-            await context.RespondAsync<IOperationResult<IGetUserResponse>>(response);
+            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response);
         }
 
-        private object GetUserInfo(IGetUserRequest request)
+        private object GetUserInfo(IGetUserInfoRequest request)
         {
             var dbUser = repository.GetUserInfoById(request.UserId);
 
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 throw new NotFoundException();
             }
 
-            return IGetUserResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
+            return IGetUserInfoResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
         }
     }
 }
