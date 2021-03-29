@@ -7,7 +7,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
     [Migration("20210329163012_UpdateAdminData")]
-    class UpdateAdminData : Migration
+    public partial class UpdateAdminData : Migration
     {
         private const string ADMIN_PASSWORD = "%4fgT1_3ioR";
 
@@ -15,12 +15,21 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         {
             migrationBuilder.UpdateData(
                 table: DbUserCredentials.TableName,
-                keyColumn: nameof(DbUserCredentials.UserId),
-                keyValue: AdminCredentials.userId,
+                keyColumns: new string[]
+                {
+                    nameof(DbUserCredentials.UserId)
+                },
+                keyColumnTypes: new string[] { string.Empty },
+                keyValues: new string[] { AdminCredentials.userId.ToString() },
                 columns: new string[]
                 {
                     nameof(DbUserCredentials.PasswordHash),
                     nameof(DbUserCredentials.Salt)
+                },
+                columnTypes: new string[]
+                {
+                    string.Empty,
+                    string.Empty
                 },
                 values: new object[]
                 {
@@ -31,20 +40,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateData(
-                table: DbUserCredentials.TableName,
-                keyColumn: nameof(DbUserCredentials.UserId),
-                keyValue: AdminCredentials.userId,
-                columns: new string[]
-                {
-                    nameof(DbUserCredentials.PasswordHash),
-                    nameof(DbUserCredentials.Salt)
-                },
-                values: new object[]
-                {
-                    AdminCredentials.GetPasswordHash(),
-                    AdminCredentials.salt
-                });
+
         }
     }
 }
