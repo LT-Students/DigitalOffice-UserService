@@ -118,7 +118,6 @@ namespace LT.DigitalOffice.UserService
                 x.AddConsumer<UserLoginConsumer>();
                 x.AddConsumer<GetUserInfoConsumer>();
                 x.AddConsumer<AccessValidatorConsumer>();
-                x.AddConsumer<GetUserInfoConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
