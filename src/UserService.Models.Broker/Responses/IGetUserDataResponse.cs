@@ -4,11 +4,11 @@ namespace LT.DigitalOffice.Broker.Responses
 {
     public interface IGetUserDataResponse
     {
-        Guid Id { get; set; }
-        string FirstName { get; set; }
-        string LastName { get; set; }
-        string MiddleName { get; set; }
-        bool IsActive { get; set; }
+        Guid Id { get; }
+        string FirstName { get; }
+        string LastName { get; }
+        string MiddleName { get; }
+        bool IsActive { get; }
 
         static object CreateObj(Guid id, string firstName, string middleName, string lastName, bool isActive)
         {
