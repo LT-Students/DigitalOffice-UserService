@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public T Body { get; set; }
     }
 
-    internal class UserInfoResponse : IGetUserDataResponse
+    internal class UserDataResponse : IGetUserDataResponse
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; }
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public string UserPositionName { get; set; }
     }
 
-    internal class GetUserInfoConsumerTests
+    internal class GetUserDataConsumerTests
     {
         private readonly Guid userId = Guid.NewGuid();
         private ConsumerTestHarness<GetUserDataConsumer> consumerTestHarness;
@@ -70,7 +70,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         }
 
         [Test]
-        public async Task ShouldResponseUserInfoResponse()
+        public async Task ShouldResponseUserDataResponse()
         {
             repository
                 .Setup(x => x.GetUserInfoById(It.IsAny<Guid>()))

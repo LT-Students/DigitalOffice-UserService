@@ -24,12 +24,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         public async Task Consume(ConsumeContext<IGetUserDataRequest> context)
         {
-            var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message);
+            var response = OperationResultWrapper.CreateResponse(GetUserData, context.Message);
 
             await context.RespondAsync<IOperationResult<IGetUserDataResponse>>(response);
         }
 
-        private object GetUserInfo(IGetUserDataRequest request)
+        private object GetUserData(IGetUserDataRequest request)
         {
             DbUser dbUser = repository.GetUserInfoById(request.UserId);
 
