@@ -13,32 +13,32 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     /// <summary>
     /// Consumer for getting information about the user.
     /// </summary>
-    public class GetUserInfoConsumer : IConsumer<IGetUserInfoRequest>
+    public class GetUserDataConsumer : IConsumer<IGetUserDataRequest>
     {
         private readonly IUserRepository repository;
 
-        public GetUserInfoConsumer([FromServices] IUserRepository repository)
+        public GetUserDataConsumer([FromServices] IUserRepository repository)
         {
             this.repository = repository;
         }
 
-        public async Task Consume(ConsumeContext<IGetUserInfoRequest> context)
+        public async Task Consume(ConsumeContext<IGetUserDataRequest> context)
         {
             var response = OperationResultWrapper.CreateResponse(GetUserInfo, context.Message);
 
-            await context.RespondAsync<IOperationResult<IGetUserInfoResponse>>(response);
+            await context.RespondAsync<IOperationResult<IGetUserDataResponse>>(response);
         }
 
-        private object GetUserInfo(IGetUserInfoRequest request)
+        private object GetUserInfo(IGetUserDataRequest request)
         {
             DbUser dbUser = repository.GetUserInfoById(request.UserId);
 
             if (dbUser == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("The user was not found.");
             }
 
-            return IGetUserInfoResponse.CreateObj(dbUser.Id, dbUser.FirstName, /*dbUser.MiddleName,*/ dbUser.LastName, dbUser.IsActive);
+            return IGetUserDataResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public T Body { get; set; }
     }
 
-    internal class UserInfoResponse : IGetUserInfoResponse
+    internal class UserInfoResponse : IGetUserDataResponse
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; }
@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
     internal class GetUserInfoConsumerTests
     {
         private readonly Guid userId = Guid.NewGuid();
-        private ConsumerTestHarness<GetUserInfoConsumer> consumerTestHarness;
+        private ConsumerTestHarness<GetUserDataConsumer> consumerTestHarness;
 
         private InMemoryTestHarness harness;
         private DbUser dbUser;
@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             harness = new InMemoryTestHarness();
             consumerTestHarness = harness.Consumer(() =>
-                new GetUserInfoConsumer(repository.Object));
+                new GetUserDataConsumer(repository.Object));
 
             dbUser = new DbUser
             {
@@ -81,9 +81,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserDataRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IGetUserInfoResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserDataResponse>>(new
                 {
                     UserId = userId
                 });
@@ -105,8 +105,8 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 Assert.True(response.Message.IsSuccess);
                 Assert.AreEqual(null, response.Message.Errors);
                 SerializerAssert.AreEqual(expected, response.Message);
-                Assert.That(consumerTestHarness.Consumed.Select<IGetUserInfoRequest>().Any(), Is.True);
-                Assert.That(harness.Sent.Select<IOperationResult<IGetUserInfoResponse>>().Any(), Is.True);
+                Assert.That(consumerTestHarness.Consumed.Select<IGetUserDataRequest>().Any(), Is.True);
+                Assert.That(harness.Sent.Select<IOperationResult<IGetUserDataResponse>>().Any(), Is.True);
                 repository.Verify();
             }
             finally
@@ -126,9 +126,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             try
             {
-                var requestClient = await harness.ConnectRequestClient<IGetUserInfoRequest>();
+                var requestClient = await harness.ConnectRequestClient<IGetUserDataRequest>();
 
-                var response = await requestClient.GetResponse<IOperationResult<IGetUserInfoResponse>>(new
+                var response = await requestClient.GetResponse<IOperationResult<IGetUserDataResponse>>(new
                 {
                     UserId = userId
                 });
