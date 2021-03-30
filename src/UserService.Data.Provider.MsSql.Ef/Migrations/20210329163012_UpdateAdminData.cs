@@ -19,8 +19,14 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 {
                     nameof(DbUserCredentials.UserId)
                 },
-                keyColumnTypes: new string[] { string.Empty },
-                keyValues: new string[] { AdminCredentials.userId.ToString() },
+                keyColumnTypes: new string[]
+                {
+                    string.Empty
+                },
+                keyValues: new string[]
+                {
+                    AdminCredentials.userId.ToString()
+                },
                 columns: new string[]
                 {
                     nameof(DbUserCredentials.PasswordHash),
