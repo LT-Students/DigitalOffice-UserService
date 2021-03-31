@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
@@ -14,6 +15,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// </summary>
         /// <param name="request">User data.</param>
         /// <returns>Guid of added user.</returns>
-        Guid Execute(UserRequest request);
+        Guid Execute(CreateUserRequest request);
     }
 }

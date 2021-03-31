@@ -1,14 +1,16 @@
-﻿using LT.DigitalOffice.Kernel.Exceptions;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Business.UserCredentials;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.UserCredentials;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 
 namespace LT.DigitalOffice.UserService.Business
 {
+    [NotAutoInject]
     public class ChangePasswordCommand : IChangePasswordCommand
     {
         private readonly IMemoryCache cache;

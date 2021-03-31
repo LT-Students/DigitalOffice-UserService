@@ -1,12 +1,13 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -16,19 +17,19 @@ using System.Text;
 
 namespace LT.DigitalOffice.UserService.Business
 {
-	/// <inheritdoc/>
-	public class ForgotUserPasswordCommand : IForgotPasswordCommand
+    /// <inheritdoc/>
+    public class ForgotPasswordCommand : IForgotPasswordCommand
 	{
 		private readonly IRequestClient<IUserDescriptionRequest> requestClientMS;
-		private readonly IOptions<CacheOptions> cacheOptions;
-		private readonly IValidator<string> validator;
+		private readonly IOptions<CacheConfig> cacheOptions;
+		private readonly IEmailValidator validator;
 		private readonly IUserRepository repository;
 		private readonly IMemoryCache cache;
 
-		public ForgotUserPasswordCommand(
+		public ForgotPasswordCommand(
 			[FromServices] IRequestClient<IUserDescriptionRequest> requestClientMS,
-			[FromServices] IOptions<CacheOptions> cacheOptions,
-			[FromServices] IValidator<string> validator,
+			[FromServices] IOptions<CacheConfig> cacheOptions,
+			[FromServices] IEmailValidator validator,
 			[FromServices] IUserRepository repository,
 			[FromServices] IMemoryCache cache)
 		{
@@ -68,7 +69,7 @@ namespace LT.DigitalOffice.UserService.Business
 			var brokerResponse = requestClientMS.GetResponse<IOperationResult<bool>>(new
 			{
 				GeneratedId = generatedId,
-				dbUser.Email,
+				string.Empty, // TODO Update with first email from user communications
 				dbUser.FirstName,
 				dbUser.LastName,
 				dbUser.MiddleName

@@ -1,10 +1,7 @@
 ﻿using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +14,8 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserResponseMapper mapper;
 
         public GetUsersByIdsCommand(
-            [FromServices] IUserRepository repository,
-            [FromServices] IUserResponseMapper mapper)
+            IUserRepository repository,
+            IUserResponseMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;

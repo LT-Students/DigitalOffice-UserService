@@ -5,6 +5,8 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -16,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
     {
         private Mock<IUserRepository> repositoryMock;
         private Mock<IUserResponseMapper> mapperMock;
-        private Mock<IValidator<string>> validatorMock;
+        private Mock<IEmailValidator> validatorMock;
         private Mock<ValidationResult> validationResultIsValidMock;
 
         private IGetUserByEmailCommand command;
@@ -30,7 +32,17 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void OneTimeSetUp()
         {
             userEmail = "example@gmail.com";
-            user = new User { Email = userEmail };
+            user = new User
+            {
+                Communications = new List<Communications>
+                {
+                    new Communications
+                    {
+                        Type = CommunicationType.Email,
+                        Value = userEmail
+                    }
+                }
+            };
 
             dbUser = new DbUser
             {
@@ -60,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [SetUp]
         public void SetUp()
         {
-            validatorMock = new Mock<IValidator<string>>();
+            validatorMock = new Mock<IEmailValidator>();
             repositoryMock = new Mock<IUserRepository>();
             mapperMock = new Mock<IUserResponseMapper>();
 
@@ -116,7 +128,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<User>(result);
-            Assert.AreEqual(userEmail, result.Email);
             repositoryMock.Verify(repository => repository.GetUserByEmail(userEmail), Times.Once);
         }
     }

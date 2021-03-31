@@ -1,14 +1,14 @@
-﻿using FluentValidation;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Exceptions;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Business.UserCredentials;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.DbMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.UserCredentials;
-using Microsoft.AspNetCore.Mvc;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using System;
 
 namespace LT.DigitalOffice.UserService.Business
@@ -17,51 +17,43 @@ namespace LT.DigitalOffice.UserService.Business
     public class CreateUserCommand : ICreateUserCommand
     {
         private readonly IUserRepository _userRepository;
-        private readonly IValidator<UserRequest> _validator;
-        private readonly IUserRequestMapper _mapperUser;
-        private readonly IUserCredentialsRequestMapper _mapperUserCredentials;
+        private readonly ICreateUserRequestValidator _validator;
+        private readonly IDbUserMapper _mapperUser;
         private readonly IAccessValidator _accessValidator;
 
         public CreateUserCommand(
-            [FromServices] IUserRepository userRepository,
-            [FromServices] IValidator<UserRequest> validator,
-            [FromServices] IUserRequestMapper mapperUser,
-            [FromServices] IAccessValidator accessValidator,
-            [FromServices] IUserCredentialsRequestMapper mapperUserCredentials)
+            IUserRepository userRepository,
+            ICreateUserRequestValidator validator,
+            IDbUserMapper mapperUser,
+            IAccessValidator accessValidator)
         {
             _validator = validator;
             _userRepository = userRepository;
             _mapperUser = mapperUser;
-            _mapperUserCredentials = mapperUserCredentials;
             _accessValidator = accessValidator;
         }
 
         /// <inheritdoc/>
-        public Guid Execute(UserRequest request)
+        public Guid Execute(CreateUserRequest request)
         {
-            const int rightId = 1;
-
-            if (!(_accessValidator.IsAdmin() || _accessValidator.HasRights(rightId)))
+            if (!(_accessValidator.IsAdmin() ||
+                  _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
             {
                 throw new ForbiddenException("Not enough rights.");
             }
 
             _validator.ValidateAndThrowCustom(request);
 
-            var dbUser = _mapperUser.Map(request);
-            dbUser.CreatedAt = DateTime.UtcNow;
+            var dbUser = _mapperUser.Map(
+                request,
+                (login, salt, password) => UserPasswordHash.GetPasswordHash(login, salt, password));
 
             AddUserSkillsToDbUser(dbUser, request);
 
-            var dbUserCredentials = _mapperUserCredentials.Map(request);
-
-            dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
-                request.Login, dbUserCredentials.Salt, request.Password);
-
-            return _userRepository.CreateUser(dbUser, dbUserCredentials);
+            return _userRepository.CreateUser(dbUser);
         }
 
-        private void AddUserSkillsToDbUser(DbUser dbUser, UserRequest request)
+        private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
         {
             if (request.Skills == null)
             {

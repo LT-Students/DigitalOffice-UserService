@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 values: new object[]
                 {
-                    new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                    AdminCredentials.UserId,
                     AdminCredentials.EMAIL,
                     AdminCredentials.FIRST_NAME,
                     AdminCredentials.LAST_NAME,
@@ -58,10 +58,10 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 values: new object[]
                 {
                     new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"),
-                    new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
+                    AdminCredentials.UserId,
                     AdminCredentials.LOGIN,
                     AdminCredentials.GetPasswordHash(),
-                    AdminCredentials.salt
+                    AdminCredentials.Salt
                 });
         }
 
@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"));
+                keyValue: AdminCredentials.UserId);
 
             migrationBuilder.DropColumn(
                 name: "Email",

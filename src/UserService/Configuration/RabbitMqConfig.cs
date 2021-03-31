@@ -10,6 +10,8 @@ namespace LT.DigitalOffice.UserService.Configuration
 
         public string GetUserCredentialsEndpoint { get; set; }
 
+        public string GetUserInfoEndpoint { get; set; }
+        public string AddImageEndpoint { get; set; }
         public string GetUserDataEndpoint { get; set; }
     }
 }

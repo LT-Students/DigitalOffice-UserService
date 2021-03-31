@@ -1,7 +1,9 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Exceptions;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,27 +20,21 @@ namespace LT.DigitalOffice.UserService.Data
             _provider = provider;
         }
 
-        public Guid CreateUser(DbUser dbUser, DbUserCredentials dbUserCredentials)
+        public Guid CreateUser(DbUser dbUser)
         {
-            if (_provider.Users.Any(u => u.Email == dbUser.Email))
-            {
-                throw new BadRequestException("Email is already taken.");
-            }
-
-            if (_provider.UserCredentials.Any(uc => uc.Login == dbUserCredentials.Login))
+            if (_provider.UserCredentials.Any(uc => uc.Login == dbUser.Credentials.Login))
             {
                 throw new BadRequestException("User credentials is already exist.");
             }
 
             _provider.Users.Add(dbUser);
-            _provider.UserCredentials.Add(dbUserCredentials);
             _provider.Save();
 
             return dbUser.Id;
         }
 
         public DbUser GetUserInfoById(Guid userId)
-            => _provider.Users.FirstOrDefault(dbUser => dbUser.Id == userId) ??
+            => _provider.Users.Include(u => u.Communications).FirstOrDefault(dbUser => dbUser.Id == userId) ??
                throw new NotFoundException($"User with this id: '{userId}' was not found.");
 
         public bool EditUser(DbUser user)
@@ -56,7 +52,11 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbUser GetUserByEmail(string userEmail)
         {
-            DbUser dbUser = _provider.Users.FirstOrDefault(uc => uc.Email == userEmail);
+            DbUser dbUser = _provider.Users
+                .Include(u => u.Credentials)
+                .FirstOrDefault(u => u.Communications.FirstOrDefault(
+                    uc =>
+                        uc.Type == (int)CommunicationType.Email && uc.Value == userEmail) != null);
 
             if (dbUser == null)
             {

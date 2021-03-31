@@ -2,10 +2,11 @@
 using FluentValidation.Results;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.UserService.Business.Cache.Options;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -29,12 +30,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
     class ForgotUserPasswordCommandTests
     {
         private Mock<IUserRepository> repositoryMock;
-        private Mock<IValidator<string>> validatorMock;
+        private Mock<IEmailValidator> validatorMock;
         private Mock<ValidationResult> validationResultIsValidMock;
         private Mock<IRequestClient<IUserDescriptionRequest>> requestClientMock;
 
         private IMemoryCache cache;
-        private IOptions<CacheOptions> cacheOptions;
+        private IOptions<CacheConfig> cacheOptions;
 
         private DbUser dbUser;
         private string userEmail;
@@ -47,19 +48,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             userEmail = "Example@gmail.com";
 
-            cacheOptions = Options.Create(new CacheOptions()
+            cacheOptions = Options.Create(new CacheConfig()
             {
                 CacheLiveInMinutes = 5
             });
 
-            validatorMock = new Mock<IValidator<string>>();
+            validatorMock = new Mock<IEmailValidator>();
             repositoryMock = new Mock<IUserRepository>();
             cache = new MemoryCache(new MemoryCacheOptions());
 
             dbUser = new DbUser
             {
                 Id = Guid.NewGuid(),
-                Email = userEmail,
                 FirstName = "Example1",
                 LastName = "Example1",
                 MiddleName = "Example1",
@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             BrokerSetUp();
 
-            command = new ForgotUserPasswordCommand(requestClientMock.Object,
+            command = new ForgotPasswordCommand(requestClientMock.Object,
                 cacheOptions, validatorMock.Object, repositoryMock.Object, cache);
 
             validationResultError = new ValidationResult(

@@ -4,9 +4,9 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
-    public class DbConnection
+    public class DbUserCommunication
     {
-        public const string TableName = "Connections";
+        public const string TableName = "UserCommunications";
 
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
@@ -15,19 +15,19 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public DbUser User { get; set; }
     }
 
-    public class DbConnectionConfiguration : IEntityTypeConfiguration<DbConnection>
+    public class DbConnectionConfiguration : IEntityTypeConfiguration<DbUserCommunication>
     {
-        public void Configure(EntityTypeBuilder<DbConnection> builder)
+        public void Configure(EntityTypeBuilder<DbUserCommunication> builder)
         {
             builder
-                .ToTable(DbConnection.TableName);
+                .ToTable(DbUserCommunication.TableName);
 
             builder
                 .HasKey(conn =>  conn.Id);
 
             builder
                 .HasOne(conn => conn.User)
-                .WithMany(u => u.Connections)
+                .WithMany(u => u.Communications)
                 .HasForeignKey(conn => conn.UserId);
         }
     }
