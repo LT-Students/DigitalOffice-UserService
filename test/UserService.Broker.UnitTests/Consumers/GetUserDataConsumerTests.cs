@@ -105,8 +105,8 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 Assert.True(response.Message.IsSuccess);
                 Assert.AreEqual(null, response.Message.Errors);
                 SerializerAssert.AreEqual(expected, response.Message);
-                Assert.That(consumerTestHarness.Consumed.Select<IGetUserDataRequest>().Any(), Is.True);
-                Assert.That(harness.Sent.Select<IOperationResult<IGetUserDataResponse>>().Any(), Is.True);
+                Assert.True(consumerTestHarness.Consumed.Select<IGetUserDataRequest>().Any());
+                Assert.True(harness.Sent.Select<IOperationResult<IGetUserDataResponse>>().Any());
                 repository.Verify();
             }
             finally
