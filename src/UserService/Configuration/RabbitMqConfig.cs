@@ -13,6 +13,5 @@ namespace LT.DigitalOffice.UserService.Configuration
         public string GetUserDataEndpoint { get; set; }
 
         public string AddImageEndpoint { get; set; }
-
     }
 }
