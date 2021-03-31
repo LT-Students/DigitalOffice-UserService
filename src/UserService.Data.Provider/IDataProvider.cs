@@ -11,6 +11,6 @@ namespace LT.DigitalOffice.CompanyService.Data.Provider
         public DbSet<DbAchievement> Achievements { get; set; }
         public DbSet<DbUserSkills> UserSkills { get; set; }
         public DbSet<DbSkill> Skills { get; set; }
-        public DbSet<DbUserCommunication> Connections { get; set; }
+        public DbSet<DbUserCommunication> UserCommunications { get; set; }
     }
 }
