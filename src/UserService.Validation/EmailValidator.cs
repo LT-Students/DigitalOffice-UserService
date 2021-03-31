@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Validation
 {
-    public class UserEmailValidator : AbstractValidator<string>
+    public class EmailValidator : AbstractValidator<string>, IEmailValidator
     {
-        public UserEmailValidator()
+        public EmailValidator()
         {
             RuleFor(email => email)
                 .NotEmpty()

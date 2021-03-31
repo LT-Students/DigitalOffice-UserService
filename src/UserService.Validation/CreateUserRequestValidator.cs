@@ -1,17 +1,14 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Validation
 {
-    public class UserValidator : AbstractValidator<UserRequest>
+    public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>, ICreateUserRequestValidator
     {
-        public UserValidator()
+        public CreateUserRequestValidator()
         {
-            RuleFor(user => user.Id.Value)
-                .NotEmpty()
-                .When(x => x.Id.HasValue);
-
             RuleFor(user => user.FirstName)
                 .NotEmpty()
                 .MaximumLength(32).WithMessage("First name is too long.")
@@ -32,11 +29,6 @@ namespace LT.DigitalOffice.UserService.Validation
                         .MinimumLength(1).WithMessage("Middle name is too short.")
                         .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error."));
 
-            RuleFor(user => user.Email)
-                .NotEmpty()
-                .MaximumLength(254).WithMessage("Email is too long.")
-                .EmailAddress().WithMessage("Email is invalid.");
-
             RuleFor(user => user.Status)
                 .IsInEnum().WithMessage("Wrong status value.");
 
@@ -48,9 +40,9 @@ namespace LT.DigitalOffice.UserService.Validation
                 .MinimumLength(5)
                 .MaximumLength(15);
 
-            When(user => user.Connections != null && user.Connections.Any(), () =>
+            When(user => user.Communications != null && user.Communications.Any(), () =>
             {
-                RuleForEach(user => user.Connections).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
+                RuleForEach(user => user.Communications).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
             });
 
             When(user => user.Skills != null && user.Skills.Any(), () =>

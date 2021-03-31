@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            validator = new UserEmailValidator();
+            validator = new EmailValidator();
         }
 
         [Test]

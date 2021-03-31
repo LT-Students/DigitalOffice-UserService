@@ -1,39 +1,46 @@
-﻿using LT.DigitalOffice.Kernel.Exceptions;
+﻿using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers
 {
     public class UserResponseMapper : IUserResponseMapper
     {
-        public User Map(DbUser value)
+        public User Map(DbUser dbUser)
         {
-            if (value == null)
+            if (dbUser == null)
             {
                 throw new BadRequestException();
             }
 
             return new User
             {
-                Id = value.Id,
-                Email = value.Email,
-                AchievementsIds = value.Achievements?.Select(dbUserAchievement => new Achievement
+                Id = dbUser.Id,
+                AchievementsIds = dbUser.Achievements?.Select(dbUserAchievement => new Achievement
                 {
                     Id = dbUserAchievement.Achievement.Id,
                     Message = dbUserAchievement.Achievement.Message,
                     PictureFileId = dbUserAchievement.Achievement.PictureFileId
                 }).ToList(),
-                AvatarFileId = value.AvatarFileId,
-                CertificatesIds = value.CertificatesFiles?.Select(x => x.CertificateId).ToList(),
-                FirstName = value.FirstName,
-                LastName = value.LastName,
-                MiddleName = value.MiddleName,
-                Status = (UserStatus)value.Status,
-                IsAdmin = value.IsAdmin,
-                CreatedAt = value.CreatedAt
+                AvatarFileId = dbUser.AvatarFileId,
+                CertificatesIds = dbUser.CertificatesFiles?.Select(x => x.CertificateId).ToList(),
+                FirstName = dbUser.FirstName,
+                LastName = dbUser.LastName,
+                MiddleName = dbUser.MiddleName,
+                Status = (UserStatus)dbUser.Status,
+                IsAdmin = dbUser.IsAdmin,
+                CreatedAt = dbUser.CreatedAt,
+                Communications = dbUser.Communications?.Select(
+                    c =>
+                        new Communications
+                        {
+                            Type = (CommunicationType)c.Type,
+                            Value = c.Value
+                        }) ?? new List<Communications>()
             };
         }
     }

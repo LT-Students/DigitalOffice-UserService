@@ -1,27 +1,16 @@
-using FluentValidation;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
-using LT.DigitalOffice.UserService.Business;
-using LT.DigitalOffice.UserService.Business.Cache.Options;
-using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Configuration;
-using LT.DigitalOffice.UserService.Data;
-using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Mappers.RequestsMappers;
-using LT.DigitalOffice.UserService.Mappers.RequestsMappers.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.ResponsesMappers;
-using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Validation;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,20 +20,31 @@ using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
 {
-  public class Startup
+    public class Startup
     {
+        private readonly ILogger<Startup> _logger;
+
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
+                    .AddConsole();
+            });
+
+            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHealthChecks();
+            services.AddKernelExtensions();
 
-            services.AddHttpContextAccessor();
+            services.AddHealthChecks();
 
             string connStr = Environment.GetEnvironmentVariable("ConnectionString");
             if (string.IsNullOrEmpty(connStr))
@@ -52,7 +52,7 @@ namespace LT.DigitalOffice.UserService
                 connStr = Configuration.GetConnectionString("SQLConnectionString");
             }
 
-            Console.WriteLine(connStr);
+            _logger.LogTrace(connStr.EncodeSqlConnectionString());
 
             services.AddDbContext<UserServiceDbContext>(options =>
             {
@@ -60,30 +60,51 @@ namespace LT.DigitalOffice.UserService
             });
 
             services.AddControllers();
-            
+
             services.AddControllers().AddJsonOptions(opt =>
             {
                 opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-            
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
-            services.Configure<CacheOptions>(Configuration.GetSection(CacheOptions.MemoryCache));
+            services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.MemoryCache));
 
             services.AddMemoryCache();
 
-            services.AddKernelExtensions();
+            services.AddTransient<IDataProvider, UserServiceDbContext>();
 
-            ConfigureCommands(services);
-            ConfigureRepositories(services);
-            ConfigureValidators(services);
-            ConfigureMappers(services);
             ConfigureMassTransit(services);
+
+            InjectObjects(services);
 
             services.AddControllers().AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
+        }
+
+        private void InjectObjects(IServiceCollection services)
+        {
+            services.InjectObjects(
+                InjectObjectType.Command,
+                InjectType.Transient,
+                "LT.DigitalOffice.UserService.Business",
+                _logger);
+            services.InjectObjects(
+                InjectObjectType.Repository,
+                InjectType.Transient,
+                "LT.DigitalOffice.UserService.Data",
+                _logger);
+            services.InjectObjects(
+                InjectObjectType.Mapper,
+                InjectType.Transient,
+                "LT.DigitalOffice.UserService.Mappers",
+                _logger);
+            services.InjectObjects(
+                InjectObjectType.Validator,
+                InjectType.Transient,
+                "LT.DigitalOffice.UserService.Validation",
+                _logger);
         }
 
         private void ConfigureEndpoints(
@@ -132,13 +153,16 @@ namespace LT.DigitalOffice.UserService
                 });
 
                 x.AddRequestClient<IUserDescriptionRequest>(
-                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.UserDescriptionUrl}"));
+                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.UserDescriptionUrl}"));
 
                 x.AddRequestClient<IGetUserPositionRequest>(
-                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.CompanyServiceUrl}"));
+                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.CompanyServiceUrl}"));
 
                 x.AddRequestClient<ICheckTokenRequest>(
-                  new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
+                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
+
+                x.AddRequestClient<IAddImageRequest>(
+                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.AddImageEndpoint}"));
 
                 x.ConfigureKernelMassTransit(rabbitMqConfig);
             });
@@ -146,13 +170,13 @@ namespace LT.DigitalOffice.UserService
             services.AddMassTransitHostedService();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
+            UpdateDatabase(app);
+
             app.UseHealthChecks("/api/healthcheck");
 
-            app.UseExceptionHandler(tempApp => tempApp.Run(CustomExceptionHandler.HandleCustomException));
-
-            UpdateDatabase(app);
+            app.AddExceptionsHandler(loggerFactory);
 
 #if RELEASE
             app.UseHttpsRedirection();
@@ -185,40 +209,6 @@ namespace LT.DigitalOffice.UserService
             using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
 
             context.Database.Migrate();
-        }
-
-        private void ConfigureRepositories(IServiceCollection services)
-        {
-            services.AddTransient<IDataProvider, UserServiceDbContext>();
-
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IUserCredentialsRepository, UserCredentialsRepository>();
-        }
-
-        private void ConfigureMappers(IServiceCollection services)
-        {
-            services.AddTransient<IUserRequestMapper, UserRequestMapper>();
-            services.AddTransient<IUserResponseMapper, UserResponseMapper>();
-            services.AddTransient<IUserCredentialsRequestMapper, UserCredentialsRequestMapper>();
-        }
-
-        private void ConfigureCommands(IServiceCollection services)
-        {
-            services.AddTransient<ICreateUserCommand, CreateUserCommand>();
-            services.AddTransient<IGeneratePasswordCommand, GeneratePasswordCommand>();
-            services.AddTransient<IChangePasswordCommand, ChangePasswordCommand>();
-            services.AddTransient<IEditUserCommand, EditUserCommand>();
-            services.AddTransient<IGetUserByEmailCommand, GetUserByEmailCommand>();
-            services.AddTransient<IGetUserByIdCommand, GetUserByIdCommand>();
-            services.AddTransient<IGetUsersByIdsCommand, GetUsersByIdsCommand>();
-            services.AddTransient<IForgotPasswordCommand, ForgotUserPasswordCommand>();
-            services.AddTransient<IGetAllUsersCommand, GetAllUsersCommand>();
-        }
-
-        private void ConfigureValidators(IServiceCollection services)
-        {
-            services.AddTransient<IValidator<UserRequest>, UserValidator>();
-            services.AddTransient<IValidator<string>, UserEmailValidator>();
         }
     }
 }

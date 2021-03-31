@@ -25,13 +25,13 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpPost("create")]
-        public Guid Create([FromServices] ICreateUserCommand command, [FromBody] UserRequest request)
+        public Guid Create([FromServices] ICreateUserCommand command, [FromBody] CreateUserRequest request)
         {
             return command.Execute(request);
         }
 
         [HttpPost("editUser")]
-        public bool EditUser([FromServices] IEditUserCommand command, [FromBody] UserRequest request)
+        public bool EditUser([FromServices] IEditUserCommand command, [FromBody] CreateUserRequest request)
         {
             return command.Execute(request);
         }

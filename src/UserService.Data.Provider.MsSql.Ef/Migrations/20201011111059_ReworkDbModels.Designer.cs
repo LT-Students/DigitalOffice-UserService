@@ -153,7 +153,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                             UserId = new Guid("6146B87A-587D-4945-A565-1CBDE93F187C"),
                             Login = AdminCredentials.LOGIN,
                             PasswordHash = AdminCredentials.GetPasswordHash(),
-                            Salt = AdminCredentials.salt
+                            Salt = AdminCredentials.Salt
                         });
                 });
 

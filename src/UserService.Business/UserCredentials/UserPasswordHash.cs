@@ -3,8 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Business.UnitTests")]
+[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers")]
 
-namespace LT.DigitalOffice.UserService.UserCredentials
+namespace LT.DigitalOffice.UserService.Business.UserCredentials
 {
     internal static class UserPasswordHash
     {

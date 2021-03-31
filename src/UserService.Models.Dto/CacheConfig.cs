@@ -1,6 +1,6 @@
-﻿namespace LT.DigitalOffice.UserService.Business.Cache.Options
+﻿namespace LT.DigitalOffice.UserService.Models.Dto
 {
-    public class CacheOptions
+    public class CacheConfig
     {
         public const string MemoryCache = "MemoryCache";
 

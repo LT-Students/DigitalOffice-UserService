@@ -11,8 +11,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     public class UserValidatorTests
     {
-        private IValidator<UserRequest> validator;
-        private static IEnumerable<Expression<Func<UserRequest, string>>> NamePropertyCases
+        private IValidator<CreateUserRequest> validator;
+        private static IEnumerable<Expression<Func<CreateUserRequest, string>>> NamePropertyCases
         {
             get
             {
@@ -35,70 +35,40 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             }
         }
 
-        private static IEnumerable<string> WrongEmailCases
-        {
-            get
-            {
-                yield return "@.";
-                yield return "@gmail.com";
-                yield return "@.com";
-                yield return "Hello!";
-            }
-        }
-
         [SetUp]
         public void SetUp()
         {
-            validator = new UserValidator();
+            validator = new CreateUserRequestValidator();
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
-            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
-            Expression<Func<UserRequest, string>> gettingNamePropertyExpression)
+            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<UserRequest, string>> gettingNamePropertyExpression,
+            [ValueSource(nameof(NamePropertyCases))] Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression,
             [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
             string name)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, name);
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenEmailIsEmpty()
-        {
-            validator.ShouldHaveValidationErrorFor(x => x.Email, "");
-        }
-
-        [TestCaseSource(nameof(WrongEmailCases))]
-        public void ShouldThrowValidationExceptionWhenEmailIsInvalid(string wrongEmail)
-        {
-            validator.ShouldHaveValidationErrorFor(x => x.Email, wrongEmail);
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenEmailTooLong()
-        {
-            var email = new string('a', 400) + "@gmail.com";
-            validator.ShouldHaveValidationErrorFor(x => x.Email, email);
         }
 
         [Test]
@@ -117,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldThrowValidationExceptionWhenAllFieldsAreEmpty()
         {
-            var request = new UserRequest();
+            var request = new CreateUserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
         }
@@ -125,14 +95,12 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
                 Login = "admin",
                 MiddleName = "Example",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
@@ -145,13 +113,12 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsNull()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Login = "admin",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
@@ -164,14 +131,12 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndIdIsExist()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
                 Login = "admin",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
@@ -181,34 +146,14 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldThrowValidationExceptionWhenIdUserIsNotValid()
-        {
-            var request = new UserRequest
-            {
-                Id = Guid.Empty,
-                FirstName = "Example",
-                LastName = "Example",
-                MiddleName = "Example",
-                Email = "Example@gmail.com",
-                Status = UserStatus.Sick,
-                Password = "Example",
-                IsAdmin = false
-            };
-
-            validator.TestValidate(request).ShouldHaveValidationErrorFor(x => x.Id.Value);
-        }
-
-        [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValidAndContainsRussianSymbols()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",
                 Login = "админ",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
@@ -244,16 +189,14 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Connections = new List<UserConnection>(),
+                Communications = new List<Communications>(),
                 Login = "Example"
             };
 
@@ -263,20 +206,18 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithRightConnections()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Connections = new List<UserConnection>()
+                Communications = new List<Communications>()
                 {
-                    new UserConnection()
+                    new Communications()
                     {
-                        Type = ConnectionType.Email,
+                        Type = CommunicationType.Email,
                         Value = "Ex@mail.ru"
                     }
                 },
@@ -289,20 +230,18 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         [Test]
         public void ShouldPassWhenDataIsValidWithWrongConnections()
         {
-            var request = new UserRequest
+            var request = new CreateUserRequest
             {
-                Id = Guid.NewGuid(),
                 FirstName = "Example",
                 LastName = "Example",
-                Email = "Example@gmail.com",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Connections = new List<UserConnection>()
+                Communications = new List<Communications>()
                 {
-                    new UserConnection()
+                    new Communications()
                     {
-                        Type = ConnectionType.Email,
+                        Type = CommunicationType.Email,
                         Value = ""
                     }
                 },

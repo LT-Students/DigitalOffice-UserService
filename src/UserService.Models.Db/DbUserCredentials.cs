@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .IsRequired();
 
             builder.HasOne(uc => uc.User)
-                .WithOne(u => u.UserCredentials)
+                .WithOne(u => u.Credentials)
                 .HasForeignKey<DbUserCredentials>(uc => uc.UserId);
         }
     }

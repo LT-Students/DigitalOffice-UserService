@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 keyValues: new string[]
                 {
-                    AdminCredentials.userId.ToString()
+                    AdminCredentials.UserId.ToString()
                 },
                 columns: new string[]
                 {
@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 values: new object[]
                 {
                     AdminCredentials.GetPasswordHash(ADMIN_PASSWORD),
-                    AdminCredentials.salt
+                    AdminCredentials.Salt
                 });
         }
 

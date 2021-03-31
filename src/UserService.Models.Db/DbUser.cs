@@ -10,7 +10,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public const string TableName = "Users";
 
         public Guid Id { get; set; }
-        public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
@@ -18,17 +17,16 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid? AvatarFileId { get; set; }
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
-
         public DateTime CreatedAt { get; set; }
-        public DbUserCredentials UserCredentials { get; set; }
+        public DbUserCredentials Credentials { get; set; }
         public ICollection<DbUserCertificateFile> CertificatesFiles { get; set; }
         public ICollection<DbUserAchievement> Achievements { get; set; }
-        public ICollection<DbConnection> Connections { get; set; }
+        public ICollection<DbUserCommunication> Communications { get; set; }
         public ICollection<DbUserSkills> UserSkills { get; set; }
 
         public DbUser()
         {
-            Connections = new HashSet<DbConnection>();
+            Communications = new HashSet<DbUserCommunication>();
             Achievements = new HashSet<DbUserAchievement>();
             CertificatesFiles = new HashSet<DbUserCertificateFile>();
             UserSkills = new HashSet<DbUserSkills>();
@@ -50,10 +48,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 HasKey(p => p.Id);
 
             builder
-                .Property(p => p.Email)
-                .IsRequired();
-
-            builder
                 .Property(p => p.FirstName)
                 .IsRequired();
 
@@ -66,7 +60,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .IsRequired();
 
             builder
-                .HasMany(u => u.Connections)
+                .HasOne(u => u.Credentials)
+                .WithOne(uc => uc.User);
+
+            builder
+                .HasMany(u => u.Communications)
                 .WithOne(conn => conn.User);
 
             builder
