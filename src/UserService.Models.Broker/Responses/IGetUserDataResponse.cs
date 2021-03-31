@@ -2,13 +2,13 @@
 
 namespace LT.DigitalOffice.Broker.Responses
 {
-    public interface IGetUserResponse
+    public interface IGetUserDataResponse
     {
         Guid Id { get; }
         string FirstName { get; }
-        string LastName { get; set; }
+        string LastName { get; }
         string MiddleName { get; }
-        bool IsActive { get; set; }
+        bool IsActive { get; }
 
         static object CreateObj(Guid id, string firstName, string middleName, string lastName, bool isActive)
         {

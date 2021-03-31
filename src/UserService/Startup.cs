@@ -118,9 +118,9 @@ namespace LT.DigitalOffice.UserService
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
             });
 
-            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserDataEndpoint, ep =>
             {
-                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
+                ep.ConfigureConsumer<GetUserDataConsumer>(context);
             });
 
             cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
@@ -138,7 +138,7 @@ namespace LT.DigitalOffice.UserService
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserLoginConsumer>();
-                x.AddConsumer<GetUserInfoConsumer>();
+                x.AddConsumer<GetUserDataConsumer>();
                 x.AddConsumer<AccessValidatorConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
