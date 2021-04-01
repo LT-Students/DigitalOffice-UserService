@@ -15,26 +15,20 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IEmailValidator validator;
         private readonly IUserRepository repository;
         private readonly IUserResponseMapper mapper;
-        ILogger<GetUserByEmailCommand> _logger;
 
         public GetUserByEmailCommand(
             [FromServices] IEmailValidator validator,
             [FromServices] IUserRepository repository,
-            [FromServices] IUserResponseMapper mapper,
-            ILogger<GetUserByEmailCommand> logger)
+            [FromServices] IUserResponseMapper mapper)
         {
             this.validator = validator;
             this.repository = repository;
             this.mapper = mapper;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
         public User Execute(string userEmail)
         {
-
-            _logger.LogInformation("sjdncjscdnsjcjsnc");
-
             validator.ValidateAndThrowCustom(userEmail);
 
             var user = mapper.Map(repository.GetUserByEmail(userEmail));
