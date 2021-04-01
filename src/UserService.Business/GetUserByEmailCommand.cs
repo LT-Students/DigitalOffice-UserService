@@ -5,7 +5,6 @@ using LT.DigitalOffice.UserService.Mappers.ResponsesMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Business
 {
