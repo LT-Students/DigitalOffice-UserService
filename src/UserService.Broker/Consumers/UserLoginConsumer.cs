@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -14,19 +15,24 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
     {
+        private readonly ILogger<UserLoginConsumer> _logger;
         private readonly IUserCredentialsRepository _credentialsRepository;
         private readonly IUserRepository _userRepository;
 
         public UserLoginConsumer(
             [FromServices] IUserCredentialsRepository credentialsRepository,
-            [FromServices] IUserRepository userRepository)
+            [FromServices] IUserRepository userRepository,
+            [FromServices] ILogger<UserLoginConsumer> logger)
         {
             _credentialsRepository = credentialsRepository;
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
         {
+            _logger.LogInformation($"User login data: '{context.Message.LoginData}'");
+
             var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
             await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
@@ -36,30 +42,22 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
             DbUserCredentials dbUserCredentials;
 
-            if (!IsEmail(request.LoginData))
+            try
             {
-                dbUserCredentials = _credentialsRepository.GetUserCredentialsByLogin(request.LoginData);
-
-                if (dbUserCredentials == null)
+                if (!IsEmail(request.LoginData))
                 {
-                    throw new NotFoundException($"User credentials for user with login: '{request.LoginData}' was not found.");
+                    dbUserCredentials = GetDbUserCredentialsByLogin(request.LoginData);
+                }
+                else
+                {
+                    dbUserCredentials = GetDbUserCredentialsByUserId(request.LoginData);
                 }
             }
-            else
+            catch (Exception exception)
             {
-                var dbUser = _userRepository.GetUserByEmail(request.LoginData);
+                _logger.LogError(exception, exception.Message);
 
-                if (dbUser == null)
-                {
-                    throw new NotFoundException($"User with email: '{request.LoginData}' was not found.");
-                }
-
-                dbUserCredentials = _credentialsRepository.GetUserCredentialsByUserId(dbUser.Id);
-
-                if (dbUserCredentials == null)
-                {
-                    throw new NotFoundException($"User credentials for user with email: '{request.LoginData}' was not found.");
-                }
+                throw new Exception(exception.Message);
             }
 
             return IUserCredentialsResponse.CreateObj(
@@ -81,6 +79,37 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             {
                 return false;
             }
+        }
+
+        private DbUserCredentials GetDbUserCredentialsByLogin(string loginData)
+        {
+            var dbUserCredentials = _credentialsRepository.GetUserCredentialsByLogin(loginData);
+
+            if (dbUserCredentials == null)
+            {
+                throw new NotFoundException($"User credentials for user with login: '{loginData}' was not found.");
+            }
+
+            return dbUserCredentials;
+        }
+
+        private DbUserCredentials GetDbUserCredentialsByUserId(string loginData)
+        {
+            var dbUser = _userRepository.GetUserByEmail(loginData);
+
+            if (dbUser == null)
+            {
+                throw new NotFoundException($"User with email: '{loginData}' was not found.");
+            }
+
+            var dbUserCredentials = _credentialsRepository.GetUserCredentialsByUserId(dbUser.Id);
+
+            if (dbUserCredentials == null)
+            {
+                throw new NotFoundException($"User credentials for user with email: '{loginData}' was not found.");
+            }
+
+            return dbUserCredentials;
         }
     }
 }

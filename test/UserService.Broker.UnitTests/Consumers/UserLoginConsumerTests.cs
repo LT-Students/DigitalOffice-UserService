@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit.Testing;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -30,6 +31,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
         private Mock<IUserRepository> userRepositoryMock;
         private DbUserCredentials userCredentials;
         private ConsumerTestHarness<UserLoginConsumer> consumerTestHarness;
+        private Mock<ILogger<UserLoginConsumer>> _loggerMock;
 
         #region SetUp
         [SetUp]
@@ -38,6 +40,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
             harness = new InMemoryTestHarness();
             credentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
             userRepositoryMock = new Mock<IUserRepository>();
+            _loggerMock = new Mock<ILogger<UserLoginConsumer>>();
 
             var userId = Guid.NewGuid();
 
@@ -55,7 +58,7 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                .Returns(userCredentials);
 
             consumerTestHarness = harness.Consumer(
-                () => new UserLoginConsumer(credentialsRepositoryMock.Object, userRepositoryMock.Object));
+                () => new UserLoginConsumer(credentialsRepositoryMock.Object, userRepositoryMock.Object, _loggerMock.Object));
         }
         #endregion
 

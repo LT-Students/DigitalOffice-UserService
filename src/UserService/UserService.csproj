@@ -3,6 +3,12 @@
   <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
 
   <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.Http" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UserService.Broker\UserService.Broker.csproj" />
     <ProjectReference Include="..\UserService.Business\UserService.Business.csproj" />
     <ProjectReference Include="..\UserService.Models.Broker\UserService.Models.Broker.csproj" />

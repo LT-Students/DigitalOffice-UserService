@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService
         private static void ConfigureLogger()
         {
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsetting.Production.json", optional: false)
+                .AddJsonFile("appsettings.Production.json", optional: false)
                 .Build();
             var logstashUrl = config.GetSection("LogstashUrl").Value;
 
