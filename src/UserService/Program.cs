@@ -1,7 +1,9 @@
+using LT.DigitalOffice.UserService.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.IO;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -16,13 +18,20 @@ namespace LT.DigitalOffice.UserService
 
         private static void ConfigureLogger()
         {
-            var config = new ConfigurationBuilder()
+            var productionConfigurations = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.Production.json", optional: false)
                 .Build();
-            var logstashUrl = config.GetSection("LogstashUrl").Value;
+
+            var logstashConfig = productionConfigurations
+                .GetSection(LogstashConfig.LogstashSectionName)
+                .Get<LogstashConfig>();
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Http(logstashUrl)
+                .Enrich.WithProperty(
+                    nameof(logstashConfig.KeyProperty),
+                    logstashConfig.KeyProperty)
+                .WriteTo.Http(logstashConfig.Url)
                 .CreateLogger();
         }
 
