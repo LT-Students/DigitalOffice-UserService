@@ -185,7 +185,7 @@ namespace LT.DigitalOffice.UserService
 
             app.UseRouting();
 
-            //app.UseMiddleware<TokenMiddleware>();
+            app.UseMiddleware<TokenMiddleware>();
 
             string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
 
