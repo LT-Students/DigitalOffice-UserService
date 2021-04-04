@@ -1,9 +1,12 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class NormalizedCreate : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20200714202256_NormalizedCreate")]
+    public class NormalizedCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

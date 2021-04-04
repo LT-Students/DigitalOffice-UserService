@@ -1,7 +1,9 @@
-﻿using FluentValidation;
-using FluentValidation.TestHelper;
+﻿using FluentValidation.TestHelper;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Validation.User;
+using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
     public class UserValidatorTests
     {
-        private IValidator<CreateUserRequest> validator;
+        private ICreateUserRequestValidator validator;
+
         private static IEnumerable<Expression<Func<CreateUserRequest, string>>> NamePropertyCases
         {
             get
@@ -99,12 +102,10 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             {
                 FirstName = "Example",
                 LastName = "Example",
-                Login = "admin",
                 MiddleName = "Example",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>()
+                IsAdmin = false
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -118,11 +119,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Login = "admin",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false,
-                Skills = new List<string>()
+                IsAdmin = false
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -136,7 +135,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
-                Login = "admin",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
@@ -153,7 +151,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",
-                Login = "админ",
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false
@@ -171,22 +168,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldPassWhenSkillsIsNull()
-        {
-            List<string> skills = null;
-
-            validator.ShouldNotHaveValidationErrorFor(x => x.Skills, skills);
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenSkillNameIsTooLong()
-        {
-            var skills = new List<string>() { "C#", "some very looooooooooong name skill" };
-
-            validator.ShouldHaveValidationErrorFor(x => x.Skills, skills);
-        }
-
-        [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
         {
             var request = new CreateUserRequest
@@ -196,8 +177,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Communications = new List<Communications>(),
-                Login = "Example"
+                Communications = new List<CommunicationInfo>()
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -213,15 +193,14 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Communications = new List<Communications>()
+                Communications = new List<CommunicationInfo>()
                 {
-                    new Communications()
+                    new CommunicationInfo()
                     {
                         Type = CommunicationType.Email,
                         Value = "Ex@mail.ru"
                     }
-                },
-                Login = "Example"
+                }
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -237,15 +216,14 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
-                Communications = new List<Communications>()
+                Communications = new List<CommunicationInfo>()
                 {
-                    new Communications()
+                    new CommunicationInfo()
                     {
                         Type = CommunicationType.Email,
                         Value = ""
                     }
-                },
-                Login = "Example"
+                }
             };
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();

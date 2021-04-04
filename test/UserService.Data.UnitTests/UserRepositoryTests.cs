@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
@@ -63,12 +62,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var result = _repository.CreateSkill(nameSkill);
 
             Assert.AreEqual(result, _provider.Skills.FirstOrDefaultAsync(s => s.SkillName == nameSkill).Result.Id);
-        }
-
-        [Test]
-        public void ShouldThrowBadRequestExceptionWhenAddedSkillAlreadyInDb()
-        {
-            Assert.Throws<BadRequestException>(() => _repository.CreateSkill(_dbSkillInDb.SkillName));
         }
 
         [Test]

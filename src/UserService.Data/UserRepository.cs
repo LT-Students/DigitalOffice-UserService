@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,92 +16,108 @@ namespace LT.DigitalOffice.UserService.Data
     {
         private readonly IDataProvider _provider;
 
+        private IQueryable<DbUser> CreateGetPredicates(
+            GetUserFilter filter,
+            IQueryable<DbUser> dbUsers)
+        {
+            if (filter.UserId.HasValue)
+            {
+                dbUsers = dbUsers.Where(u => u.Id == filter.UserId);
+            }
+
+            if (!string.IsNullOrEmpty(filter.Name?.Trim()))
+            {
+                dbUsers = dbUsers.Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
+            }
+
+            if (filter.IncludeCommunications.HasValue && filter.IncludeCommunications.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Communications);
+
+                if (!string.IsNullOrEmpty(filter.Email?.Trim()))
+                {
+                    dbUsers = dbUsers.Where(u => u.Communications
+                        .Where(
+                            c =>
+                                c.Type == (int)CommunicationType.Email &&
+                                c.Value == filter.Email)
+                        .Any());
+                }
+            }
+
+            if (filter.IncludeCertificates.HasValue && filter.IncludeCertificates.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Certificates);
+            }
+
+            if (filter.IncludeAchievements.HasValue && filter.IncludeAchievements.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
+            }
+
+            if (filter.IncludeSkills.HasValue && filter.IncludeSkills.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Skills).ThenInclude(s => s.Skill);
+            }
+
+            return dbUsers;
+        }
+
         public UserRepository(IDataProvider provider)
         {
             _provider = provider;
         }
 
-        public Guid CreateUser(DbUser dbUser)
+        public Guid Create(DbUser dbUser, string password)
         {
-            if (_provider.UserCredentials.Any(uc => uc.Login == dbUser.Credentials.Login))
+            DbPendingUser dbPendingUser = new()
             {
-                throw new BadRequestException("User credentials is already exist.");
-            }
+                UserId = dbUser.Id,
+                Password = password
+            };
 
             _provider.Users.Add(dbUser);
+            _provider.PendingUsers.Add(dbPendingUser);
             _provider.Save();
 
             return dbUser.Id;
         }
 
-        public DbUser GetUserInfoById(Guid userId)
-            => _provider.Users.Include(u => u.Communications).FirstOrDefault(dbUser => dbUser.Id == userId) ??
-               throw new NotFoundException($"User with this id: '{userId}' was not found.");
+        public DbUser Get(Guid id)
+        {
+            GetUserFilter filter = new()
+            {
+                UserId = id
+            };
+
+            return Get(filter);
+        }
+
+        public DbUser Get(GetUserFilter filter)
+        {
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            var dbUsers = _provider.Users
+                .AsSingleQuery()
+                .AsQueryable();
+
+            return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
+        }
 
         public bool EditUser(DbUser user)
         {
             if (!_provider.Users.Any(users => user.Id == users.Id))
             {
-                throw new NotFoundException($"User with this id: '{user.Id}' was not found.");
+                throw new NotFoundException($"User with ID '{user.Id}' was not found.");
             }
 
             _provider.Users.Update(user);
             _provider.Save();
 
             return true;
-        }
-
-        public DbUser GetUserByEmail(string userEmail)
-        {
-            DbUser dbUser = _provider.Users
-                .Include(u => u.Credentials)
-                .FirstOrDefault(u => u.Communications.FirstOrDefault(
-                    uc =>
-                        uc.Type == (int)CommunicationType.Email && uc.Value == userEmail) != null);
-
-            if (dbUser == null)
-            {
-                throw new NotFoundException($"User with this email: '{userEmail}' was not found.");
-            }
-
-            return dbUser;
-        }
-
-        public IEnumerable<DbUser> GetUsersByIds(IEnumerable<Guid> usersIds)
-        {
-            if (!usersIds.Any())
-            {
-                throw new BadRequestException();
-            }
-
-            var dbUsers = _provider.Users.Where(user => usersIds.Contains(user.Id)).ToList();
-
-            if (!dbUsers.Any())
-            {
-                throw new NotFoundException("Users were not found.");
-            }
-
-            return dbUsers;
-        }
-
-        public IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter)
-        {
-            if (userNameFilter != null)
-            {
-               return _provider.Users
-                    .Select(user => new { user.Id, FIO = $"{user.LastName} {user.FirstName} {user.MiddleName}", Info = user })
-                    .AsEnumerable()
-                    .Where(user => user.FIO.Contains(userNameFilter))
-                    .Select(user => user.Info)
-                    .Skip(skipCount)
-                    .Take(takeCount)
-                    .AsEnumerable();
-            }
-
-            return _provider.Users
-                .Skip(skipCount)
-                .Take(takeCount)
-                .AsEnumerable();
         }
 
         public DbSkill FindSkillByName(string name)
@@ -110,11 +127,16 @@ namespace LT.DigitalOffice.UserService.Data
 
         public Guid CreateSkill(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             var dbSkill = _provider.Skills.FirstOrDefault(s => s.SkillName == name);
 
             if (dbSkill != null)
             {
-                throw new BadRequestException("Skill name was null");
+                return dbSkill.Id;
             }
 
             var skill = new DbSkill
@@ -127,6 +149,43 @@ namespace LT.DigitalOffice.UserService.Data
             _provider.Save();
 
             return skill.Id;
+        }
+
+        /// <inheritdoc />
+        public bool SwitchActiveStatus(Guid userId, bool status)
+        {
+            DbUser dbUser = _provider.Users.FirstOrDefault(u => u.Id == userId);
+            if (dbUser == null)
+            {
+                throw new NotFoundException($"User with ID '{userId}' was not found.");
+            }
+
+            dbUser.IsActive = status;
+
+            _provider.Users.Update(dbUser);
+            _provider.Save();
+
+            return true;
+        }
+
+        public IEnumerable<DbUser> Find(int skipCount, int takeCount, out int totalCount)
+        {
+            totalCount = _provider.Users.Count();
+
+            return _provider.Users.Skip(skipCount * takeCount).Take(takeCount).ToList();
+        }
+
+        public DbPendingUser GetPendingUser(Guid userId)
+        {
+            return _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
+        }
+
+        public void DeletePendingUser(Guid userId)
+        {
+            DbPendingUser dbPendingUser = _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
+
+            _provider.PendingUsers.Remove(dbPendingUser);
+            _provider.Save();
         }
     }
 }

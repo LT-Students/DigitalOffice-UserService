@@ -1,9 +1,12 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class InitialCreate : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20200711045501_InitialCreate")]
+    public class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
