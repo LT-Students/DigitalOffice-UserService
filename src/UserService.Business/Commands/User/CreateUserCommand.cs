@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business
         }
 
         // TODO add resend logic
-        private void SendEmail(DbUser dbUser, List<string> errors)
+        private void SendEmail(DbUser dbUser, string password, List<string> errors)
         {
             var email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
 
@@ -68,6 +68,7 @@ namespace LT.DigitalOffice.UserService.Business
                 sb.AppendLine("You receive this message because you was invited to join Digital Office community.");
                 sb.AppendLine("If you sure that it is not for you just ignore this message.");
                 sb.AppendLine($"In other case please follow this link: {link}");
+                sb.AppendLine($"Your password: {password}");
                 sb.AppendLine();
                 sb.AppendLine("Best Regards,");
                 sb.AppendLine("Digital Office team.");
@@ -173,7 +174,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             Guid userId = _userRepository.Create(dbUser, request.Password);
 
-            SendEmail(dbUser, errors);
+            SendEmail(dbUser, request.Password, errors);
 
             if (request.DepartmentId.HasValue)
             {
