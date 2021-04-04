@@ -39,7 +39,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
         [FromQuery(Name = "includeprojects")]
         public bool? IncludeProjects { get; set; }
 
-
         public bool IsIncludeDepartment => IncludeDepartment.HasValue && IncludeDepartment.Value;
         public bool IsIncludePosition => IncludePosition.HasValue && IncludePosition.Value;
         public bool IsIncludeAchievements => IncludeAchievements.HasValue && IncludeAchievements.Value;
