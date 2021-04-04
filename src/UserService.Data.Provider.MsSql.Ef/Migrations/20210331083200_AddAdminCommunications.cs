@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     Guid.NewGuid(),
                     AdminCredentials.UserId,
                     (int)CommunicationType.Email,
-                    AdminCredentials.EMAIL
+                    AdminCredentials.Email
                 });
 
             migrationBuilder.UpdateData(
@@ -63,8 +63,8 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 },
                 values: new object[]
                 {
-                    AdminCredentials.FIRST_NAME,
-                    AdminCredentials.LAST_NAME
+                    AdminCredentials.FirstName,
+                    AdminCredentials.LastName
                 });
         }
     }

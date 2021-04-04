@@ -1,10 +1,13 @@
 ﻿using LT.DigitalOffice.UserService.UserCredentials.Admin;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class ReworkDbModels : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20201011111059_ReworkDbModels")]
+    public class ReworkDbModels : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -38,9 +41,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 values: new object[]
                 {
                     AdminCredentials.UserId,
-                    AdminCredentials.EMAIL,
-                    AdminCredentials.FIRST_NAME,
-                    AdminCredentials.LAST_NAME,
+                    AdminCredentials.Email,
+                    AdminCredentials.FirstName,
+                    AdminCredentials.LastName,
                     true,
                     true
                 });
@@ -59,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 {
                     new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"),
                     AdminCredentials.UserId,
-                    AdminCredentials.LOGIN,
+                    AdminCredentials.Login,
                     AdminCredentials.GetPasswordHash(),
                     AdminCredentials.Salt
                 });

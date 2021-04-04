@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class AddDbUserCredentials : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20201007132434_AddDbUserCredentials")]
+    public class AddDbUserCredentials : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
