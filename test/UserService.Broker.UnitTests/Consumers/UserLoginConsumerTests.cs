@@ -58,7 +58,10 @@ namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
                .Returns(userCredentials);
 
             consumerTestHarness = harness.Consumer(
-                () => new UserLoginConsumer(credentialsRepositoryMock.Object, userRepositoryMock.Object, _loggerMock.Object));
+                () => new UserLoginConsumer(
+                    userRepositoryMock.Object,
+                    _loggerMock.Object,
+                    credentialsRepositoryMock.Object));
         }
         #endregion
 

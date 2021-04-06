@@ -5,7 +5,6 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Mail;
@@ -15,25 +14,27 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
     {
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<UserLoginConsumer> _logger;
         private readonly IUserCredentialsRepository _credentialsRepository;
-        private readonly IUserRepository _userRepository;
 
         public UserLoginConsumer(
-            [FromServices] IUserCredentialsRepository credentialsRepository,
-            [FromServices] IUserRepository userRepository,
-            [FromServices] ILogger<UserLoginConsumer> logger)
+            IUserRepository userRepository,
+            ILogger<UserLoginConsumer> logger,
+            IUserCredentialsRepository credentialsRepository)
         {
-            _credentialsRepository = credentialsRepository;
-            _userRepository = userRepository;
             _logger = logger;
+            _userRepository = userRepository;
+            _credentialsRepository = credentialsRepository;
         }
 
         public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
         {
-            _logger.LogInformation($"User login data: '{context.Message.LoginData}'");
+            string messageTemplate = "User login data: {LoginData}. Broker conversation id: {ConversationId}";
 
             var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
+
+            _logger.LogInformation(messageTemplate, context.Message.LoginData, context.ConversationId);
 
             await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
         }
