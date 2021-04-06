@@ -11,12 +11,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
         public Guid Id { get; set; }
         public string SkillName { get; set; }
-
-        public ICollection<DbUserSkills> UserSkills { get; set; }
+        public ICollection<DbUserSkill> UserSkills { get; set; }
 
         public DbSkill()
         {
-            UserSkills = new HashSet<DbUserSkills>();
+            UserSkills = new HashSet<DbUserSkill>();
         }
     }
 
@@ -24,9 +23,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
     {
         public void Configure(EntityTypeBuilder<DbSkill> builder)
         {
-            builder.ToTable(DbSkill.TableName);
+            builder
+                .ToTable(DbSkill.TableName);
 
-            builder.HasKey(s => s.Id);
+            builder
+                .HasKey(s => s.Id);
 
             builder
                 .Property(s => s.SkillName)

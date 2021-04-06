@@ -5,10 +5,11 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
+using LT.DigitalOffice.UserService.Business.Helpers;
 using LT.DigitalOffice.UserService.Configuration;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Models.Dto;
 using MassTransit;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -26,62 +27,17 @@ namespace LT.DigitalOffice.UserService
 
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        #region private methods
+
+        private void UpdateDatabase(IApplicationBuilder app)
         {
-            Configuration = configuration;
+            using var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
 
-            using var loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder
-                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
-                    .AddConsole();
-            });
+            using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
 
-            _logger = loggerFactory.CreateLogger<Startup>();
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddKernelExtensions();
-
-            services.AddHealthChecks();
-
-            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-
-            if (string.IsNullOrEmpty(connStr))
-            {
-                connStr = Configuration.GetConnectionString("SQLConnectionString");
-            }
-
-            _logger.LogTrace(connStr.EncodeSqlConnectionString());
-
-            services.AddDbContext<UserServiceDbContext>(options =>
-            {
-                options.UseSqlServer(connStr);
-            });
-
-            services.AddControllers();
-
-            services.AddControllers().AddJsonOptions(opt =>
-            {
-                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
-
-            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
-            services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.MemoryCache));
-
-            services.AddMemoryCache();
-
-            services.AddTransient<IDataProvider, UserServiceDbContext>();
-
-            ConfigureMassTransit(services);
-
-            InjectObjects(services);
-
-            services.AddControllers().AddJsonOptions(option =>
-            {
-                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            context.Database.Migrate();
         }
 
         private void InjectObjects(IServiceCollection services)
@@ -108,6 +64,70 @@ namespace LT.DigitalOffice.UserService
                 _logger);
         }
 
+        #region configure masstransit
+
+        private void ConfigureMassTransit(IServiceCollection services)
+        {
+            var rabbitMqConfig = Configuration
+                .GetSection(BaseRabbitMqOptions.RabbitMqSectionName)
+                .Get<RabbitMqConfig>();
+
+            services.AddMassTransit(busConfigurator =>
+            {
+                busConfigurator.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitMqConfig.Host, "/", host =>
+                    {
+                        host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
+                        host.Password(rabbitMqConfig.Password);
+                    });
+
+                    ConfigureEndpoints(context, cfg, rabbitMqConfig);
+                });
+
+                ConfigureConsumers(busConfigurator);
+
+                ConfigureRequestClients(busConfigurator, rabbitMqConfig);
+
+                busConfigurator.ConfigureKernelMassTransit(rabbitMqConfig);
+            });
+
+            services.AddMassTransitHostedService();
+        }
+
+        private void ConfigureConsumers(IServiceCollectionBusConfigurator x)
+        {
+            x.AddConsumer<UserLoginConsumer>();
+            x.AddConsumer<GetUserDataConsumer>();
+            x.AddConsumer<AccessValidatorConsumer>();
+        }
+
+        private void ConfigureRequestClients(IServiceCollectionBusConfigurator x, RabbitMqConfig rabbitMqConfig)
+        {
+            x.AddRequestClient<ISendEmailRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.SendEmailEndpoint}"));
+            x.AddRequestClient<IGetPositionRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetPositionEndpoint}"));
+            x.AddRequestClient<ICheckTokenRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
+            x.AddRequestClient<IAddImageRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.AddImageEndpoint}"));
+            x.AddRequestClient<IGetFileRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetFileEndpoint}"));
+            x.AddRequestClient<IGetDepartmentRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetDepartmentEndpoint}"));
+            x.AddRequestClient<IChangeUserDepartmentRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ChangeUserDepartmentEndpoint}"));
+            x.AddRequestClient<IChangeUserPositionRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ChangeUserPositionEndpoint}"));
+            x.AddRequestClient<IGetUserProjectsRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetProjectsEndpoint}"));
+            x.AddRequestClient<IGetProjectRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetProjectEndpoint}"));
+            x.AddRequestClient<IGetTokenRequest>(
+                new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.GetTokenEndpoint}"));
+        }
+
         private void ConfigureEndpoints(
             IBusRegistrationContext context,
             IRabbitMqBusFactoryConfigurator cfg,
@@ -119,9 +139,9 @@ namespace LT.DigitalOffice.UserService
                 ep.ConfigureConsumer<AccessValidatorConsumer>(context);
             });
 
-            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserInfoEndpoint, ep =>
+            cfg.ReceiveEndpoint(rabbitMqConfig.GetUserDataEndpoint, ep =>
             {
-                ep.ConfigureConsumer<GetUserInfoConsumer>(context);
+                ep.ConfigureConsumer<GetUserDataConsumer>(context);
             });
 
             cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
@@ -130,45 +150,65 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
-        private void ConfigureMassTransit(IServiceCollection services)
+        #endregion
+
+        #endregion
+
+        #region public methods
+
+        public Startup(IConfiguration configuration)
         {
-            var rabbitMqConfig = Configuration
-                .GetSection(BaseRabbitMqOptions.RabbitMqSectionName)
-                .Get<RabbitMqConfig>();
+            Configuration = configuration;
 
-            services.AddMassTransit(x =>
+            using var loggerFactory = LoggerFactory.Create(builder =>
             {
-                x.AddConsumer<UserLoginConsumer>();
-                x.AddConsumer<GetUserInfoConsumer>();
-                x.AddConsumer<AccessValidatorConsumer>();
-
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(rabbitMqConfig.Host, "/", host =>
-                    {
-                        host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
-                        host.Password(rabbitMqConfig.Password);
-                    });
-
-                    ConfigureEndpoints(context, cfg, rabbitMqConfig);
-                });
-
-                x.AddRequestClient<IUserDescriptionRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.UserDescriptionUrl}"));
-
-                x.AddRequestClient<IGetUserPositionRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.CompanyServiceUrl}"));
-
-                x.AddRequestClient<ICheckTokenRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
-
-                x.AddRequestClient<IAddImageRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.AddImageEndpoint}"));
-
-                x.ConfigureKernelMassTransit(rabbitMqConfig);
+                builder
+                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
+                    .AddConsole();
             });
 
-            services.AddMassTransitHostedService();
+            _logger = loggerFactory.CreateLogger<Startup>();
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddKernelExtensions();
+
+            services.AddHealthChecks();
+
+            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
+            if (string.IsNullOrEmpty(connStr))
+            {
+                connStr = Configuration.GetConnectionString("SQLConnectionString");
+            }
+
+            _logger.LogTrace(connStr.EncodeSqlConnectionString());
+
+            services.AddDbContext<UserServiceDbContext>(options =>
+            {
+                options.UseSqlServer(connStr);
+            });
+
+            services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
+            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
+            services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.MemoryCache));
+
+            services.AddMemoryCache();
+
+            services.AddTransient<IDataProvider, UserServiceDbContext>();
+
+            ConfigureMassTransit(services);
+
+            InjectObjects(services);
+
+            services.AddControllers().AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -201,15 +241,6 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
-        private void UpdateDatabase(IApplicationBuilder app)
-        {
-            using var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-
-            using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
-
-            context.Database.Migrate();
-        }
+        #endregion
     }
 }

@@ -13,8 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string Login { get; set; }
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
-
-        public virtual DbUser User { get; set; }
+        public DbUser User { get; set; }
     }
 
     public class UserCredentialsConfiguration : IEntityTypeConfiguration<DbUserCredentials>
@@ -22,20 +21,26 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public void Configure(EntityTypeBuilder<DbUserCredentials> builder)
         {
 
-            builder.ToTable(DbUserCredentials.TableName);
+            builder
+                .ToTable(DbUserCredentials.TableName);
 
-            builder.HasKey(uc => uc.Id);
+            builder
+                .HasKey(uc => uc.Id);
 
-            builder.Property(uc => uc.Login)
+            builder
+                .Property(uc => uc.Login)
                 .IsRequired();
 
-            builder.Property(uc => uc.PasswordHash)
+            builder
+                .Property(uc => uc.PasswordHash)
                 .IsRequired();
 
-            builder.Property(uc => uc.Salt)
+            builder
+                .Property(uc => uc.Salt)
                 .IsRequired();
 
-            builder.HasOne(uc => uc.User)
+            builder
+                .HasOne(uc => uc.User)
                 .WithOne(u => u.Credentials)
                 .HasForeignKey<DbUserCredentials>(uc => uc.UserId);
         }

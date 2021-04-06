@@ -4,13 +4,18 @@ namespace LT.DigitalOffice.UserService.Configuration
 {
     public class RabbitMqConfig : BaseRabbitMqOptions
     {
-        public string UserDescriptionUrl { get; set; }
-
         public string CompanyServiceUrl { get; set; }
-
         public string GetUserCredentialsEndpoint { get; set; }
-
-        public string GetUserInfoEndpoint { get; set; }
+        public string GetUserDataEndpoint { get; set; }
         public string AddImageEndpoint { get; set; }
+        public string GetFileEndpoint { get; set; }
+        public string GetDepartmentEndpoint { get; set; }
+        public string GetPositionEndpoint { get; set; }
+        public string ChangeUserDepartmentEndpoint { get; set; }
+        public string ChangeUserPositionEndpoint { get; set; }
+        public string GetProjectsEndpoint { get; set; }
+        public string GetProjectEndpoint { get; set; }
+        public string SendEmailEndpoint { get; set; }
+        public string GetTokenEndpoint { get; set; }
     }
 }

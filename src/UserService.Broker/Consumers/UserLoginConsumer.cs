@@ -4,10 +4,12 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
@@ -18,47 +20,42 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         private readonly ILogger<UserLoginConsumer> _logger;
         private readonly IUserCredentialsRepository _credentialsRepository;
 
-        public UserLoginConsumer(
-            IUserRepository userRepository,
-            ILogger<UserLoginConsumer> logger,
-            IUserCredentialsRepository credentialsRepository)
+        private GetCredentialsFilter CreateCredentialsFilter(IUserCredentialsRequest request)
         {
-            _logger = logger;
-            _userRepository = userRepository;
-            _credentialsRepository = credentialsRepository;
-        }
+            GetCredentialsFilter result = new();
 
         public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
         {
             string messageTemplate = "User login data: {LoginData}. Broker conversation id: {ConversationId}";
 
             var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
+            if (IsEmail(request.LoginData))
+            {
+                result.Email = request.LoginData;
+            }
+            else if (IsPhone(request.LoginData))
+            {
+                result.Phone = request.LoginData;
+            }
+            else
+            {
+                result.Login = request.LoginData;
+            }
 
-            _logger.LogInformation(messageTemplate, context.Message.LoginData, context.ConversationId);
-
-            await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
+            return result;
         }
 
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
             DbUserCredentials dbUserCredentials;
 
-            try
-            {
-                if (!IsEmail(request.LoginData))
-                {
-                    dbUserCredentials = GetDbUserCredentialsByLogin(request.LoginData);
-                }
-                else
-                {
-                    dbUserCredentials = GetDbUserCredentialsByUserId(request.LoginData);
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, exception.Message);
+            GetCredentialsFilter filter = CreateCredentialsFilter(request);
 
-                throw new Exception(exception.Message);
+            dbUserCredentials = _credentialsRepository.Get(filter);
+
+            if (dbUserCredentials == null)
+            {
+                throw new NotFoundException($"User credentials was not found.");
             }
 
             return IUserCredentialsResponse.CreateObj(
@@ -82,35 +79,33 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             }
         }
 
-        private DbUserCredentials GetDbUserCredentialsByLogin(string loginData)
+        private bool IsPhone(string value)
         {
-            var dbUserCredentials = _credentialsRepository.GetUserCredentialsByLogin(loginData);
+            StringBuilder sb = new();
 
-            if (dbUserCredentials == null)
+            foreach (char c in value)
             {
-                throw new NotFoundException($"User credentials for user with login: '{loginData}' was not found.");
+                if (!char.IsNumber(c))
+                {
+                    continue;
+                }
+                sb.Append(c);
             }
 
-            return dbUserCredentials;
+            return sb.Length > 0 && sb.Length < 15;
         }
 
-        private DbUserCredentials GetDbUserCredentialsByUserId(string loginData)
+        public UserLoginConsumer(
+            [FromServices] IUserCredentialsRepository credentialsRepository)
         {
-            var dbUser = _userRepository.GetUserByEmail(loginData);
+            _credentialsRepository = credentialsRepository;
+        }
 
-            if (dbUser == null)
-            {
-                throw new NotFoundException($"User with email: '{loginData}' was not found.");
-            }
+        public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
+        {
+            var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
-            var dbUserCredentials = _credentialsRepository.GetUserCredentialsByUserId(dbUser.Id);
-
-            if (dbUserCredentials == null)
-            {
-                throw new NotFoundException($"User credentials for user with email: '{loginData}' was not found.");
-            }
-
-            return dbUserCredentials;
+            await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
         }
     }
 }
