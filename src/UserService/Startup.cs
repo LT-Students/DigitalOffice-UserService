@@ -58,8 +58,6 @@ namespace LT.DigitalOffice.UserService
                 ConfigureConsumers(busConfigurator);
 
                 busConfigurator.AddRequestClients(_rabbitMqConfig, _logger);
-
-                busConfigurator.ConfigureKernelMassTransit(_rabbitMqConfig);
             });
 
             services.AddMassTransitHostedService();
@@ -124,8 +122,7 @@ namespace LT.DigitalOffice.UserService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddKernelExtensions();
-
+            services.AddHttpContextAccessor();
             services.AddHealthChecks();
 
             string connStr = Environment.GetEnvironmentVariable("ConnectionString");
