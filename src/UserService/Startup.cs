@@ -140,6 +140,7 @@ namespace LT.DigitalOffice.UserService
 
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.SectionName));
+            services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
             services.AddMemoryCache();
             services.AddBusinessObjects(_logger);
