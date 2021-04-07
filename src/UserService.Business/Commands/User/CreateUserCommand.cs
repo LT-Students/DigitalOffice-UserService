@@ -34,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IDbUserMapper _mapperUser;
         private readonly IAccessValidator _accessValidator;
 
+        #region private methods
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
             // TODO add user department
@@ -132,7 +133,8 @@ namespace LT.DigitalOffice.UserService.Business
 
             return avatarImageId;
         }
-
+        #endregion
+        
         public CreateUserCommand(
             ILogger<CreateUserCommand> logger,
             IRequestClient<IAddImageRequest> rcImage,
