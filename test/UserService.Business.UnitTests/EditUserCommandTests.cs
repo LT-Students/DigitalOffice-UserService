@@ -9,12 +9,18 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Castle.Core.Logging;
+using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
@@ -26,6 +32,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IPatchDbUserMapper> _mapperUserMock;
         private Mock<IAccessValidator> _accessValidatorMock;
         private Mock<IHttpContextAccessor> _httpAccessorMock;
+        private Mock<ILogger<EditUserCommand>> _loggerMock;
+        private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
         
         private JsonPatchDocument<DbUser> _patchDbUser;
         private JsonPatchDocument<EditUserRequest> _request;
@@ -72,9 +80,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _validatorMock = new Mock<IEditUserRequestValidator>();
             _accessValidatorMock = new Mock<IAccessValidator>();
 
+            _loggerMock = new Mock<ILogger<EditUserCommand>>();
+            _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
+            
             ClientRequestUp();
             
             _command = new EditUserCommand(
+                _loggerMock.Object,
+                _rcImageMock.Object,
                 _httpAccessorMock.Object,
                 _validatorMock.Object,
                 _userRepositoryMock.Object,
