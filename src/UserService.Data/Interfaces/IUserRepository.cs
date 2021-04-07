@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// Represents interface of repository in repository pattern.
     /// Provides methods for working with the database of UserService.
     /// </summary>
+    [AutoInject]
     public interface IUserRepository
     {
         DbUser Get(GetUserFilter filter);

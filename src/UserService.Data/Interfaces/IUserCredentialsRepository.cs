@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using System;
 
@@ -8,6 +9,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// Represents interface of repository in repository pattern.
     /// Provides methods for working with the database of UserService.
     /// </summary>
+    [AutoInject]
     public interface IUserCredentialsRepository
     {
         /// <summary>

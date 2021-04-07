@@ -38,6 +38,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     "IsActive",
                     "IsAdmin"
                 },
+                columnTypes: new[]
+                {
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    "bit",
+                    "bit"
+                },
                 values: new object[]
                 {
                     AdminCredentials.UserId,
@@ -58,9 +67,17 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     "PasswordHash",
                     "Salt"
                 },
+                columnTypes: new[]
+                {
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                },
                 values: new object[]
                 {
-                    new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"),
+                    Guid.NewGuid(),
                     AdminCredentials.UserId,
                     AdminCredentials.Login,
                     AdminCredentials.GetPasswordHash(),
