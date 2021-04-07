@@ -1,8 +1,12 @@
-﻿namespace LT.DigitalOffice.Broker.Requests
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+
+namespace LT.DigitalOffice.Broker.Requests
 {
     /// <summary>
     /// Send email broker request.
     /// </summary>
+    [AutoInjectRequest(nameof(RabbitMqConfig.SendEmailEndpoint))]
     public interface ISendEmailRequest
     {
         string Email { get; }

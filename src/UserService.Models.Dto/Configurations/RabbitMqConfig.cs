@@ -1,8 +1,8 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Configurations;
 
-namespace LT.DigitalOffice.UserService.Configuration
+namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
-    public class RabbitMqConfig : BaseRabbitMqOptions
+    public class RabbitMqConfig : BaseRabbitMqConfig
     {
         public string CompanyServiceUrl { get; set; }
         public string GetUserCredentialsEndpoint { get; set; }

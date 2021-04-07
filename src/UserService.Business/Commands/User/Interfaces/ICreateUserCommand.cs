@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Dto;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using System;
 
@@ -8,6 +9,7 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
     /// Represents interface for a command in command pattern.
     /// Provides method for adding a new user.
     /// </summary>
+    [AutoInject]
     public interface ICreateUserCommand
     {
         /// <summary>
