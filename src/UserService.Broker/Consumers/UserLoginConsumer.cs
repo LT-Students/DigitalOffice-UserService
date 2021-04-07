@@ -16,19 +16,15 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
     {
-        private readonly IUserRepository _userRepository;
         private readonly ILogger<UserLoginConsumer> _logger;
         private readonly IUserCredentialsRepository _credentialsRepository;
+
+        private Guid? _conversationId;
 
         private GetCredentialsFilter CreateCredentialsFilter(IUserCredentialsRequest request)
         {
             GetCredentialsFilter result = new();
 
-        public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
-        {
-            string messageTemplate = "User login data: {LoginData}. Broker conversation id: {ConversationId}";
-
-            var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
             if (IsEmail(request.LoginData))
             {
                 result.Email = request.LoginData;
@@ -48,6 +44,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         private object GetUserCredentials(IUserCredentialsRequest request)
         {
             DbUserCredentials dbUserCredentials;
+            string messageTemplate = string.Join(" ",
+                $"User login data: {request.LoginData}.",
+                "Broker conversation id: {ConversationId}.");
 
             GetCredentialsFilter filter = CreateCredentialsFilter(request);
 
@@ -55,8 +54,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
             if (dbUserCredentials == null)
             {
+                _logger.LogWarning(messageTemplate, _conversationId);
+
                 throw new NotFoundException($"User credentials was not found.");
             }
+
+            _logger.LogInformation(messageTemplate, _conversationId);
 
             return IUserCredentialsResponse.CreateObj(
                 dbUserCredentials.UserId,
@@ -96,13 +99,17 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         }
 
         public UserLoginConsumer(
-            [FromServices] IUserCredentialsRepository credentialsRepository)
+            ILogger<UserLoginConsumer> logger,
+            IUserCredentialsRepository credentialsRepository)
         {
+            _logger = logger;
             _credentialsRepository = credentialsRepository;
         }
 
         public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
         {
+            _conversationId = context.ConversationId;
+
             var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
             await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
