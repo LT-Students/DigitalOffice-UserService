@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 if (string.Equals(
                     item.path,
                     $"/{nameof(EditUserRequest.AvatarImage)}",
-                    StringComparison.CurrentCultureIgnoreCase))
+                    StringComparison.OrdinalIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.AvatarFileId)}";
                     item.value = GetAvatarImageId(item.value.ToString());
@@ -77,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 if (string.Equals(
                     item.path,
                     $"/{nameof(EditUserRequest.Status)}",
-                    StringComparison.CurrentCultureIgnoreCase))
+                    StringComparison.OrdinalIgnoreCase))
                 {
                     item.value = (int) item.value;
                 }

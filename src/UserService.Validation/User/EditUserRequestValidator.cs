@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     string.Equals(
                         x.path,
                         path,
-                        StringComparison.InvariantCultureIgnoreCase));
+                        StringComparison.OrdinalIgnoreCase));
 
         public EditUserRequestValidator()
         {
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .Must(x => x.Any())
                 .WithMessage("You don't have changes.")
                 .ForEach(y => y
-                    .Must(x => Paths.Contains(x.path))
+                    .Must(x => Paths.Any(cur => string.Equals(cur, x.path, StringComparison.OrdinalIgnoreCase)))
                     .WithMessage(
                         $"Document contains invalid path. Only such paths are allowed: {Paths.Aggregate((x, y) => x + ", " + y)}")
                 )
