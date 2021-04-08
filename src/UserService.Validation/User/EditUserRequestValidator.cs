@@ -27,11 +27,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         public static string MiddleName => $"/{nameof(EditUserRequest.MiddleName)}";
         public static string AvatarImage => $"/{nameof(EditUserRequest.AvatarImage)}";
         public static string Status => $"/{nameof(EditUserRequest.Status)}";
-        
+
         Func<JsonPatchDocument<EditUserRequest>, string, Operation> GetOperationByPath =>
             (x, path) =>
-                x.Operations.FirstOrDefault(x => x.path == path);
-        
+                x.Operations.FirstOrDefault(x =>
+                    string.Equals(
+                        x.path,
+                        path,
+                        StringComparison.InvariantCultureIgnoreCase));
+
         public EditUserRequestValidator()
         {
             RuleFor(x => x.Operations)

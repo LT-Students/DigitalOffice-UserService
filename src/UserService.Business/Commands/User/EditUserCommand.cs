@@ -93,9 +93,9 @@ namespace LT.DigitalOffice.UserService.Business
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
-            if (!(userId == _httpContext.GetUserId()
-                  && (_accessValidator.IsAdmin()
-                      || _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers))))
+            if (userId != _httpContext.GetUserId()
+                             && (!_accessValidator.IsAdmin()
+                             || !_accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers)))
             {
                 throw new ForbiddenException("Not enough rights.");
             }

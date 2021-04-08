@@ -65,28 +65,34 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             foreach (var item in request.Operations)
             {
-                if (item.path == $"/{nameof(EditUserRequest.AvatarImage)}")
+                if (string.Equals(
+                    item.path,
+                    $"/{nameof(EditUserRequest.AvatarImage)}",
+                    StringComparison.CurrentCultureIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.AvatarFileId)}";
                     item.value = GetAvatarImageId(item.value.ToString());
                 }
 
-                if (item.path == $"/{nameof(EditUserRequest.Status)}")
+                if (string.Equals(
+                    item.path,
+                    $"/{nameof(EditUserRequest.Status)}",
+                    StringComparison.CurrentCultureIgnoreCase))
                 {
                     item.value = (int) item.value;
                 }
-                
-                switch (item.OperationType)
+
+                string operation = item.OperationType switch
                 {
-                    case OperationType.Add:
-                        result.Operations.Add(new Operation<DbUser>("/add", item.path, item.from, item.value));
-                        break;
-                    case OperationType.Remove:
-                        result.Operations.Add(new Operation<DbUser>("/remove", item.path, item.from, item.value));
-                        break;
-                    case OperationType.Replace:
-                        result.Operations.Add(new Operation<DbUser>("/replace", item.path, item.from, item.value));
-                        break;
+                    OperationType.Add => "/add",
+                    OperationType.Remove => "/remove",
+                    OperationType.Replace => "/replace",
+                    _ => null
+                };
+
+                if (operation != null)
+                {
+                    result.Operations.Add(new Operation<DbUser>(operation, item.path, item.from, item.value));
                 }
             }
 

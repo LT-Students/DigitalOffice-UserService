@@ -41,11 +41,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private ValidationResult _validationResultError;
         private Guid _userId = Guid.NewGuid();
         
-        private void ClientRequestUp()
+        private void ClientRequestUp(Guid newGuid)
         {
             IDictionary<object, object> httpContextItems = new Dictionary<object, object>();
 
-            httpContextItems.Add("UserId", _userId);
+            httpContextItems.Add("UserId", newGuid);
 
             _httpAccessorMock
                 .Setup(x => x.HttpContext.Items)
@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _loggerMock = new Mock<ILogger<EditUserCommand>>();
             _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
             
-            ClientRequestUp();
+            ClientRequestUp(_userId);
             
             _command = new EditUserCommand(
                 _loggerMock.Object,
@@ -151,6 +151,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
+
+            ClientRequestUp(Guid.NewGuid());
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _request));
         }
