@@ -141,13 +141,18 @@ namespace LT.DigitalOffice.UserService
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.SectionName));
             services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
+            services.Configure<BaseRabbitMqConfig>(Configuration.GetSection(BaseRabbitMqConfig.SectionName));
+            services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
             services.AddMemoryCache();
             services.AddBusinessObjects(_logger);
 
             ConfigureMassTransit(services);
 
-            services.AddControllers().AddJsonOptions(option =>
+            services
+                .AddControllers()
+                .AddNewtonsoftJson()
+                .AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
