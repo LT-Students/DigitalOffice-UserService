@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
@@ -7,6 +8,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
     /// Represents mapper. Provides methods for converting an object of user value <see cref="CreateCredentialsRequest"/>
     /// type into an object of <see cref="DbUserCredentials"/> type according to some rule.
     /// </summary>
+    [AutoInject]
     public interface IDbUserCredentialsMapper
     {
         DbUserCredentials Map(

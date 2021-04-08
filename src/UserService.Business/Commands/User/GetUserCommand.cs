@@ -39,8 +39,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 IOperationResult<IDepartmentResponse> response = _rcDepartment.GetResponse<IOperationResult<IDepartmentResponse>>(
-                    IGetDepartmentRequest.CreateObj(userId, null),
-                    timeout: RequestTimeout.After(500)).Result.Message;
+                    IGetDepartmentRequest.CreateObj(userId, null)).Result.Message;
 
                 if (response.IsSuccess)
                 {
@@ -78,8 +77,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 IOperationResult<IPositionResponse> response = _rcPosition.GetResponse<IOperationResult<IPositionResponse>>(
-                    IGetPositionRequest.CreateObj(userId, null),
-                    timeout: RequestTimeout.After(500)).Result.Message;
+                    IGetPositionRequest.CreateObj(userId, null)).Result.Message;
 
                 if (response.IsSuccess)
                 {
@@ -117,8 +115,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 IOperationResult<IProjectsResponse> response = _rcProjects.GetResponse<IOperationResult<IProjectsResponse>>(
-                    IGetUserProjectsRequest.CreateObj(userId),
-                    timeout: RequestTimeout.After(500)).Result.Message;
+                    IGetUserProjectsRequest.CreateObj(userId)).Result.Message;
 
                 if (response.IsSuccess)
                 {
@@ -193,8 +190,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 IOperationResult<IFileResponse> response = _rcFile.GetResponse<IOperationResult<IFileResponse>>(
-                    IGetFileRequest.CreateObj(imageId.Value, true),
-                    timeout: RequestTimeout.After(500)).Result.Message;
+                    IGetFileRequest.CreateObj(imageId.Value, true)).Result.Message;
 
                 if (response.IsSuccess)
                 {

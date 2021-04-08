@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Dto;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.JsonPatch;
@@ -10,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
     /// Represents interface for a command in command pattern.
     /// Provides method for editing an existing user.
     /// </summary>
+    [AutoInject]
     public interface IEditUserCommand
     {
         /// <summary>
