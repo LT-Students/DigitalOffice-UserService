@@ -1,9 +1,12 @@
 ﻿using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.MessageService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
@@ -13,6 +16,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -27,6 +31,8 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserRepository _userRepository;
         private readonly ILogger<CreateUserCommand> _logger;
         private readonly IRequestClient<IAddImageRequest> _rcImage;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRequestClient<IGetEmailTemplateTagsRequest> _rcGetTemplateTags;
         private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
         private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
@@ -58,6 +64,8 @@ namespace LT.DigitalOffice.UserService.Business
 
             string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resended in 1 hour.";
 
+            string languageTemplate = "en";
+            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
             try
             {
                 string link = $"http://localhost:4200/auth/firstlogin?userId={dbUser.Id}";
@@ -73,12 +81,23 @@ namespace LT.DigitalOffice.UserService.Business
                 sb.AppendLine("Best Regards,");
                 sb.AppendLine("Digital Office team.");
 
+                var templateTags = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
+                    IGetEmailTemplateTagsRequest.CreateObj(
+                        languageTemplate,
+                        EmailTemplateType.Greeting)).Result.Message;
+
+                var templateValues = templateTags.Body.CreateDictionaryTemplate(
+                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password);
+
                 // TODO add email template ID
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
+                        templateTags.Body.TemplateId,
+                        senderId,
                         email.Value,
-                        "Digital Office change password",
-                        sb.ToString())).Result.Message;
+                        languageTemplate,
+                        templateValues
+                       )).Result.Message;
 
                 if (!response.IsSuccess)
                 {
@@ -136,6 +155,8 @@ namespace LT.DigitalOffice.UserService.Business
         public CreateUserCommand(
             ILogger<CreateUserCommand> logger,
             IRequestClient<IAddImageRequest> rcImage,
+            IHttpContextAccessor httpContextAccessor,
+            IRequestClient<IGetEmailTemplateTagsRequest> rcGetTemplateTags,
             IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
             IRequestClient<IChangeUserPositionRequest> rcPosition,
             IRequestClient<ISendEmailRequest> rcSendEmail,
@@ -150,9 +171,11 @@ namespace LT.DigitalOffice.UserService.Business
             _rcPosition = rcPosition;
             _rcSendEmail = rcSendEmail;
             _validator = validator;
+            _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
+            _rcGetTemplateTags = rcGetTemplateTags;
         }
 
         /// <inheritdoc/>
