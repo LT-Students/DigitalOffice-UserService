@@ -21,7 +21,6 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password
 {
@@ -58,37 +57,25 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         {
             string errorMessage = $"Can not send email to '{email}'. Please try again latter.";
 
-            string languageTemplate = "en";
+            //TODO: fix add specific template language
+            string templateLanguage = "en";
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
             try
             {
-                string link = $"http://localhost:4200/auth/changepassword?userId={dbUser.Id}&secret={secret}";
-
-                StringBuilder sb = new();
-                sb.AppendLine($"Hello, {dbUser.FirstName}!!!");
-                sb.AppendLine();
-                sb.AppendLine("You receive this message because someone initiate change password process.");
-                sb.AppendLine("If it was not you just ignore this message.");
-                sb.AppendLine($"In other case please follow this link: {link}");
-                sb.AppendLine();
-                sb.AppendLine("Best Regards,");
-                sb.AppendLine("Digital Office team.");
-
                 var templateTags = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
                    IGetEmailTemplateTagsRequest.CreateObj(
-                       languageTemplate,
+                       templateLanguage,
                        EmailTemplateType.Warning)).Result.Message;
 
                 var templateValues = templateTags.Body.CreateDictionaryTemplate(
                     dbUser.FirstName, email, dbUser.Id.ToString(), null, secret.ToString());
 
-                // TODO add email template ID
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
                         templateTags.Body.TemplateId,
                         senderId,
                         email,
-                        languageTemplate,
+                        templateLanguage,
                         templateValues
                        )).Result.Message;
 

@@ -21,7 +21,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -64,38 +63,25 @@ namespace LT.DigitalOffice.UserService.Business
 
             string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resended in 1 hour.";
 
-            string languageTemplate = "en";
+            //TODO: fix add specific template language
+            string templateLanguage = "en";
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
             try
             {
-                string link = $"http://localhost:4200/auth/firstlogin?userId={dbUser.Id}";
-
-                StringBuilder sb = new();
-                sb.AppendLine($"Hello, {dbUser.FirstName}!!!");
-                sb.AppendLine();
-                sb.AppendLine("You receive this message because you was invited to join Digital Office community.");
-                sb.AppendLine("If you sure that it is not for you just ignore this message.");
-                sb.AppendLine($"In other case please follow this link: {link}");
-                sb.AppendLine($"Your password: {password}");
-                sb.AppendLine();
-                sb.AppendLine("Best Regards,");
-                sb.AppendLine("Digital Office team.");
-
                 var templateTags = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
                     IGetEmailTemplateTagsRequest.CreateObj(
-                        languageTemplate,
+                        templateLanguage,
                         EmailTemplateType.Greeting)).Result.Message;
 
                 var templateValues = templateTags.Body.CreateDictionaryTemplate(
                     dbUser.FirstName, email.Value, dbUser.Id.ToString(), password, null);
 
-                // TODO add email template ID
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
                         templateTags.Body.TemplateId,
                         senderId,
                         email.Value,
-                        languageTemplate,
+                        templateLanguage,
                         templateValues
                        )).Result.Message;
 
