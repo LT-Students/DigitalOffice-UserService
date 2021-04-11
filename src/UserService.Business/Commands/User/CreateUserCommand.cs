@@ -87,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Business
                         EmailTemplateType.Greeting)).Result.Message;
 
                 var templateValues = templateTags.Body.CreateDictionaryTemplate(
-                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password);
+                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password, null);
 
                 // TODO add email template ID
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(

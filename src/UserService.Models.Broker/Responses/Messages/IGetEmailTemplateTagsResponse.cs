@@ -44,6 +44,11 @@ namespace LT.DigitalOffice.Broker.Responses
                 TemplateTags[nameof(userId)] = userId;
             }
 
+            if (isKey(userPassword))
+            {
+                TemplateTags[nameof(userPassword)] = userPassword;
+            }
+
             if (isKey(secret))
             {
                 TemplateTags[nameof(secret)] = secret;
