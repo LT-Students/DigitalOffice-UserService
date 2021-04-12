@@ -1,20 +1,25 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.MessageService.Models.Dto.Enums;
 using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Business.Commands.Password;
+using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -23,48 +28,26 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
-    class CreateUserCommandTests
+    class ForgotPasswordCommandTests
     {
-        private Mock<IDbUserMapper> _mapperUserMock;
         private Mock<IUserRepository> _userRepositoryMock;
-        private Mock<IAccessValidator> _accessValidatorMock;
-        private Mock<ILogger<CreateUserCommand>> _loggerMock;
-        private Mock<ICreateUserRequestValidator> _validatorMock;
-        private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
+        private Mock<ILogger<ForgotPasswordCommand>> _loggerMock;
+        private Mock<IEmailValidator> _validatorMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
-        private Mock<IRequestClient<IChangeUserPositionRequest>> _rcPositionMock;
-        private Mock<IRequestClient<IChangeUserDepartmentRequest>> _rcDepartmentMock;
         private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
-
-        private Mock<IOperationResult<Guid>> _operationResultAddImageMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
         private Mock<IOperationResult<IGetEmailTemplateTagsResponse>> _operationResultGetTempTagsMock;
 
         private DbUser _dbUser;
-        private ICreateUserCommand _command;
+        private IMemoryCache _memoryCache;
+        private IOptions<CacheConfig> _cacheOptions;
+        private IForgotPasswordCommand  _command;
         private CreateUserRequest _createUserRequest;
         private DbUserCommunication _dbCommunication;
-        private OperationResultResponse<Guid> _expectedOperationResultResponse;
+        private OperationResultResponse<bool> _expectedOperationResultResponse;
 
         #region Broker setup
-        private void RcAddImageSetUp()
-        {
-            _operationResultAddImageMock = new Mock<IOperationResult<Guid>>();
-            _operationResultAddImageMock.Setup(x => x.Body).Returns(Guid.NewGuid());
-            _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(true);
-            _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
-
-            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<Guid>>>();
-            responseBrokerAddImageMock
-               .SetupGet(x => x.Message)
-               .Returns(_operationResultAddImageMock.Object);
-
-            _rcImageMock.Setup(
-                x => x.GetResponse<IOperationResult<Guid>>(
-                    It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
-        }
 
         private void RcGetTemplateTagSetUp()
         {
@@ -113,24 +96,24 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                 .Returns(Task.FromResult(responseBrokerSendEmailMock.Object));
         }
+
         #endregion
 
         #region Setup
-
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _mapperUserMock = new Mock<IDbUserMapper>();
+            _cacheOptions = Options.Create(new CacheConfig
+            {
+                CacheLiveInMinutes = 5
+            });
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
             _userRepositoryMock = new Mock<IUserRepository>();
-            _accessValidatorMock = new Mock<IAccessValidator>();
-            _loggerMock = new Mock<ILogger<CreateUserCommand>>();
-            _validatorMock = new Mock<ICreateUserRequestValidator>();
+            _loggerMock = new Mock<ILogger<ForgotPasswordCommand>>();
+            _validatorMock = new Mock<IEmailValidator>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
-            _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
             _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
-            _rcPositionMock = new Mock<IRequestClient<IChangeUserPositionRequest>>();
-            _rcDepartmentMock = new Mock<IRequestClient<IChangeUserDepartmentRequest>>();
             _rcGetTemplateTagsMock = new Mock<IRequestClient<IGetEmailTemplateTagsRequest>>();
 
             var userId = Guid.NewGuid();
@@ -172,42 +155,35 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             };
 
             IDictionary<object, object> httpContextItems = new Dictionary<object, object>();
-
             httpContextItems.Add("UserId", userId);
 
             _httpContextAccessorMock
                 .Setup(x => x.HttpContext.Items)
                 .Returns(httpContextItems);
 
-            _command = new CreateUserCommand(
+            _command = new ForgotPasswordCommand(
                 _loggerMock.Object,
-                _rcImageMock.Object,
-                _httpContextAccessorMock.Object,
-                _rcGetTemplateTagsMock.Object,
-                _rcDepartmentMock.Object,
-                _rcPositionMock.Object,
                 _rcSendEmailMock.Object,
-                _userRepositoryMock.Object,
+                _rcGetTemplateTagsMock.Object,
+                _cacheOptions,
+                _httpContextAccessorMock.Object,
                 _validatorMock.Object,
-                _mapperUserMock.Object,
-                _accessValidatorMock.Object);
+                _userRepositoryMock.Object,
+                _memoryCache);
         }
 
         [SetUp]
         public void SetUp()
         {
-            _expectedOperationResultResponse = new OperationResultResponse<Guid>()
+            _expectedOperationResultResponse = new OperationResultResponse<bool>()
             {
-                Body = _dbUser.Id,
+                Body = true,
                 Status = OperationResultStatusType.FullSuccess,
                 Errors = new List<string>()
             };
 
-            _mapperUserMock.Reset();
             _userRepositoryMock.Reset();
-            _accessValidatorMock.Reset();
 
-            RcAddImageSetUp();
             RcSendEmailSetUp();
             RcGetTemplateTagSetUp();
         }
@@ -215,51 +191,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         #endregion
 
         [Test]
-        public void ShoulRequestIsPartialSuccessWhenImageWasNotAdded()
-        {
-            _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-            var messageError = new List<string>();
-            messageError.Add($"Can not add avatar image to user. Please try again later.");
-
-            _expectedOperationResultResponse.Errors = messageError;
-
-            _operationResultAddImageMock
-                .Setup(x => x.IsSuccess)
-                .Returns(false);
-            _operationResultAddImageMock
-                .Setup(x => x.Errors)
-                .Returns(messageError);
-
-            _accessValidatorMock
-                .Setup(X => X.IsAdmin())
-                .Returns(true);
-
-            _validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
-
-            _mapperUserMock
-                .Setup(x => x.Map(_createUserRequest, null))
-                .Returns(_dbUser);
-
-            _userRepositoryMock
-                .Setup(x => x.Create(_dbUser, _createUserRequest.Password))
-                .Returns(_dbUser.Id);
-
-            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        }
-
-        [Test]
         public void ShoulRequestIsPartialSuccessWhenEmailWasNotSended()
         {
             _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
 
             var messageError = new List<string>();
-            messageError.Add($"Can not send email to '{_dbCommunication.Value}'. " +
-                "Email placed in resend queue and will be resended in 1 hour.");
+            messageError.Add($"Can not send email to '{_dbCommunication.Value}'. Please try again latter.");
 
             _expectedOperationResultResponse.Errors = messageError;
+            _expectedOperationResultResponse.Body = false;
+            _expectedOperationResultResponse.Status = OperationResultStatusType.Failed;
 
             _operationResultSendEmailMock
                 .Setup(x => x.IsSuccess)
@@ -268,46 +209,59 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Errors)
                 .Returns(messageError);
 
-            _accessValidatorMock
-                .Setup(X => X.IsAdmin())
+            _validatorMock
+                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
+
+            _userRepositoryMock
+                .Setup(x => x.Get(It.IsAny<GetUserFilter>()))
+                .Returns(_dbUser);
+
+            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_dbCommunication.Value));
+        }
+
+        [Test]
+        public void ShoulRequestIsPartialSuccessWhenTemplateTagsNotWereReceived()
+        {
+            _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
+
+            var messageError = new List<string>();
+            messageError.Add($"Can not send email to '{_dbCommunication.Value}'. Please try again latter.");
+
+            _expectedOperationResultResponse.Errors = messageError;
+            _expectedOperationResultResponse.Body = false;
+            _expectedOperationResultResponse.Status = OperationResultStatusType.Failed;
+
+            _operationResultGetTempTagsMock
+                .Setup(x => x.IsSuccess)
+                .Returns(false);
+            _operationResultSendEmailMock
+                .Setup(x => x.Errors)
+                .Returns(messageError);
 
             _validatorMock
                 .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
 
-            _mapperUserMock
-                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body))
+            _userRepositoryMock
+                .Setup(x => x.Get(It.IsAny<GetUserFilter>()))
                 .Returns(_dbUser);
 
-            _userRepositoryMock
-                .Setup(x => x.Create(_dbUser, _createUserRequest.Password))
-                .Returns(_dbUser.Id);
-
-            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
+            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_dbCommunication.Value));
         }
 
         [Test]
         public void ShoulCreateUserSuccessful()
         {
-            _accessValidatorMock
-                .Setup(X => X.IsAdmin())
-                .Returns(true);
-
             _validatorMock
                 .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
 
-            _mapperUserMock
-                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body))
+            _userRepositoryMock
+                .Setup(x => x.Get(It.IsAny<GetUserFilter>()))
                 .Returns(_dbUser);
 
-            _userRepositoryMock
-                .Setup(x => x.Create(_dbUser, _createUserRequest.Password))
-                .Returns(_dbUser.Id);
-
-            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
+            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_dbCommunication.Value));
         }
-
     }
 }
