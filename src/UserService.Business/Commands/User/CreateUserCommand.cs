@@ -66,29 +66,39 @@ namespace LT.DigitalOffice.UserService.Business
             //TODO: fix add specific template language
             string templateLanguage = "en";
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
-                var templateTags = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
+                var rcGetTemplateTagsResponse = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
                     IGetEmailTemplateTagsRequest.CreateObj(
                         templateLanguage,
-                        EmailTemplateType.Greeting)).Result.Message;
+                        templateType)).Result.Message;
 
-                var templateValues = templateTags.Body.CreateDictionaryTemplate(
+                var templateValues = rcGetTemplateTagsResponse.Body.CreateDictionaryTemplate(
                     dbUser.FirstName, email.Value, dbUser.Id.ToString(), password, null);
 
-                IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
+                if (!rcGetTemplateTagsResponse.IsSuccess)
+                {
+                    _logger.LogWarning(
+                        $"Errors while get email template tags of type:'{templateType}':" +
+                        $"{Environment.NewLine}{string.Join('\n', rcGetTemplateTagsResponse.Errors)}.");
+
+                    errors.Add(errorMessage);
+                }
+
+                IOperationResult<bool> rcSendEmailResponse = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
-                        templateTags.Body.TemplateId,
+                        rcGetTemplateTagsResponse.Body.TemplateId,
                         senderId,
                         email.Value,
                         templateLanguage,
                         templateValues
                        )).Result.Message;
 
-                if (!response.IsSuccess)
+                if (!rcSendEmailResponse.IsSuccess)
                 {
                     _logger.LogWarning(
-                        $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}.");
 
                     errors.Add(errorMessage);
                 }

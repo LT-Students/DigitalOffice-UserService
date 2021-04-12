@@ -60,19 +60,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             //TODO: fix add specific template language
             string templateLanguage = "en";
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
-                var templateTags = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
+                var rcGetTemplateTagsResponse = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
                    IGetEmailTemplateTagsRequest.CreateObj(
                        templateLanguage,
-                       EmailTemplateType.Warning)).Result.Message;
+                       templateType)).Result.Message;
 
-                var templateValues = templateTags.Body.CreateDictionaryTemplate(
+                var templateValues = rcGetTemplateTagsResponse.Body.CreateDictionaryTemplate(
                     dbUser.FirstName, email, dbUser.Id.ToString(), null, secret.ToString());
+
+                if (!rcGetTemplateTagsResponse.IsSuccess)
+                {
+                    _logger.LogWarning(
+                        $"Errors while get email template tags of type:'{templateType}':" +
+                        $"{Environment.NewLine}{string.Join('\n', rcGetTemplateTagsResponse.Errors)}.");
+
+                    errors.Add(errorMessage);
+
+                    return false;
+                }
 
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
-                        templateTags.Body.TemplateId,
+                        rcGetTemplateTagsResponse.Body.TemplateId,
                         senderId,
                         email,
                         templateLanguage,
@@ -103,7 +115,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
         public ForgotPasswordCommand(
             ILogger<ForgotPasswordCommand> logger,
-            IRequestClient<ISendEmailRequest> requestClientMS,
+            IRequestClient<ISendEmailRequest> rcSendEmail,
+            IRequestClient<IGetEmailTemplateTagsRequest> rcGetTemplateTags,
             IOptions<CacheConfig> cacheOptions,
             IHttpContextAccessor httpContextAccessor,
             IEmailValidator validator,
@@ -111,7 +124,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             IMemoryCache cache)
         {
             _logger = logger;
-            _rcSendEmail = requestClientMS;
+            _rcSendEmail = rcSendEmail;
+            _rcGetTemplateTags = rcGetTemplateTags;
             _httpContextAccessor = httpContextAccessor;
             _repository = repository;
             _validator = validator;
