@@ -13,7 +13,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -122,14 +126,18 @@ namespace LT.DigitalOffice.UserService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpContextAccessor();
-            services.AddHealthChecks();
-
+            
             string connStr = Environment.GetEnvironmentVariable("ConnectionString");
             if (string.IsNullOrEmpty(connStr))
             {
                 connStr = Configuration.GetConnectionString("SQLConnectionString");
             }
+            
+            services.AddHttpContextAccessor();
+            
+            services.AddHealthChecks()
+                .AddRabbitMqCheck()
+                .AddSqlServer(connStr);
 
             _logger.LogTrace(connStr.EncodeSqlConnectionString());
 
@@ -141,13 +149,18 @@ namespace LT.DigitalOffice.UserService
             services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
             services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.SectionName));
             services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
+            services.Configure<BaseRabbitMqConfig>(Configuration.GetSection(BaseRabbitMqConfig.SectionName));
+            services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
             services.AddMemoryCache();
             services.AddBusinessObjects(_logger);
 
             ConfigureMassTransit(services);
 
-            services.AddControllers().AddJsonOptions(option =>
+            services
+                .AddControllers()
+                .AddNewtonsoftJson()
+                .AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
@@ -180,6 +193,17 @@ namespace LT.DigitalOffice.UserService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks($"/{_serviceInfoConfig.Id}/hc", new HealthCheckOptions
+                {
+                    ResultStatusCodes = new Dictionary<HealthStatus, int>
+                    {
+                        { HealthStatus.Unhealthy, 200 },
+                        { HealthStatus.Healthy, 200 },
+                        { HealthStatus.Degraded, 200 },
+                    },
+                    Predicate = check => check.Name != "masstransit-bus",
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
             });
         }
 

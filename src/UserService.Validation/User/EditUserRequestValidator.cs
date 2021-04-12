@@ -27,11 +27,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         public static string MiddleName => $"/{nameof(EditUserRequest.MiddleName)}";
         public static string AvatarImage => $"/{nameof(EditUserRequest.AvatarImage)}";
         public static string Status => $"/{nameof(EditUserRequest.Status)}";
-        
+
         Func<JsonPatchDocument<EditUserRequest>, string, Operation> GetOperationByPath =>
             (x, path) =>
-                x.Operations.FirstOrDefault(x => x.path == path);
-        
+                x.Operations.FirstOrDefault(x =>
+                    string.Equals(
+                        x.path,
+                        path,
+                        StringComparison.OrdinalIgnoreCase));
+
         public EditUserRequestValidator()
         {
             RuleFor(x => x.Operations)
@@ -43,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .Must(x => x.Any())
                 .WithMessage("You don't have changes.")
                 .ForEach(y => y
-                    .Must(x => Paths.Contains(x.path))
+                    .Must(x => Paths.Any(cur => string.Equals(cur, x.path, StringComparison.OrdinalIgnoreCase)))
                     .WithMessage(
                         $"Document contains invalid path. Only such paths are allowed: {Paths.Aggregate((x, y) => x + ", " + y)}")
                 )

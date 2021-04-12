@@ -107,8 +107,8 @@ namespace LT.DigitalOffice.UserService.Data
 
         public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
-            var dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
-                         throw new NotFoundException($"User with ID '{id}' was not found.");
+            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ?? 
+                            throw new NotFoundException($"User with ID '{id}' was not found.");
 
             userPatch.ApplyTo(dbUser);
             
