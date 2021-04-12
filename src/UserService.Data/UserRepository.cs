@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -37,11 +38,8 @@ namespace LT.DigitalOffice.UserService.Data
                 if (!string.IsNullOrEmpty(filter.Email?.Trim()))
                 {
                     dbUsers = dbUsers.Where(u => u.Communications
-                        .Where(
-                            c =>
-                                c.Type == (int)CommunicationType.Email &&
-                                c.Value == filter.Email)
-                        .Any());
+                        .Any(c => c.Type == (int)CommunicationType.Email &&
+                                  c.Value == filter.Email));
                 }
             }
 
@@ -107,14 +105,13 @@ namespace LT.DigitalOffice.UserService.Data
             return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
         }
 
-        public bool EditUser(DbUser user)
+        public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
-            if (!_provider.Users.Any(users => user.Id == users.Id))
-            {
-                throw new NotFoundException($"User with ID '{user.Id}' was not found.");
-            }
+            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ?? 
+                            throw new NotFoundException($"User with ID '{id}' was not found.");
 
-            _provider.Users.Update(user);
+            userPatch.ApplyTo(dbUser);
+            
             _provider.Save();
 
             return true;

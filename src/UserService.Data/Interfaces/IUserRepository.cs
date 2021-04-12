@@ -3,6 +3,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -31,9 +32,10 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <summary>
         /// Edit existing dbUser. Returns whether it was successful to edit.
         /// </summary>
-        /// <param name="user">User to edit.</param>
+        /// <param name="id"></param>
+        /// <param name="userPatch"></param>
         /// <returns>Whether it was successful to edit.</returns>
-        bool EditUser(DbUser user);
+        bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch);
 
         /// <summary>
         /// Return DbSkill if it exist in database, else return null.

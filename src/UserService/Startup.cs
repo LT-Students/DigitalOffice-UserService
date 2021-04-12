@@ -157,7 +157,10 @@ namespace LT.DigitalOffice.UserService
 
             ConfigureMassTransit(services);
 
-            services.AddControllers().AddJsonOptions(option =>
+            services
+                .AddControllers()
+                .AddNewtonsoftJson()
+                .AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
