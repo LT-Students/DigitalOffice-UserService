@@ -4,6 +4,7 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Broker.Models;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using MassTransit.Testing;
@@ -23,6 +24,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
         private InMemoryTestHarness harness;
         private DbUser dbUser;
+        private UserData userData;
 
         private Mock<IUserRepository> repository;
 
@@ -44,6 +46,8 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 MiddleName = "Ivnovich",
                 IsActive = false
             };
+
+            userData = UserData.Create(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
         }
 
         [Test]
@@ -69,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 {
                     IsSuccess = true,
                     Errors = null as List<string>,
-                    Body = new List<DbUser> { dbUser }
+                    Body = new List<UserData> { userData }
                 };
 
                 Assert.True(response.Message.IsSuccess);
