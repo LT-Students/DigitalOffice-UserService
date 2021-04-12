@@ -1,4 +1,6 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using System;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
@@ -7,27 +9,21 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// Represents interface of repository in repository pattern.
     /// Provides methods for working with the database of UserService.
     /// </summary>
+    [AutoInject]
     public interface IUserCredentialsRepository
     {
         /// <summary>
-        /// Returns the user credentials with the specified user id from database.
+        /// Returns the user credentials.
         /// </summary>
-        /// <param name="userId">Specified Id of user.</param>
-        /// <returns>User credentials model.</returns>
-        DbUserCredentials GetUserCredentialsByUserId(Guid userId);
+        DbUserCredentials Get(GetCredentialsFilter filter);
 
-        /// <summary>
-        /// Returns the user credentials with the specified user email from database.
-        /// </summary>
-        /// <param name="login">Specified login of user.</param>
-        /// <returns>User credentials model.</returns>
-        DbUserCredentials GetUserCredentialsByLogin(string login);
+        Guid Create(DbUserCredentials dbUserCredentials);
 
         /// <summary>
         /// Edit existing user credentials. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="userCredentials">User credentials to edit.</param>
         /// <returns>Whether it was successful to edit.</returns>
-        bool EditUserCredentials(DbUserCredentials userCredentials);
+        bool Edit(DbUserCredentials userCredentials);
     }
 }

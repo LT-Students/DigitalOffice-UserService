@@ -1,6 +1,9 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -8,63 +11,48 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// Represents interface of repository in repository pattern.
     /// Provides methods for working with the database of UserService.
     /// </summary>
+    [AutoInject]
     public interface IUserRepository
     {
-        /// <summary>
-        /// Returns the dbUser with the specified id from database.
-        /// </summary>
-        /// <param name="userId">Specified id of dbUser.</param>
-        /// <returns>User with specified id.</returns>
-        DbUser GetUserInfoById(Guid userId);
+        DbUser Get(GetUserFilter filter);
+
+        DbUser Get(Guid id);
+
+        IEnumerable<DbUser> Find(int skipCount, int takeCount, out int totalCount);
+
+        DbPendingUser GetPendingUser(Guid userId);
+
+        void DeletePendingUser(Guid userId);
 
         /// <summary>
         /// Adds new dbUser to the database. Returns whether it was successful to add.
         /// </summary>
-        /// <param name="dbUser">User to add.</param>
-        /// <returns>ID of added dbUser.</returns>
-        Guid CreateUser(DbUser dbUser);
+        Guid Create(DbUser dbUser, string password);
 
         /// <summary>
         /// Edit existing dbUser. Returns whether it was successful to edit.
         /// </summary>
-        /// <param name="user">User to edit.</param>
+        /// <param name="id"></param>
+        /// <param name="userPatch"></param>
         /// <returns>Whether it was successful to edit.</returns>
-        bool EditUser(DbUser user);
-
-        /// <summary>
-        /// Returns the dbUser with the specified email from database.
-        /// </summary>
-        /// <param name="userEmail">Specified dbUser email.</param>
-        /// <returns>User model.</returns>
-        DbUser GetUserByEmail(string userEmail);
-
-        /// <summary>
-        /// Returns the collection of DbUsers with the specified ids from database.
-        /// </summary>
-        /// <param name="usersIds">List of specified ids.</param>
-        /// <returns>Collection of DbUser models.</returns>
-        IEnumerable<DbUser> GetUsersByIds(IEnumerable<Guid> usersIds);
-
-        /// <summary>
-        /// Returns the collection of user models using pagination and filter by full name.
-        /// </summary>
-        /// <param name="skipCount">Number of pages to skip.</param>
-        /// <param name="takeCount">Number of users on one page.</param>
-        /// <param name="userNameFilter">User full name or its part that is wanted to be found.</param>
-        /// <returns>Collection of user models.</returns>
-        IEnumerable<DbUser> GetAllUsers(int skipCount, int takeCount, string userNameFilter);
+        bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch);
 
         /// <summary>
         /// Return DbSkill if it exist in database, else return null.
         /// </summary>
         /// <param name="name">Skill name.</param>
-        public DbSkill FindSkillByName(string name);
+        DbSkill FindSkillByName(string name);
 
         /// <summary>
         /// Adds new skill to Database. Returns Id of new DbSkill if it was successful to add.
         /// </summary>
         /// <param name="name">Skill name.</param>
         /// <returns> Guid of created DbSkill.</returns>
-        public Guid CreateSkill(string name);
+        Guid CreateSkill(string name);
+
+        /// <summary>
+        /// Disable user.
+        /// </summary>
+        bool SwitchActiveStatus(Guid userId, bool status);
     }
 }

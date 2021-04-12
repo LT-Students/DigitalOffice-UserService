@@ -1,14 +1,11 @@
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
-using LT.DigitalOffice.UserService.Configuration;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using MassTransit;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -16,95 +13,66 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace LT.DigitalOffice.UserService
 {
     public class Startup
     {
+        private readonly BaseServiceInfoConfig _serviceInfoConfig;
+        private readonly RabbitMqConfig _rabbitMqConfig;
         private readonly ILogger<Startup> _logger;
 
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        #region private methods
+
+        private void UpdateDatabase(IApplicationBuilder app)
         {
-            Configuration = configuration;
+            using var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
 
-            using var loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder
-                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
-                    .AddConsole();
-            });
+            using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
 
-            _logger = loggerFactory.CreateLogger<Startup>();
+            context.Database.Migrate();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        #region configure masstransit
+
+        private void ConfigureMassTransit(IServiceCollection services)
         {
-            services.AddKernelExtensions();
-
-            services.AddHealthChecks();
-
-            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-            if (string.IsNullOrEmpty(connStr))
+            services.AddMassTransit(busConfigurator =>
             {
-                connStr = Configuration.GetConnectionString("SQLConnectionString");
-            }
+                busConfigurator.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(_rabbitMqConfig.Host, "/", host =>
+                    {
+                        host.Username($"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}");
+                        host.Password(_serviceInfoConfig.Id);
+                    });
 
-            _logger.LogTrace(connStr.EncodeSqlConnectionString());
+                    ConfigureEndpoints(context, cfg, _rabbitMqConfig);
+                });
 
-            services.AddDbContext<UserServiceDbContext>(options =>
-            {
-                options.UseSqlServer(connStr);
+                ConfigureConsumers(busConfigurator);
+
+                busConfigurator.AddRequestClients(_rabbitMqConfig, _logger);
             });
 
-            services.AddControllers();
-
-            services.AddControllers().AddJsonOptions(opt =>
-            {
-                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
-
-            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
-            services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.MemoryCache));
-
-            services.AddMemoryCache();
-
-            services.AddTransient<IDataProvider, UserServiceDbContext>();
-
-            ConfigureMassTransit(services);
-
-            InjectObjects(services);
-
-            services.AddControllers().AddJsonOptions(option =>
-            {
-                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            services.AddMassTransitHostedService();
         }
 
-        private void InjectObjects(IServiceCollection services)
+        private void ConfigureConsumers(IServiceCollectionBusConfigurator x)
         {
-            services.InjectObjects(
-                InjectObjectType.Command,
-                InjectType.Transient,
-                "LT.DigitalOffice.UserService.Business",
-                _logger);
-            services.InjectObjects(
-                InjectObjectType.Repository,
-                InjectType.Transient,
-                "LT.DigitalOffice.UserService.Data",
-                _logger);
-            services.InjectObjects(
-                InjectObjectType.Mapper,
-                InjectType.Transient,
-                "LT.DigitalOffice.UserService.Mappers",
-                _logger);
-            services.InjectObjects(
-                InjectObjectType.Validator,
-                InjectType.Transient,
-                "LT.DigitalOffice.UserService.Validation",
-                _logger);
+            x.AddConsumer<UserLoginConsumer>();
+            x.AddConsumer<GetUserDataConsumer>();
+            x.AddConsumer<GetUsersDataConsumer>();
+            x.AddConsumer<AccessValidatorConsumer>();
         }
 
         private void ConfigureEndpoints(
@@ -134,46 +102,74 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
-        private void ConfigureMassTransit(IServiceCollection services)
+        #endregion
+
+        #endregion
+
+        #region public methods
+
+        public Startup(IConfiguration configuration)
         {
-            var rabbitMqConfig = Configuration
-                .GetSection(BaseRabbitMqOptions.RabbitMqSectionName)
+            Configuration = configuration;
+
+            _serviceInfoConfig = Configuration
+                .GetSection(BaseServiceInfoConfig.SectionName)
+                .Get<BaseServiceInfoConfig>();
+
+            _rabbitMqConfig = Configuration
+                .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
 
-            services.AddMassTransit(x =>
+            using var loggerFactory = LoggerFactory.Create(builder =>
             {
-                x.AddConsumer<UserLoginConsumer>();
-                x.AddConsumer<GetUserDataConsumer>();
-                x.AddConsumer<GetUsersDataConsumer>();
-                x.AddConsumer<AccessValidatorConsumer>();
-
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(rabbitMqConfig.Host, "/", host =>
-                    {
-                        host.Username($"{rabbitMqConfig.Username}_{rabbitMqConfig.Password}");
-                        host.Password(rabbitMqConfig.Password);
-                    });
-
-                    ConfigureEndpoints(context, cfg, rabbitMqConfig);
-                });
-
-                x.AddRequestClient<IUserDescriptionRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.UserDescriptionUrl}"));
-
-                x.AddRequestClient<IGetUserPositionRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.CompanyServiceUrl}"));
-
-                x.AddRequestClient<ICheckTokenRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.ValidateTokenEndpoint}"));
-
-                x.AddRequestClient<IAddImageRequest>(
-                    new Uri($"{rabbitMqConfig.BaseUrl}/{rabbitMqConfig.AddImageEndpoint}"));
-
-                x.ConfigureKernelMassTransit(rabbitMqConfig);
+                builder
+                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
+                    .AddConsole();
             });
 
-            services.AddMassTransitHostedService();
+            _logger = loggerFactory.CreateLogger<Startup>();
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            
+            string connStr = Environment.GetEnvironmentVariable("ConnectionString");
+            if (string.IsNullOrEmpty(connStr))
+            {
+                connStr = Configuration.GetConnectionString("SQLConnectionString");
+            }
+            
+            services.AddHttpContextAccessor();
+            
+            services.AddHealthChecks()
+                .AddRabbitMqCheck()
+                .AddSqlServer(connStr);
+
+            _logger.LogTrace(connStr.EncodeSqlConnectionString());
+
+            services.AddDbContext<UserServiceDbContext>(options =>
+            {
+                options.UseSqlServer(connStr);
+            });
+
+            services.Configure<TokenConfiguration>(Configuration.GetSection("CheckTokenMiddleware"));
+            services.Configure<CacheConfig>(Configuration.GetSection(CacheConfig.SectionName));
+            services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
+            services.Configure<BaseRabbitMqConfig>(Configuration.GetSection(BaseRabbitMqConfig.SectionName));
+            services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
+
+            services.AddMemoryCache();
+            services.AddBusinessObjects(_logger);
+
+            ConfigureMassTransit(services);
+
+            services
+                .AddControllers()
+                .AddNewtonsoftJson()
+                .AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -182,7 +178,7 @@ namespace LT.DigitalOffice.UserService
 
             app.UseHealthChecks("/api/healthcheck");
 
-            app.AddExceptionsHandler(loggerFactory);
+            app.UseExceptionsHandler(loggerFactory);
 
 #if RELEASE
             app.UseHttpsRedirection();
@@ -203,18 +199,20 @@ namespace LT.DigitalOffice.UserService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks($"/{_serviceInfoConfig.Id}/hc", new HealthCheckOptions
+                {
+                    ResultStatusCodes = new Dictionary<HealthStatus, int>
+                    {
+                        { HealthStatus.Unhealthy, 200 },
+                        { HealthStatus.Healthy, 200 },
+                        { HealthStatus.Degraded, 200 },
+                    },
+                    Predicate = check => check.Name != "masstransit-bus",
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
             });
         }
 
-        private void UpdateDatabase(IApplicationBuilder app)
-        {
-            using var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-
-            using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
-
-            context.Database.Migrate();
-        }
+        #endregion
     }
 }

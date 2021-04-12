@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         private void CreateUsersSkillsTable(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: DbUserSkills.TableName,
+                name: DbUserSkill.TableName,
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(DbUserSkills.TableName);
+            migrationBuilder.DropTable(DbUserSkill.TableName);
             migrationBuilder.DropTable(DbSkill.TableName);
         }
     }

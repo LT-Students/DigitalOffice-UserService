@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using LT.DigitalOffice.Broker.Requests;
+﻿using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
@@ -7,6 +6,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserData(IGetUserDataRequest request)
         {
-            DbUser dbUser = repository.GetUserInfoById(request.UserId);
+            DbUser dbUser = repository.Get(request.UserId);
 
             if (dbUser == null)
             {

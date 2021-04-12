@@ -4,183 +4,181 @@ using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.DbMappers.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Validation.Interfaces;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Castle.Core.Logging;
+using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using MassTransit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     public class EditUserCommandTests
     {
-        private Mock<IUserRepository> userRepositoryMock;
-        private Mock<ICreateUserRequestValidator> validatorMock;
-        private Mock<ValidationResult> validationResultIsValidMock;
-        private Mock<IDbUserMapper> mapperUserMock;
-        private Mock<IUserCredentialsRepository> userCredentialsRepositoryMock;
-        private Mock<IAccessValidator> accessValidatorMock;
-        private Mock<IDbUserCredentialsMapper> mapperUserCredentialsMock;
+        private Mock<IUserRepository> _userRepositoryMock;
+        private Mock<IEditUserRequestValidator> _validatorMock;
+        private Mock<ValidationResult> _validationResultIsValidMock;
+        private Mock<IPatchDbUserMapper> _mapperUserMock;
+        private Mock<IAccessValidator> _accessValidatorMock;
+        private Mock<IHttpContextAccessor> _httpAccessorMock;
+        private Mock<ILogger<EditUserCommand>> _loggerMock;
+        private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
+        
+        private JsonPatchDocument<DbUser> _patchDbUser;
+        private JsonPatchDocument<EditUserRequest> _request;
+        private IEditUserCommand _command;
+        private ValidationResult _validationResultError;
+        private Guid _userId = Guid.NewGuid();
+        
+        private void ClientRequestUp(Guid newGuid)
+        {
+            IDictionary<object, object> httpContextItems = new Dictionary<object, object>();
 
-        private DbUser dbUser;
-        private CreateUserRequest request;
-        private IEditUserCommand command;
-        private DbUserCredentials dbUserCredentials;
-        private ValidationResult validationResultError;
+            httpContextItems.Add("UserId", newGuid);
 
+            _httpAccessorMock
+                .Setup(x => x.HttpContext.Items)
+                .Returns(httpContextItems);
+        }
+        
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            request = new CreateUserRequest
-            {
-                FirstName = "Example",
-                LastName = "Example",
-                MiddleName = "Example",
-                Status = UserStatus.Sick,
-                Password = "Example",
-                IsAdmin = false
-            };
+            _request = new JsonPatchDocument<EditUserRequest>();
 
-            Guid userId = Guid.NewGuid();
+            _patchDbUser = new JsonPatchDocument<DbUser>();
 
-            dbUser = new DbUser
-            {
-                Id = userId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                MiddleName = request.MiddleName,
-                Status = (int)request.Status,
-                IsAdmin = request.IsAdmin,
-                IsActive = true
-            };
-
-            dbUserCredentials = new DbUserCredentials
-            {
-                UserId = userId,
-                PasswordHash = request.Password,
-                Salt = "Example"
-            };
-
-            validationResultError = new ValidationResult(
+            _validationResultError = new ValidationResult(
                 new List<ValidationFailure>
                 {
                     new ValidationFailure("error", "something", null)
                 });
 
-            validationResultIsValidMock = new Mock<ValidationResult>();
+            _validationResultIsValidMock = new Mock<ValidationResult>();
 
-            validationResultIsValidMock
-                .Setup(x => x.IsValid)
-                .Returns(true);
+            _httpAccessorMock = new Mock<IHttpContextAccessor>();
         }
 
         [SetUp]
         public void SetUp()
         {
-            userRepositoryMock = new Mock<IUserRepository>();
-            userCredentialsRepositoryMock = new Mock<IUserCredentialsRepository>();
+            _userRepositoryMock = new Mock<IUserRepository>();
 
-            mapperUserMock = new Mock<IDbUserMapper>();
-            mapperUserCredentialsMock = new Mock<IDbUserCredentialsMapper>();
+            _mapperUserMock = new Mock<IPatchDbUserMapper>();
 
-            validatorMock = new Mock<ICreateUserRequestValidator>();
-            accessValidatorMock = new Mock<IAccessValidator>();
+            _validatorMock = new Mock<IEditUserRequestValidator>();
+            _accessValidatorMock = new Mock<IAccessValidator>();
 
-            command = new EditUserCommand(validatorMock.Object,
-                userRepositoryMock.Object,
-                userCredentialsRepositoryMock.Object,
-                mapperUserMock.Object,
-                mapperUserCredentialsMock.Object,
-                accessValidatorMock.Object);
+            _loggerMock = new Mock<ILogger<EditUserCommand>>();
+            _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
+            
+            ClientRequestUp(_userId);
+            
+            _command = new EditUserCommand(
+                _loggerMock.Object,
+                _rcImageMock.Object,
+                _httpAccessorMock.Object,
+                _validatorMock.Object,
+                _userRepositoryMock.Object,
+                _mapperUserMock.Object,
+                _accessValidatorMock.Object);
 
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.IsAdmin())
                 .Returns(true);
 
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(true);
 
-            validatorMock
+            _validatorMock
                 .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(validationResultIsValidMock.Object);
+                .Returns(_validationResultIsValidMock.Object);
 
-            mapperUserMock
-                .Setup(x => x.Map(It.IsAny<CreateUserRequest>(), It.IsAny<Func<string, string, string, string>>()))
-                .Returns(dbUser);
+            _mapperUserMock
+                .Setup(x => x.Map(It.IsAny<JsonPatchDocument<EditUserRequest>>()))
+                .Returns(_patchDbUser);
 
-            mapperUserCredentialsMock
-                .Setup(x => x.Map(It.IsAny<CreateUserRequest>()))
-                .Returns(dbUserCredentials);
-
-            userRepositoryMock
-                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
+            _userRepositoryMock
+                .Setup(x => x.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()))
                 .Returns(true);
-
-            userCredentialsRepositoryMock
-                .Setup(x => x.EditUserCredentials(It.IsAny<DbUserCredentials>()))
+            
+            _validationResultIsValidMock
+                .Setup(x => x.IsValid)
                 .Returns(true);
         }
 
         [Test]
         public void ShouldThrowExceptionWhenUserDataIsInvalid()
         {
-            validatorMock
+            _validatorMock
                 .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(validationResultError);
+                .Returns(_validationResultError);
 
-            Assert.Throws<ValidationException>(() => command.Execute(request));
-            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Never);
+            Assert.Throws<ValidationException>(() => _command.Execute(_userId, _request));
+            _userRepositoryMock.Verify(repository => 
+                repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Never);
         }
 
         [Test]
         public void ShouldThrowExceptionWhenEmailIsAlreadyTaken()
         {
-            userRepositoryMock
-                .Setup(x => x.EditUser(It.IsAny<DbUser>()))
+            _userRepositoryMock
+                .Setup(x => x.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => command.Execute(request));
+            Assert.Throws<Exception>(() => _command.Execute(_userId, _request));
         }
 
         [Test]
         public void ShouldThrowExceptionWhenCurrentUserIsNotAdminAndNotHaveRights()
         {
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.IsAdmin())
                 .Returns(false);
 
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
 
-            Assert.Throws<ForbiddenException>(() => command.Execute(request));
+            ClientRequestUp(Guid.NewGuid());
+
+            Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _request));
         }
 
         [Test]
         public void ShouldEditUserWhenUserDataIsValidAndCurrentUserHasRights()
         {
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.IsAdmin())
                 .Returns(false);
 
-            Assert.IsTrue(command.Execute(request));
-            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
+            Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
+            _userRepositoryMock.Verify(repository => 
+                repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
         }
 
         [Test]
         public void ShouldEditUserWhenUserDataIsValidAndCurrentUserIsAdmin()
         {
-            accessValidatorMock
+            _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
 
-            Assert.IsTrue(command.Execute(request));
-            userRepositoryMock.Verify(repository => repository.EditUser(It.IsAny<DbUser>()), Times.Once);
+            Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
+            _userRepositoryMock.Verify(repository => 
+                repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
         }
     }
 }

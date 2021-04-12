@@ -1,9 +1,12 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class Requirements : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20200714205518_Requirements")]
+    public class Requirements : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

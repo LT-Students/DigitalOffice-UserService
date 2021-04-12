@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Business.Interfaces;
+﻿using LT.DigitalOffice.UserService.Business.Commands.Password;
+using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 

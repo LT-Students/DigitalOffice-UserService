@@ -1,9 +1,12 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
-    public partial class RemovedCompanyEntities : Migration
+    [DbContext(typeof(UserServiceDbContext))]
+    [Migration("20200721124300_RemovedCompanyEntities")]
+    public class RemovedCompanyEntities : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

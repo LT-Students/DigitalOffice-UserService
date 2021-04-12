@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
     [Migration("20210331065500_Refactoring")]
-    public class ChangeConnectionsTable : Migration
+    public class _20210331065500_Refactoring : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
