@@ -7,6 +7,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string CompanyServiceUrl { get; set; }
         public string GetUserCredentialsEndpoint { get; set; }
         public string GetUserDataEndpoint { get; set; }
+        public string GetUsersDataEndpoint { get; set; }
         public string AddImageEndpoint { get; set; }
         public string GetFileEndpoint { get; set; }
         public string GetDepartmentEndpoint { get; set; }

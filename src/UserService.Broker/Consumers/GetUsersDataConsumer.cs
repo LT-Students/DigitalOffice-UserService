@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserInfo(IGetUsersDataRequest request)
         {
-            var dbUsers = repository.GetUsersByIds(request.UserIds);
+            var dbUsers = repository.Get(request.UserIds);
 
             return IGetUsersDataResponse.CreateObj(
                 dbUsers

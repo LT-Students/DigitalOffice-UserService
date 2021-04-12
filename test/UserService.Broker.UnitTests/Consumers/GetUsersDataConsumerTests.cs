@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         public async Task ShouldResponseUserDataResponse()
         {
             repository
-                .Setup(x => x.GetUsersByIds(It.IsAny<IEnumerable<Guid>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerable<Guid>>()))
                 .Returns(new List<DbUser> { dbUser })
                 .Verifiable();
 
