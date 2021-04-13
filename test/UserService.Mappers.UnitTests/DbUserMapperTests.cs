@@ -1,15 +1,5 @@
-﻿using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Helpers.Password;
-using LT.DigitalOffice.UserService.Mappers.Db;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Models;
-using NUnit.Framework;
+﻿using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {

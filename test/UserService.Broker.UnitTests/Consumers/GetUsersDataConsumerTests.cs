@@ -73,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 {
                     IsSuccess = true,
                     Errors = null as List<string>,
-                    Body = new List<UserData> { userData }
+                    Body = new { UsersData = new List<UserData> { userData } }
                 };
 
                 Assert.True(response.Message.IsSuccess);

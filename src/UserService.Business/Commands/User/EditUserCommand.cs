@@ -16,7 +16,6 @@ using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto;
 using MassTransit;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;

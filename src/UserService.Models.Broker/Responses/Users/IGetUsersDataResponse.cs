@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.UserService.Models.Broker.Models;
-using System;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.Broker.Responses

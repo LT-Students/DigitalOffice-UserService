@@ -1,16 +1,8 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Broker.Consumers;
+﻿using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit.Testing;
 using Moq;
-using NUnit.Framework;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserServiceUnitTests.Broker.Consumer
 {
