@@ -2,12 +2,10 @@
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.MessageService.Models.Dto.Enums;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
@@ -30,19 +28,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
     class ForgotPasswordCommandTests
     {
+        private Mock<IEmailValidator> _validatorMock;
         private Mock<IUserRepository> _userRepositoryMock;
         private Mock<ILogger<ForgotPasswordCommand>> _loggerMock;
-        private Mock<IEmailValidator> _validatorMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
-        private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
+        private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
         private Mock<IOperationResult<IGetEmailTemplateTagsResponse>> _operationResultGetTempTagsMock;
 
         private DbUser _dbUser;
         private IMemoryCache _memoryCache;
-        private IOptions<CacheConfig> _cacheOptions;
         private IForgotPasswordCommand  _command;
+        private IOptions<CacheConfig> _cacheOptions;
         private CreateUserRequest _createUserRequest;
         private DbUserCommunication _dbCommunication;
         private OperationResultResponse<bool> _expectedOperationResultResponse;
