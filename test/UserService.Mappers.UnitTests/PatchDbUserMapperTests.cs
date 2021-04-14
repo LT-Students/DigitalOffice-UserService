@@ -23,7 +23,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     public class PatchDbUserMapperTests
     {
-        private Mock<IOperationResult<Guid>> _operationResultAddImageMock;
         private Mock<ILogger<PatchDbUserMapper>> _loggerMock;
         private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
         private IPatchDbUserMapper _mapper;
@@ -31,23 +30,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private JsonPatchDocument<EditUserRequest> _request;
         private JsonPatchDocument<DbUser> _response;
         
-        private void RcAddImageSetUp()
-        {
-            _operationResultAddImageMock = new Mock<IOperationResult<Guid>>();
-            _operationResultAddImageMock.Setup(x => x.Body).Returns(Guid.NewGuid());
-            _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(true);
-            _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
-
-            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<Guid>>>();
-            responseBrokerAddImageMock
-                .SetupGet(x => x.Message)
-                .Returns(_operationResultAddImageMock.Object);
-
-            _rcImageMock.Setup(
-                    x => x.GetResponse<IOperationResult<Guid>>(
-                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
-        }
+        
         
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -108,20 +91,19 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [SetUp]
         public void SetUp()
         {
-            RcAddImageSetUp();
         }
 
         [Test]
         public void ShouldReturnCorrectResponse()
         {
-            SerializerAssert.AreEqual(_response, _mapper.Map(_request));
+            SerializerAssert.AreEqual(_response, _mapper.Map(_request, _ => Guid.NewGuid()));
         }
         
         [Test]
         public void ShouldThrowExceptionWhenRequestNull()
         {
             _request = null;
-            Assert.Throws<BadRequestException>(() => _mapper.Map(_request));
+            Assert.Throws<BadRequestException>(() => _mapper.Map(_request, _ => Guid.NewGuid()));
         }
         
     }

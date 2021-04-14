@@ -107,7 +107,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_validationResultIsValidMock.Object);
 
             _mapperUserMock
-                .Setup(x => x.Map(It.IsAny<JsonPatchDocument<EditUserRequest>>()))
+                .Setup(x => x.Map(
+                    It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Func<string, Guid?>>()))
                 .Returns(_patchDbUser);
 
             _userRepositoryMock
