@@ -22,10 +22,11 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 
 namespace LT.DigitalOffice.UserService
 {
-    public class Startup
+    public class Startup : BaseApiInfo
     {
         public const string CorsPolicyName = "LtDoCorsPolicy";
 
@@ -134,6 +135,11 @@ namespace LT.DigitalOffice.UserService
             _rabbitMqConfig = Configuration
                 .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
+
+            Version = "1.2.2";
+            Description = "UserService is an API that intended to work with users.";
+            StartTime = DateTime.UtcNow;
+            ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -194,7 +200,11 @@ namespace LT.DigitalOffice.UserService
         {
             UpdateDatabase(app);
 
+            app.UseForwardedHeaders();
+
             app.UseExceptionsHandler(loggerFactory);
+
+            app.UseApiInformation();
 
             app.UseRouting();
 
