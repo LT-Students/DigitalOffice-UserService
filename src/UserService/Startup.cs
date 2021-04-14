@@ -18,14 +18,19 @@ using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService
 {
     public class Startup
     {
+        public const string CorsPolicyName = "LtDoCorsPolicy";
+
         private readonly BaseServiceInfoConfig _serviceInfoConfig;
         private readonly RabbitMqConfig _rabbitMqConfig;
-        private readonly ILogger<Startup> _logger;
 
         public IConfiguration Configuration { get; }
 
@@ -40,6 +45,22 @@ namespace LT.DigitalOffice.UserService
             using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
 
             context.Database.Migrate();
+        }
+        //AF1gy0Q1eTLoWWQ0qqET
+        private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
+        {
+            var builder = new ServiceCollection()
+                .AddLogging()
+                .AddMvc()
+                .AddNewtonsoftJson()
+                .Services.BuildServiceProvider();
+
+            return builder
+                .GetRequiredService<IOptions<MvcOptions>>()
+                .Value
+                .InputFormatters
+                .OfType<NewtonsoftJsonPatchInputFormatter>()
+                .First();
         }
 
         #region configure masstransit
@@ -61,7 +82,7 @@ namespace LT.DigitalOffice.UserService
 
                 ConfigureConsumers(busConfigurator);
 
-                busConfigurator.AddRequestClients(_rabbitMqConfig, _logger);
+                busConfigurator.AddRequestClients(_rabbitMqConfig);
             });
 
             services.AddMassTransitHostedService();
@@ -113,33 +134,34 @@ namespace LT.DigitalOffice.UserService
             _rabbitMqConfig = Configuration
                 .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
-
-            using var loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder
-                    .AddFilter("LT.DigitalOffice.UserService.Startup", LogLevel.Trace)
-                    .AddConsole();
-            });
-
-            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    CorsPolicyName,
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins("http://*.ltdo.xyz", "http://ltdo.xyz", "http://ltdo.xyz:9802")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
+
             string connStr = Environment.GetEnvironmentVariable("ConnectionString");
             if (string.IsNullOrEmpty(connStr))
             {
                 connStr = Configuration.GetConnectionString("SQLConnectionString");
             }
-            
+
             services.AddHttpContextAccessor();
-            
+
             services.AddHealthChecks()
                 .AddRabbitMqCheck()
                 .AddSqlServer(connStr);
-
-            _logger.LogTrace(connStr.EncodeSqlConnectionString());
 
             services.AddDbContext<UserServiceDbContext>(options =>
             {
@@ -153,46 +175,36 @@ namespace LT.DigitalOffice.UserService
             services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
             services.AddMemoryCache();
-            services.AddBusinessObjects(_logger);
+            services.AddBusinessObjects();
 
             ConfigureMassTransit(services);
 
             services
-                .AddControllers()
-                .AddNewtonsoftJson()
-                .AddJsonOptions(option =>
-            {
-                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+                .AddControllers(options =>
+                {
+                    options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+                }) // TODO check enum serialization from request without .AddJsonOptions()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             UpdateDatabase(app);
 
-            app.UseHealthChecks("/api/healthcheck");
-
             app.UseExceptionsHandler(loggerFactory);
-
-#if RELEASE
-            app.UseHttpsRedirection();
-#endif
 
             app.UseRouting();
 
             app.UseMiddleware<TokenMiddleware>();
 
-            string corsUrl = Configuration.GetSection("Settings")["CorsUrl"];
-
-            app.UseCors(builder =>
-                builder
-                    .WithOrigins(corsUrl)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod());
+            app.UseCors(CorsPolicyName);
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers().RequireCors(CorsPolicyName);
                 endpoints.MapHealthChecks($"/{_serviceInfoConfig.Id}/hc", new HealthCheckOptions
                 {
                     ResultStatusCodes = new Dictionary<HealthStatus, int>
