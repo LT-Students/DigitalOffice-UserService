@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using System;
 
@@ -20,6 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             {
                 Id = dbUserCertificate.Id,
                 Name = dbUserCertificate.Name,
+                Type = (EducationType)dbUserCertificate.EducationType,
                 ReceivedAt = dbUserCertificate.ReceivedAt,
                 SchoolName = dbUserCertificate.SchoolName,
                 Image = image

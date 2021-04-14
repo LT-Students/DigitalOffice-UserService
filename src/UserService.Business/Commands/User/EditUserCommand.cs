@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Business
                     errors.Add(errorMessage);
                 }
             }
-            
+
             return avatarImageId;
         }
 
@@ -89,7 +89,7 @@ namespace LT.DigitalOffice.UserService.Business
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
         }
-        
+
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
@@ -99,20 +99,20 @@ namespace LT.DigitalOffice.UserService.Business
             {
                 throw new ForbiddenException("Not enough rights.");
             }
-            
+
             List<string> errors = new List<string>();
-            
+
             _validator.ValidateAndThrowCustom(patch);
 
             Operation<EditUserRequest> avatarRequest = patch.Operations
                 .FirstOrDefault(x => x.path == $"/{nameof(EditUserRequest.AvatarImage)}");
-            
+
             GetAvatarImageId(avatarRequest?.value as string, errors);
-            
-            var dbUserPatch = _mapperUser.Map(patch);
+
+            var dbUserPatch = _mapperUser.Map(patch, userId);
 
             _userRepository.EditUser(userId, dbUserPatch);
-            
+
             return new OperationResultResponse<bool>
             {
                 Status = OperationResultStatusType.FullSuccess,

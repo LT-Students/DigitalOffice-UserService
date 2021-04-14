@@ -2,12 +2,13 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
+using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
 {
     [AutoInject]
     public interface IPatchDbUserMapper
     {
-        JsonPatchDocument<DbUser> Map(JsonPatchDocument<EditUserRequest> request);
+        JsonPatchDocument<DbUser> Map(JsonPatchDocument<EditUserRequest> request, Guid userId);
     }
 }
