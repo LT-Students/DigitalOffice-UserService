@@ -251,7 +251,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShoulRequestIsPartialSuccessWhenEmailWasNotSended()
+        public void ShouldRequestIsPartialSuccessWhenEmailWasNotSent()
         {
             _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
 
@@ -269,7 +269,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             _accessValidatorMock
-                .Setup(X => X.IsAdmin())
+                .Setup(x => x.IsAdmin())
                 .Returns(true);
 
             _validatorMock
@@ -288,10 +288,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShoulCreateUserSuccessful()
+        public void ShouldCreateUserSuccessful()
         {
             _accessValidatorMock
-                .Setup(X => X.IsAdmin())
+                .Setup(x => x.IsAdmin())
                 .Returns(true);
 
             _validatorMock

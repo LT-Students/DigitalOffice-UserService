@@ -84,9 +84,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
                 string operation = item.OperationType switch
                 {
-                    OperationType.Add => "/add",
-                    OperationType.Remove => "/remove",
-                    OperationType.Replace => "/replace",
+                    OperationType.Add => "add",
+                    OperationType.Remove => "remove",
+                    OperationType.Replace => "replace",
                     _ => null
                 };
 
