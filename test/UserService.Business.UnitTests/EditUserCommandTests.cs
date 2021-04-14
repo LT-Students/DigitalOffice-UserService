@@ -34,13 +34,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IHttpContextAccessor> _httpAccessorMock;
         private Mock<ILogger<EditUserCommand>> _loggerMock;
         private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
-        
+
         private JsonPatchDocument<DbUser> _patchDbUser;
         private JsonPatchDocument<EditUserRequest> _request;
         private IEditUserCommand _command;
         private ValidationResult _validationResultError;
         private Guid _userId = Guid.NewGuid();
-        
+
         private void ClientRequestUp(Guid newGuid)
         {
             IDictionary<object, object> httpContextItems = new Dictionary<object, object>();
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.HttpContext.Items)
                 .Returns(httpContextItems);
         }
-        
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
@@ -82,9 +82,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _loggerMock = new Mock<ILogger<EditUserCommand>>();
             _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
-            
+
             ClientRequestUp(_userId);
-            
+
             _command = new EditUserCommand(
                 _loggerMock.Object,
                 _rcImageMock.Object,
@@ -107,13 +107,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_validationResultIsValidMock.Object);
 
             _mapperUserMock
-                .Setup(x => x.Map(It.IsAny<JsonPatchDocument<EditUserRequest>>()))
+                .Setup(x => x.Map(It.IsAny<JsonPatchDocument<EditUserRequest>>(), _userId))
                 .Returns(_patchDbUser);
 
             _userRepositoryMock
                 .Setup(x => x.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()))
                 .Returns(true);
-            
+
             _validationResultIsValidMock
                 .Setup(x => x.IsValid)
                 .Returns(true);
@@ -127,7 +127,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_validationResultError);
 
             Assert.Throws<ValidationException>(() => _command.Execute(_userId, _request));
-            _userRepositoryMock.Verify(repository => 
+            _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Never);
         }
 
@@ -165,7 +165,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
-            _userRepositoryMock.Verify(repository => 
+            _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
         }
 
@@ -177,7 +177,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
-            _userRepositoryMock.Verify(repository => 
+            _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
         }
     }
