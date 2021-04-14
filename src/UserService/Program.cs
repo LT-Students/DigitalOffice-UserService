@@ -21,6 +21,7 @@ namespace LT.DigitalOffice.UserService
 
             Log.Logger = new LoggerConfiguration().ReadFrom
                 .Configuration(configuration)
+                .Enrich.WithProperty("Service", "UserService")
                 .CreateLogger();
 
             try
