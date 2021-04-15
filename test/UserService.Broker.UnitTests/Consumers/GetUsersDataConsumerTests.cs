@@ -79,8 +79,8 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 Assert.True(response.Message.IsSuccess);
                 Assert.AreEqual(null, response.Message.Errors);
                 SerializerAssert.AreEqual(expected, response.Message);
-                Assert.True(consumerTestHarness.Consumed.Select<IGetUserDataRequest>().Any());
-                Assert.True(harness.Sent.Select<IOperationResult<IGetUserDataResponse>>().Any());
+                Assert.True(consumerTestHarness.Consumed.Select<IGetUsersDataRequest>().Any());
+                Assert.True(harness.Sent.Select<IOperationResult<IGetUsersDataResponse>>().Any());
                 repository.Verify();
             }
             finally
