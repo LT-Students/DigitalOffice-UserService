@@ -1,5 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.Broker.Requests
 {
@@ -9,17 +11,26 @@ namespace LT.DigitalOffice.Broker.Requests
     [AutoInjectRequest(nameof(RabbitMqConfig.SendEmailEndpoint))]
     public interface ISendEmailRequest
     {
+        Guid TemplateId { get; }
+        Guid SenderId { get; }
         string Email { get; }
-        string Subject { get; set; }
-        string Text { get; }
+        string Language { get; }
+        IDictionary<string, string> TemplateValues { get; }
 
-        static object CreateObj(string email, string subject, string text)
+        static object CreateObj(
+            Guid templateId,
+            Guid senderId,
+            string email,
+            string language,
+            IDictionary<string, string> templateValues)
         {
             return new
             {
                 Email = email,
-                Subject = subject,
-                Text = text
+                Language = language,
+                SenderId = senderId,
+                TemplateId = templateId,
+                TemplateValues = templateValues
             };
         }
     }

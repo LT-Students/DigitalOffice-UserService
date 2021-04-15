@@ -17,6 +17,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string GetProjectsEndpoint { get; set; }
         public string GetProjectEndpoint { get; set; }
         public string SendEmailEndpoint { get; set; }
+        public string GetTempalateTagsEndpoint { get; set; }
         public string GetTokenEndpoint { get; set; }
     }
 }

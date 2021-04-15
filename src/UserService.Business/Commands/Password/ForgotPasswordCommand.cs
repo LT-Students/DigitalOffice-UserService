@@ -1,7 +1,10 @@
 ﻿using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.MessageService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -11,13 +14,13 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password
 {
@@ -26,7 +29,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     public class ForgotPasswordCommand : IForgotPasswordCommand
     {
         private readonly ILogger<ForgotPasswordCommand> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
+        private readonly IRequestClient<IGetEmailTemplateTagsRequest> _rcGetTemplateTags;
         private readonly IOptions<CacheConfig> _cacheOptions;
         private readonly IEmailValidator _validator;
         private readonly IUserRepository _repository;
@@ -52,26 +57,39 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         {
             string errorMessage = $"Can not send email to '{email}'. Please try again latter.";
 
+            //TODO: fix add specific template language
+            string templateLanguage = "en";
+            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
-                string link = $"http://localhost:4200/auth/changepassword?userId={dbUser.Id}&secret={secret}";
+                var rcGetTemplateTagsResponse = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
+                   IGetEmailTemplateTagsRequest.CreateObj(
+                       templateLanguage,
+                       templateType)).Result.Message;
 
-                StringBuilder sb = new();
-                sb.AppendLine($"Hello, {dbUser.FirstName}!!!");
-                sb.AppendLine();
-                sb.AppendLine("You receive this message because someone initiate change password process.");
-                sb.AppendLine("If it was not you just ignore this message.");
-                sb.AppendLine($"In other case please follow this link: {link}");
-                sb.AppendLine();
-                sb.AppendLine("Best Regards,");
-                sb.AppendLine("Digital Office team.");
+                var templateValues = rcGetTemplateTagsResponse.Body.CreateDictionaryTemplate(
+                    dbUser.FirstName, email, dbUser.Id.ToString(), null, secret.ToString());
 
-                // TODO add email template ID
+                if (!rcGetTemplateTagsResponse.IsSuccess)
+                {
+                    _logger.LogWarning(
+                        $"Errors while get email template tags of type:'{templateType}':" +
+                        $"{Environment.NewLine}{string.Join('\n', rcGetTemplateTagsResponse.Errors)}.");
+
+                    errors.Add(errorMessage);
+
+                    return false;
+                }
+
                 IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
                     ISendEmailRequest.CreateObj(
+                        rcGetTemplateTagsResponse.Body.TemplateId,
+                        senderId,
                         email,
-                        "Digital Office change password",
-                        sb.ToString())).Result.Message;
+                        templateLanguage,
+                        templateValues
+                       )).Result.Message;
 
                 if (!response.IsSuccess)
                 {
@@ -97,14 +115,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
         public ForgotPasswordCommand(
             ILogger<ForgotPasswordCommand> logger,
-            IRequestClient<ISendEmailRequest> requestClientMS,
+            IRequestClient<ISendEmailRequest> rcSendEmail,
+            IRequestClient<IGetEmailTemplateTagsRequest> rcGetTemplateTags,
             IOptions<CacheConfig> cacheOptions,
+            IHttpContextAccessor httpContextAccessor,
             IEmailValidator validator,
             IUserRepository repository,
             IMemoryCache cache)
         {
             _logger = logger;
-            _rcSendEmail = requestClientMS;
+            _rcSendEmail = rcSendEmail;
+            _rcGetTemplateTags = rcGetTemplateTags;
+            _httpContextAccessor = httpContextAccessor;
             _repository = repository;
             _validator = validator;
             _cacheOptions = cacheOptions;
