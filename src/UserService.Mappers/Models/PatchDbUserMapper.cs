@@ -1,66 +1,19 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using System;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using MassTransit;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
     public class PatchDbUserMapper : IPatchDbUserMapper
     {
-        private readonly ILogger<PatchDbUserMapper> _logger;
-        private readonly ICertificateInfoMapper _certificateMapper;
-        private readonly IRequestClient<IAddImageRequest> _requestClient;
-
-        private Guid? AddImage(string image)
-        {
-            Guid? avatarImageId = null;
-            if (!string.IsNullOrEmpty(image))
-            {
-                try
-                {
-                    Response<IOperationResult<Guid>> response = _requestClient.GetResponse<IOperationResult<Guid>>(
-                        IAddImageRequest.CreateObj(image),
-                        timeout: RequestTimeout.After(ms: 500)).Result;
-
-                    if (!response.Message.IsSuccess)
-                    {
-                        _logger.LogWarning($"Can not add avatar image. Reason: '{string.Join(',', response.Message.Errors)}'");
-                    }
-                    else
-                    {
-                        avatarImageId = response.Message.Body;
-                    }
-                }
-                catch (Exception exc)
-                {
-                    _logger.LogError(exc, "Exception while add avatar image to db.");
-                }
-            }
-
-            return avatarImageId;
-        }
-
-        public PatchDbUserMapper(
-            ILogger<PatchDbUserMapper> logger,
-            ICertificateInfoMapper certificateMapper,
-            IRequestClient<IAddImageRequest> requestClient)
-        {
-            _logger = logger;
-            _requestClient = requestClient;
-            _certificateMapper = certificateMapper;
-        }
-
-        public JsonPatchDocument<DbUser> Map(JsonPatchDocument<EditUserRequest> request, Guid userId)
+        public JsonPatchDocument<DbUser> Map(
+            JsonPatchDocument<EditUserRequest> request,
+            Func<string, Guid?> getAvatarImageId)
         {
             if (request == null)
             {
@@ -77,7 +30,12 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     StringComparison.OrdinalIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.AvatarFileId)}";
-                    item.value = AddImage(item.value.ToString());
+                    item.value = getAvatarImageId.Invoke(item.value.ToString());
+                    
+                    if (item.value == null)
+                    {
+                        continue;
+                    }
                 }
 
                 if (string.Equals(
@@ -110,9 +68,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
                 string operation = item.OperationType switch
                 {
-                    OperationType.Add => "/add",
-                    OperationType.Remove => "/remove",
-                    OperationType.Replace => "/replace",
+                    OperationType.Add => "add",
+                    OperationType.Remove => "remove",
+                    OperationType.Replace => "replace",
                     _ => null
                 };
 
