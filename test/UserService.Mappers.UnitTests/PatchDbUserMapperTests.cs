@@ -23,23 +23,17 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
     public class PatchDbUserMapperTests
     {
-        private Mock<ILogger<PatchDbUserMapper>> _loggerMock;
-        private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
         private IPatchDbUserMapper _mapper;
 
         private JsonPatchDocument<EditUserRequest> _request;
         private JsonPatchDocument<DbUser> _response;
-        
-        
-        
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _loggerMock = new Mock<ILogger<PatchDbUserMapper>>();
-            _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
-            _mapper = new PatchDbUserMapper(_loggerMock.Object, _rcImageMock.Object);
-            
-            _request = new JsonPatchDocument<EditUserRequest>( new List<Operation<EditUserRequest>>
+            _mapper = new PatchDbUserMapper();
+
+            _request = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
             {
                 new Operation<EditUserRequest>(
                     "replace",
@@ -62,8 +56,8 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "",
                     UserStatus.Vacation)
             }, new CamelCasePropertyNamesContractResolver());
-            
-            _response = new JsonPatchDocument<DbUser>( new List<Operation<DbUser>>
+
+            _response = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
             {
                 new Operation<DbUser>(
                     "replace",
@@ -86,11 +80,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "",
                     UserStatus.Vacation)
             }, new CamelCasePropertyNamesContractResolver());
-        }
-        
-        [SetUp]
-        public void SetUp()
-        {
         }
 
         [Test]

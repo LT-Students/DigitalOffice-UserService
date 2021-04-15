@@ -15,17 +15,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
     public class PatchDbUserMapper : IPatchDbUserMapper
     {
-        private readonly ILogger<PatchDbUserMapper> _logger;
-        private readonly IRequestClient<IAddImageRequest> _requestClient;
-
-        public PatchDbUserMapper(
-            ILogger<PatchDbUserMapper> logger,
-            IRequestClient<IAddImageRequest> requestClient)
-        {
-            _logger = logger;
-            _requestClient = requestClient;
-        }
-        
         public JsonPatchDocument<DbUser> Map(
             JsonPatchDocument<EditUserRequest> request,
             Func<string, Guid?> getAvatarImageId)

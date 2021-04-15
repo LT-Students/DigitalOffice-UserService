@@ -104,11 +104,6 @@ namespace LT.DigitalOffice.UserService.Business
             
             _validator.ValidateAndThrowCustom(patch);
 
-            Operation<EditUserRequest> avatarRequest = patch.Operations
-                .FirstOrDefault(x => x.path == $"/{nameof(EditUserRequest.AvatarImage)}");
-            
-            GetAvatarImageId(avatarRequest?.value as string, errors);
-            
             var dbUserPatch = _mapperUser.Map(patch, s => GetAvatarImageId(s, errors));
 
             _userRepository.EditUser(userId, dbUserPatch);
