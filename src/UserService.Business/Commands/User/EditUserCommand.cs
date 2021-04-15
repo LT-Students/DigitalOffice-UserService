@@ -11,14 +11,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto;
 using MassTransit;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Business
@@ -104,12 +101,7 @@ namespace LT.DigitalOffice.UserService.Business
             
             _validator.ValidateAndThrowCustom(patch);
 
-            Operation<EditUserRequest> avatarRequest = patch.Operations
-                .FirstOrDefault(x => x.path == $"/{nameof(EditUserRequest.AvatarImage)}");
-            
-            GetAvatarImageId(avatarRequest?.value as string, errors);
-            
-            var dbUserPatch = _mapperUser.Map(patch);
+            var dbUserPatch = _mapperUser.Map(patch, s => GetAvatarImageId(s, errors));
 
             _userRepository.EditUser(userId, dbUserPatch);
             
