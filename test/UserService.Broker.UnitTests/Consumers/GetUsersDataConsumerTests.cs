@@ -28,7 +28,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
         private Mock<IUserRepository> repository;
 
-
         [SetUp]
         public void SetUp()
         {
