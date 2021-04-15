@@ -1,11 +1,13 @@
-﻿using System;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
+﻿using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using System;
+using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -13,7 +15,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     {
         public JsonPatchDocument<DbUser> Map(
             JsonPatchDocument<EditUserRequest> request,
-            Func<string, Guid?> getAvatarImageId)
+            Func<string, Guid?> getAvatarImageId,
+            Guid userId)
         {
             if (request == null)
             {
@@ -31,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 {
                     item.path = $"/{nameof(DbUser.AvatarFileId)}";
                     item.value = getAvatarImageId.Invoke(item.value.ToString());
-                    
+
                     if (item.value == null)
                     {
                         continue;
@@ -44,19 +47,28 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     StringComparison.OrdinalIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.Certificates)}/-";
-                    var certificates = (List<CertificateInfo>)item.value;
 
-                    item.value = certificates.Select(x => new DbUserCertificate
+                    var certificate = (EditCertificate)item.value;
+                    item.value = new DbUserCertificate
                     {
-                        Id = x.Id ?? Guid.NewGuid(),
+                        Name = certificate.Name,
+                        SchoolName = certificate.SchoolName,
+                        EducationType = (int)certificate.EducationType,
+                        ReceivedAt = certificate.ReceivedAt,
                         UserId = userId,
-                        ImageId = x.Image.Id ?? (Guid)AddImage(x.Image.Content),
-                        EducationType = (int)x.Type,
-                        Name = x.Name,
-                        SchoolName = x.SchoolName,
-                        ReceivedAt = DateTime.UtcNow
-                    });
+                        ImageId = (Guid)getAvatarImageId.Invoke(certificate.Image.Content)
+                    };
                 }
+
+                if (Regex.IsMatch(item.path, "/Certificates/.*?/Image"))
+                {
+                    var image = (ImageInfo)item.value;
+                    var numberElement = Regex.Match(item.path.Trim('/'), "/.*?/").Value;
+
+                    item.path = $"/{nameof(DbUser.Certificates)}{numberElement}{nameof(DbUserCertificate.ImageId)}";
+                    item.value = (Guid)getAvatarImageId.Invoke(image.Content);
+                }
+
 
                 if (string.Equals(
                     item.path,

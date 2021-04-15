@@ -101,10 +101,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(patch);
 
-            var dbUserPatch = _mapperUser.Map(patch, s => GetAvatarImageId(s, errors));
-
-            var dbUserPatch = _mapperUser.Map(patch, userId);
-
+            var dbUserPatch = _mapperUser.Map(patch, s => GetAvatarImageId(s, errors), userId);
             _userRepository.EditUser(userId, dbUserPatch);
 
             return new OperationResultResponse<bool>
