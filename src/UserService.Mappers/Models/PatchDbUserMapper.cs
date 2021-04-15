@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Net;
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using MassTransit;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
-using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
