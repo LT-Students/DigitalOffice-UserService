@@ -152,6 +152,7 @@ namespace LT.DigitalOffice.UserService
                     {
                         builder
                             .WithOrigins(
+                                "https://*.ltdo.xyz",
                                 "http://*.ltdo.xyz",
                                 "http://ltdo.xyz",
                                 "http://ltdo.xyz:9802",
