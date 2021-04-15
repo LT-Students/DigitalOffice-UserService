@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private IPatchDbUserMapper _mapper;
 
         private JsonPatchDocument<EditUserRequest> _request;
-        private JsonPatchDocument<DbUser> _response;
+        private JsonPatchDocument<DbUser> _result;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     UserStatus.Vacation)
             }, new CamelCasePropertyNamesContractResolver());
 
-            _response = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
+            _result = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
             {
                 new Operation<DbUser>(
                     "replace",
@@ -78,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnCorrectResponse()
         {
-            SerializerAssert.AreEqual(_response, _mapper.Map(_request, _ => Guid.NewGuid()));
+            SerializerAssert.AreEqual(_result, _mapper.Map(_request, _ => Guid.NewGuid()));
         }
         
         [Test]
