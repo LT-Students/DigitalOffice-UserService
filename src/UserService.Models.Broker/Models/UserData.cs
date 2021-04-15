@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LT.DigitalOffice.UserService.Models.Broker.Models
+namespace LT.DigitalOffice.Broker.Models
 {
     public class UserData
     {

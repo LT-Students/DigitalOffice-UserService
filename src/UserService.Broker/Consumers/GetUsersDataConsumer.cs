@@ -4,7 +4,7 @@ using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Broker.Models;
+using LT.DigitalOffice.Broker.Models;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 

@@ -4,7 +4,7 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Broker.Models;
+using LT.DigitalOffice.Broker.Models;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using MassTransit.Testing;
