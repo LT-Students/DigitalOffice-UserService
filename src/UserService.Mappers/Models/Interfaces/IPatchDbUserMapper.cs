@@ -3,7 +3,6 @@ using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
-using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
 {
