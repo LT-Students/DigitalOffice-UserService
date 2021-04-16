@@ -17,8 +17,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     {
         private readonly IUserRepository repository;
 
-        public GetUsersDataConsumer(
-            [FromServices] IUserRepository repository)
+        public GetUsersDataConsumer(IUserRepository repository)
         {
             this.repository = repository;
         }
