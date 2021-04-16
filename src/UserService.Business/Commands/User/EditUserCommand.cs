@@ -1,22 +1,22 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using MassTransit;
-using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.UserService.Business
 {

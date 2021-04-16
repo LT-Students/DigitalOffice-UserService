@@ -41,6 +41,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     }
                 }
 
+                if (Regex.IsMatch(item.path, "/Certificates/.*?/Image"))
+                {
+                    var image = (ImageInfo)item.value;
+
+                    item.path = $"/{nameof(DbUserCertificate.ImageId)}";
+                    item.value = (Guid)getAvatarImageId.Invoke(image.Content);
+                }
+
                 if (string.Equals(
                     item.path,
                     $"/{nameof(EditUserRequest.Certificates)}/-",
@@ -51,24 +59,15 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     var certificate = (EditCertificate)item.value;
                     item.value = new DbUserCertificate
                     {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
                         Name = certificate.Name,
                         SchoolName = certificate.SchoolName,
                         EducationType = (int)certificate.EducationType,
                         ReceivedAt = certificate.ReceivedAt,
-                        UserId = userId,
                         ImageId = (Guid)getAvatarImageId.Invoke(certificate.Image.Content)
                     };
                 }
-
-                if (Regex.IsMatch(item.path, "/Certificates/.*?/Image"))
-                {
-                    var image = (ImageInfo)item.value;
-                    var numberElement = Regex.Match(item.path.Trim('/'), "/.*?/").Value;
-
-                    item.path = $"/{nameof(DbUser.Certificates)}{numberElement}{nameof(DbUserCertificate.ImageId)}";
-                    item.value = (Guid)getAvatarImageId.Invoke(image.Content);
-                }
-
 
                 if (string.Equals(
                     item.path,
