@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private JsonPatchDocument<DbUser> _result;
 
         private Guid _userId;
-        private List<DbUserCertificate> _dbCertificates;
+        private DbUserCertificate _dbCertificates;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -32,35 +32,30 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
             _userId = Guid.NewGuid();
             _mapper = new PatchDbUserMapper();
 
-            var requestCertificates = new List<EditCertificate>
+            var requestCertificates = new EditCertificate
             {
-                new EditCertificate
+                Name = "Programmer",
+                SchoolName = "Hackerman",
+                EducationType = EducationType.Offline,
+                ReceivedAt = DateTime.UtcNow,
+                Image = new ImageInfo
                 {
-                    Id = Guid.NewGuid(),
-                    Name = "Programmer",
-                    SchoolName = "Hackerman",
-                    EducationType = EducationType.Offline,
-                    ReceivedAt = DateTime.UtcNow,
-                    Image = new ImageInfo
-                    {
-                        Content = "[10][9][20]",
-                        Extension = "png"
-                    }
+                    Content = "[10][9][20]",
+                    Extension = "png"
                 }
             };
 
-            _dbCertificates = new List<DbUserCertificate>
+            _dbCertificates = new DbUserCertificate
             {
-                new DbUserCertificate
-                {
-                    Id = requestCertificates[0].Id,
-                    Name = "Hackerman",
-                    SchoolName = requestCertificates[0].SchoolName,
-                    EducationType = (int)requestCertificates[0].EducationType,
-                    ReceivedAt = DateTime.UtcNow,
-                    ImageId = Guid.NewGuid()
-                }
+                Name = requestCertificates.Name,
+                SchoolName = requestCertificates.SchoolName,
+                EducationType = (int)requestCertificates.EducationType,
+                ReceivedAt = requestCertificates.ReceivedAt,
+                ImageId = Guid.NewGuid(),
+                UserId = _userId
             };
+
+            var certificateId = Guid.NewGuid();
 
             _request = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
             {
@@ -70,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "",
                     "Name"),
                 new Operation<EditUserRequest>(
-                    "add",
+                    "replace",
                     $"/{nameof(EditUserRequest.MiddleName)}",
                     "",
                     "Middlename"),
@@ -85,15 +80,30 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "",
                     UserStatus.Vacation),
                 new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.Certificates)}/0/Image",
+                    "add",
+                    $"/{nameof(EditUserRequest.Certificates)}/-",
                     "",
-                    requestCertificates[0].Image),
+                    requestCertificates),
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.Certificates)}/0/Name",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Id)}",
                     "",
-                    requestCertificates[0].Name)
+                    certificateId),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.EducationType)}",
+                    "",
+                    1),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.SchoolName)}",
+                    "",
+                    "School"),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Name)}",
+                    "",
+                    "Programmer"),
 
             }, new CamelCasePropertyNamesContractResolver());
 
@@ -105,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "",
                     "Name"),
                 new Operation<DbUser>(
-                    "add",
+                    "replace",
                     $"/{nameof(DbUser.MiddleName)}",
                     "",
                     "Middlename"),
@@ -119,31 +129,48 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     $"/{nameof(DbUser.Status)}",
                     "",
                     UserStatus.Vacation),
-                 new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/ImageId",
+                new Operation<DbUser>(
+                    "add",
+                    $"/{nameof(DbUser.Certificates)}/-",
                     "",
-                    _dbCertificates[0].ImageId),
-                 new Operation<DbUser>(
+                    _dbCertificates),
+                new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/Name",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Id)}",
                     "",
-                    requestCertificates[0].Name)
+                    certificateId),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.EducationType)}",
+                    "",
+                    1),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.SchoolName)}",
+                    "",
+                    "School"),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Name)}",
+                    "",
+                    "Programmer"),
             }, new CamelCasePropertyNamesContractResolver());
         }
 
         [Test]
         public void ShouldReturnCorrectResponse()
         {
-            SerializerAssert.AreEqual(_result, _mapper.Map(_request, _ => _dbCertificates[0].ImageId, _userId));
+            var dbUserPatch = _mapper.Map(_request, _ => _dbCertificates.ImageId, _userId);
+            _dbCertificates.Id = ((DbUserCertificate)dbUserPatch.Operations[4].value).Id;
+
+            SerializerAssert.AreEqual(_result, dbUserPatch);
         }
 
         [Test]
         public void ShouldThrowExceptionWhenRequestNull()
         {
             _request = null;
-            Assert.Throws<BadRequestException>(() => _mapper.Map(_request, _ => _dbCertificates[0].ImageId, _userId));
+            Assert.Throws<BadRequestException>(() => _mapper.Map(_request, _ => _dbCertificates.ImageId, _userId));
         }
-
     }
 }
