@@ -232,7 +232,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             _accessValidatorMock
-                .Setup(X => X.IsAdmin())
+                .Setup(X => X.IsAdmin(null))
                 .Returns(true);
 
             _validatorMock
@@ -269,7 +269,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             _accessValidatorMock
-                .Setup(x => x.IsAdmin())
+                .Setup(x => x.IsAdmin(null))
                 .Returns(true);
 
             _validatorMock
@@ -291,7 +291,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldCreateUserSuccessful()
         {
             _accessValidatorMock
-                .Setup(x => x.IsAdmin())
+                .Setup(x => x.IsAdmin(null))
                 .Returns(true);
 
             _validatorMock
