@@ -15,11 +15,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     /// </summary>
     public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
     {
-        private readonly IUserRepository repository;
+        private readonly IUserRepository _repository;
 
         public GetUsersDataConsumer(IUserRepository repository)
         {
-            this.repository = repository;
+            _repository = repository;
         }
 
         public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserInfo(IGetUsersDataRequest request)
         {
-            var dbUsers = repository.Get(request.UserIds);
+            var dbUsers = _repository.Get(request.UserIds);
 
             return IGetUsersDataResponse.CreateObj(
                 dbUsers
