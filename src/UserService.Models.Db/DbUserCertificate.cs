@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid ImageId { get; set; }
+        public int EducationType { get; set; }
         public string Name { get; set; }
         public string SchoolName { get; set; }
         public DateTime ReceivedAt { get; set; }

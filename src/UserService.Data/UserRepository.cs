@@ -4,11 +4,11 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -107,11 +107,19 @@ namespace LT.DigitalOffice.UserService.Data
 
         public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
-            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ?? 
+            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
                             throw new NotFoundException($"User with ID '{id}' was not found.");
 
+            for (int i = 0; i < userPatch.Operations.Count; i++)
+            {
+                if (string.Equals(userPatch.Operations[i].path, $"/{nameof(DbUser.Certificates)}/-"))
+                {
+                    _provider.UserCertificates.Add((DbUserCertificate)userPatch.Operations[i].value);
+                    userPatch.Operations.RemoveAt(i);
+                }
+            }
+
             userPatch.ApplyTo(dbUser);
-            
             _provider.Save();
 
             return true;
