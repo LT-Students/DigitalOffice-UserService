@@ -66,8 +66,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             {
                 Id = userId,
                 FirstName = "Ivan",
-                LastName = "Ivanovich",
-                MiddleName = "Ivanod",
+                LastName = "Ivanov",
+                MiddleName = "Ivanovich",
                 CreatedAt = DateTime.Now,
                 IsActive = true,
                 Certificates = new List<DbUserCertificate>
