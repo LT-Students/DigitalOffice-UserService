@@ -1,4 +1,6 @@
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
 {
@@ -9,5 +11,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public string MiddleName { get; set; }
         public string AvatarImage { get; set; }
         public UserStatus Status { get; set; }
+        public IEnumerable<EditCertificate> Certificates { get; set; }
     }
 }

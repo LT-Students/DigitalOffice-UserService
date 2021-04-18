@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
