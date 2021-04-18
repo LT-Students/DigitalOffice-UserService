@@ -4,6 +4,7 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
+using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using MassTransit;
@@ -23,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -32,6 +34,7 @@ namespace LT.DigitalOffice.UserService
 
         private readonly BaseServiceInfoConfig _serviceInfoConfig;
         private readonly RabbitMqConfig _rabbitMqConfig;
+        private readonly EmailEngineConfig _emailEngineConfig;
 
         public IConfiguration Configuration { get; }
 
@@ -135,6 +138,12 @@ namespace LT.DigitalOffice.UserService
             _rabbitMqConfig = Configuration
                 .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
+
+            _emailEngineConfig = Configuration
+                .GetSection(EmailEngineConfig.SectionName)
+                .Get<EmailEngineConfig>();
+
+            Task.Run(() => EmailResender.Start(_emailEngineConfig.ResendInterval));
 
             Version = "1.2.3";
             Description = "UserService is an API that intended to work with users.";

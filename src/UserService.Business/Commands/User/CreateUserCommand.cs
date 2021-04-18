@@ -7,6 +7,7 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.MessageService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
@@ -50,7 +51,6 @@ namespace LT.DigitalOffice.UserService.Business
             // TODO add user position
         }
 
-        // TODO add resend logic
         private void SendEmail(DbUser dbUser, string password, List<string> errors)
         {
             var email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
@@ -63,6 +63,8 @@ namespace LT.DigitalOffice.UserService.Business
             }
 
             string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resended in 1 hour.";
+
+            Object emailRequest = null;
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
@@ -87,14 +89,17 @@ namespace LT.DigitalOffice.UserService.Business
                     errors.Add(errorMessage);
                 }
 
-                IOperationResult<bool> rcSendEmailResponse = _rcSendEmail.GetResponse<IOperationResult<bool>>(
-                    ISendEmailRequest.CreateObj(
+                emailRequest = ISendEmailRequest.CreateObj(
                         rcGetTemplateTagsResponse.Body.TemplateId,
                         senderId,
                         email.Value,
                         templateLanguage,
-                        templateValues
-                       )).Result.Message;
+                        templateValues);
+                IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
+                    .GetResponse<IOperationResult<bool>>(emailRequest)
+                    .Result
+                    .Message;
+
 
                 if (!rcSendEmailResponse.IsSuccess)
                 {
@@ -102,6 +107,8 @@ namespace LT.DigitalOffice.UserService.Business
                         $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}.");
 
                     errors.Add(errorMessage);
+
+                    EmailResender.AddToQueue(emailRequest);
                 }
             }
             catch (Exception exc)
@@ -109,6 +116,11 @@ namespace LT.DigitalOffice.UserService.Business
                 _logger.LogError(exc, errorMessage);
 
                 errors.Add(errorMessage);
+
+                if (emailRequest != null)
+                {
+                    EmailResender.AddToQueue(emailRequest);
+                }
             }
         }
 
@@ -149,7 +161,7 @@ namespace LT.DigitalOffice.UserService.Business
             return avatarImageId;
         }
         #endregion
-        
+
         public CreateUserCommand(
             ILogger<CreateUserCommand> logger,
             IRequestClient<IAddImageRequest> rcImage,
