@@ -105,7 +105,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Example",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Rate = 0.25
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -121,7 +122,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Example",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Rate = 0.25
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -137,7 +139,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Example",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Rate = 0.25
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -153,7 +156,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 MiddleName = "Пример",
                 Status = UserStatus.Sick,
                 Password = "Example",
-                IsAdmin = false
+                IsAdmin = false,
+                Rate = 0.25
             };
 
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
@@ -177,6 +181,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
+                Rate = 0.25,
                 Communications = new List<CommunicationInfo>()
             };
 
@@ -193,6 +198,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 Status = UserStatus.Sick,
                 Password = "Example",
                 IsAdmin = false,
+                Rate = 0.25,
                 Communications = new List<CommunicationInfo>()
                 {
                     new CommunicationInfo()
