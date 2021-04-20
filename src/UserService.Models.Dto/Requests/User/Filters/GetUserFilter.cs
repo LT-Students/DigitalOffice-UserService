@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 {

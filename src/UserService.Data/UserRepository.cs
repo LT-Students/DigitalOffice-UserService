@@ -105,6 +105,11 @@ namespace LT.DigitalOffice.UserService.Data
             return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
         }
 
+        public IEnumerable<DbUser> Get(IEnumerable<Guid> userIds)
+        {
+            return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
+        }
+
         public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
             DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
