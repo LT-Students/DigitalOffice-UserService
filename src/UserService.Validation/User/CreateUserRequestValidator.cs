@@ -40,6 +40,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 RuleForEach(user => user.Communications).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
             });
 
+            RuleFor(user => user.Rate)
+                .GreaterThan(0)
+                .LessThanOrEqualTo(1);
+
             // TODO move to edit user validation
             //When(user => user.Skills != null && user.Skills.Any(), () =>
             //{

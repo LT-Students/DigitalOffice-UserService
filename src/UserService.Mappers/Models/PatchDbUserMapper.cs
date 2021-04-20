@@ -28,9 +28,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             foreach (var item in request.Operations)
             {
                 if (string.Equals(
-                    item.path,
-                    $"/{nameof(EditUserRequest.AvatarImage)}",
-                    StringComparison.OrdinalIgnoreCase))
+                        item.path,
+                        $"/{nameof(EditUserRequest.AvatarImage)}",
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.AvatarFileId)}";
                     item.value = getAvatarImageId.Invoke(item.value.ToString());
@@ -50,9 +50,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
 
                 if (string.Equals(
-                    item.path,
-                    $"/{nameof(EditUserRequest.Certificates)}/-",
-                    StringComparison.OrdinalIgnoreCase))
+                        item.path,
+                        $"/{nameof(EditUserRequest.Certificates)}/-",
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     item.path = $"/{nameof(DbUser.Certificates)}/-";
 
@@ -70,9 +70,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
 
                 if (string.Equals(
-                    item.path,
-                    $"/{nameof(EditUserRequest.Status)}",
-                    StringComparison.OrdinalIgnoreCase))
+                        item.path,
+                        $"/{nameof(EditUserRequest.Status)}",
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     item.value = (int) item.value;
                 }

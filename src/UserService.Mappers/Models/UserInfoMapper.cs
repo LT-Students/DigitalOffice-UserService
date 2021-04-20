@@ -24,7 +24,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 StartWorkingAt = dbUser.StartWorkingAt.ToShortDateString(),
                 About = dbUser.About,
                 IsAdmin = dbUser.IsAdmin,
-                Status = (UserStatus)dbUser.Status
+                Status = (UserStatus)dbUser.Status,
+                Rate = dbUser.Rate
             };
         }
     }

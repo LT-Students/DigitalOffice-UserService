@@ -18,6 +18,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
         public string About { get; set; }
+        public double Rate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime StartWorkingAt { get; set; }
         public DbUserCredentials Credentials { get; set; }
@@ -59,6 +60,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .Property(p => p.IsActive)
+                .IsRequired();
+
+            builder
+                .Property(u => u.Rate)
                 .IsRequired();
 
             builder

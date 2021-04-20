@@ -13,5 +13,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public bool IsAdmin { get; set; }
         public string About { get; set; }
         public string StartWorkingAt { get; set; }
+        public double Rate { get; set; }
     }
 }

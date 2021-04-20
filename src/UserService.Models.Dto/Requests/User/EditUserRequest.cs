@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public string LastName { get; set; }
         public string MiddleName { get; set; }
         public string AvatarImage { get; set; }
+        public double Rate { get; set; }
         public UserStatus Status { get; set; }
         public IEnumerable<EditCertificate> Certificates { get; set; }
     }

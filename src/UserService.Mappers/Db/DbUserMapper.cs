@@ -38,6 +38,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 IsAdmin = request.IsAdmin ?? false,
                 CreatedAt = DateTime.UtcNow,
                 StartWorkingAt = startWorkingAt,
+                Rate = request.Rate,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
