@@ -35,7 +35,6 @@ namespace LT.DigitalOffice.UserService
 
         private readonly BaseServiceInfoConfig _serviceInfoConfig;
         private readonly RabbitMqConfig _rabbitMqConfig;
-        private readonly EmailEngineConfig _emailEngineConfig;
 
         public IConfiguration Configuration { get; }
 
@@ -122,6 +121,23 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
+        private void RunEmailResender()
+        {
+            var resendInterval = Environment.GetEnvironmentVariable("ResendIntervalInMinutes");
+            if (!string.IsNullOrEmpty(resendInterval))
+            {
+                Task.Run(() => EmailResender.Start(Convert.ToInt32(resendInterval)));
+            }
+            else
+            {
+                var emailEngineConfig = Configuration
+                    .GetSection(EmailEngineConfig.SectionName)
+                    .Get<EmailEngineConfig>();
+
+                Task.Run(() => EmailResender.Start(emailEngineConfig.ResendIntervalInMinutes));
+            }
+        }
+
         #endregion
 
         #endregion
@@ -140,11 +156,7 @@ namespace LT.DigitalOffice.UserService
                 .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
 
-            _emailEngineConfig = Configuration
-                .GetSection(EmailEngineConfig.SectionName)
-                .Get<EmailEngineConfig>();
-
-            Task.Run(() => EmailResender.Start(_emailEngineConfig.ResendInterval));
+            RunEmailResender();
 
             Version = "1.2.3";
             Description = "UserService is an API that intended to work with users.";

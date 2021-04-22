@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     {
         public const string SectionName = "EmailEngineConfig";
 
-        public int ResendInterval { get; set; }
+        public int ResendIntervalInMinutes { get; set; }
     }
 }

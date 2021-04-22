@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resended in 1 hour.";
 
-            Object emailRequest = null;
+            object emailRequest = null;
 
             //TODO: fix add specific template language
             string templateLanguage = "en";

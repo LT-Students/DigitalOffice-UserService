@@ -10,38 +10,51 @@ namespace LT.DigitalOffice.UserService.Business.Helpers.Email
 {
     public class EmailResender
     {
-        private static readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
-        private static readonly ILogger<EmailResender> _logger;
+        private static IRequestClient<ISendEmailRequest> _rcSendEmail;
+        private static ILogger<EmailResender> _logger;
 
-        private static List<Object> _emailRequests = new();
+        private static readonly List<object> _emailRequests = new();
 
-        public static void AddToQueue(Object emailRequest)
+        public EmailResender(
+            IRequestClient<ISendEmailRequest> rcSendEmail,
+            ILogger<EmailResender> logger)
+        {
+            _rcSendEmail = rcSendEmail;
+            _logger = logger;
+        }
+
+        public static void AddToQueue(object emailRequest)
         {
             _emailRequests.Add(emailRequest);
         }
 
-        public static void Start(double interval)
+        public static void Start(double intervalInMinutes)
         {
             while (true)
             {
-                Task.Delay(TimeSpan.FromMinutes(interval)).Wait();
+                Task.Delay(TimeSpan.FromMinutes(intervalInMinutes)).Wait();
 
                 for (int i = 0; i < _emailRequests.Count; i++)
                 {
                     try
                     {
-                        IOperationResult<bool> respond = _rcSendEmail.GetResponse<IOperationResult<bool>>(_emailRequests[i]).Result.Message;
-                        if (respond.IsSuccess)
+                        IOperationResult<bool> rcSendEmailResponse = 
+                            _rcSendEmail.GetResponse<IOperationResult<bool>>(_emailRequests[i]).Result.Message;
+                        if (rcSendEmailResponse.IsSuccess)
                         {
                             _emailRequests.RemoveAt(i);
                         }
                         else
                         {
-                            _logger.LogWarning($"Can not send email. Email remain in resend queue.");
+                            // TODO: log mailing address
+                            _logger.LogWarning(
+                                $"Can not send email. Email remain in resend queue:" +
+                                $"{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}");
                         }
                     }
                     catch (Exception exc)
                     {
+                        // TODO: log mailing address
                         _logger.LogError(exc, $"Errors while sending email. Email remain in resend queue.");
                     }
                 }
