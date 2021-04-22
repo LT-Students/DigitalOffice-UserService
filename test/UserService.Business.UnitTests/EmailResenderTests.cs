@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private static Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
         private static Mock<ILogger<EmailResender>> _loggerMock;
 
-        private static EmailResender _emailResender;
+        private Task _emailResenderTask;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -25,8 +25,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
             _loggerMock = new Mock<ILogger<EmailResender>>();
 
-            _emailResender = new EmailResender(_rcSendEmailMock.Object, _loggerMock.Object);
-            Task.Run(() => EmailResender.Start(0));
+            new EmailResender(_rcSendEmailMock.Object, _loggerMock.Object);
+            _emailResenderTask = Task.Run(() => EmailResender.Start(0));
         }
 
         [Test]
@@ -83,6 +83,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _rcSendEmailMock.Verify(x => x.GetResponse<IOperationResult<bool>>(
                     email, default, It.IsAny<RequestTimeout>()), Times.AtLeastOnce);
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _emailResenderTask.Dispose();
         }
     }
 }
