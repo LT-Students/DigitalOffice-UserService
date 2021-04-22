@@ -28,26 +28,30 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShouldCorrectlySendMessage()
+        public void ShouldResentMessageWhenEveryoneIsGood()
         {
             var email = new { Id = Guid.NewGuid() };
 
-            var _operationResultAddImageMock = new Mock<IOperationResult<bool>>();
-            _operationResultAddImageMock.Setup(x => x.Body).Returns(true);
-            _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(true);
-            _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
+            var _operationResultMock = new Mock<IOperationResult<bool>>();
+            _operationResultMock.Setup(x => x.Body).Returns(true);
+            _operationResultMock.Setup(x => x.IsSuccess).Returns(true);
+            _operationResultMock.Setup(x => x.Errors).Returns(new List<string>());
 
-            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<bool>>>();
-            responseBrokerAddImageMock
+            var responseBrokerMock = new Mock<Response<IOperationResult<bool>>>();
+            responseBrokerMock
                .SetupGet(x => x.Message)
-               .Returns(_operationResultAddImageMock.Object);
+               .Returns(_operationResultMock.Object);
 
             _rcSendEmailMock.Setup(
                 x => x.GetResponse<IOperationResult<bool>>(
                     email, default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
+                .Returns(Task.FromResult(responseBrokerMock.Object));
+
+            Console.WriteLine($"The sending broker will successfully send messages.");
 
             EmailResender.AddToQueue(email);
+
+            Console.WriteLine($"{email} was added to queue.");
 
             Task.Delay(TimeSpan.FromSeconds(3));
 
@@ -56,24 +60,26 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ShouldIncorrectlySendMessage()
+        public void ShouldNotResentMessageWhenClientNotWork()
         {
             var email = new { Id = Guid.NewGuid() };
 
-            var _operationResultAddImageMock = new Mock<IOperationResult<bool>>();
-            _operationResultAddImageMock.Setup(x => x.Body).Returns(false);
-            _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(false);
-            _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
+            var _operationResultMock = new Mock<IOperationResult<bool>>();
+            _operationResultMock.Setup(x => x.Body).Returns(false);
+            _operationResultMock.Setup(x => x.IsSuccess).Returns(false);
+            _operationResultMock.Setup(x => x.Errors).Returns(new List<string>());
 
-            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<bool>>>();
-            responseBrokerAddImageMock
+            var responseBrokerMock = new Mock<Response<IOperationResult<bool>>>();
+            responseBrokerMock
                .SetupGet(x => x.Message)
-               .Returns(_operationResultAddImageMock.Object);
+               .Returns(_operationResultMock.Object);
 
             _rcSendEmailMock.Setup(
                 x => x.GetResponse<IOperationResult<bool>>(
                     email, default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
+                .Returns(Task.FromResult(responseBrokerMock.Object));
+
+            Console.WriteLine($"The sending broker will failed send messages.");
 
             EmailResender.AddToQueue(email);
 
