@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
@@ -24,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _loggerMock = new Mock<ILogger<EmailResender>>();
 
             _ = new EmailResender(_rcSendEmailMock.Object, _loggerMock.Object);
-            Task.Run(() => EmailResender.Start(0));
+            new Thread(() => EmailResender.Start(0)).Start();
         }
 
         [Test]
