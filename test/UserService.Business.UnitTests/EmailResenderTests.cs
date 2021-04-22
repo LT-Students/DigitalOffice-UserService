@@ -77,6 +77,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             EmailResender.AddToQueue(email);
 
+            Console.WriteLine($"{email} was added to queue.");
+
             Task.Delay(TimeSpan.FromSeconds(3));
 
             _rcSendEmailMock.Verify(x => x.GetResponse<IOperationResult<bool>>(
