@@ -6,6 +6,16 @@ namespace LT.DigitalOffice.Broker.Responses
     {
         Guid Id { get; }
         string Name { get; }
-        bool IsActive { get; }
+        int ProjectStatus { get; }
+
+        static object CreateObj(Guid id, string name, int projectStatus)
+        {
+            return new
+            {
+                Id = id,
+                Name = name,
+                ProjectStatus = projectStatus
+            };
+        }
     }
 }
