@@ -100,7 +100,6 @@ namespace LT.DigitalOffice.UserService.Business
                     .Result
                     .Message;
 
-
                 if (!rcSendEmailResponse.IsSuccess)
                 {
                     _logger.LogWarning(
