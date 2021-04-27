@@ -138,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business
                                 {
                                     Id = projectId,
                                     Name = projectResponse.Body.Name,
-                                    IsActive = projectResponse.Body.IsActive
+                                    Status = projectResponse.Body.ProjectStatus
                                 });
                             }
                             else
