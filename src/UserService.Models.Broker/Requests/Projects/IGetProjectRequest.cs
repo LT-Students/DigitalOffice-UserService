@@ -4,7 +4,7 @@ using System;
 
 namespace LT.DigitalOffice.Broker.Requests
 {
-    [AutoInjectRequest(nameof(RabbitMqConfig.GetProjectEndpoint))]
+    [AutoInjectRequest(nameof(RabbitMqConfig.GetProjectInfoEndpoint))]
     public interface IGetProjectRequest
     {
         Guid Id { get; }
