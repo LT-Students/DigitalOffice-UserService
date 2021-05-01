@@ -40,8 +40,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
         public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
         {
             if (!(_accessValidator.IsAdmin() ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers)
-                  || _httpContextAccessor.HttpContext.GetUserId() != request.UserId))
+                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+                  && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }

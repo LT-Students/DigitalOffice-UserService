@@ -40,13 +40,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
         }
 
         public OperationResultResponse<bool> Execute(Guid userId, Guid educationId, JsonPatchDocument<EditEducationRequest> request)
-        {/*
+        {
             if (!(_accessValidator.IsAdmin() ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers)
-                  || _httpContextAccessor.HttpContext.GetUserId() != userId))
+                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+                  && _httpContextAccessor.HttpContext.GetUserId() != userId)
             {
                 throw new ForbiddenException("Not enough rights.");
-            }*/
+            }
 
             _validator.ValidateAndThrowCustom(request);
 
