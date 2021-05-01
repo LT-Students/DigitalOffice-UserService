@@ -9,14 +9,15 @@ namespace LT.DigitalOffice.CompanyService.Data.Provider
     [AutoInject(InjectType.Scoped)]
     public interface IDataProvider : IBaseDataProvider
     {
-        public DbSet<DbUser> Users { get; set; }
-        public DbSet<DbAchievement> Achievements { get; set; }
-        public DbSet<DbSkill> Skills { get; set; }
-        public DbSet<DbUserCredentials> UserCredentials { get; set; }
-        public DbSet<DbUserSkill> UserSkills { get; set; }
-        public DbSet<DbUserAchievement> UserAchievements { get; set; }
-        public DbSet<DbUserCertificate> UserCertificates { get; set; }
-        public DbSet<DbUserCommunication> UserCommunications { get; set; }
-        public DbSet<DbPendingUser> PendingUsers { get; set; }
+        DbSet<DbUser> Users { get; set; }
+        DbSet<DbAchievement> Achievements { get; set; }
+        DbSet<DbSkill> Skills { get; set; }
+        DbSet<DbUserCredentials> UserCredentials { get; set; }
+        DbSet<DbUserSkill> UserSkills { get; set; }
+        DbSet<DbUserAchievement> UserAchievements { get; set; }
+        DbSet<DbUserCertificate> UserCertificates { get; set; }
+        DbSet<DbUserEducation> UserEducations { get; set; }
+        DbSet<DbUserCommunication> UserCommunications { get; set; }
+        DbSet<DbPendingUser> PendingUsers { get; set; }
     }
 }

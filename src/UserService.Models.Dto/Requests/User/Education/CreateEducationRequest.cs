@@ -1,11 +1,11 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System;
 
-namespace LT.DigitalOffice.UserService.Models.Dto.Models
+namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education
 {
-    public class EducationInfo
+    public class CreateEducationRequest
     {
-        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
         public string UniversityName { get; set; }
         public string QualificationName { get; set; }
         public FormEducation FormEducation { get; set; }

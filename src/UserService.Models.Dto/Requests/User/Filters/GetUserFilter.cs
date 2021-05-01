@@ -32,8 +32,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
         [FromQuery(Name = "includeskills")]
         public bool? IncludeSkills { get; set; }
 
-        [FromQuery(Name = "includeeducation")]
-        public bool? IncludeEducation { get; set; }
+        [FromQuery(Name = "includeeducations")]
+        public bool? IncludeEducations { get; set; }
 
         [FromQuery(Name = "includeimages")]
         public bool? IncludeImages { get; set; }
@@ -48,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
         public bool IsIncludeCommunications => IncludeCommunications.HasValue && IncludeCommunications.Value;
         public bool IsIncludeImages => IncludeImages.HasValue && IncludeImages.Value;
         public bool IsIncludeSkills => IncludeSkills.HasValue && IncludeSkills.Value;
-        public bool IsIncludeEducation => IncludeEducation.HasValue && IncludeEducation.Value;
+        public bool IsIncludeEducation => IncludeEducations.HasValue && IncludeEducations.Value;
         public bool IsIncludeProjects => IncludeProjects.HasValue && IncludeProjects.Value;
     }
 }

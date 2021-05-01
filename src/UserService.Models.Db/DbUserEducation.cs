@@ -12,9 +12,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid UserId { get; set; }
         public string UniversityName { get; set; }
         public string QualificationName { get; set; }
-        public int FormEdication { get; set; }
+        public int FormEducation { get; set; }
         public DateTime AdmissiomAt { get; set; }
         public DateTime? IssueAt { get; set; }
+
+        public DbUser User { get; set; }
     }
 
     public class DbUserEducationConfiguration : IEntityTypeConfiguration<DbUserEducation>
@@ -34,6 +36,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
             builder
                 .Property(e => e.QualificationName)
                 .IsRequired();
+
+            builder
+                .HasOne(e => e.User)
+                .WithMany(u => u.Educations)
+                .HasForeignKey(e => e.UserId);
         }
     }
 }

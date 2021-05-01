@@ -56,5 +56,13 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Disable user.
         /// </summary>
         bool SwitchActiveStatus(Guid userId, bool status);
+
+        void AddEducation(DbUserEducation education);
+
+        bool EditEducation(Guid educationId, JsonPatchDocument<DbUserEducation> request);
+
+        bool RemoveEducation(Guid educationId);
+
+        bool IsExistUser(Guid userId);
     }
 }

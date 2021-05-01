@@ -48,6 +48,11 @@ namespace LT.DigitalOffice.UserService.Data
                 dbUsers = dbUsers.Include(u => u.Certificates);
             }
 
+            if (filter.IncludeEducations.HasValue && filter.IncludeEducations.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Educations);
+            }
+
             if (filter.IncludeAchievements.HasValue && filter.IncludeAchievements.Value)
             {
                 dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
@@ -196,6 +201,57 @@ namespace LT.DigitalOffice.UserService.Data
 
             _provider.PendingUsers.Remove(dbPendingUser);
             _provider.Save();
+        }
+
+        public void AddEducation(DbUserEducation education)
+        {
+            if (education == null)
+            {
+                throw new ArgumentNullException(nameof(education));
+            }
+
+            _provider.UserEducations.Add(education);
+            _provider.Save();
+        }
+
+        public bool EditEducation(Guid educationId, JsonPatchDocument<DbUserEducation> request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            DbUserEducation dbUserEducation = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
+
+            if (dbUserEducation == null)
+            {
+                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+            }
+
+            request.ApplyTo(dbUserEducation);
+            _provider.Save();
+
+            return true;
+        }
+
+        public bool RemoveEducation(Guid educationId)
+        {
+            DbUserEducation dbUserEducation = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
+
+            if (dbUserEducation == null)
+            {
+                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+            }
+
+            _provider.UserEducations.Remove(dbUserEducation);
+            _provider.Save();
+
+            return true;
+        }
+
+        public bool IsExistUser(Guid userId)
+        {
+            return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
         }
     }
 }

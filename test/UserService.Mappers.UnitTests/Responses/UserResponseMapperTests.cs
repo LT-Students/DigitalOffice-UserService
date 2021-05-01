@@ -140,7 +140,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 UserId = Guid.NewGuid(),
                 UniversityName = "university name",
                 QualificationName = "qualification name",
-                FormEdication = 0,
+                FormEducation = 0,
                 AdmissiomAt = DateTime.UtcNow,
                 IssueAt = DateTime.UtcNow
             };
@@ -150,7 +150,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUserEducation.Id,
                 UniversityName = _dbUserEducation.UniversityName,
                 QualificationName = _dbUserEducation.QualificationName,
-                FormEdication = (FormEducation)_dbUserEducation.FormEdication,
+                FormEducation = (FormEducation)_dbUserEducation.FormEducation,
                 AdmissiomAt = _dbUserEducation.AdmissiomAt,
                 IssueAt = _dbUserEducation.IssueAt
             };
@@ -264,7 +264,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IncludeAchievements = true,
                 IncludeCertificates = true,
                 IncludeDepartment = true,
-                IncludeEducation = true,
+                IncludeEducations = true,
                 IncludeImages = true,
                 IncludePosition = true,
                 IncludeProjects = true,

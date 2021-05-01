@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Models
                 UserId = Guid.NewGuid(),
                 UniversityName = "university name",
                 QualificationName = "qualification name",
-                FormEdication = 0,
+                FormEducation = 0,
                 AdmissiomAt = DateTime.UtcNow,
                 IssueAt = DateTime.UtcNow
             };
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Models
                 Id = _dbEducation.Id,
                 UniversityName = _dbEducation.UniversityName,
                 QualificationName = _dbEducation.QualificationName,
-                FormEdication = (FormEducation)_dbEducation.FormEdication,
+                FormEducation = (FormEducation)_dbEducation.FormEducation,
                 AdmissiomAt = _dbEducation.AdmissiomAt,
                 IssueAt = _dbEducation.IssueAt
             };

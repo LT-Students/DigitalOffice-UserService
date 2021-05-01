@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AvatarImage,
             Status
         };
-        
+
         public static string FirstName => $"/{nameof(EditUserRequest.FirstName)}";
         public static string LastName => $"/{nameof(EditUserRequest.LastName)}";
         public static string MiddleName => $"/{nameof(EditUserRequest.MiddleName)}";
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                             .MinimumLength(1).WithMessage("First name is too short.")
                             .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("First name with error.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, LastName) != null, () =>
                     {
                         RuleFor(x => x.Operations)
@@ -87,16 +87,16 @@ namespace LT.DigitalOffice.UserService.Validation.User
                             .MinimumLength(1).WithMessage("Middle name is too short.")
                             .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, Status) != null, () =>
                     {
                         RuleFor(x => x.Operations)
                             .UniqueOperationWithAllowedOp(Status, "add", "replace", "remove");
-                        
+
                         RuleFor(x => (UserStatus) GetOperationByPath(x, Status).value)
                             .IsInEnum().WithMessage("Wrong status value.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, AvatarImage) != null, () =>
                     {
                         RuleFor(x => x.Operations)
@@ -109,6 +109,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                                 .TryFromBase64String(x, new Span<byte>(new byte[x.Length]), out _));
                     });
                 });
-        }        
+        }
     }
 }
