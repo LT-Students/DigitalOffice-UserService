@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -20,6 +21,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             foreach (var item in request.Operations)
             {
+                if (item.path.ToUpper().EndsWith(nameof(EditEducationRequest.FormEducation).ToUpper()))
+                {
+                    if (Enum.TryParse(item.value.ToString(), out FormEducation education))
+                    {
+                        dbUserEducation.Operations.Add(new Operation<DbUserEducation>(item.op, item.path, item.from, (int)education));
+                        continue;
+                    }
+                }
                 dbUserEducation.Operations.Add(new Operation<DbUserEducation>(item.op, item.path, item.from, item.value));
             }
 

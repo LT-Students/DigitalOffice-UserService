@@ -27,6 +27,8 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
 
         public EditEducationRequestValidator()
         {
+            CascadeMode = CascadeMode.Stop;
+
             RuleFor(x => x.Operations)
                 .Must(x =>
                     x.Select(x => x.path)
@@ -71,8 +73,10 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
                         RuleFor(x => x.Operations)
                             .UniqueOperationWithAllowedOp(FormEducation, "replace");
 
-                        RuleFor(x => (FormEducation)(long)GetOperationByPath(x, FormEducation).value)
-                            .IsInEnum().WithMessage("Wrong form education.");
+                        RuleFor(x => GetOperationByPath(x, FormEducation))
+                            .Must(e => e.value != null)
+                            .Must(e => Enum.TryParse(e.value.ToString(), out FormEducation _))
+                            .WithMessage("Wrong form education.");
                     });
                 });
         }
