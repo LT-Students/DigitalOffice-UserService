@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
         public static string UniversityName => $"/{nameof(EditEducationRequest.UniversityName)}";
         public static string QualificationName => $"/{nameof(EditEducationRequest.QualificationName)}";
         public static string FormEducation => $"/{nameof(EditEducationRequest.FormEducation)}";
-        public static string AdmissiomAt => $"/{nameof(EditEducationRequest.AdmissiomAt)}";
+        public static string AdmissiomAt => $"/{nameof(EditEducationRequest.AdmissionAt)}";
         public static string IssueAt => $"/{nameof(EditEducationRequest.IssueAt)}";
 
         Func<JsonPatchDocument<EditEducationRequest>, string, Operation> GetOperationByPath =>

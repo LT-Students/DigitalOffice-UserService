@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     UniversityName = table.Column<string>(nullable: false),
                     QualificationName = table.Column<string>(nullable: false),
                     FormEducation = table.Column<int>(nullable: false),
-                    AdmissiomAt = table.Column<DateTime>(nullable: false),
+                    AdmissionAt = table.Column<DateTime>(nullable: false),
                     IssueAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>

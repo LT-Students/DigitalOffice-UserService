@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                             "New Qualification name"),
                         new Operation<EditEducationRequest>(
                             "replace",
-                            $"/{nameof(EditEducationRequest.AdmissiomAt)}",
+                            $"/{nameof(EditEducationRequest.AdmissionAt)}",
                             "",
                             time),
                         new Operation<EditEducationRequest>(
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                             "New Qualification name"),
                         new Operation<DbUserEducation>(
                             "replace",
-                            $"/{nameof(DbUserEducation.AdmissiomAt)}",
+                            $"/{nameof(DbUserEducation.AdmissionAt)}",
                             "",
                             time),
                         new Operation<DbUserEducation>(

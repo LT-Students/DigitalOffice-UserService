@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
                 UniversityName = "UniversityName",
                 QualificationName = "QualificationName",
                 FormEducation = FormEducation.Distance,
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 UserId = Guid.NewGuid()
             };
 
@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
                 UniversityName = "UniversityName",
                 QualificationName = "QualificationName",
                 FormEducation = 1,
-                AdmissiomAt = _education.AdmissiomAt,
+                AdmissionAt = _education.AdmissionAt,
                 UserId = _education.UserId
             };
         }

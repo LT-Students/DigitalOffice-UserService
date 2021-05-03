@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
                 QualificationName = "name",
                 FormEducation = FormEducation.FullTime,
                 UserId = Guid.NewGuid(),
-                AdmissiomAt = DateTime.UtcNow
+                AdmissionAt = DateTime.UtcNow
             };
 
             _validator.TestValidate(_request).ShouldNotHaveAnyValidationErrors();
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
                 QualificationName = "",
                 FormEducation = (FormEducation)3,
                 UserId = Guid.NewGuid(),
-                AdmissiomAt = DateTime.UtcNow
+                AdmissionAt = DateTime.UtcNow
             };
 
             _repositoryMock

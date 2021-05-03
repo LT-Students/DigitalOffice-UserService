@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 UserId = request.UserId,
                 UniversityName = request.UniversityName,
                 QualificationName = request.QualificationName,
-                AdmissiomAt = request.AdmissiomAt,
+                AdmissionAt = request.AdmissionAt,
                 IssueAt = request.IssueAt,
                 FormEducation = (int)request.FormEducation
             };

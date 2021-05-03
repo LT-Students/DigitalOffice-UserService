@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string UniversityName { get; set; }
         public string QualificationName { get; set; }
         public int FormEducation { get; set; }
-        public DateTime AdmissiomAt { get; set; }
+        public DateTime AdmissionAt { get; set; }
         public DateTime? IssueAt { get; set; }
 
         public DbUser User { get; set; }

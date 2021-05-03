@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 UserId = Guid.NewGuid(),
                 UniversityName = "name",
                 QualificationName = "name",
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 IssueAt = DateTime.UtcNow,
                 FormEducation = FormEducation.FullTime
             };
@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 UserId = _request.UserId,
                 UniversityName = _request.UniversityName,
                 QualificationName = _request.QualificationName,
-                AdmissiomAt = _request.AdmissiomAt,
+                AdmissionAt = _request.AdmissionAt,
                 IssueAt = _request.IssueAt,
                 FormEducation = (int)_request.FormEducation
             };

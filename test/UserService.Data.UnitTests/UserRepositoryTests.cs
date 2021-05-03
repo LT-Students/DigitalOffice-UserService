@@ -231,7 +231,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UniversityName = "UniversityName",
                 QualificationName = "QualificationName",
                 FormEducation = 1,
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 UserId = _dbUser.Id
             };
 
@@ -255,7 +255,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UniversityName = "UniversityName",
                 QualificationName = "QualificationName",
                 FormEducation = 1,
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 UserId = _dbUser.Id
             };
 
@@ -307,7 +307,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UniversityName = "UniversityName",
                 QualificationName = "QualificationName",
                 FormEducation = 1,
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 UserId = _dbUser.Id
             };
 

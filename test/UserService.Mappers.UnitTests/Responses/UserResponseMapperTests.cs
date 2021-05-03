@@ -141,7 +141,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 UniversityName = "university name",
                 QualificationName = "qualification name",
                 FormEducation = 0,
-                AdmissiomAt = DateTime.UtcNow,
+                AdmissionAt = DateTime.UtcNow,
                 IssueAt = DateTime.UtcNow
             };
 
@@ -151,7 +151,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 UniversityName = _dbUserEducation.UniversityName,
                 QualificationName = _dbUserEducation.QualificationName,
                 FormEducation = (FormEducation)_dbUserEducation.FormEducation,
-                AdmissiomAt = _dbUserEducation.AdmissiomAt,
+                AdmissionAt = _dbUserEducation.AdmissionAt,
                 IssueAt = _dbUserEducation.IssueAt
             };
 

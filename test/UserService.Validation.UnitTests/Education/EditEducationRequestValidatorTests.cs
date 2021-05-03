@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
                             "New Qualification name"),
                         new Operation<EditEducationRequest>(
                             "replace",
-                            $"/{nameof(EditEducationRequest.AdmissiomAt)}",
+                            $"/{nameof(EditEducationRequest.AdmissionAt)}",
                             "",
                             DateTime.UtcNow),
                         new Operation<EditEducationRequest>(
