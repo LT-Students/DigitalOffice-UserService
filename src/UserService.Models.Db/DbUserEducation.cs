@@ -31,11 +31,13 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .Property(e => e.UniversityName)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder
                 .Property(e => e.QualificationName)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder
                 .HasOne(e => e.User)
