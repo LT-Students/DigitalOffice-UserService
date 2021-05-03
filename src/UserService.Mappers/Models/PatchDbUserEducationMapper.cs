@@ -25,7 +25,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 {
                     if (Enum.TryParse(item.value.ToString(), out FormEducation education))
                     {
-                        dbUserEducation.Operations.Add(new Operation<DbUserEducation>(item.op, item.path, item.from, (int)education));
+                        dbUserEducation.Operations.Add(new Operation<DbUserEducation>(
+                            item.op, $"/{nameof(EditEducationRequest.FormEducation)}", item.from, (int)education));
                         continue;
                     }
                 }

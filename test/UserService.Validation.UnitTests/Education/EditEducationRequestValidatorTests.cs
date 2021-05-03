@@ -97,9 +97,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
                 {
                         new Operation<EditEducationRequest>(
                             "replace",
-                            $"/{nameof(EditEducationRequest.FormEducation)}",
+                            $"/formeducation",
                             "",
-                            "awfawf")
+                            "fulltime")
                 }, new CamelCasePropertyNamesContractResolver());
 
             _validator.TestValidate(_request).ShouldHaveAnyValidationError();

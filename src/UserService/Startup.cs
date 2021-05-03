@@ -248,7 +248,7 @@ namespace LT.DigitalOffice.UserService
 
             app.UseRouting();
 
-            app.UseMiddleware<TokenMiddleware>();
+            //app.UseMiddleware<TokenMiddleware>();
 
             app.UseCors(CorsPolicyName);
 

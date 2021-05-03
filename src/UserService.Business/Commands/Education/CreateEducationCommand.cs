@@ -3,7 +3,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -13,7 +13,7 @@ using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
 using Microsoft.AspNetCore.Http;
 using System;
 
-namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
+namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
     public class CreateEducationCommand : ICreateEducationCommand
     {
@@ -39,9 +39,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
 
         public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
         {
-            if (!(_accessValidator.IsAdmin() ||
+            var senderId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var dbUser = _repository.Get(senderId);
+
+            if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
+                  && senderId != request.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }

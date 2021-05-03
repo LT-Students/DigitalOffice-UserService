@@ -14,16 +14,14 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
     public class EditEducationRequestValidator : AbstractValidator<JsonPatchDocument<EditEducationRequest>>, IEditEducationRequestValidator
     {
         private static List<string> Paths
-            => new() { UniversityName, QualificationName, FormEducation, AdmissiomAt, IssueAt };
-
-        public static string UniversityName => $"/{nameof(EditEducationRequest.UniversityName)}";
-        public static string QualificationName => $"/{nameof(EditEducationRequest.QualificationName)}";
-        public static string FormEducation => $"/{nameof(EditEducationRequest.FormEducation)}";
-        public static string AdmissiomAt => $"/{nameof(EditEducationRequest.AdmissionAt)}";
-        public static string IssueAt => $"/{nameof(EditEducationRequest.IssueAt)}";
-
-        Func<JsonPatchDocument<EditEducationRequest>, string, Operation> GetOperationByPath =>
-            (x, path) => x.Operations.FirstOrDefault(x => x.path == path);
+            => new()
+            {
+                $"/{nameof(EditEducationRequest.UniversityName)}",
+                $"/{nameof(EditEducationRequest.QualificationName)}",
+                $"/{nameof(EditEducationRequest.FormEducation)}",
+                $"/{nameof(EditEducationRequest.AdmissionAt)}",
+                $"/{nameof(EditEducationRequest.IssueAt)}"
+            };
 
         public EditEducationRequestValidator()
         {
@@ -46,38 +44,35 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
                 )
                 .DependentRules(() =>
                 {
-                    When(x => GetOperationByPath(x, UniversityName) != null, () =>
+                    When(x => x.Operations != null, () =>
                     {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(UniversityName, "replace");
+                        RuleForEach(x => x.Operations)
+                            .Must(o =>
+                                {
+                                    string value = o.value?.ToString();
 
-                        RuleFor(x => (string)GetOperationByPath(x, UniversityName).value)
-                            .NotEmpty()
-                            .MaximumLength(50)
-                            .WithMessage("University name is too long");
+                                    if (string.IsNullOrEmpty(value))
+                                    {
+                                        return false;
+                                    }
+
+                                    if (o.path.EndsWith(nameof(EditEducationRequest.UniversityName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return value.Length < 100;
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditEducationRequest.QualificationName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return value.Length < 100;
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditEducationRequest.FormEducation), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return Enum.TryParse(typeof(FormEducation), value, out _);
+                                    }
+
+                                    return true;
+                                });
                     });
 
-                    When(x => GetOperationByPath(x, QualificationName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(QualificationName, "replace");
-
-                        RuleFor(x => (string)GetOperationByPath(x, QualificationName).value)
-                            .NotEmpty()
-                            .MaximumLength(50)
-                            .WithMessage("Qualification name is too long");
-                    });
-
-                    When(x => GetOperationByPath(x, FormEducation) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(FormEducation, "replace");
-
-                        RuleFor(x => GetOperationByPath(x, FormEducation))
-                            .Must(e => e.value != null)
-                            .Must(e => Enum.TryParse(e.value.ToString(), out FormEducation _))
-                            .WithMessage("Wrong form education.");
-                    });
                 });
         }
     }

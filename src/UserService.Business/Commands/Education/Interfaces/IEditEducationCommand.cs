@@ -4,7 +4,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 
-namespace LT.DigitalOffice.UserService.Business.Commands.User.Interfaces.Education
+namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
 {
     [AutoInject]
     public interface IEditEducationCommand

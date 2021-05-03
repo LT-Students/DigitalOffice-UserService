@@ -3,7 +3,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 
-namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
+namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
     public class EditEducationCommand : IEditEducationCommand
     {
@@ -41,18 +41,29 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User.Education
 
         public OperationResultResponse<bool> Execute(Guid userId, Guid educationId, JsonPatchDocument<EditEducationRequest> request)
         {
-            if (!(_accessValidator.IsAdmin() ||
+            var senderId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var dbUser = _repository.Get(senderId);
+
+            if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && _httpContextAccessor.HttpContext.GetUserId() != userId)
+                  && senderId != userId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }
 
             _validator.ValidateAndThrowCustom(request);
 
+            DbUserEducation userEducation = _repository.GetEducation(educationId);
+
+            if (userEducation.UserId != userId)
+            {
+                throw new BadRequestException($"Education {educationId} is not linked to this user {userId}");
+            }
+
             JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
 
-            bool result = _repository.EditEducation(educationId, dbRequest);
+            bool result = _repository.EditEducation(userEducation, dbRequest);
 
             return new OperationResultResponse<bool>
             {

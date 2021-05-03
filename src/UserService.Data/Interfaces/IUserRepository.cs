@@ -59,7 +59,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         void AddEducation(DbUserEducation education);
 
-        bool EditEducation(Guid educationId, JsonPatchDocument<DbUserEducation> request);
+        DbUserEducation GetEducation(Guid educationId);
+
+        bool EditEducation(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
 
         bool RemoveEducation(Guid educationId);
 

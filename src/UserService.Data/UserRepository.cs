@@ -117,6 +117,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
+            //TODO
             DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
                             throw new NotFoundException($"User with ID '{id}' was not found.");
 
@@ -214,21 +215,31 @@ namespace LT.DigitalOffice.UserService.Data
             _provider.Save();
         }
 
-        public bool EditEducation(Guid educationId, JsonPatchDocument<DbUserEducation> request)
+        public DbUserEducation GetEducation(Guid educationId)
         {
+            DbUserEducation education = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
+
+            if (education == null)
+            {
+                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+            }
+
+            return education;
+        }
+
+        public bool EditEducation(DbUserEducation education, JsonPatchDocument<DbUserEducation> request)
+        {
+            if (education == null)
+            {
+                throw new ArgumentNullException(nameof(education));
+            }
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            DbUserEducation dbUserEducation = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
-
-            if (dbUserEducation == null)
-            {
-                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
-            }
-
-            request.ApplyTo(dbUserEducation);
+            request.ApplyTo(education);
             _provider.Save();
 
             return true;

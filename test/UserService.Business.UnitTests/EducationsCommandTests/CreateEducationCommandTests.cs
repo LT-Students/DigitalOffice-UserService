@@ -3,8 +3,8 @@ using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Commands.User.Education;
-using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Business.Commands.Education;
+using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -28,16 +28,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 
         private CreateEducationRequest _request;
         private DbUserEducation _dbEducation;
+        private DbUser _dbUser;
 
         [SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
             _command = _mocker.CreateInstance<CreateEducationCommand>();
-
-            _mocker
-                .Setup<IAccessValidator, bool>(x => x.IsAdmin(null))
-                .Returns(true);
 
             _request = new CreateEducationRequest
             {
@@ -60,8 +57,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 FormEducation = (int)_request.FormEducation
             };
 
+            _dbUser = new DbUser
+            {
+                Id = Guid.NewGuid(),
+                IsAdmin = true
+            };
+
             IDictionary<object, object> _items = new Dictionary<object, object>();
-            _items.Add("UserId", Guid.NewGuid());
+            _items.Add("UserId", _dbUser.Id);
 
             _mocker
                 .Setup<IHttpContextAccessor, IDictionary<object, object>>(x => x.HttpContext.Items)
@@ -72,27 +75,28 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Returns(_dbEducation);
 
             _mocker
-                .Setup<IAccessValidator, bool>(x => x.IsAdmin(null))
+                .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(true);
 
             _mocker
-                .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+                .Returns(_dbUser);
         }
 
         [Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {
             _mocker
-                .Setup<IAccessValidator, bool>(x => x.IsAdmin(null))
-                .Returns(false);
-
-            _mocker
                 .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
                 .Returns(false);
 
+            _mocker
+                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+                .Returns(new DbUser { IsAdmin = false });
+
             Assert.Throws<ForbiddenException>(() => _command.Execute(_request));
             _mocker.Verify<IUserRepository>(x => x.AddEducation(It.IsAny<DbUserEducation>()), Times.Never);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
         [Test]
@@ -104,17 +108,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 
             Assert.Throws<ValidationException>(() => _command.Execute(_request));
             _mocker.Verify<IUserRepository>(x => x.AddEducation(It.IsAny<DbUserEducation>()), Times.Never);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
         [Test]
         public void ShouldThrowExceptionWhenRepositoryThrow()
         {
             _mocker
-                .Setup<IUserRepository>(x => x.AddEducation(_dbEducation))
+                .Setup<IUserRepository>(x => x.Get(It.IsAny<Guid>()))
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddEducation(_dbEducation), Times.Once);
+            _mocker.Verify<IUserRepository>(x => x.AddEducation(_dbEducation), Times.Never);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
         [Test]
@@ -128,6 +134,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<IUserRepository>(x => x.AddEducation(_dbEducation), Times.Once);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
     }
 }
