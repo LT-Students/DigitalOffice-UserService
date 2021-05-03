@@ -162,6 +162,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.IsAdmin(null))
                 .Returns(false);
 
+            ClientRequestUp(Guid.NewGuid());
+            
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
             _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
@@ -174,6 +176,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
 
+            ClientRequestUp(Guid.NewGuid());
+            
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
             _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
