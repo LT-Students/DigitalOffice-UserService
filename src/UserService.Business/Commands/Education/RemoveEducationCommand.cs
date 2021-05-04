@@ -4,6 +4,7 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            bool result = _repository.RemoveEducation(educationId);
+            DbUserEducation userEducation = _repository.GetEducation(educationId);
+
+            if (userEducation.UserId != userId)
+            {
+                throw new BadRequestException($"Education {educationId} is not linked to this user {userId}");
+            }
+
+            bool result = _repository.RemoveEducation(userEducation);
 
             return new OperationResultResponse<bool>
             {

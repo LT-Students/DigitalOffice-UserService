@@ -245,16 +245,14 @@ namespace LT.DigitalOffice.UserService.Data
             return true;
         }
 
-        public bool RemoveEducation(Guid educationId)
+        public bool RemoveEducation(DbUserEducation education)
         {
-            DbUserEducation dbUserEducation = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
-
-            if (dbUserEducation == null)
+            if (education == null)
             {
-                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+                throw new ArgumentNullException(nameof(education));
             }
 
-            _provider.UserEducations.Remove(dbUserEducation);
+            education.IsActive = false;
             _provider.Save();
 
             return true;

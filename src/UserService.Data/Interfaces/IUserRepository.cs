@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         bool EditEducation(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
 
-        bool RemoveEducation(Guid educationId);
+        bool RemoveEducation(DbUserEducation education);
 
         bool IsExistUser(Guid userId);
     }

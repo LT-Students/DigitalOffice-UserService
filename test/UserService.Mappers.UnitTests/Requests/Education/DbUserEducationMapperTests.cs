@@ -36,7 +36,8 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
                 QualificationName = "QualificationName",
                 FormEducation = 1,
                 AdmissionAt = _education.AdmissionAt,
-                UserId = _education.UserId
+                UserId = _education.UserId,
+                IsActive = true
             };
         }
 

@@ -22,7 +22,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 QualificationName = request.QualificationName,
                 AdmissionAt = request.AdmissionAt,
                 IssueAt = request.IssueAt,
-                FormEducation = (int)request.FormEducation
+                FormEducation = (int)request.FormEducation,
+                IsActive = true
             };
         }
     }

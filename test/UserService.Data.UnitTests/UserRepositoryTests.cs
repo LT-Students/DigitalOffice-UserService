@@ -297,14 +297,14 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldRemoveEducationSuccesful()
         {
-            Assert.IsTrue(_repository.RemoveEducation(_dbUserEducation.Id));
+            Assert.IsTrue(_repository.RemoveEducation(_dbUserEducation));
             Assert.IsFalse(_provider.UserEducations.Contains(_dbUserEducation));
         }
 
         [Test]
-        public void ShoudThrowExceptionWhenDbHasNotRequiredForRemoveModel()
+        public void ShoudThrowExceptionWhenEducationIsNull()
         {
-            Assert.Throws<NotFoundException>(() => _repository.RemoveEducation(Guid.NewGuid()));
+            Assert.Throws<ArgumentNullException>(() => _repository.RemoveEducation(null));
         }
 
         [Test]

@@ -15,6 +15,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public int FormEducation { get; set; }
         public DateTime AdmissionAt { get; set; }
         public DateTime? IssueAt { get; set; }
+        public bool IsActive { get; set; }
 
         public DbUser User { get; set; }
     }
