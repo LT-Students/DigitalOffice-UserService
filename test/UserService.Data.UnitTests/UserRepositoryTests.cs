@@ -297,8 +297,10 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldRemoveEducationSuccesful()
         {
+            _dbUserEducation.IsActive = true;
+
             Assert.IsTrue(_repository.RemoveEducation(_dbUserEducation));
-            Assert.IsFalse(_provider.UserEducations.Contains(_dbUserEducation));
+            Assert.IsFalse(_dbUserEducation.IsActive);
         }
 
         [Test]
