@@ -40,9 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-
             var dbUser = _repository.Get(senderId);
-
             if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
                   && senderId != request.UserId)

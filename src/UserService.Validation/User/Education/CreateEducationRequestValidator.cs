@@ -14,11 +14,13 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
 
             RuleFor(education => education.UniversityName)
                 .NotEmpty()
-                .MaximumLength(50).WithMessage("University name is too long");
+                .MaximumLength(100)
+                .WithMessage("University name is too long");
 
             RuleFor(education => education.QualificationName)
                 .NotEmpty()
-                .MaximumLength(50).WithMessage("Qualification name is too long");
+                .MaximumLength(100)
+                .WithMessage("Qualification name is too long");
 
             RuleFor(education => education.FormEducation)
                 .IsInEnum().WithMessage("Wrong form education.");

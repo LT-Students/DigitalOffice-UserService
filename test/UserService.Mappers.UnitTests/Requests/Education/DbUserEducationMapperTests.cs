@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenrequestIdNull()
+        public void ShouldThrowExceptionWhenRequestIdNull()
         {
             Assert.Throws<ArgumentNullException>(() => _mapper.Map(null));
         }

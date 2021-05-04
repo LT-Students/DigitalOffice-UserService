@@ -15,7 +15,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
         private EditEducationRequestValidator _validator;
         private JsonPatchDocument<EditEducationRequest> _request;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             _validator = new EditEducationRequestValidator();
