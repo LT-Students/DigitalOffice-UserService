@@ -80,7 +80,7 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
                                         return DateTime.TryParse(value, out _);
                                     }
 
-                                    return true;
+                                    return false;
                                 });
                     });
 
