@@ -10,5 +10,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education
         public FormEducation FormEducation { get; set; }
         public DateTime AdmissionAt { get; set; }
         public DateTime? IssueAt { get; set; }
+        public bool IsActive { get; set; }
     }
 }

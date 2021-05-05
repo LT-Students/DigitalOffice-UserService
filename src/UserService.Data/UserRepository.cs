@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (filter.IncludeEducations.HasValue && filter.IncludeEducations.Value)
             {
-                dbUsers = dbUsers.Include(u => u.Educations);
+                dbUsers = dbUsers.Include(u => u.Educations.Where(e => e.IsActive));
             }
 
             if (filter.IncludeAchievements.HasValue && filter.IncludeAchievements.Value)

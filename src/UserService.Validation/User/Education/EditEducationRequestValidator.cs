@@ -18,7 +18,8 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
                 $"/{nameof(EditEducationRequest.QualificationName)}",
                 $"/{nameof(EditEducationRequest.FormEducation)}",
                 $"/{nameof(EditEducationRequest.AdmissionAt)}",
-                $"/{nameof(EditEducationRequest.IssueAt)}"
+                $"/{nameof(EditEducationRequest.IssueAt)}",
+                $"/{nameof(EditEducationRequest.IsActive)}"
             };
 
         public EditEducationRequestValidator()
@@ -65,6 +66,18 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
                                     else if (o.path.EndsWith(nameof(EditEducationRequest.FormEducation), StringComparison.OrdinalIgnoreCase))
                                     {
                                         return Enum.TryParse(typeof(FormEducation), value, out _);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditEducationRequest.IsActive), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return bool.TryParse(value, out _);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditEducationRequest.AdmissionAt), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return DateTime.TryParse(value, out _);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditEducationRequest.IssueAt), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return DateTime.TryParse(value, out _);
                                     }
 
                                     return true;

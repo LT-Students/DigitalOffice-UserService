@@ -104,5 +104,53 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
 
             _validator.TestValidate(_request).ShouldHaveAnyValidationError();
         }
+
+        [Test]
+        public void ShouldThrowExceptionWhenIsActiveIncorrect()
+        {
+            _request = new JsonPatchDocument<EditEducationRequest>(
+                new List<Operation<EditEducationRequest>>
+                {
+                        new Operation<EditEducationRequest>(
+                            "replace",
+                            $"/isactive",
+                            "",
+                            "not bool")
+                }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(_request).ShouldHaveAnyValidationError();
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenAdmissionAtIncorrect()
+        {
+            _request = new JsonPatchDocument<EditEducationRequest>(
+                new List<Operation<EditEducationRequest>>
+                {
+                        new Operation<EditEducationRequest>(
+                            "replace",
+                            $"/admissionat",
+                            "",
+                            "not time")
+                }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(_request).ShouldHaveAnyValidationError();
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenIssueAtIncorrect()
+        {
+            _request = new JsonPatchDocument<EditEducationRequest>(
+                new List<Operation<EditEducationRequest>>
+                {
+                        new Operation<EditEducationRequest>(
+                            "replace",
+                            $"/issueat",
+                            "",
+                            "not time")
+                }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(_request).ShouldHaveAnyValidationError();
+        }
     }
 }
