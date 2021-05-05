@@ -15,33 +15,20 @@ namespace LT.DigitalOffice.UserService.Validation.User
     {
         private static List<string> Paths => new List<string>
         {
-            FirstName,
-            LastName,
-            MiddleName,
-            AvatarImage,
-            Status
+            $"/{nameof(EditUserRequest.FirstName)}",
+            $"/{nameof(EditUserRequest.MiddleName)}",
+            $"/{nameof(EditUserRequest.LastName)}",
+            $"/{nameof(EditUserRequest.Image)}",
+            $"/{nameof(EditUserRequest.Status)}",
+            $"/{nameof(EditUserRequest.Rate)}"
         };
-        
-        public static string FirstName => $"/{nameof(EditUserRequest.FirstName)}";
-        public static string LastName => $"/{nameof(EditUserRequest.LastName)}";
-        public static string MiddleName => $"/{nameof(EditUserRequest.MiddleName)}";
-        public static string AvatarImage => $"/{nameof(EditUserRequest.AvatarImage)}";
-        public static string Status => $"/{nameof(EditUserRequest.Status)}";
-
-        Func<JsonPatchDocument<EditUserRequest>, string, Operation> GetOperationByPath =>
-            (x, path) =>
-                x.Operations.FirstOrDefault(x =>
-                    string.Equals(
-                        x.path,
-                        path,
-                        StringComparison.OrdinalIgnoreCase));
 
         public EditUserRequestValidator()
         {
             RuleFor(x => x.Operations)
                 .Must(x =>
                     x.Select(x => x.path)
-                        .Distinct().Count() == x.Count()
+                        .Distinct().Count() == x.Count
                 )
                 .WithMessage("You don't have to change the same field of Project multiple times.")
                 .Must(x => x.Any())
@@ -53,6 +40,47 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 )
                 .DependentRules(() =>
                 {
+                    When(o => o.Operations != null, () =>
+                    {
+                        RuleForEach(x => x.Operations)
+                            .Must(o =>
+                            {
+                                string value = o.value?.ToString();
+
+                                if (string.IsNullOrEmpty(value))
+                                {
+                                    return false;
+                                }
+
+                                if (o.path.EndsWith(nameof(EditEducationRequest.UniversityName), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return value.Length < 100;
+                                }
+                                else if (o.path.EndsWith(nameof(EditEducationRequest.QualificationName), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return value.Length < 100;
+                                }
+                                else if (o.path.EndsWith(nameof(EditEducationRequest.FormEducation), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return Enum.TryParse(typeof(FormEducation), value, out _);
+                                }
+                                else if (o.path.EndsWith(nameof(EditEducationRequest.IsActive), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return bool.TryParse(value, out _);
+                                }
+                                else if (o.path.EndsWith(nameof(EditEducationRequest.AdmissionAt), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return DateTime.TryParse(value, out _);
+                                }
+                                else if (o.path.EndsWith(nameof(EditEducationRequest.IssueAt), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return DateTime.TryParse(value, out _);
+                                }
+
+                                return true;
+                            });
+                    });
+
                     When(x => GetOperationByPath(x, FirstName) != null, () =>
                     {
                         RuleFor(x => x.Operations)
@@ -64,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                             .MinimumLength(1).WithMessage("First name is too short.")
                             .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("First name with error.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, LastName) != null, () =>
                     {
                         RuleFor(x => x.Operations)
@@ -87,16 +115,16 @@ namespace LT.DigitalOffice.UserService.Validation.User
                             .MinimumLength(1).WithMessage("Middle name is too short.")
                             .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, Status) != null, () =>
                     {
                         RuleFor(x => x.Operations)
                             .UniqueOperationWithAllowedOp(Status, "add", "replace", "remove");
-                        
+
                         RuleFor(x => (UserStatus) GetOperationByPath(x, Status).value)
                             .IsInEnum().WithMessage("Wrong status value.");
                     });
-                    
+
                     When(x => GetOperationByPath(x, AvatarImage) != null, () =>
                     {
                         RuleFor(x => x.Operations)
@@ -109,6 +137,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                                 .TryFromBase64String(x, new Span<byte>(new byte[x.Length]), out _));
                     });
                 });
-        }        
+        }
     }
 }
