@@ -232,7 +232,8 @@ namespace LT.DigitalOffice.UserService
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                });
+                })
+                .AddNewtonsoftJson();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -247,7 +248,7 @@ namespace LT.DigitalOffice.UserService
 
             app.UseRouting();
 
-            app.UseMiddleware<TokenMiddleware>();
+            //app.UseMiddleware<TokenMiddleware>();
 
             app.UseCors(CorsPolicyName);
 

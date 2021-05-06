@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Broker.Requests;
+using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -31,40 +33,42 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<EditUserCommand> _logger;
         private readonly IRequestClient<IAddImageRequest> _rcImage;
 
-        private Guid? GetAvatarImageId(string avatarRequest, List<string> errors)
+        private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
         {
             Guid? avatarImageId = null;
 
-            if (!string.IsNullOrEmpty(avatarRequest))
+            Guid userId = _httpContext.GetUserId();
+
+            string errorMessage = "Can not add avatar image to user {userId}. Please try again later.";
+
+            try
             {
-                string errorMessage = $"Can not add avatar image to user. Please try again later.";
+                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
+                    IAddImageRequest.CreateObj(
+                        avatarRequest.Name,
+                        avatarRequest.Content,
+                        avatarRequest.Extension,
+                        userId)).Result;
 
-                try
+                if (!response.Message.IsSuccess)
                 {
-                    Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
-                        IAddImageRequest.CreateObj(avatarRequest),
-                        default,
-                        timeout: RequestTimeout.After(ms: 500)).Result;
-
-                    if (!response.Message.IsSuccess)
-                    {
-                        _logger.LogWarning(
-                            $"Can not add avatar image. Reason: '{string.Join(',', response.Message.Errors)}'");
-
-                        errors.Add(errorMessage);
-                    }
-                    else
-                    {
-                        avatarImageId = response.Message.Body;
-                    }
-                }
-                catch (Exception exc)
-                {
-                    _logger.LogError(exc, errorMessage);
+                    _logger.LogWarning(
+                        "Can not add avatar image to user {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
 
                     errors.Add(errorMessage);
                 }
+                else
+                {
+                    avatarImageId = response.Message.Body.Id;
+                }
             }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, errorMessage, userId);
+
+                errors.Add(errorMessage);
+            }
+
             return avatarImageId;
         }
 
@@ -89,18 +93,28 @@ namespace LT.DigitalOffice.UserService.Business
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
-            if (userId != _httpContext.GetUserId()
-                    && !_accessValidator.IsAdmin()
-                    && !_accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers))
+            /*bool isAdmin = _accessValidator.IsAdmin();
+            bool hasRight = _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers);
+            bool hasEditRate = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null;
+
+            if (!(isAdmin || hasRight || (userId == _httpContext.GetUserId() && !hasEditRate)))
             {
                 throw new ForbiddenException("Not enough rights.");
-            }
+            }*/
 
             List<string> errors = new List<string>();
 
             _validator.ValidateAndThrowCustom(patch);
 
-            var dbUserPatch = _mapperUser.Map(patch, s => GetAvatarImageId(s, errors), userId);
+            var imageOperation = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase));
+            Guid? imageId = null;
+
+            if (imageOperation != null)
+            {
+                imageId = GetAvatarImageId((AddImageRequest)imageOperation.value, errors);
+            }
+
+            var dbUserPatch = _mapperUser.Map(patch, imageId, userId);
             _userRepository.EditUser(userId, dbUserPatch);
 
             return new OperationResultResponse<bool>

@@ -105,7 +105,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mapperUserMock
                 .Setup(x => x.Map(
-                    It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Func<string, Guid?>>(), It.IsAny<Guid>()))
+                    It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Guid?>(), It.IsAny<Guid>()))
                 .Returns(_patchDbUser);
 
             _userRepositoryMock
@@ -163,7 +163,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             ClientRequestUp(Guid.NewGuid());
-            
+
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
             _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);
@@ -177,7 +177,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(false);
 
             ClientRequestUp(Guid.NewGuid());
-            
+
             Assert.AreEqual(_command.Execute(_userId, _request).Status, OperationResultStatusType.FullSuccess);
             _userRepositoryMock.Verify(repository =>
                 repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Once);

@@ -39,28 +39,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
 
             var userId = Guid.NewGuid();
 
-            var dbUserCertificate = new DbUserCertificate
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                SchoolName = "It university",
-                EducationType = 1,
-                ImageId = Guid.NewGuid(),
-                Name = "Hackerman",
-                ReceivedAt = DateTime.UtcNow
-            };
-
-            var newDbUserCertificate = new DbUserCertificate
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                SchoolName = "1C school",
-                EducationType = 1,
-                ImageId = Guid.NewGuid(),
-                Name = "1С",
-                ReceivedAt = DateTime.UtcNow
-            };
-
             _dbUser = new DbUser
             {
                 Id = userId,
@@ -68,11 +46,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 LastName = "Ivanov",
                 MiddleName = "Ivanovich",
                 CreatedAt = DateTime.Now,
-                IsActive = true,
-                Certificates = new List<DbUserCertificate>
-                {
-                    dbUserCertificate
-                }
+                IsActive = true
             };
 
             _editdBUser = new DbUser
@@ -83,21 +57,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 MiddleName = "Middlename",
                 CreatedAt = _dbUser.CreatedAt,
                 Status = (int)UserStatus.Vacation,
-                IsActive = true,
-                Certificates = new List<DbUserCertificate>
-                {
-                    new DbUserCertificate
-                    {
-                        Id = dbUserCertificate.Id,
-                        UserId = dbUserCertificate.UserId,
-                        SchoolName = "School",
-                        EducationType = dbUserCertificate.EducationType,
-                        ImageId = dbUserCertificate.ImageId,
-                        Name = "Programmer",
-                        ReceivedAt = dbUserCertificate.ReceivedAt
-                    },
-                    newDbUserCertificate
-                }
+                AvatarFileId = Guid.NewGuid(),
+                IsActive = true
             };
 
             _userPatch = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
@@ -123,30 +84,15 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                     "",
                     _editdBUser.Status),
                 new Operation<DbUser>(
-                    "add",
-                    $"/{nameof(DbUser.Certificates)}/-",
+                    "replace",
+                    $"/{nameof(DbUser.Rate)}",
                     "",
-                    newDbUserCertificate),
+                    _editdBUser.Rate),
                 new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Id)}",
+                    $"/{nameof(DbUser.AvatarFileId)}",
                     "",
-                    dbUserCertificate.Id),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.EducationType)}",
-                    "",
-                    1),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.SchoolName)}",
-                    "",
-                    "School"),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Certificates)}/0/{nameof(DbUserCertificate.Name)}",
-                    "",
-                    "Programmer"),
+                    _editdBUser.AvatarFileId)
             }, new CamelCasePropertyNamesContractResolver());
 
             _dbContext = new DbContextOptionsBuilder<UserServiceDbContext>()

@@ -14,6 +14,7 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
@@ -123,38 +124,40 @@ namespace LT.DigitalOffice.UserService.Business
             }
         }
 
-        private Guid? GetAvatarImageId(CreateUserRequest request, List<string> errors)
+        private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
         {
             Guid? avatarImageId = null;
 
-            if (!string.IsNullOrEmpty(request.AvatarImage))
+            Guid userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            string errorMessage = "Can not add avatar image to user {userId}. Please try again later.";
+
+            try
             {
-                string errorMessage = $"Can not add avatar image to user. Please try again later.";
+                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
+                    IAddImageRequest.CreateObj(
+                        avatarRequest.Name,
+                        avatarRequest.Content,
+                        avatarRequest.Extension,
+                        userId)).Result;
 
-                try
+                if (!response.Message.IsSuccess)
                 {
-                    Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
-                        IAddImageRequest.CreateObj(request.AvatarImage),
-                        default,
-                        timeout: RequestTimeout.After(ms: 500)).Result;
-
-                    if (!response.Message.IsSuccess)
-                    {
-                        _logger.LogWarning($"Can not add avatar image. Reason: '{string.Join(',', response.Message.Errors)}'");
-
-                        errors.Add(errorMessage);
-                    }
-                    else
-                    {
-                        avatarImageId = response.Message.Body;
-                    }
-                }
-                catch (Exception exc)
-                {
-                    _logger.LogError(exc, errorMessage);
+                    _logger.LogWarning(
+                        "Can not add avatar image to user {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
 
                     errors.Add(errorMessage);
                 }
+                else
+                {
+                    avatarImageId = response.Message.Body.Id;
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, errorMessage, userId);
+
+                errors.Add(errorMessage);
             }
 
             return avatarImageId;
@@ -200,7 +203,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             List<string> errors = new();
 
-            Guid? avatarImageId = GetAvatarImageId(request, errors);
+            Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, errors);
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FluentValidation;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
@@ -18,10 +18,42 @@ namespace LT.DigitalOffice.UserService.Validation.User
             $"/{nameof(EditUserRequest.FirstName)}",
             $"/{nameof(EditUserRequest.MiddleName)}",
             $"/{nameof(EditUserRequest.LastName)}",
-            $"/{nameof(EditUserRequest.Image)}",
+            $"/{nameof(EditUserRequest.AvatarImage)}",
             $"/{nameof(EditUserRequest.Status)}",
             $"/{nameof(EditUserRequest.Rate)}"
         };
+
+        private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
+
+        private bool ValidateFirstName(string value)
+        {
+            return value.Length < 32 && NameRegex.Match(value).Success;
+        }
+
+        private bool ValidateLastName(string value)
+        {
+            return value.Length < 100 && NameRegex.Match(value).Success;
+        }
+
+        private bool ValidateMiddleName(string value)
+        {
+            return value.Length < 32 && NameRegex.Match(value).Success;
+        }
+
+        private bool ValidateRate(string value)
+        {
+            return double.TryParse(value, out _);
+        }
+
+        private bool ValidateAvatarImage(object value)
+        {
+            return value is AddImageRequest;
+        }
+
+        private bool ValidateStatus(string value)
+        {
+            return Enum.TryParse(typeof(UserStatus), value, out _);
+        }
 
         public EditUserRequestValidator()
         {
@@ -52,89 +84,54 @@ namespace LT.DigitalOffice.UserService.Validation.User
                                     return false;
                                 }
 
-                                if (o.path.EndsWith(nameof(EditEducationRequest.UniversityName), StringComparison.OrdinalIgnoreCase))
+                                if (o.OperationType == OperationType.Replace)
                                 {
-                                    return value.Length < 100;
+                                    if (o.path.EndsWith(nameof(EditUserRequest.FirstName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateFirstName(value);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditUserRequest.LastName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateLastName(value);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditUserRequest.MiddleName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateMiddleName(value);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateRate(value);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateStatus(value);
+                                    }
+                                    else if (o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateAvatarImage(o.value);
+                                    }
                                 }
-                                else if (o.path.EndsWith(nameof(EditEducationRequest.QualificationName), StringComparison.OrdinalIgnoreCase))
+                                else if (o.OperationType == OperationType.Remove)
                                 {
-                                    return value.Length < 100;
+                                    if (o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateAvatarImage(o.value);
+                                    }
                                 }
-                                else if (o.path.EndsWith(nameof(EditEducationRequest.FormEducation), StringComparison.OrdinalIgnoreCase))
+                                else if (o.OperationType == OperationType.Add)
                                 {
-                                    return Enum.TryParse(typeof(FormEducation), value, out _);
-                                }
-                                else if (o.path.EndsWith(nameof(EditEducationRequest.IsActive), StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return bool.TryParse(value, out _);
-                                }
-                                else if (o.path.EndsWith(nameof(EditEducationRequest.AdmissionAt), StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return DateTime.TryParse(value, out _);
-                                }
-                                else if (o.path.EndsWith(nameof(EditEducationRequest.IssueAt), StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return DateTime.TryParse(value, out _);
+                                    if (o.path.EndsWith(nameof(EditUserRequest.MiddleName), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateMiddleName(value);
+                                    }
+                                    if (o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ValidateAvatarImage(o.value);
+                                    }
                                 }
 
-                                return true;
+                                return false;
                             });
-                    });
-
-                    When(x => GetOperationByPath(x, FirstName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(FirstName, "replace");
-
-                        RuleFor(x => (string) GetOperationByPath(x, FirstName).value)
-                            .NotEmpty()
-                            .MaximumLength(32).WithMessage("First name is too long.")
-                            .MinimumLength(1).WithMessage("First name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("First name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, LastName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(LastName, "replace");
-
-                        RuleFor(x => (string) GetOperationByPath(x, LastName).value)
-                            .NotEmpty()
-                            .MaximumLength(32).WithMessage("Last name is too long.")
-                            .MinimumLength(1).WithMessage("Last name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Last name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, MiddleName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(MiddleName, "add", "replace", "remove");
-
-                        RuleFor(x => (string) GetOperationByPath(x, MiddleName).value)
-                            .MaximumLength(32).WithMessage("Middle name is too long.")
-                            .MinimumLength(1).WithMessage("Middle name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, Status) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(Status, "add", "replace", "remove");
-
-                        RuleFor(x => (UserStatus) GetOperationByPath(x, Status).value)
-                            .IsInEnum().WithMessage("Wrong status value.");
-                    });
-
-                    When(x => GetOperationByPath(x, AvatarImage) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(AvatarImage, "add", "replace", "remove");
-
-                        RuleFor(x => (string) GetOperationByPath(x, AvatarImage).value)
-                            .NotEmpty()
-                            .NotNull()
-                            .Must(x => Convert
-                                .TryFromBase64String(x, new Span<byte>(new byte[x.Length]), out _));
                     });
                 });
         }

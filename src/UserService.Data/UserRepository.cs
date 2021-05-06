@@ -112,17 +112,13 @@ namespace LT.DigitalOffice.UserService.Data
 
         public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
         {
+            if (userPatch == null)
+            {
+                throw new ArgumentNullException(nameof(userPatch));
+            }
+
             DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
                             throw new NotFoundException($"User with ID '{id}' was not found.");
-
-            for (int i = 0; i < userPatch.Operations.Count; i++)
-            {
-                if (string.Equals(userPatch.Operations[i].path, $"/{nameof(DbUser.Certificates)}/-"))
-                {
-                    _provider.UserCertificates.Add((DbUserCertificate)userPatch.Operations[i].value);
-                    userPatch.Operations.RemoveAt(i);
-                }
-            }
 
             userPatch.ApplyTo(dbUser);
             _provider.Save();
