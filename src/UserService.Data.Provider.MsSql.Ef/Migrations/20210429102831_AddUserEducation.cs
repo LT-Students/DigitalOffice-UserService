@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                     QualificationName = table.Column<string>(nullable: false),
                     FormEducation = table.Column<int>(nullable: false),
                     AdmissionAt = table.Column<DateTime>(nullable: false),
-                    IssueAt = table.Column<DateTime>(nullable: true),
+                    IssueAt = table.Column<DateTime?>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
