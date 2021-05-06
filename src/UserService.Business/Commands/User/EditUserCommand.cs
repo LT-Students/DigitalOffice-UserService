@@ -16,6 +16,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IEditUserRequestValidator _validator;
         private readonly IAccessValidator _accessValidator;
         private readonly ILogger<EditUserCommand> _logger;
-        private readonly IRequestClient<IAddImageRequest> _rcImage;
+        private readonly IRequestClient<IAddImageRequest> _requestClient;
 
         private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
         {
@@ -39,16 +40,16 @@ namespace LT.DigitalOffice.UserService.Business
 
             Guid userId = _httpContext.GetUserId();
 
-            string errorMessage = "Can not add avatar image to user {userId}. Please try again later.";
+            string errorMessage = $"Can not add avatar image to user {userId}. Please try again later.";
 
             try
             {
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
-                    IAddImageRequest.CreateObj(
-                        avatarRequest.Name,
-                        avatarRequest.Content,
-                        avatarRequest.Extension,
-                        userId)).Result;
+                var imageRequest = IAddImageRequest.CreateObj(
+                    avatarRequest.Name,
+                    avatarRequest.Content,
+                    avatarRequest.Extension,
+                    userId);
+                var response = _requestClient.GetResponse<IOperationResult<IAddImageResponse>>(imageRequest, timeout: TimeSpan.FromSeconds(2)).Result;
 
                 if (!response.Message.IsSuccess)
                 {
@@ -64,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage, userId);
+                _logger.LogError(exc, "Can not add avatar image to user {userId}.", userId);
 
                 errors.Add(errorMessage);
             }
@@ -82,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business
             IAccessValidator accessValidator)
         {
             _logger = logger;
-            _rcImage = rcImage;
+            _requestClient = rcImage;
             _httpContext = httpContextAccessor.HttpContext;
             _validator = validator;
             _userRepository = userRepository;
@@ -93,14 +94,14 @@ namespace LT.DigitalOffice.UserService.Business
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
-            /*bool isAdmin = _accessValidator.IsAdmin();
+            bool isAdmin = _accessValidator.IsAdmin();
             bool hasRight = _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers);
             bool hasEditRate = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null;
 
             if (!(isAdmin || hasRight || (userId == _httpContext.GetUserId() && !hasEditRate)))
             {
                 throw new ForbiddenException("Not enough rights.");
-            }*/
+            }
 
             List<string> errors = new List<string>();
 
@@ -111,7 +112,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (imageOperation != null)
             {
-                imageId = GetAvatarImageId((AddImageRequest)imageOperation.value, errors);
+                imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value.ToString()), errors);
             }
 
             var dbUserPatch = _mapperUser.Map(patch, imageId, userId);

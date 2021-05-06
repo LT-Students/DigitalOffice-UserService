@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -23,7 +24,12 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             foreach (var item in request.Operations)
             {
-                if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
+                if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserStatus), item.value.ToString())));
+                    continue;
+                }
+                else if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;
