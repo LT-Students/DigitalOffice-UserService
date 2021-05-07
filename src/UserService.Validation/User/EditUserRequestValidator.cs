@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.Validators;
@@ -20,7 +21,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
             #region local functions
 
-            void AddСorrectPaths(
+            void AddСorrectPaths(List<string> paths)
+            {
+                if (paths.FirstOrDefault(p => p.EndsWith(requestedOperation.path[1..], StringComparison.OrdinalIgnoreCase)) == null)
+                {
+                    context.AddFailure(requestedOperation.path, $"This path {requestedOperation.path} is not available");
+                }
+            }
+
+            void AddСorrectOperations(
                 string propertyName,
                 List<OperationType> types)
             {
@@ -55,12 +64,23 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #region paths
 
-            AddСorrectPaths(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectPaths(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectPaths(
+                new List<string>
+                {
+                    nameof(EditUserRequest.FirstName),
+                    nameof(EditUserRequest.MiddleName),
+                    nameof(EditUserRequest.LastName),
+                    nameof(EditUserRequest.Status),
+                    nameof(EditUserRequest.Rate),
+                    nameof(EditUserRequest.AvatarImage)
+                });
+
+            AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
 
             #endregion
 
