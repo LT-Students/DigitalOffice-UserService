@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User.Education
 {
@@ -18,7 +17,15 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
         {
             #region local functions
 
-            void AddСorrectPaths(
+            void AddСorrectPaths(List<string> paths)
+            {
+                if (paths.FirstOrDefault(p => p.EndsWith(requestedOperation.path[1..], StringComparison.OrdinalIgnoreCase)) == null)
+                {
+                    context.AddFailure(requestedOperation.path, $"This path {requestedOperation.path} is not available");
+                }
+            }
+
+            void AddСorrectOperations(
                 string propertyName,
                 List<OperationType> types)
             {
@@ -53,14 +60,75 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
 
             #region paths
 
-            AddСorrectPaths(nameof(EditEducationRequest.UniversityName), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditEducationRequest.QualificationName), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditEducationRequest.FormEducation), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditEducationRequest.AdmissionAt), new List<OperationType> { OperationType.Replace });
-            AddСorrectPaths(nameof(EditEducationRequest.IssueAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectPaths(nameof(EditEducationRequest.IsActive), new List<OperationType> { OperationType.Replace });
+            AddСorrectPaths(
+                new List<string>
+                {
+                    nameof(EditEducationRequest.UniversityName),
+                    nameof(EditEducationRequest.QualificationName),
+                    nameof(EditEducationRequest.FormEducation),
+                    nameof(EditEducationRequest.AdmissionAt),
+                    nameof(EditEducationRequest.IssueAt),
+                    nameof(EditEducationRequest.IsActive),
+                });
+
+            AddСorrectOperations(nameof(EditEducationRequest.UniversityName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditEducationRequest.QualificationName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditEducationRequest.FormEducation), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditEducationRequest.AdmissionAt), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditEducationRequest.IssueAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditEducationRequest.IsActive), new List<OperationType> { OperationType.Replace });
 
             #endregion
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.UniversityName),
+                o => o == OperationType.Replace,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value?.ToString()), "UniversityName is too short."},
+                    { x => x.value.ToString().Length < 100, "UniversityName is too long."}
+                });
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.QualificationName),
+                o => o == OperationType.Replace,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value?.ToString()), "QualificationName is too short."},
+                    { x => x.value.ToString().Length < 100, "QualificationName is too long."}
+                });
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.FormEducation),
+                o => o == OperationType.Replace,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => Enum.TryParse(typeof(FormEducation), x.value?.ToString(), out _), "Incorrect format FormEducation"}
+                });
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.IssueAt),
+                o => o == OperationType.Replace || o == OperationType.Add,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => DateTime.TryParse(x.value?.ToString(), out _), "Incorrect format IssueAt"}
+                });
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.AdmissionAt),
+                o => o == OperationType.Replace,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => DateTime.TryParse(x.value?.ToString(), out _), "Incorrect format AdmissionAt"}
+                });
+
+            AddFailureForPropertyIf(
+                nameof(EditEducationRequest.IsActive),
+                o => o == OperationType.Replace,
+                new Dictionary<Func<Operation<EditEducationRequest>, bool>, string>
+                {
+                    { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect format IsActive"}
+                });
         }
 
         public EditEducationRequestValidator()
@@ -68,80 +136,5 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
             RuleForEach(x => x.Operations)
                .Custom(HandleInternalPropertyValidation);
         }
-        //private static List<string> Paths
-        //    => new()
-        //    {
-        //        $"/{nameof(EditEducationRequest.UniversityName)}",
-        //        $"/{nameof(EditEducationRequest.QualificationName)}",
-        //        $"/{nameof(EditEducationRequest.FormEducation)}",
-        //        $"/{nameof(EditEducationRequest.AdmissionAt)}",
-        //        $"/{nameof(EditEducationRequest.IssueAt)}",
-        //        $"/{nameof(EditEducationRequest.IsActive)}"
-        //    };
-
-        //public EditEducationRequestValidator()
-        //{
-        //    CascadeMode = CascadeMode.Stop;
-
-        //    RuleFor(x => x.Operations)
-        //        .Must(x =>
-        //            x.Select(x => x.path)
-        //                .Distinct().Count() == x.Count())
-        //        .WithMessage("You don't have to change the same field of Education multiple times.")
-        //        .Must(x => x.Any())
-        //        .WithMessage("You don't have changes.")
-        //        .ForEach(y => y
-        //            .Must(x => Paths.Any(cur => string.Equals(
-        //                cur,
-        //                x.path,
-        //                StringComparison.OrdinalIgnoreCase)))
-        //            .WithMessage(
-        //                $"Document contains invalid path. Only such paths are allowed: {Paths.Aggregate((x, y) => x + ", " + y)}")
-        //        )
-        //        .DependentRules(() =>
-        //        {
-        //            When(x => x.Operations != null, () =>
-        //            {
-        //                RuleForEach(x => x.Operations)
-        //                    .Must(o =>
-        //                        {
-        //                            string value = o.value?.ToString();
-
-        //                            if (string.IsNullOrEmpty(value))
-        //                            {
-        //                                return false;
-        //                            }
-
-        //                            if (o.path.EndsWith(nameof(EditEducationRequest.UniversityName), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return value.Length < 100;
-        //                            }
-        //                            else if (o.path.EndsWith(nameof(EditEducationRequest.QualificationName), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return value.Length < 100;
-        //                            }
-        //                            else if (o.path.EndsWith(nameof(EditEducationRequest.FormEducation), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return Enum.TryParse(typeof(FormEducation), value, out _);
-        //                            }
-        //                            else if (o.path.EndsWith(nameof(EditEducationRequest.IsActive), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return bool.TryParse(value, out _);
-        //                            }
-        //                            else if (o.path.EndsWith(nameof(EditEducationRequest.AdmissionAt), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return DateTime.TryParse(value, out _);
-        //                            }
-        //                            else if (o.path.EndsWith(nameof(EditEducationRequest.IssueAt), StringComparison.OrdinalIgnoreCase))
-        //                            {
-        //                                return DateTime.TryParse(value, out _);
-        //                            }
-
-        //                            return false;
-        //                        });
-        //            });
-
-        //        });
-        //}
     }
 }
