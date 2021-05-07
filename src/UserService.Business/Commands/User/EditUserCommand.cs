@@ -101,7 +101,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var status = OperationResultStatusType.FullSuccess;
 
-            bool isAdmin = _accessValidator.IsAdmin();
+            bool isAdmin = _userRepository.Get(_httpContext.GetUserId()).IsAdmin;
             bool hasRight = _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers);
             bool hasEditRate = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null;
 

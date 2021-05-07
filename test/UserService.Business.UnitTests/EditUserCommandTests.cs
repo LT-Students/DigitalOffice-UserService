@@ -45,6 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private IEditUserCommand _command;
         private ValidationResult _validationResultError;
 
+        private Guid _adminId = Guid.NewGuid();
         private Guid _userId = Guid.NewGuid();
         private Guid _imageId = Guid.NewGuid();
 
@@ -167,7 +168,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _loggerMock = new Mock<ILogger<EditUserCommand>>();
             _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
 
-            ClientRequestUp(_userId);
+            ClientRequestUp(_adminId);
 
             _command = new EditUserCommand(
                 _loggerMock.Object,
@@ -177,10 +178,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 _userRepositoryMock.Object,
                 _mapperUserMock.Object,
                 _accessValidatorMock.Object);
-
-            _accessValidatorMock
-                .Setup(x => x.IsAdmin(null))
-                .Returns(true);
 
             _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
@@ -194,6 +191,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(
                     It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Guid?>(), It.IsAny<Guid>()))
                 .Returns(_patchDbUser);
+
+            _userRepositoryMock
+                .Setup(x => x.Get(_adminId))
+                .Returns(new DbUser { Id = _adminId, IsAdmin = true });
 
             _userRepositoryMock
                 .Setup(x => x.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()))
@@ -238,14 +239,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         public void ShouldThrowExceptionWhenCurrentUserIsNotAdminAndNotHaveRights()
         {
             _accessValidatorMock
-                .Setup(x => x.IsAdmin(null))
-                .Returns(false);
-
-            _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(false);
 
-            ClientRequestUp(Guid.NewGuid());
+            var userId = Guid.NewGuid();
+            ClientRequestUp(userId);
+            _userRepositoryMock
+                .Setup(x => x.Get(userId))
+                .Returns(new DbUser { Id = userId, IsAdmin = false });
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _request));
             _userRepositoryMock.Verify(repository =>
