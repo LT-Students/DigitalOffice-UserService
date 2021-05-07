@@ -128,9 +128,14 @@ namespace LT.DigitalOffice.UserService.Business
         {
             Guid? avatarImageId = null;
 
+            if (avatarRequest is null)
+            {
+                return avatarImageId;
+            }
+
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            string errorMessage = "Can not add avatar image to user {userId}. Please try again later.";
+            string errorMessage = $"Can not add avatar image to user {userId}. Please try again later.";
 
             try
             {

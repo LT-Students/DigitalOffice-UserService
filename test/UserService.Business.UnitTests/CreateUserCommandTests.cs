@@ -10,6 +10,7 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
@@ -37,10 +38,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IRequestClient<IChangeUserDepartmentRequest>> _rcDepartmentMock;
         private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
 
-        private Mock<IOperationResult<Guid>> _operationResultAddImageMock;
+        private Mock<IOperationResult<IAddImageResponse>> _operationResultAddImageMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
         private Mock<IOperationResult<IGetEmailTemplateTagsResponse>> _operationResultGetTempTagsMock;
 
+        private Guid _imageId = Guid.NewGuid();
         private DbUser _dbUser;
         private ICreateUserCommand _command;
         private CreateUserRequest _createUserRequest;
@@ -50,18 +52,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         #region Broker setup
         private void RcAddImageSetUp()
         {
-            _operationResultAddImageMock = new Mock<IOperationResult<Guid>>();
-            _operationResultAddImageMock.Setup(x => x.Body).Returns(Guid.NewGuid());
+            _operationResultAddImageMock = new Mock<IOperationResult<IAddImageResponse>>();
+            _operationResultAddImageMock.Setup(x => x.Body.Id).Returns(_imageId);
             _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(true);
             _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
 
-            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<Guid>>>();
+            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<IAddImageResponse>>>();
             responseBrokerAddImageMock
                .SetupGet(x => x.Message)
                .Returns(_operationResultAddImageMock.Object);
 
             _rcImageMock.Setup(
-                x => x.GetResponse<IOperationResult<Guid>>(
+                x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
         }
@@ -142,7 +144,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 MiddleName = "Ivanovich",
                 Status = UserStatus.Vacation,
                 Password = "12341234",
-                //AvatarImage = "[84][104][105][115][32]",
+                AvatarImage = new AddImageRequest
+                {
+                    Name = "name",
+                    Content = "[84][104][105][115][32]",
+                    Extension = ".jpg"
+                },
                 StartWorkingAt = "2021-08-23",
                 IsAdmin = false
             };
@@ -162,7 +169,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 LastName = _createUserRequest.LastName,
                 MiddleName = _createUserRequest.MiddleName,
                 Status = (int)_createUserRequest.Status,
-                AvatarFileId = null,//Guid.NewGuid(),
+                AvatarFileId = _imageId,
                 IsAdmin = (bool)_createUserRequest.IsAdmin,
                 IsActive = true,
                 Communications = new List<DbUserCommunication>
@@ -220,7 +227,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
 
             var messageError = new List<string>();
-            messageError.Add($"Can not add avatar image to user. Please try again later.");
+            messageError.Add($"Can not add avatar image to user {_dbUser.Id}. Please try again later.");
 
             _expectedOperationResultResponse.Errors = messageError;
 
@@ -277,7 +284,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(true);
 
             _mapperUserMock
-                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body))
+                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body.Id))
                 .Returns(_dbUser);
 
             _userRepositoryMock
@@ -299,7 +306,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(true);
 
             _mapperUserMock
-                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body))
+                .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body.Id))
                 .Returns(_dbUser);
 
             _userRepositoryMock

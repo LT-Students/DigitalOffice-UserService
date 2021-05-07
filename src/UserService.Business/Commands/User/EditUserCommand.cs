@@ -38,6 +38,11 @@ namespace LT.DigitalOffice.UserService.Business
         {
             Guid? avatarImageId = null;
 
+            if (avatarRequest is null)
+            {
+                return avatarImageId;
+            }
+
             Guid userId = _httpContext.GetUserId();
 
             string errorMessage = $"Can not add avatar image to user {userId}. Please try again later.";
@@ -94,6 +99,8 @@ namespace LT.DigitalOffice.UserService.Business
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
+            var status = OperationResultStatusType.FullSuccess;
+
             bool isAdmin = _accessValidator.IsAdmin();
             bool hasRight = _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers);
             bool hasEditRate = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null;
@@ -112,7 +119,11 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (imageOperation != null)
             {
-                imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value.ToString()), errors);
+                imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
+                if (imageId is null)
+                {
+                    status = OperationResultStatusType.PartialSuccess;
+                }
             }
 
             var dbUserPatch = _mapperUser.Map(patch, imageId, userId);
@@ -120,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             return new OperationResultResponse<bool>
             {
-                Status = OperationResultStatusType.FullSuccess,
+                Status = status,
                 Body = true,
                 Errors = errors
             };

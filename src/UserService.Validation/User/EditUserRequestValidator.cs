@@ -171,7 +171,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                                 return false;
                             }
                         },
-                        "Incorrect rate format"
+                        "Incorrect Image format"
                     }
             });
 
