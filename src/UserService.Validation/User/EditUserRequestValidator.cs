@@ -161,7 +161,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             if (double.TryParse(x.value?.ToString(), out double rate))
                             {
-                                return rate < 3; // I am not sure
+                                return rate <= 1;
                             }
 
                             return false;

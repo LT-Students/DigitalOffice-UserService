@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                     "replace",
                     $"/{nameof(EditUserRequest.Rate)}",
                     "",
-                    2)
+                    1)
             }, new CamelCasePropertyNamesContractResolver());
         }
 
