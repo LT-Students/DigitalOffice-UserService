@@ -227,7 +227,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
 
             var messageError = new List<string>();
-            messageError.Add($"Can not add avatar image to user {_dbUser.Id}. Please try again later.");
+            messageError.Add($"Can not add avatar image to user with id {_dbUser.Id}. Please try again later.");
 
             _expectedOperationResultResponse.Errors = messageError;
 
