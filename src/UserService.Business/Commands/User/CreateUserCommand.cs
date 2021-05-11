@@ -135,7 +135,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            string errorMessage = $"Can not add avatar image to user {userId}. Please try again later.";
+            string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
 
             try
             {
@@ -149,7 +149,7 @@ namespace LT.DigitalOffice.UserService.Business
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        "Can not add avatar image to user {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
 
                     errors.Add(errorMessage);
                 }
@@ -160,7 +160,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage, userId);
+                _logger.LogError(exc, "Can not add avatar image to user with id {userId}.", userId);
 
                 errors.Add(errorMessage);
             }

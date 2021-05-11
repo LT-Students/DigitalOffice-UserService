@@ -7,10 +7,10 @@ namespace LT.DigitalOffice.Broker.Requests
     [AutoInjectRequest(nameof(RabbitMqConfig.AddImageEndpoint))]
     public interface IAddImageRequest
     {
-        public string Name { get; set; }
-        public string Content { get; set; }
-        public string Extension { get; set; }
-        public Guid UserId { get; set; }
+        string Name { get; set; }
+        string Content { get; set; }
+        string Extension { get; set; }
+        Guid UserId { get; set; }
 
         static object CreateObj(
             string name,
