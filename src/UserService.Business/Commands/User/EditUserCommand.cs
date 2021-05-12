@@ -29,7 +29,6 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly HttpContext _httpContext;
         private readonly IUserRepository _userRepository;
         private readonly IPatchDbUserMapper _mapperUser;
-        private readonly IEditUserRequestValidator _validator;
         private readonly IAccessValidator _accessValidator;
         private readonly ILogger<EditUserCommand> _logger;
         private readonly IRequestClient<IAddImageRequest> _requestClient;
@@ -82,7 +81,6 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<EditUserCommand> logger,
             IRequestClient<IAddImageRequest> rcImage,
             IHttpContextAccessor httpContextAccessor,
-            IEditUserRequestValidator validator,
             IUserRepository userRepository,
             IPatchDbUserMapper mapperUser,
             IAccessValidator accessValidator)
@@ -90,7 +88,6 @@ namespace LT.DigitalOffice.UserService.Business
             _logger = logger;
             _requestClient = rcImage;
             _httpContext = httpContextAccessor.HttpContext;
-            _validator = validator;
             _userRepository = userRepository;
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
@@ -111,8 +108,6 @@ namespace LT.DigitalOffice.UserService.Business
             }
 
             List<string> errors = new List<string>();
-
-            _validator.ValidateAndThrowCustom(patch);
 
             var imageOperation = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase));
             Guid? imageId = null;

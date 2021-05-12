@@ -6,14 +6,13 @@ using FluentValidation;
 using FluentValidation.Validators;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json;
 
 namespace LT.DigitalOffice.UserService.Validation.User
 {
-    public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>, IEditUserRequestValidator
+    public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
     {
         private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
 

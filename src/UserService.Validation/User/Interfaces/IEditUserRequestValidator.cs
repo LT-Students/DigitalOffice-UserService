@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.UserService.Validation.User.Interfaces
 {
-    [AutoInject]
     public interface IEditUserRequestValidator : IValidator<JsonPatchDocument<EditUserRequest>>
     {
     }

@@ -30,8 +30,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
     public class EditUserCommandTests
     {
         private Mock<IUserRepository> _userRepositoryMock;
-        private Mock<IEditUserRequestValidator> _validatorMock;
-        private Mock<ValidationResult> _validationResultIsValidMock;
         private Mock<IPatchDbUserMapper> _mapperUserMock;
         private Mock<IAccessValidator> _accessValidatorMock;
         private Mock<IHttpContextAccessor> _httpAccessorMock;
@@ -150,8 +148,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     new ValidationFailure("error", "something", null)
                 });
 
-            _validationResultIsValidMock = new Mock<ValidationResult>();
-
             _httpAccessorMock = new Mock<IHttpContextAccessor>();
         }
 
@@ -162,7 +158,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mapperUserMock = new Mock<IPatchDbUserMapper>();
 
-            _validatorMock = new Mock<IEditUserRequestValidator>();
             _accessValidatorMock = new Mock<IAccessValidator>();
 
             _loggerMock = new Mock<ILogger<EditUserCommand>>();
@@ -174,7 +169,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 _loggerMock.Object,
                 _rcImageMock.Object,
                 _httpAccessorMock.Object,
-                _validatorMock.Object,
                 _userRepositoryMock.Object,
                 _mapperUserMock.Object,
                 _accessValidatorMock.Object);
@@ -182,10 +176,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _accessValidatorMock
                 .Setup(x => x.HasRights(It.IsAny<int>()))
                 .Returns(true);
-
-            _validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(_validationResultIsValidMock.Object);
 
             _mapperUserMock
                 .Setup(x => x.Map(
@@ -200,25 +190,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()))
                 .Returns(true);
 
-            _validationResultIsValidMock
-                .Setup(x => x.IsValid)
-                .Returns(true);
-
             RcAddImageSetUp();
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenUserDataIsInvalid()
-        {
-            _validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()))
-                .Returns(_validationResultError);
-
-            Assert.Throws<ValidationException>(() => _command.Execute(_userId, _request));
-            _userRepositoryMock.Verify(repository =>
-                repository.EditUser(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbUser>>()), Times.Never);
-            _rcImageMock.Verify(x =>
-                x.GetResponse<IOperationResult<IAddImageResponse>>(It.IsAny<object>(), default, TimeSpan.FromSeconds(2)), Times.Never);
         }
 
         [Test]

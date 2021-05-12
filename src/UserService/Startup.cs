@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -7,12 +9,15 @@ using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Validation.User;
 using MassTransit;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +28,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -224,11 +231,18 @@ namespace LT.DigitalOffice.UserService
 
             ConfigureMassTransit(services);
 
+            //string path = Path.Combine(
+            //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+            //    "LT.DigitalOffice.UserService.Validation.dll");
+            services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
+
             services
                 .AddControllers(options =>
                 {
                     options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
                 }) // TODO check enum serialization from request without .AddJsonOptions()
+                   //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
+                .AddFluentValidation()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
