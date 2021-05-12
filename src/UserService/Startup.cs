@@ -231,6 +231,7 @@ namespace LT.DigitalOffice.UserService
 
             ConfigureMassTransit(services);
 
+            //this will be used when all validation takes place on the pipeline
             //string path = Path.Combine(
             //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
             //    "LT.DigitalOffice.UserService.Validation.dll");
@@ -241,7 +242,8 @@ namespace LT.DigitalOffice.UserService
                 {
                     options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
                 }) // TODO check enum serialization from request without .AddJsonOptions()
-                   //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
+                //this will be used when all validation takes place on the pipeline
+                //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
                 .AddFluentValidation()
                 .AddJsonOptions(options =>
                 {
