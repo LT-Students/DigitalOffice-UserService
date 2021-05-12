@@ -116,14 +116,15 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 var response = _rcProjects.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-                    IGetUserProjectsInfoRequest.CreateObj(userId)).Result.Message;
+                    IGetUserProjectsInfoRequest.CreateObj(userId),
+                    timeout: RequestTimeout.Default).Result.Message;
                 /*IOperationResult<IProjectsResponse> response = _rcProjects.GetResponse<IOperationResult<IProjectsResponse>>(
                     IGetUserProjectsRequest.CreateObj(userId)).Result.Message;*/
 
                 if (response.IsSuccess)
                 {
                     /*var projects = new List<ProjectInfo>();
-
+                    0
                     foreach(var project in response.Body.Projects)
                     {
                         projects.Add(new ProjectInfo
