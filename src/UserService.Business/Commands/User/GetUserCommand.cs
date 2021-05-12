@@ -26,8 +26,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserResponseMapper _mapper;
         private readonly IRequestClient<IGetDepartmentRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
-        private readonly IRequestClient<IGetUserProjectsRequest> _rcProjects;
-        private readonly IRequestClient<IGetProjectRequest> _rcProject;
+        private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
         private readonly IRequestClient<IGetFileRequest> _rcFile;
 
         private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
@@ -110,22 +109,36 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<ProjectInfo> GetProjects(Guid userId, List<string> errors)
         {
-            List<ProjectInfo> result = null;
+            //List<ProjectInfo> result = null;
 
             string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
 
             try
             {
+                /*var response = _rcProjects.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
+                    IGetUserProjectsInfoRequest.CreateObj(userId)).Result.Message;*/
                 IOperationResult<IProjectsResponse> response = _rcProjects.GetResponse<IOperationResult<IProjectsResponse>>(
                     IGetUserProjectsRequest.CreateObj(userId)).Result.Message;
 
                 if (response.IsSuccess)
                 {
-                    result = new();
+                    /*var projects = new List<ProjectInfo>();
 
-                    string subErrorMessage = "Can not get information about project '{0}'. Please try again later.";
+                    foreach(var project in response.Body.Projects)
+                    {
+                        projects.Add(new ProjectInfo
+                        {
+                            Id = project.Id,
+                            Name = project.Name,
+                            Status = project.Status
+                        });
+                    };
+                    return projects;*/
+                    //result = new();
 
-                    foreach (Guid projectId in response.Body.ProjectsIds)
+                    //string subErrorMessage = "Can not get information about project '{0}'. Please try again later.";
+
+                    /*foreach (Guid projectId in response.Body.ProjectsIds)
                     {
                         try
                         {
@@ -158,7 +171,7 @@ namespace LT.DigitalOffice.UserService.Business
 
                             errors.Add(err);
                         }
-                    }
+                    }*/
                 }
                 else
                 {
@@ -175,7 +188,7 @@ namespace LT.DigitalOffice.UserService.Business
                 errors.Add(errorMessage);
             }
 
-            return result;
+            return null;
         }
 
         private ImageInfo GetImage(Guid? imageId, List<string> errors)
@@ -231,8 +244,7 @@ namespace LT.DigitalOffice.UserService.Business
             IUserResponseMapper mapper,
             IRequestClient<IGetDepartmentRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
-            IRequestClient<IGetUserProjectsRequest> rcProjects,
-            IRequestClient<IGetProjectRequest> rcProject,
+            IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
             IRequestClient<IGetFileRequest> rcFile)
         {
             _logger = logger;
@@ -241,7 +253,6 @@ namespace LT.DigitalOffice.UserService.Business
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
             _rcProjects = rcProjects;
-            _rcProject = rcProject;
             _rcFile = rcFile;
         }
 
