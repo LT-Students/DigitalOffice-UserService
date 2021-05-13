@@ -109,20 +109,16 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<ProjectInfo> GetProjects(Guid userId, List<string> errors)
         {
-            //List<ProjectInfo> result = null;
-
             string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
 
             try
             {
                 var response = _rcProjects.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
                     IGetUserProjectsInfoRequest.CreateObj(userId)).Result.Message;
-                /*IOperationResult<IProjectsResponse> response = _rcProjects.GetResponse<IOperationResult<IProjectsResponse>>(
-                    IGetUserProjectsRequest.CreateObj(userId)).Result.Message;*/
 
                 if (response.IsSuccess)
                 {
-                    /*var projects = new List<ProjectInfo>();
+                    var projects = new List<ProjectInfo>();
 
                     foreach(var project in response.Body.Projects)
                     {
@@ -133,45 +129,7 @@ namespace LT.DigitalOffice.UserService.Business
                             Status = project.Status
                         });
                     };
-                    return projects;*/
-                    //result = new();
-
-                    //string subErrorMessage = "Can not get information about project '{0}'. Please try again later.";
-
-                    /*foreach (Guid projectId in response.Body.ProjectsIds)
-                    {
-                        try
-                        {
-                            IOperationResult<IProjectResponse> projectResponse = _rcProject.GetResponse<IOperationResult<IProjectResponse>>(
-                                IGetProjectRequest.CreateObj(projectId)).Result.Message;
-
-                            if (projectResponse.IsSuccess)
-                            {
-                                result.Add(new ProjectInfo
-                                {
-                                    Id = projectId,
-                                    Name = projectResponse.Body.Name,
-                                    Status = projectResponse.Body.ProjectStatus
-                                });
-                            }
-                            else
-                            {
-                                string err = string.Format(subErrorMessage, projectId);
-
-                                _logger.LogWarning(err);
-
-                                errors.Add(err);
-                            }
-                        }
-                        catch (Exception exc)
-                        {
-                            string err = string.Format(subErrorMessage, projectId);
-
-                            _logger.LogError(exc, err);
-
-                            errors.Add(err);
-                        }
-                    }*/
+                    return projects;
                 }
                 else
                 {
