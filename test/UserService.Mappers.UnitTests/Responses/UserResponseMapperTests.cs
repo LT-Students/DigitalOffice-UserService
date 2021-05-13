@@ -234,7 +234,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 {
                     Id = Guid.NewGuid(),
                     Name = "Project name",
-                    Status = 0
+                    Status = "Active"
                 }
             };
 
