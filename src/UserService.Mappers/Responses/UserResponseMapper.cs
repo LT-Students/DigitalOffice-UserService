@@ -17,6 +17,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         private readonly IUserInfoMapper _userInfoMapper;
         private readonly IUserAchievementInfoMapper _userAchievementInfoMapper;
         private readonly ICertificateInfoMapper _certificateInfoMapper;
+        private readonly IEducationInfoMapper _educationInfoMapper;
 
         private ImageInfo GetImage(List<ImageInfo> images, Guid? imageId)
         {
@@ -34,11 +35,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         public UserResponseMapper(
             IUserInfoMapper userInfoMapper,
             IUserAchievementInfoMapper userAchievementInfoMapper,
-            ICertificateInfoMapper certificateInfoMapper)
+            ICertificateInfoMapper certificateInfoMapper,
+            IEducationInfoMapper educationInfoMapper)
         {
             _userInfoMapper = userInfoMapper;
             _userAchievementInfoMapper = userAchievementInfoMapper;
             _certificateInfoMapper = certificateInfoMapper;
+            _educationInfoMapper = educationInfoMapper;
         }
 
         public UserResponse Map(
@@ -92,6 +95,10 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                             Type = (CommunicationType)c.Type,
                             Value = c.Value
                         })
+                    : null,
+                Educations = filter.IsIncludeEducation
+                    ? dbUser.Educations.Select(
+                        e => _educationInfoMapper.Map(e))
                     : null,
                 Errors = errors
             };

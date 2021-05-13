@@ -1,108 +1,395 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Responses;
+﻿using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Responses;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
+using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
+using Moq;
+using Moq.AutoMock;
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 {
-    internal class UserResponseMapperTests
+    class UserResponseMapperTests
     {
-        private UserResponseMapper userResponseMapper;
+        private UserResponseMapper _mapper;
+        private AutoMocker _mocker;
 
-        private const string Message = "smth";
-        private const string FirstName = "Ivan";
-        private const string LastName = "Dudikov";
-        private const bool IsActive = true;
-        private const int DbStatus = 1;
-        private const UserStatus Status = UserStatus.Sick;
-        private const bool IsAdmin = false;
+        private DbUser _dbUser;
+        private DepartmentInfo _departmentInfo;
+        private PositionInfo _positionInfo;
+        private List<ProjectInfo> _projects;
+        private List<ImageInfo> _images;
+        private GetUserFilter _filter;
+        private List<string> _errors;
 
-        private DateTime createdAt;
-        private Guid userId;
-        private Guid achievementId;
-        private Guid certificateFileId;
-        private Guid pictureFileId;
-        private Guid avatarFileId;
+        private UserInfo _userInfo;
 
-        private DbAchievement achievement;
-        private DbUserAchievement dbUserAchievement;
-        private DbUser dbUser;
-        private DbUserCertificate dbUserCertificateFile;
+        private DbUserAchievement _dbUserAchievement;
+        private ImageInfo _imageAchievement;
+        private UserAchievementInfo _achievementInfo;
 
-        //[SetUp]
-        //public void SetUp()
-        //{
-        //    userResponseMapper = new UserResponseMapper();
+        private DbUserCertificate _dbUserCertificate;
+        private ImageInfo _imageCertificate;
+        private CertificateInfo _certificateInfo;
 
-        //    createdAt = DateTime.UtcNow;
-        //    userId = Guid.NewGuid();
-        //    achievementId = Guid.NewGuid();
-        //    certificateFileId = Guid.NewGuid();
-        //    pictureFileId = Guid.NewGuid();
-        //    avatarFileId = Guid.NewGuid();
+        private DbUserEducation _dbUserEducation;
+        private EducationInfo _educationInfo;
 
-        //    achievement = new DbAchievement
-        //    {
-        //        Id = achievementId,
-        //        ImageId = pictureFileId
-        //    };
+        private ImageInfo _avatarInfo;
+        private CommunicationInfo _communicationInfo;
 
-        //    dbUserAchievement = new DbUserAchievement
-        //    {
-        //        Achievement = achievement,
-        //        AchievementId = achievementId,
-        //        User = dbUser,
-        //        UserId = userId
-        //    };
+        private DbSkill _dbSkill;
+        private DbUserCommunication _dbUserCommunication;
 
-        //    dbUserCertificateFile = new DbUserCertificate
-        //    {
-        //        User = dbUser,
-        //        UserId = userId
-        //    };
+        private UserResponse _response;
 
-        //    dbUser = new DbUser
-        //    {
-        //        Achievements = new List<DbUserAchievement> { dbUserAchievement },
-        //        AvatarFileId = avatarFileId,
-        //        FirstName = FirstName,
-        //        Id = userId,
-        //        IsActive = IsActive,
-        //        IsAdmin = IsAdmin,
-        //        LastName = LastName,
-        //        Status = 1,
-        //        Certificates = new List<DbUserCertificate> { dbUserCertificateFile },
-        //        CreatedAt = createdAt
-        //    };
-        //}
+        private void CreateModels()
+        {
+            #region certificate models
+            _dbUserCertificate = new DbUserCertificate
+            {
+                Id = Guid.NewGuid(),
+                Name = "Certificate name",
+                SchoolName = "School name",
+                EducationType = 0,
+                ReceivedAt = DateTime.UtcNow,
+                ImageId = Guid.NewGuid()
+            };
 
-        //[Test]
-        //public void ShouldThrowBadRequestExceptionWhenDbUserIsNull()
-        //{
-        //    Assert.Throws<BadRequestException>(() => userResponseMapper.Map(null));
-        //}
+            _imageCertificate = new ImageInfo
+            {
+                Id = _dbUserCertificate.ImageId,
+                Content = "Content",
+                Extension = ".jpg",
+                ParentId = null
+            };
 
-        //[Test]
-        //public void ShouldReturnUserModelWhenMappingValidDbUser()
-        //{
-        //    var resultUserModel = userResponseMapper.Map(dbUser);
+            _certificateInfo = new CertificateInfo
+            {
+                Id = _dbUserCertificate.Id,
+                Name = _dbUserCertificate.Name,
+                SchoolName = _dbUserCertificate.SchoolName,
+                EducationType = (EducationType)_dbUserCertificate.EducationType,
+                ReceivedAt = _dbUserCertificate.ReceivedAt,
+                Image = _imageCertificate
+            };
+            #endregion
 
-        //    Assert.IsNotNull(resultUserModel);
-        //    Assert.IsInstanceOf<UserResponse>(resultUserModel);
+            #region achivment models
 
-        //    Assert.AreEqual(achievementId, resultUserModel.AchievementsIds.ToList()[0].Id);
-        //    Assert.AreEqual(Message, resultUserModel.AchievementsIds.ToList()[0].Message);
-        //    Assert.AreEqual(pictureFileId, resultUserModel.AchievementsIds.ToList()[0].PictureFileId);
+            _imageAchievement = new ImageInfo
+            {
+                Id = Guid.NewGuid(),
+                Content = "Content",
+                Extension = ".png",
+                ParentId = null
+            };
 
-        //    Assert.AreEqual(certificateFileId, resultUserModel.CertificatesIds.ToList()[0]);
-        //    Assert.AreEqual(userId, resultUserModel.Id);
-        //    Assert.AreEqual(FirstName, resultUserModel.FirstName);
-        //    Assert.AreEqual(LastName, resultUserModel.LastName);
-        //    Assert.IsNull(resultUserModel.MiddleName);
-        //    Assert.AreEqual(Status, resultUserModel.Status);
-        //    Assert.AreEqual(avatarFileId, resultUserModel.AvatarFileId);
-        //    Assert.AreEqual(IsAdmin, resultUserModel.IsAdmin);
-        //    Assert.AreEqual(createdAt, resultUserModel.CreatedAt);
-        //}
+            _dbUserAchievement = new DbUserAchievement
+            {
+                Id = Guid.NewGuid(),
+                ReceivedAt = DateTime.UtcNow,
+                Achievement = new DbAchievement
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Achievment name",
+                    Description = "Description",
+                    ImageId = _imageAchievement.Id.Value
+                }
+            };
+
+            _achievementInfo = new UserAchievementInfo
+            {
+                Id = _dbUserAchievement.Id,
+                AchievementId = _dbUserAchievement.Achievement.Id,
+                ReceivedAt = _dbUserAchievement.ReceivedAt,
+                Image = _imageAchievement,
+                Name = _dbUserAchievement.Achievement.Name
+            };
+
+            #endregion
+
+            #region communication models
+
+            _dbUserCommunication = new DbUserCommunication
+            {
+                Value = "value",
+                Type = 0
+            };
+
+            _communicationInfo = new CommunicationInfo
+            {
+                Type = (CommunicationType)_dbUserCommunication.Type,
+                Value = _dbUserCommunication.Value
+            };
+
+            #endregion
+
+            #region education models
+
+            _dbUserEducation = new DbUserEducation
+            {
+                Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                UniversityName = "university name",
+                QualificationName = "qualification name",
+                FormEducation = 0,
+                AdmissionAt = DateTime.UtcNow,
+                IssueAt = DateTime.UtcNow
+            };
+
+            _educationInfo = new EducationInfo
+            {
+                Id = _dbUserEducation.Id,
+                UniversityName = _dbUserEducation.UniversityName,
+                QualificationName = _dbUserEducation.QualificationName,
+                FormEducation = (FormEducation)_dbUserEducation.FormEducation,
+                AdmissionAt = _dbUserEducation.AdmissionAt,
+                IssueAt = _dbUserEducation.IssueAt
+            };
+
+            #endregion
+
+            _dbSkill = new DbSkill
+            {
+                Id = Guid.NewGuid(),
+                SkillName = "Skill name"
+            };
+
+            _dbUser = new DbUser
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Name",
+                LastName = "LastName",
+                Status = 0,
+                AvatarFileId = Guid.NewGuid(),
+                IsActive = true,
+                IsAdmin = false,
+                About = "smth about",
+                Rate = 1,
+                CreatedAt = DateTime.UtcNow,
+                StartWorkingAt = DateTime.UtcNow,
+                Skills = new List<DbUserSkill>
+                {
+                    new DbUserSkill
+                    {
+                        Skill = _dbSkill
+                    }
+                },
+                Certificates = new List<DbUserCertificate>
+                {
+                    _dbUserCertificate
+                },
+                Achievements = new List<DbUserAchievement>
+                {
+                    _dbUserAchievement
+                },
+                Communications = new List<DbUserCommunication>
+                {
+                    _dbUserCommunication
+                },
+                Educations = new List<DbUserEducation>
+                {
+                    _dbUserEducation
+                }
+            };
+
+            _userInfo = new UserInfo
+            {
+                Id = _dbUser.Id,
+                FirstName = _dbUser.FirstName,
+                MiddleName = _dbUser.MiddleName,
+                LastName = _dbUser.LastName,
+                Status = (UserStatus)_dbUser.Status,
+                IsAdmin = _dbUser.IsAdmin,
+                About = _dbUser.About,
+                Rate = _dbUser.Rate,
+                StartWorkingAt = _dbUser.StartWorkingAt.ToShortDateString()
+            };
+
+            _departmentInfo = new DepartmentInfo
+            {
+                Id = Guid.NewGuid(),
+                Name = "Department name",
+                StartWorkingAt = DateTime.UtcNow
+            };
+
+            _positionInfo = new PositionInfo
+            {
+                Id = Guid.NewGuid(),
+                Name = "Position name",
+                ReceivedAt = DateTime.UtcNow
+            };
+
+            _projects = new List<ProjectInfo>
+            {
+                new ProjectInfo
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Project name",
+                    Status = 0
+                }
+            };
+
+            _avatarInfo = new ImageInfo
+            {
+                Id = _dbUser.AvatarFileId,
+                Content = "Content",
+                Extension = ".jpg",
+                ParentId = null
+            };
+
+            _images = new List<ImageInfo>
+            {
+                _avatarInfo
+            };
+
+            _errors = new List<string>
+            {
+                "error"
+            };
+
+            _filter = new GetUserFilter
+            {
+                UserId = _dbUser.Id,
+                Name = _dbUser.LastName,
+                IncludeCommunications = true,
+                IncludeAchievements = true,
+                IncludeCertificates = true,
+                IncludeDepartment = true,
+                IncludeEducations = true,
+                IncludeImages = true,
+                IncludePosition = true,
+                IncludeProjects = true,
+                IncludeSkills = true
+            };
+
+            _response = new UserResponse
+            {
+                User = _userInfo,
+                Avatar = _avatarInfo,
+                Department = _departmentInfo,
+                Position = _positionInfo,
+                Skills = new List<string>
+                {
+                    _dbSkill.SkillName
+                },
+                Communications = new List<CommunicationInfo>
+                {
+                    _communicationInfo
+                },
+                Certificates = new List<CertificateInfo>
+                {
+                    _certificateInfo
+                },
+                Achievements = new List<UserAchievementInfo>
+                {
+                    _achievementInfo
+                },
+                Projects = _projects,
+                Educations = new List<EducationInfo>
+                {
+                    _educationInfo
+                },
+                Errors = _errors
+            };
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            CreateModels();
+
+            _mocker = new AutoMocker();
+            _mapper = _mocker.CreateInstance<UserResponseMapper>();
+
+            _mocker
+                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser))
+                .Returns(_userInfo);
+
+            _mocker
+                .Setup<IUserAchievementInfoMapper, UserAchievementInfo>(x =>
+                    x.Map(_dbUserAchievement, It.IsAny<ImageInfo>()))
+                .Returns(_achievementInfo);
+
+            _mocker
+                .Setup<ICertificateInfoMapper, CertificateInfo>(x =>
+                    x.Map(_dbUserCertificate, It.IsAny<ImageInfo>()))
+                .Returns(_certificateInfo);
+
+            _mocker
+                .Setup<IEducationInfoMapper, EducationInfo>(x =>
+                    x.Map(_dbUserEducation))
+                .Returns(_educationInfo);
+        }
+
+        [Test]
+        public void ShouldReturnFullCorrectResponse()
+        {
+            SerializerAssert.AreEqual(
+                _response,
+                _mapper.Map(
+                    _dbUser,
+                    _departmentInfo,
+                    _positionInfo,
+                    _projects,
+                    _images,
+                    _filter,
+                    _errors));
+        }
+
+        [Test]
+        public void ShouldReturnCorrectResponseWithoutOptionalFields()
+        {
+            _filter = new GetUserFilter
+            {
+                UserId = _dbUser.Id,
+                Name = _dbUser.LastName
+            };
+
+
+            var avatar = new ImageInfo
+            {
+                Id = _dbUser.AvatarFileId
+            };
+
+            var response = new UserResponse
+            {
+                User = _userInfo,
+                Avatar = avatar,
+                Errors = _errors
+            };
+
+            SerializerAssert.AreEqual(
+                response,
+                _mapper.Map(
+                    _dbUser,
+                    null,
+                    null,
+                    null,
+                    null,
+                    _filter,
+                    _errors));
+        }
+
+        [Test]
+        public void ShouldThrowArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => _mapper.Map(
+                    null,
+                    _departmentInfo,
+                    _positionInfo,
+                    _projects,
+                    _images,
+                    _filter,
+                    _errors));
+        }
     }
 }
