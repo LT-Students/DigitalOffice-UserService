@@ -26,6 +26,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public ICollection<DbUserAchievement> Achievements { get; set; }
         public ICollection<DbUserCommunication> Communications { get; set; }
         public ICollection<DbUserSkill> Skills { get; set; }
+        public ICollection<DbUserEducation> Educations { get; set; }
 
         public DbUser()
         {
@@ -33,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
             Achievements = new HashSet<DbUserAchievement>();
             Certificates = new HashSet<DbUserCertificate>();
             Skills = new HashSet<DbUserSkill>();
+            Educations = new HashSet<DbUserEducation>();
         }
     }
 

@@ -48,6 +48,11 @@ namespace LT.DigitalOffice.UserService.Data
                 dbUsers = dbUsers.Include(u => u.Certificates);
             }
 
+            if (filter.IncludeEducations.HasValue && filter.IncludeEducations.Value)
+            {
+                dbUsers = dbUsers.Include(u => u.Educations.Where(e => e.IsActive));
+            }
+
             if (filter.IncludeAchievements.HasValue && filter.IncludeAchievements.Value)
             {
                 dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
@@ -192,6 +197,65 @@ namespace LT.DigitalOffice.UserService.Data
 
             _provider.PendingUsers.Remove(dbPendingUser);
             _provider.Save();
+        }
+
+        public void AddEducation(DbUserEducation education)
+        {
+            if (education == null)
+            {
+                throw new ArgumentNullException(nameof(education));
+            }
+
+            _provider.UserEducations.Add(education);
+            _provider.Save();
+        }
+
+        public DbUserEducation GetEducation(Guid educationId)
+        {
+            DbUserEducation education = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
+
+            if (education == null)
+            {
+                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+            }
+
+            return education;
+        }
+
+        public bool EditEducation(DbUserEducation education, JsonPatchDocument<DbUserEducation> request)
+        {
+            if (education == null)
+            {
+                throw new ArgumentNullException(nameof(education));
+            }
+
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            request.ApplyTo(education);
+            _provider.Save();
+
+            return true;
+        }
+
+        public bool RemoveEducation(DbUserEducation education)
+        {
+            if (education == null)
+            {
+                throw new ArgumentNullException(nameof(education));
+            }
+
+            education.IsActive = false;
+            _provider.Save();
+
+            return true;
+        }
+
+        public bool IsExistUser(Guid userId)
+        {
+            return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
         }
     }
 }
