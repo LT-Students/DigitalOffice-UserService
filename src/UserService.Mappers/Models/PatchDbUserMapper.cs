@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserStatus), item.value.ToString())));
                     continue;
                 }
-                else if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
+                if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;
