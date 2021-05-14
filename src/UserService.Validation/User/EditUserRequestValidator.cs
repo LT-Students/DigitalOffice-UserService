@@ -165,7 +165,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
                             return false;
                         },
-                        "Rate must be less than 3"
+                        "Rate must be less than 1"
                     }
                 });
 

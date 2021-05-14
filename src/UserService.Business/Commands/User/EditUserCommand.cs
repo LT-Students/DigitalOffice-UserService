@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             Guid? avatarImageId = null;
 
-            if (avatarRequest is null)
+            if (avatarRequest == null)
             {
                 return avatarImageId;
             }
@@ -115,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business
             if (imageOperation != null)
             {
                 imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
-                if (imageId is null)
+                if (imageId == null)
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }

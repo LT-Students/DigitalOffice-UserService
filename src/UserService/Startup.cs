@@ -231,7 +231,7 @@ namespace LT.DigitalOffice.UserService
 
             ConfigureMassTransit(services);
 
-            //this will be used when all validation takes place on the pipeline
+            //TODO this will be used when all validation takes place on the pipeline
             //string path = Path.Combine(
             //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
             //    "LT.DigitalOffice.UserService.Validation.dll");
