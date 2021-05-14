@@ -128,7 +128,7 @@ namespace LT.DigitalOffice.UserService.Business
         {
             Guid? avatarImageId = null;
 
-            if (avatarRequest is null)
+            if (avatarRequest == null)
             {
                 return avatarImageId;
             }
