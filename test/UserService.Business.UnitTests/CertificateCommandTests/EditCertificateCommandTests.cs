@@ -6,6 +6,8 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UserService.Business.Commands.Certificate;
+using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Education;
 using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -13,6 +15,7 @@ using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
@@ -26,16 +29,17 @@ using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTests
 {
     class EditCertificateCommandTests
     {
-        private IEditEducationCommand _command;
+        private IEditCertificateCommand _command;
         private AutoMocker _mocker;
 
-        private JsonPatchDocument<EditEducationRequest> _request;
+        private JsonPatchDocument<EditCertificateRequest> _request;
         private JsonPatchDocument<DbUserCertificate> _dbRequest;
 
         private Guid _userId;
@@ -43,7 +47,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         private DbUserCertificate _dbUserCertificate;
         private DbUser _dbUser;
         private Guid _imageId;
-        private AddImageRequest _image;
 
         private void RequestClientMock()
         {
@@ -69,8 +72,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         public void SetUp()
         {
             _mocker = new AutoMocker();
-            _command = _mocker.CreateInstance<EditEducationCommand>();
+            _command = _mocker.CreateInstance<EditCertificateCommand>();
 
+            _imageId = Guid.NewGuid();
             _userId = Guid.NewGuid();
             _certificateId = Guid.NewGuid();
 
@@ -78,11 +82,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             {
                 Id = _certificateId,
                 UserId = _userId,
-                UniversityName = "UniversityName",
-                QualificationName = "QualificationName",
-                AdmissionAt = DateTime.UtcNow,
-                IssueAt = DateTime.UtcNow,
-                FormEducation = 1
+                Name = "Name",
+                SchoolName = "SchoolName",
+                ReceivedAt = DateTime.UtcNow,
+                ImageId = _imageId,
+                EducationType = 1,
+                IsActive = true
             };
 
             _dbUser = new DbUser
@@ -95,72 +100,94 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
 
             var time = DateTime.UtcNow;
 
-            _request = new JsonPatchDocument<EditEducationRequest>(
-                new List<Operation<EditEducationRequest>>
+            _request = new JsonPatchDocument<EditCertificateRequest>(
+                new List<Operation<EditCertificateRequest>> {
+                    new Operation<EditCertificateRequest>
                     {
-                        new Operation<EditEducationRequest>(
-                            "replace",
-                            $"/{nameof(EditEducationRequest.UniversityName)}",
-                            "",
-                            "New University name"),
-                        new Operation<EditEducationRequest>(
-                            "replace",
-                            $"/{nameof(EditEducationRequest.QualificationName)}",
-                            "",
-                            "New Qualification name"),
-                        new Operation<EditEducationRequest>(
-                            "replace",
-                            $"/{nameof(EditEducationRequest.AdmissionAt)}",
-                            "",
-                            time),
-                        new Operation<EditEducationRequest>(
-                            "replace",
-                            $"/{nameof(EditEducationRequest.IssueAt)}",
-                            "",
-                            time),
-                        new Operation<EditEducationRequest>(
-                            "replace",
-                            $"/{nameof(EditEducationRequest.FormEducation)}",
-                            "",
-                            0)
-                    }, new CamelCasePropertyNamesContractResolver()
-                );
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.Name)}",
+                        value = "NewName"
+                    },
+                    new Operation<EditCertificateRequest>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.SchoolName)}",
+                        value = "NewSchoolName"
+                    },
+                    new Operation<EditCertificateRequest>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.ReceivedAt)}",
+                        value = time
+                    },
+                    new Operation<EditCertificateRequest>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.Image)}",
+                        value = JsonSerializer.Serialize(new AddImageRequest
+                        {
+                            Name = "Test",
+                            Content = "Content",
+                            Extension = ".jpg"
+                        }),
+                    },
+                    new Operation<EditCertificateRequest>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.IsActive)}",
+                        value = false
+                    },
+                    new Operation<EditCertificateRequest>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(EditCertificateRequest.UserId)}",
+                        value = _userId
+                    }
+                },
+                new CamelCasePropertyNamesContractResolver());
 
             _dbRequest = new JsonPatchDocument<DbUserCertificate>(
-                new List<Operation<DbUserCertificate>>
+                new List<Operation<DbUserCertificate>> {
+                    new Operation<DbUserCertificate>
                     {
-                        new Operation<DbUserCertificate>(
-                            "replace",
-                            $"/{nameof(DbUserCertificate.UniversityName)}",
-                            "",
-                            "New University name"),
-                        new Operation<DbUserCertificate>(
-                            "replace",
-                            $"/{nameof(DbUserCertificate.QualificationName)}",
-                            "",
-                            "New Qualification name"),
-                        new Operation<DbUserCertificate>(
-                            "replace",
-                            $"/{nameof(DbUserCertificate.AdmissionAt)}",
-                            "",
-                            time),
-                        new Operation<DbUserCertificate>(
-                            "replace",
-                            $"/{nameof(DbUserCertificate.IssueAt)}",
-                            "",
-                            time),
-                        new Operation<DbUserCertificate>(
-                            "replace",
-                            $"/{nameof(DbUserCertificate.FormEducation)}",
-                            "",
-                            0)
-                    }, new CamelCasePropertyNamesContractResolver());
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.Name)}",
+                        value = "NewName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.SchoolName)}",
+                        value = "NewSchoolName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ReceivedAt)}",
+                        value = time
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ImageId)}",
+                        value = _imageId
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.IsActive)}",
+                        value = false
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.UserId)}",
+                        value = _userId
+                    }
+                },
+                new CamelCasePropertyNamesContractResolver());
 
             #endregion
-
-            _mocker
-                .Setup<IAccessValidator, bool>(x => x.IsAdmin(null))
-                .Returns(true);
 
             IDictionary<object, object> _items = new Dictionary<object, object>();
             _items.Add("UserId", _dbUser.Id);
@@ -170,7 +197,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_items);
 
             _mocker
-                .Setup<IPatchDbUserEducationMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request))
+                .Setup<IPatchDbUserCertificateMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request, _imageId))
                 .Returns(_dbRequest);
 
             _mocker
@@ -178,16 +205,18 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(true);
 
             _mocker
-                .Setup<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
+                .Setup<IUserRepository, bool>(x => x.EditCertificate(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
                 .Returns(true);
 
             _mocker
-                .Setup<IUserRepository, DbUserCertificate>(x => x.GetEducation(_certificateId))
+                .Setup<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId))
                 .Returns(_dbUserCertificate);
 
             _mocker
                 .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
                 .Returns(_dbUser);
+
+            RequestClientMock();
         }
 
         [Test]
@@ -202,37 +231,21 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(false);
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()),
+            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetEducation(It.IsAny<Guid>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
-                Times.Once);
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenValidationInFailed()
-        {
-            _mocker
-                .Setup<IEditEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
-
-            Assert.Throws<ValidationException>(() => _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetEducation(It.IsAny<Guid>()),
+            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(It.IsAny<Guid>()),
                 Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenEducationUserIdDontEqualUserIdFromRequest()
+        public void ShouldThrowExceptionWhenCertificateUserIdDontEqualUserIdFromRequest()
         {
             Assert.Throws<BadRequestException>(() => _command.Execute(Guid.NewGuid(), _certificateId, _request));
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetEducation(_certificateId),
+            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
                 Times.Once);
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserCertificate, _dbRequest),
+            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
                 Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
@@ -246,16 +259,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserCertificate, _dbRequest),
+            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetEducation(It.IsAny<Guid>()),
+            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(It.IsAny<Guid>()),
                 Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
         }
 
         [Test]
-        public void ShouldEditEducationSuccesfull()
+        public void ShouldEditCertificateSuccesfull()
         {
             var expectedResponse = new OperationResultResponse<bool>
             {
@@ -264,12 +277,159 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             };
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserCertificate, _dbRequest),
+            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
                 Times.Once);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetEducation(_certificateId),
+            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenAddImageRequestThrow()
+        {
+            _mocker
+               .Setup<IRequestClient<IAddImageRequest>, Task>(
+                   x => x.GetResponse<IOperationResult<IAddImageResponse>>(
+                       It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
+               .Throws(new Exception());
+
+            var dbRequest = new JsonPatchDocument<DbUserCertificate>(
+                new List<Operation<DbUserCertificate>> {
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.Name)}",
+                        value = "NewName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.SchoolName)}",
+                        value = "NewSchoolName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ReceivedAt)}",
+                        value = DateTime.UtcNow
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ImageId)}",
+                        value = null
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.IsActive)}",
+                        value = false
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.UserId)}",
+                        value = null
+                    }
+                },
+                new CamelCasePropertyNamesContractResolver());
+
+            _mocker
+                .Setup<IPatchDbUserCertificateMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request, null))
+                .Returns(dbRequest);
+
+            var expectedResponse = new OperationResultResponse<bool>
+            {
+                Status = OperationResultStatusType.PartialSuccess,
+                Body = true,
+                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
+            };
+
+            Assert.Throws<Exception>(() => _command.Execute(_userId, _certificateId, _request));
+            //_mocker.Verify<IUserRepository>(x => x.EditCertificate(_dbUserCertificate, dbRequest), Times.Once);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+            _mocker.Verify<IRequestClient<IAddImageRequest>>(
+                x => x.GetResponse<IOperationResult<IAddImageResponse>>(
+                       It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
+        }
+
+        [Test]
+        public void ShouldThrowExceptionWhenAddImageRequestIsNotSuccessful()
+        {
+            var _operationResultAddImageMock = new Mock<IOperationResult<IAddImageResponse>>();
+            _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(false);
+            _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
+
+            var responseBrokerAddImageMock = new Mock<Response<IOperationResult<IAddImageResponse>>>();
+            responseBrokerAddImageMock
+               .SetupGet(x => x.Message)
+               .Returns(_operationResultAddImageMock.Object);
+
+            _mocker
+                .Setup<IRequestClient<IAddImageRequest>, Task>(
+                    x => x.GetResponse<IOperationResult<IAddImageResponse>>(
+                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
+                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
+
+            var dbRequest = new JsonPatchDocument<DbUserCertificate>(
+                new List<Operation<DbUserCertificate>> {
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.Name)}",
+                        value = "NewName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.SchoolName)}",
+                        value = "NewSchoolName"
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ReceivedAt)}",
+                        value = DateTime.UtcNow
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.ImageId)}",
+                        value = null
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.IsActive)}",
+                        value = false
+                    },
+                    new Operation<DbUserCertificate>
+                    {
+                        op = "replace",
+                        path = $"/{nameof(DbUserCertificate.UserId)}",
+                        value = null
+                    }
+                },
+                new CamelCasePropertyNamesContractResolver());
+
+            _mocker
+                .Setup<IPatchDbUserCertificateMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request, null))
+                .Returns(dbRequest);
+
+            var expectedResponse = new OperationResultResponse<bool>
+            {
+                Status = OperationResultStatusType.PartialSuccess,
+                Body = true,
+                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
+            };
+
+            Assert.Throws<BadRequestException>(() => _command.Execute(_userId, _certificateId, _request));
+            //_mocker.Verify<IUserRepository>(x => x.EditCertificate(_dbUserCertificate, _dbRequest), Times.Never);
+            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+            _mocker.Verify<IRequestClient<IAddImageRequest>>(
+                x => x.GetResponse<IOperationResult<IAddImageResponse>>(
+                       It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
         }
     }
 }

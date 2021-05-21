@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            string errorMessage = "Can not add certificate image to certificate of user with id {userId}. Please try again later.";
+            string errorMessage = "Can not add certificate image to certificate. Please try again later.";
 
             try
             {
@@ -58,9 +58,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'");
 
-                    errors.Add($"Can not add certificate image to certificate of user with id {userId}. Please try again later.");
+                    throw new BadRequestException(errorMessage);
                 }
                 else
                 {
@@ -69,9 +69,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage, userId);
+                _logger.LogError(exc, errorMessage);
 
-                errors.Add($"Can not add certificate image to certificate of user with id {userId}. Please try again later.");
+                throw;
             }
 
             return imageId;
@@ -125,9 +125,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             return new OperationResultResponse<bool>
             {
-                Status = errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess,
-                Body = result,
-                Errors = errors
+                Status = OperationResultStatusType.FullSuccess,
+                Body = result
             };
         }
     }

@@ -62,40 +62,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 IsActive = true
             };
 
-            _userPatch = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
-            {
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.FirstName)}",
-                    "",
-                    _editdBUser.FirstName),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.MiddleName)}",
-                    "",
-                    _editdBUser.MiddleName),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.LastName)}",
-                    "",
-                    _editdBUser.LastName),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Status)}",
-                    "",
-                    _editdBUser.Status),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Rate)}",
-                    "",
-                    _editdBUser.Rate),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.AvatarFileId)}",
-                    "",
-                    _editdBUser.AvatarFileId)
-            }, new CamelCasePropertyNamesContractResolver());
-
             _dbUserEducation = new DbUserEducation
             {
                 Id = Guid.NewGuid(),

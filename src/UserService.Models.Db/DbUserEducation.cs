@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public void Configure(EntityTypeBuilder<DbUserEducation> builder)
         {
             builder
-                .ToTable(DbUserEducation.TableName);
+                .ToTable(DbUserCertificate.TableName);
 
             builder
                 .HasKey(e => e.Id);

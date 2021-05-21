@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using System;

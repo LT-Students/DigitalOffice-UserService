@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;

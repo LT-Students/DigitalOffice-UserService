@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Db;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
