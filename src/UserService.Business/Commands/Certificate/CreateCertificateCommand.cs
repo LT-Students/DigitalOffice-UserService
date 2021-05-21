@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            string errorMessage = "Can not add certificate image to certificate of user with id {userId}. Please try again later.";
+            string errorMessage = "Can not add certificate image to certificate. Please try again later.";
 
             try
             {
@@ -49,12 +49,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                         addImageRequest.Name,
                         addImageRequest.Content,
                         addImageRequest.Extension,
-                        userId)).Result;
+                        userId), default, TimeSpan.FromSeconds(5)).Result;
 
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'");
 
                     throw new BadRequestException(response.Message.Errors);
                 }
@@ -65,9 +65,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage, userId);
+                _logger.LogError(exc, errorMessage);
 
-                throw;
+                throw new BadRequestException(errorMessage, exc);
             }
 
             return imageId;

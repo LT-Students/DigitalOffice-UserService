@@ -174,7 +174,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => _command.Execute(_request));
+            Assert.Throws<BadRequestException>(() => _command.Execute(_request));
             _mocker.Verify<IUserRepository>(x => x.AddCertificate(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
