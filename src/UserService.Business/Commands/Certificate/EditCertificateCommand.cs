@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                     _logger.LogWarning(
                         errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'");
 
-                    throw new BadRequestException(errorMessage);
+                    errors.Add(errorMessage);
                 }
                 else
                 {
@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             {
                 _logger.LogError(exc, errorMessage);
 
-                throw;
+                errors.Add(errorMessage);
             }
 
             return imageId;
@@ -125,8 +125,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             return new OperationResultResponse<bool>
             {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = result
+                Status = errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess,
+                Body = result,
+                Errors = errors
             };
         }
     }
