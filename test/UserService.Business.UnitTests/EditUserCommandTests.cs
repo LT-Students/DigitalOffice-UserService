@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -13,7 +12,6 @@ using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -41,7 +39,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private JsonPatchDocument<DbUser> _patchDbUser;
         private JsonPatchDocument<EditUserRequest> _request;
         private IEditUserCommand _command;
-        private ValidationResult _validationResultError;
 
         private Guid _adminId = Guid.NewGuid();
         private Guid _userId = Guid.NewGuid();
@@ -142,12 +139,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     _imageId)
             }, new CamelCasePropertyNamesContractResolver());
 
-            _validationResultError = new ValidationResult(
-                new List<ValidationFailure>
-                {
-                    new ValidationFailure("error", "something", null)
-                });
-
             _httpAccessorMock = new Mock<IHttpContextAccessor>();
         }
 
@@ -179,7 +170,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mapperUserMock
                 .Setup(x => x.Map(
-                    It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Guid?>(), It.IsAny<Guid>()))
+                    It.IsAny<JsonPatchDocument<EditUserRequest>>(), It.IsAny<Guid?>()))
                 .Returns(_patchDbUser);
 
             _userRepositoryMock

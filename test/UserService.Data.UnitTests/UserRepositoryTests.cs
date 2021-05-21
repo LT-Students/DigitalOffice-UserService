@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -22,10 +22,10 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         private IUserRepository _repository;
 
         private DbUser _dbUser;
-        private DbUser _editdBUser;
+        private DbUser _editDbUser;
         private DbSkill _dbSkillInDb;
         private DbUserEducation _dbUserEducation;
-        private JsonPatchDocument<DbUser> _userPatch;
+        private DbUserCertificate _dbUserCertificate;
 
         private DbContextOptions<UserServiceDbContext> _dbContext;
 
@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 IsActive = true
             };
 
-            _editdBUser = new DbUser
+            _editDbUser = new DbUser
             {
                 Id = userId,
                 FirstName = "Name",
@@ -106,6 +106,18 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 UserId = _dbUser.Id
             };
 
+            _dbUserCertificate = new DbUserCertificate
+            {
+                Id = Guid.NewGuid(),
+                ImageId = Guid.NewGuid(),
+                UserId = _dbUser.Id,
+                Name = "Name",
+                SchoolName = "SchoolName",
+                IsActive = true,
+                ReceivedAt = DateTime.UtcNow,
+                EducationType = 0
+            };
+
             _dbContext = new DbContextOptionsBuilder<UserServiceDbContext>()
                   .UseInMemoryDatabase(databaseName: "InMemoryDatabase")
                   .Options;
@@ -117,6 +129,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             _provider = new UserServiceDbContext(_dbContext);
             _repository = new UserRepository(_provider);
 
+            _provider.UserCertificates.Add(_dbUserCertificate);
             _provider.UserEducations.Add(_dbUserEducation);
             _provider.Users.Add(_dbUser);
             _provider.Skills.Add(_dbSkillInDb);
@@ -146,25 +159,56 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         {
             var userId = Guid.NewGuid();
 
-            Assert.Throws<NotFoundException>(() => _repository.EditUser(userId, _userPatch));
+            Assert.Throws<NotFoundException>(() => _repository.EditUser(userId, new JsonPatchDocument<DbUser>()));
         }
 
-        //TODO
-        //[Test]
-        //public void ShouldEditUser()
-        //{
-        //    bool isEdit = _repository.EditUser(_dbUser.Id, _userPatch);
+        [Test]
+        public void ShouldEditUser()
+        {
+            var _userPatch = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
+            {
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.FirstName)}",
+                    "",
+                    _editDbUser.FirstName),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.MiddleName)}",
+                    "",
+                    _editDbUser.MiddleName),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.LastName)}",
+                    "",
+                    _editDbUser.LastName),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Status)}",
+                    "",
+                    _editDbUser.Status),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Rate)}",
+                    "",
+                    _editDbUser.Rate),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.AvatarFileId)}",
+                    "",
+                    _editDbUser.AvatarFileId)
+            }, new CamelCasePropertyNamesContractResolver());
 
-        //    var dbUser = _provider.Users.FirstOrDefault(x => x.Id == _dbUser.Id);
-        //    foreach (var certificate in dbUser.Certificates)
-        //    {
-        //        certificate.User = null;
-        //    }
+            bool isEdit = _repository.EditUser(_dbUser.Id, _userPatch);
 
-        //    Assert.IsTrue(isEdit);
-        //    SerializerAssert.AreEqual(_editdBUser, dbUser);
-        //    _provider.MakeEntityDetached(_editdBUser);
-        //}
+            Assert.IsTrue(isEdit);
+            Assert.AreEqual(_dbUser.FirstName, _editDbUser.FirstName);
+            Assert.AreEqual(_dbUser.MiddleName, _editDbUser.MiddleName);
+            Assert.AreEqual(_dbUser.LastName, _editDbUser.LastName);
+            Assert.AreEqual(_dbUser.Status, _editDbUser.Status);
+            Assert.AreEqual(_dbUser.Rate, _editDbUser.Rate);
+            Assert.AreEqual(_dbUser.AvatarFileId, _editDbUser.AvatarFileId);
+        }
 
         [Test]
         public void ShouldFindExistSkillByName()
@@ -199,7 +243,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         }
 
         [Test]
-        public void ShoudThrowExceptionWhenAddModelIsNull()
+        public void ShouldThrowExceptionWhenCreateEducationRequestIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.AddEducation(null));
         }
@@ -229,13 +273,13 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         }
 
         [Test]
-        public void ShoudThrowExceptionWhenModelIsNull()
+        public void ShoudThrowExceptionWhenDbEducationIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.EditEducation(null, null));
         }
 
         [Test]
-        public void ShoudThrowExceptionWhenEditModelIsNull()
+        public void ShoudThrowExceptionWhenEditEducationRequestIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.EditEducation(_dbUserEducation, null));
         }
@@ -250,7 +294,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         }
 
         [Test]
-        public void ShoudThrowExceptionWhenEducationIsNull()
+        public void ShouldThrowExceptionWhenEducationForDeletingIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.RemoveEducation(null));
         }
@@ -280,6 +324,103 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void ShouldThrowNotFoundExceptionWhenEducationDoesNotExist()
         {
             Assert.Throws<NotFoundException>(() => _repository.GetEducation(Guid.NewGuid()));
+        }
+
+        [Test]
+        public void ShouldAddCertificateSuccesful()
+        {
+            var certificate = new DbUserCertificate
+            {
+                Id = Guid.NewGuid(),
+                ImageId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                Name = "Name",
+                SchoolName = "SchoolName",
+                IsActive = true,
+                ReceivedAt = DateTime.UtcNow,
+                EducationType = 1
+            };
+
+            _repository.AddCertificate(certificate);
+
+            Assert.IsTrue(_provider.UserCertificates.Contains(certificate));
+        }
+
+        [Test]
+        public void ShoudThrowExceptionWhenCreateCertificateRequestIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.AddCertificate(null));
+        }
+
+        [Test]
+        public void ShouldEditCertificateSuccesful()
+        {
+            var request = new JsonPatchDocument<DbUserCertificate>(
+                new List<Operation<DbUserCertificate>>
+                {
+                    new Operation<DbUserCertificate>(
+                        "replace",
+                        $"/{nameof(DbUserCertificate.Name)}",
+                        "",
+                        "New name"),
+                    new Operation<DbUserCertificate>(
+                        "replace",
+                        $"/{nameof(DbUserCertificate.EducationType)}",
+                        "",
+                        1)
+                }, new CamelCasePropertyNamesContractResolver());
+
+            Assert.IsTrue(_repository.EditCertificate(_dbUserCertificate, request));
+
+            SerializerAssert.AreEqual("New name", _dbUserCertificate.Name);
+            Assert.AreEqual(1, _dbUserCertificate.EducationType);
+        }
+
+        [Test]
+        public void ShoudThrowExceptionWhenEditModelIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.EditEducation(null, null));
+        }
+
+        [Test]
+        public void ShoudThrowExceptionWhenEditCertificateRequestIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.EditEducation(_dbUserEducation, null));
+        }
+
+        [Test]
+        public void ShouldRemoveCertificaeSuccesful()
+        {
+            _dbUserCertificate.IsActive = true;
+
+            Assert.IsTrue(_repository.RemoveCertificate(_dbUserCertificate));
+            Assert.IsFalse(_dbUserCertificate.IsActive);
+        }
+
+        [Test]
+        public void ShoudThrowExceptionWhenCertificateIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.RemoveCertificate(null));
+        }
+
+        [Test]
+        public void ShouldGetCertificateSuccesfuly()
+        {
+            var response = _repository.GetCertificate(_dbUserCertificate.Id);
+
+            Assert.AreEqual(_dbUserCertificate.Id, response.Id);
+            Assert.AreEqual(_dbUserCertificate.UserId, response.UserId);
+            Assert.AreEqual(_dbUserCertificate.ImageId, response.ImageId);
+            Assert.AreEqual(_dbUserCertificate.Name, response.Name);
+            Assert.AreEqual(_dbUserCertificate.SchoolName, response.SchoolName);
+            Assert.AreEqual(_dbUserCertificate.IsActive, response.IsActive);
+            Assert.AreEqual(_dbUserCertificate.ReceivedAt, response.ReceivedAt);
+        }
+
+        [Test]
+        public void ShouldThrowNotFoundExceptionWhenCertificateDoesNotExist()
+        {
+            Assert.Throws<NotFoundException>(() => _repository.GetCertificate(Guid.NewGuid()));
         }
     }
 }

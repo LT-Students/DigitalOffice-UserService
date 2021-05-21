@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
@@ -66,5 +66,13 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         bool RemoveEducation(DbUserEducation education);
 
         bool IsExistUser(Guid userId);
+
+        void AddCertificate(DbUserCertificate certificate);
+
+        DbUserCertificate GetCertificate(Guid certificateId);
+
+        bool EditCertificate(DbUserCertificate certificateId, JsonPatchDocument<DbUserCertificate> request);
+
+        bool RemoveCertificate(DbUserCertificate certificate);
     }
 }

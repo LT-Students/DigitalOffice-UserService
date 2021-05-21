@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
@@ -12,8 +12,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     {
         public JsonPatchDocument<DbUser> Map(
             JsonPatchDocument<EditUserRequest> request,
-            Guid? imageId,
-            Guid userId)
+            Guid? imageId)
         {
             if (request == null)
             {
