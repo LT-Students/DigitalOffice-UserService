@@ -35,8 +35,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
             return IGetUsersDataResponse.CreateObj(
                 dbUsers
-                    .Select(dbUser => UserData
-                        .Create(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive)).ToList());
+                    .Select(dbUser => new UserData(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive)).ToList());
         }
     }
 }
