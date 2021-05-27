@@ -10,7 +10,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Certificate
+namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
 {
     public class PatchDbUserCertificateMapperTests
     {

@@ -5,7 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using NUnit.Framework;
 using System;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Certificate
+namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
 {
     public class DbUserCertificateMapperTests
     {

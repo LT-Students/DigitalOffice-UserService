@@ -9,7 +9,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
+namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
 {
     class PatchDbUserEducationMapperTests
     {
