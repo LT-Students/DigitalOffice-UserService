@@ -16,6 +16,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
@@ -29,9 +30,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         private readonly IRequestClient<IAddImageRequest> _rcImage;
         private readonly ILogger<CreateCertificateCommand> _logger;
 
-        private Guid GetImageId(AddImageRequest addImageRequest)
+        private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
         {
-            Guid imageId;
+            Guid? imageId = null;
 
             if (addImageRequest == null)
             {
@@ -56,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                     _logger.LogWarning(
                         errorMessage + $"Reason: '{string.Join(',', response.Message.Errors)}'");
 
-                    throw new BadRequestException(response.Message.Errors);
+                    errors.Add(errorMessage);
                 }
                 else
                 {
@@ -67,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             {
                 _logger.LogError(exc, errorMessage);
 
-                throw new BadRequestException(errorMessage, exc);
+                errors.Add(errorMessage);
             }
 
             return imageId;
@@ -93,6 +94,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
         public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
         {
+            List<string> errors = new();
+
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
             var dbUser = _userRepository.Get(senderId);
             if (!(dbUser.IsAdmin ||
@@ -102,7 +105,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            var dbUserCertificate = _mapper.Map(request, GetImageId(request.Image));
+            Guid? imageId = GetImageId(request.Image, errors);
+
+            if (!imageId.HasValue)
+            {
+                return new OperationResultResponse<Guid>
+                {
+                    Status = OperationResultStatusType.Failed,
+                    Errors = errors
+                };
+            }
+
+            var dbUserCertificate = _mapper.Map(request, imageId.Value);
 
             _certificateRepository.Add(dbUserCertificate);
 

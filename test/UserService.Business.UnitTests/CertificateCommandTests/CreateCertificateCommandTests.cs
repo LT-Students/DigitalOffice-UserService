@@ -15,7 +15,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -166,7 +165,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenAddImageRequestThrow()
+        public void ShouldReturnFailedResponseWhenAddImageRequestThrow()
         {
             _mocker
                .Setup<IRequestClient<IAddImageRequest>, Task>(
@@ -174,7 +173,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                .Throws(new Exception());
 
-            Assert.Throws<BadRequestException>(() => _command.Execute(_request));
+            var expectedResponse = new OperationResultResponse<Guid>
+            {
+                Status = OperationResultStatusType.Failed,
+                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
+            };
+
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
@@ -183,7 +188,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         }
 
         [Test]
-        public void ShouldThrowExceptionWhenAddImageRequestIsNotSuccessful()
+        public void ShouldReturnFailedResponseWhenAddImageRequestIsNotSuccessful()
         {
             var _operationResultAddImageMock = new Mock<IOperationResult<IAddImageResponse>>();
             _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(false);
@@ -200,7 +205,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                         It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
 
-            Assert.Throws<BadRequestException>(() => _command.Execute(_request));
+            var expectedResponse = new OperationResultResponse<Guid>
+            {
+                Status = OperationResultStatusType.Failed,
+                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
+            };
+
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
