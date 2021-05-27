@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace LT.DigitalOffice.UserService.Models.Dto.Models
+namespace LT.DigitalOffice.Broker.Models
 {
-    public class ProjectInfo
+    public class ProjectShortInfo
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
