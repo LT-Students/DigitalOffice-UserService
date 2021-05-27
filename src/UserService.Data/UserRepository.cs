@@ -115,20 +115,15 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
         }
 
-        public bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch)
+        public bool EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
         {
-            //TODO
-            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == id) ??
-                            throw new NotFoundException($"User with ID '{id}' was not found.");
-
-            for (int i = 0; i < userPatch.Operations.Count; i++)
+            if (userPatch == null)
             {
-                if (string.Equals(userPatch.Operations[i].path, $"/{nameof(DbUser.Certificates)}/-"))
-                {
-                    _provider.UserCertificates.Add((DbUserCertificate)userPatch.Operations[i].value);
-                    userPatch.Operations.RemoveAt(i);
-                }
+                throw new ArgumentNullException(nameof(userPatch));
             }
+
+            DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == userId) ??
+                            throw new NotFoundException($"User with ID '{userId}' was not found.");
 
             userPatch.ApplyTo(dbUser);
             _provider.Save();

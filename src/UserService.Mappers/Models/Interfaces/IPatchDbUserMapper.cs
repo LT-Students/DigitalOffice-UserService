@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
     {
         JsonPatchDocument<DbUser> Map(
             JsonPatchDocument<EditUserRequest> request,
-            Func<string, Guid?> getAvatarImageId,
+            Guid? imageId,
             Guid userId);
     }
 }

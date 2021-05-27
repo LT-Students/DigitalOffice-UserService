@@ -1,114 +1,206 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FluentValidation;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using FluentValidation.Validators;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using Newtonsoft.Json;
 
 namespace LT.DigitalOffice.UserService.Validation.User
 {
-    public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>, IEditUserRequestValidator
+    public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
     {
-        private static List<string> Paths => new List<string>
+        private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
+
+        private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
         {
-            FirstName,
-            LastName,
-            MiddleName,
-            AvatarImage,
-            Status
-        };
+            #region local functions
 
-        public static string FirstName => $"/{nameof(EditUserRequest.FirstName)}";
-        public static string LastName => $"/{nameof(EditUserRequest.LastName)}";
-        public static string MiddleName => $"/{nameof(EditUserRequest.MiddleName)}";
-        public static string AvatarImage => $"/{nameof(EditUserRequest.AvatarImage)}";
-        public static string Status => $"/{nameof(EditUserRequest.Status)}";
+            void AddСorrectPaths(List<string> paths)
+            {
+                if (paths.FirstOrDefault(p => p.EndsWith(requestedOperation.path[1..], StringComparison.OrdinalIgnoreCase)) == null)
+                {
+                    context.AddFailure(requestedOperation.path, $"This path {requestedOperation.path} is not available");
+                }
+            }
 
-        Func<JsonPatchDocument<EditUserRequest>, string, Operation> GetOperationByPath =>
-            (x, path) =>
-                x.Operations.FirstOrDefault(x =>
-                    string.Equals(
-                        x.path,
-                        path,
-                        StringComparison.OrdinalIgnoreCase));
+            void AddСorrectOperations(
+                string propertyName,
+                List<OperationType> types)
+            {
+                if (requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
+                    && !types.Contains(requestedOperation.OperationType))
+                {
+                    context.AddFailure(propertyName, $"This operation {requestedOperation.OperationType} is prohibited for {propertyName}");
+                }
+            }
+
+            void AddFailureForPropertyIf(
+                string propertyName,
+                Func<OperationType, bool> type,
+                Dictionary<Func<Operation<EditUserRequest>, bool>, string> predicates)
+            {
+                if (!requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
+                    || !type(requestedOperation.OperationType))
+                {
+                    return;
+                }
+
+                foreach (var validateDelegate in predicates)
+                {
+                    if (!validateDelegate.Key(requestedOperation))
+                    {
+                        context.AddFailure(propertyName, validateDelegate.Value);
+                    }
+                }
+            }
+
+            #endregion
+
+            #region paths
+
+            AddСorrectPaths(
+                new List<string>
+                {
+                    nameof(EditUserRequest.FirstName),
+                    nameof(EditUserRequest.MiddleName),
+                    nameof(EditUserRequest.LastName),
+                    nameof(EditUserRequest.Status),
+                    nameof(EditUserRequest.Rate),
+                    nameof(EditUserRequest.AvatarImage)
+                });
+
+            AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+
+            #endregion
+
+            #region firstname
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.FirstName),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "FirstName is too short" },
+                    { x => x.value.ToString().Length < 32, "FirstName is too long" },
+                    { x => NameRegex.IsMatch(x.value.ToString()), "FirstName has incorrect format" }
+                });
+
+            #endregion
+
+            #region lastname
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.LastName),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "LastName is too short" },
+                    { x => x.value.ToString().Length < 100, "LastName is too long" },
+                    { x => NameRegex.IsMatch(x.value.ToString()), "LastName has incorrect format" }
+                });
+
+            #endregion
+
+            #region middlename
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.MiddleName),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "MiddleName is too short" },
+                    { x => x.value.ToString().Length < 32, "MiddleName is too long" },
+                    { x => NameRegex.IsMatch(x.value.ToString()), "MiddleName has incorrect format" }
+                });
+
+            #endregion
+
+            #region Status
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.Status),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status"},
+                });
+
+            #endregion
+
+            #region Rate
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.Rate),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format"},
+                    { x =>
+                        {
+                            if (double.TryParse(x.value?.ToString(), out double rate))
+                            {
+                                return rate > 0;
+                            }
+
+                            return false;
+                        },
+                        "Rate must be greater than 0"
+                    },
+                    { x =>
+                        {
+                            if (double.TryParse(x.value?.ToString(), out double rate))
+                            {
+                                return rate <= 1;
+                            }
+
+                            return false;
+                        },
+                        "Rate must be less than 1"
+                    }
+                });
+
+            #endregion
+
+            #region AvatarImage
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.AvatarImage),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x =>
+                        {
+                            try
+                            {
+                                _ = JsonConvert.DeserializeObject<AddImageRequest>(x.value?.ToString());
+                                return true;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        },
+                        "Incorrect Image format"
+                    }
+            });
+
+            #endregion
+        }
 
         public EditUserRequestValidator()
         {
-            RuleFor(x => x.Operations)
-                .Must(x =>
-                    x.Select(x => x.path)
-                        .Distinct().Count() == x.Count()
-                )
-                .WithMessage("You don't have to change the same field of Project multiple times.")
-                .Must(x => x.Any())
-                .WithMessage("You don't have changes.")
-                .ForEach(y => y
-                    .Must(x => Paths.Any(cur => string.Equals(cur, x.path, StringComparison.OrdinalIgnoreCase)))
-                    .WithMessage(
-                        $"Document contains invalid path. Only such paths are allowed: {Paths.Aggregate((x, y) => x + ", " + y)}")
-                )
-                .DependentRules(() =>
-                {
-                    When(x => GetOperationByPath(x, FirstName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(FirstName, "replace");
-
-                        RuleFor(x => (string) GetOperationByPath(x, FirstName).value)
-                            .NotEmpty()
-                            .MaximumLength(32).WithMessage("First name is too long.")
-                            .MinimumLength(1).WithMessage("First name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("First name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, LastName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(LastName, "replace");
-
-                        RuleFor(x => (string) GetOperationByPath(x, LastName).value)
-                            .NotEmpty()
-                            .MaximumLength(32).WithMessage("Last name is too long.")
-                            .MinimumLength(1).WithMessage("Last name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Last name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, MiddleName) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(MiddleName, "add", "replace", "remove");
-
-                        RuleFor(x => (string) GetOperationByPath(x, MiddleName).value)
-                            .MaximumLength(32).WithMessage("Middle name is too long.")
-                            .MinimumLength(1).WithMessage("Middle name is too short.")
-                            .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error.");
-                    });
-
-                    When(x => GetOperationByPath(x, Status) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(Status, "add", "replace", "remove");
-
-                        RuleFor(x => (UserStatus) GetOperationByPath(x, Status).value)
-                            .IsInEnum().WithMessage("Wrong status value.");
-                    });
-
-                    When(x => GetOperationByPath(x, AvatarImage) != null, () =>
-                    {
-                        RuleFor(x => x.Operations)
-                            .UniqueOperationWithAllowedOp(AvatarImage, "add", "replace", "remove");
-
-                        RuleFor(x => (string) GetOperationByPath(x, AvatarImage).value)
-                            .NotEmpty()
-                            .NotNull()
-                            .Must(x => Convert
-                                .TryFromBase64String(x, new Span<byte>(new byte[x.Length]), out _));
-                    });
-                });
+            RuleForEach(x => x.Operations)
+               .Custom(HandleInternalPropertyValidation);
         }
     }
 }
