@@ -57,22 +57,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         bool SwitchActiveStatus(Guid userId, bool status);
 
-        void AddEducation(DbUserEducation education);
-
-        DbUserEducation GetEducation(Guid educationId);
-
-        bool EditEducation(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
-
-        bool RemoveEducation(DbUserEducation education);
-
         bool IsExistUser(Guid userId);
-
-        void AddCertificate(DbUserCertificate certificate);
-
-        DbUserCertificate GetCertificate(Guid certificateId);
-
-        bool EditCertificate(DbUserCertificate certificateId, JsonPatchDocument<DbUserCertificate> request);
-
-        bool RemoveCertificate(DbUserCertificate certificate);
     }
 }

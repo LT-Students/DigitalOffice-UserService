@@ -16,37 +16,35 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     {
         private readonly IAccessValidator _accessValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IEducationRepository _educationRepository;
 
         public RemoveEducationCommand(
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
-            IUserRepository repository)
+            IUserRepository userRepository,
+            IEducationRepository educationRepository)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
-            _repository = repository;
+            _userRepository = userRepository;
+            _educationRepository = educationRepository;
         }
 
-        public OperationResultResponse<bool> Execute(Guid userId, Guid educationId)
+        public OperationResultResponse<bool> Execute(Guid educationId)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _repository.Get(senderId);
+            var dbUser = _userRepository.Get(senderId);
+            DbUserEducation userEducation = _educationRepository.Get(educationId);
+
             if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userId)
+                  && senderId != userEducation.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            DbUserEducation userEducation = _repository.GetEducation(educationId);
-
-            if (userEducation.UserId != userId)
-            {
-                throw new BadRequestException($"Education {educationId} is not linked to this user {userId}");
-            }
-
-            bool result = _repository.RemoveEducation(userEducation);
+            bool result = _educationRepository.Remove(userEducation);
 
             return new OperationResultResponse<bool>
             {

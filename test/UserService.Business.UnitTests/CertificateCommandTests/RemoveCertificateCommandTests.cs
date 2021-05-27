@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_items);
 
             _mocker
-                .Setup<IUserRepository, bool>(x => x.RemoveCertificate(_dbUserCertificate))
+                .Setup<ICertificateRepository, bool>(x => x.Remove(_dbUserCertificate))
                 .Returns(true);
 
             _mocker
@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_dbUser);
 
             _mocker
-                .Setup<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId))
+                .Setup<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId))
                 .Returns(_dbUserCertificate);
         }
 
@@ -89,22 +89,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
                 .Returns(false);
 
-            Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _certificateId));
-            _mocker.Verify<IUserRepository, bool>(x => x.RemoveCertificate(It.IsAny<DbUserCertificate>()), Times.Never);
+            Assert.Throws<ForbiddenException>(() => _command.Execute(_certificateId));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(It.IsAny<DbUserCertificate>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(userId), Times.Once);
-            _mocker.Verify<IUserRepository>(x => x.GetCertificate(_certificateId), Times.Never);
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenCertificateUserIdDontEqualUserIdFromRequest()
-        {
-            Assert.Throws<BadRequestException>(() => _command.Execute(Guid.NewGuid(), _certificateId));
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
-                Times.Once);
-            _mocker.Verify<IUserRepository, bool>(x => x.RemoveCertificate(It.IsAny<DbUserCertificate>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
-                Times.Once);
+            _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Once);
         }
 
         [Test]
@@ -114,10 +102,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IUserRepository>(x => x.Get(It.IsAny<Guid>()))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => _command.Execute(_userId, _certificateId));
-            _mocker.Verify<IUserRepository, bool>(x => x.RemoveCertificate(It.IsAny<DbUserCertificate>()), Times.Never);
+            Assert.Throws<Exception>(() => _command.Execute(_certificateId));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(It.IsAny<DbUserCertificate>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-            _mocker.Verify<IUserRepository>(x => x.GetEducation(_certificateId), Times.Never);
+            _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Never);
         }
 
         [Test]
@@ -129,10 +117,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Body = true
             };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _certificateId));
-            _mocker.Verify<IUserRepository, bool>(x => x.RemoveCertificate(_dbUserCertificate), Times.Once);
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(_dbUserCertificate), Times.Once);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-            _mocker.Verify<IUserRepository>(x => x.GetCertificate(_certificateId), Times.Once);
+            _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Once);
         }
     }
 }

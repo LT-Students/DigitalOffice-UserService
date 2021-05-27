@@ -22,20 +22,18 @@ namespace LT.DigitalOffice.UserService.Controllers
         [HttpPatch("edit")]
         public OperationResultResponse<bool> Edit(
             [FromServices] IEditCertificateCommand command,
-            [FromQuery] Guid userId,
             [FromQuery] Guid certificateId,
             [FromBody] JsonPatchDocument<EditCertificateRequest> request)
         {
-            return command.Execute(userId, certificateId, request);
+            return command.Execute(certificateId, request);
         }
 
         [HttpDelete("remove")]
         public OperationResultResponse<bool> Remove(
             [FromServices] IRemoveCertificateCommand command,
-            [FromQuery] Guid userId,
             [FromQuery] Guid certificateId)
         {
-            return command.Execute(userId, certificateId);
+            return command.Execute(certificateId);
         }
     }
 }

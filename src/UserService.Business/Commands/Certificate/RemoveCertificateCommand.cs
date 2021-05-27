@@ -16,37 +16,35 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
         private readonly IAccessValidator _accessValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly ICertificateRepository _certificateRepository;
 
         public RemoveCertificateCommand(
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
-            IUserRepository repository)
+            IUserRepository userRepository,
+            ICertificateRepository certificateRepostory)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
-            _repository = repository;
+            _userRepository = userRepository;
+            _certificateRepository = certificateRepostory;
         }
 
-        public OperationResultResponse<bool> Execute(Guid userId, Guid certificateId)
+        public OperationResultResponse<bool> Execute(Guid certificateId)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var sender = _repository.Get(senderId);
+            var sender = _userRepository.Get(senderId);
+            DbUserCertificate userCertificate = _certificateRepository.Get(certificateId);
+
             if (!(sender.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userId)
+                  && senderId != userCertificate.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            DbUserCertificate userCertificate = _repository.GetCertificate(certificateId);
-
-            if (userCertificate.UserId != userId)
-            {
-                throw new BadRequestException($"Certificate {certificateId} is not linked to this user {userId}");
-            }
-
-            bool result = _repository.RemoveCertificate(userCertificate);
+            bool result = _certificateRepository.Remove(userCertificate);
 
             return new OperationResultResponse<bool>
             {

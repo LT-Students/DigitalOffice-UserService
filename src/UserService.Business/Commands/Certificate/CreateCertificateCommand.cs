@@ -23,11 +23,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
         private IAccessValidator _accessValidator;
         private IHttpContextAccessor _httpContextAccessor;
-        private IUserRepository _repository;
+        private IUserRepository _userRepository;
+        private ICertificateRepository _certificateRepository;
         private IDbUserCertificateMapper _mapper;
         private readonly IRequestClient<IAddImageRequest> _rcImage;
         private readonly ILogger<CreateCertificateCommand> _logger;
-
 
         private Guid GetImageId(AddImageRequest addImageRequest)
         {
@@ -78,13 +78,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             IHttpContextAccessor httpContextAccessor,
             IDbUserCertificateMapper mapper,
             IUserRepository userRepository,
+            ICertificateRepository certificateRepository,
             IRequestClient<IAddImageRequest> rcAddIImage,
             ILogger<CreateCertificateCommand> logger)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
-            _repository = userRepository;
+            _userRepository = userRepository;
+            _certificateRepository = certificateRepository;
             _rcImage = rcAddIImage;
             _logger = logger;
         }
@@ -92,7 +94,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _repository.Get(senderId);
+            var dbUser = _userRepository.Get(senderId);
             if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
                   && senderId != request.UserId)
@@ -102,7 +104,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             var dbUserCertificate = _mapper.Map(request, GetImageId(request.Image));
 
-            _repository.AddCertificate(dbUserCertificate);
+            _certificateRepository.Add(dbUserCertificate);
 
             return new OperationResultResponse<Guid>
             {

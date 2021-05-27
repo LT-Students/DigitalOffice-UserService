@@ -92,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
 
             _dbUser = new DbUser
             {
-                Id = Guid.NewGuid(),
+                Id = _userId,
                 IsAdmin = true
             };
 
@@ -201,15 +201,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_dbRequest);
 
             _mocker
-                .Setup<IEditEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
+                .Setup<ICertificateRepository, bool>(x => x.Edit(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
                 .Returns(true);
 
             _mocker
-                .Setup<IUserRepository, bool>(x => x.EditCertificate(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
-                .Returns(true);
-
-            _mocker
-                .Setup<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId))
+                .Setup<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId))
                 .Returns(_dbUserCertificate);
 
             _mocker
@@ -230,23 +226,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
                 .Returns(false);
 
-            Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(It.IsAny<Guid>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
-                Times.Once);
-        }
+            _dbUserCertificate.UserId = Guid.NewGuid();
 
-        [Test]
-        public void ShouldThrowExceptionWhenCertificateUserIdDontEqualUserIdFromRequest()
-        {
-            Assert.Throws<BadRequestException>(() => _command.Execute(Guid.NewGuid(), _certificateId, _request));
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
-                Times.Once);
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
+            Assert.Throws<ForbiddenException>(() => _command.Execute(_certificateId, _request));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()),
                 Times.Never);
+            _mocker.Verify<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId),
+                Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
         }
@@ -258,10 +244,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IUserRepository>(x => x.Get(_dbUser.Id))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
+            Assert.Throws<Exception>(() => _command.Execute(_certificateId, _request));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, _dbRequest),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(It.IsAny<Guid>()),
+            _mocker.Verify<ICertificateRepository, DbUserCertificate>(x => x.Get(It.IsAny<Guid>()),
                 Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
@@ -276,10 +262,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Body = true
             };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, _dbRequest),
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, _dbRequest),
                 Times.Once);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
+            _mocker.Verify<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId),
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
@@ -346,10 +332,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
             };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, dbRequest),
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, dbRequest),
                 Times.Once);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
+            _mocker.Verify<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId),
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
@@ -425,10 +411,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
             };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _certificateId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditCertificate(_dbUserCertificate, dbRequest),
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
+            _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, dbRequest),
                 Times.Once);
-            _mocker.Verify<IUserRepository, DbUserCertificate>(x => x.GetCertificate(_certificateId),
+            _mocker.Verify<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId),
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);

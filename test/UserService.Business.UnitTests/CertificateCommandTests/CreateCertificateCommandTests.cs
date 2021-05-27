@@ -129,7 +129,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(new DbUser { IsAdmin = false });
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddCertificate(It.IsAny<DbUserCertificate>()), Times.Never);
+            _mocker.Verify<ICertificateRepository>(x => x.Add(It.IsAny<DbUserCertificate>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
@@ -141,7 +141,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddCertificate(_dbCertificate), Times.Never);
+            _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
@@ -158,7 +158,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             };
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddCertificate(_dbCertificate), Times.Once);
+            _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Once);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
@@ -175,7 +175,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                .Throws(new Exception());
 
             Assert.Throws<BadRequestException>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddCertificate(_dbCertificate), Times.Never);
+            _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
@@ -201,7 +201,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
 
             Assert.Throws<BadRequestException>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddCertificate(_dbCertificate), Times.Never);
+            _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(

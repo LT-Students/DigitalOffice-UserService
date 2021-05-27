@@ -30,8 +30,8 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Certificate
         {
             _repository = new Mock<IUserRepository>();
             _repository
-                .Setup(x => x.Get(_existUser))
-                .Returns(new DbUser());
+                .Setup(x => x.IsExistUser(_existUser))
+                .Returns(true);
 
             _validator = new(_repository.Object);
         }

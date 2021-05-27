@@ -28,7 +28,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
         private readonly IAccessValidator _accessValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly ICertificateRepository _certificateRepository;
         private readonly IPatchDbUserCertificateMapper _mapper;
         private readonly IRequestClient<IAddImageRequest> _rcImage;
         private readonly ILogger<EditCertificateCommand> _logger;
@@ -80,36 +81,35 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         public EditCertificateCommand(
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
-            IUserRepository repository,
+            IUserRepository userRepository,
+            ICertificateRepository certificateRepository,
             IPatchDbUserCertificateMapper mapper,
             IRequestClient<IAddImageRequest> rcImage,
             ILogger<EditCertificateCommand> logger)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
-            _repository = repository;
+            _userRepository = userRepository;
+            _certificateRepository = certificateRepository;
             _mapper = mapper;
             _rcImage = rcImage;
             _logger = logger;
         }
 
-        public OperationResultResponse<bool> Execute(Guid userId, Guid certificateId, JsonPatchDocument<EditCertificateRequest> request)
+        public OperationResultResponse<bool> Execute(Guid certificateId, JsonPatchDocument<EditCertificateRequest> request)
         {
             List<string> errors = new List<string>();
 
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var sender = _repository.Get(senderId);
+            var sender = _userRepository.Get(senderId);
+
+            DbUserCertificate certificate = _certificateRepository.Get(certificateId);
+
             if (!(sender.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userId)
+                  && senderId != certificate.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
-            }
-
-            DbUserCertificate certificate = _repository.GetCertificate(certificateId);
-            if (certificate.UserId != userId)
-            {
-                throw new BadRequestException($"Certificate {certificateId} is not linked to this user {userId}");
             }
 
             var imageOperation = request.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase));
@@ -121,7 +121,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             JsonPatchDocument<DbUserCertificate> dbRequest = _mapper.Map(request, imageId);
 
-            bool result = _repository.EditCertificate(certificate, dbRequest);
+            bool result = _certificateRepository.Edit(certificate, dbRequest);
 
             return new OperationResultResponse<bool>
             {

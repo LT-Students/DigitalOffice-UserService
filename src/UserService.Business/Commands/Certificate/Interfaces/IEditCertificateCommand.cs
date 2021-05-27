@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces
     [AutoInject]
     public interface IEditCertificateCommand
     {
-        OperationResultResponse<bool> Execute(Guid userId, Guid certificateId, JsonPatchDocument<EditCertificateRequest> request);
+        OperationResultResponse<bool> Execute(Guid certificateId, JsonPatchDocument<EditCertificateRequest> request);
     }
 }

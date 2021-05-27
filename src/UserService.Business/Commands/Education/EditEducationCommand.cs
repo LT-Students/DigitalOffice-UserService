@@ -21,47 +21,45 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     {
         private readonly IAccessValidator _accessValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IEducationRepository _educationRepository;
         private readonly IPatchDbUserEducationMapper _mapper;
         private readonly IEditEducationRequestValidator _validator;
 
         public EditEducationCommand(
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
-            IUserRepository repository,
+            IUserRepository userRepository,
+            IEducationRepository educationRepository,
             IPatchDbUserEducationMapper mapper,
             IEditEducationRequestValidator validator)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
-            _repository = repository;
+            _userRepository = userRepository;
+            _educationRepository = educationRepository;
             _mapper = mapper;
             _validator = validator;
         }
 
-        public OperationResultResponse<bool> Execute(Guid userId, Guid educationId, JsonPatchDocument<EditEducationRequest> request)
+        public OperationResultResponse<bool> Execute(Guid educationId, JsonPatchDocument<EditEducationRequest> request)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _repository.Get(senderId);
+            var dbUser = _userRepository.Get(senderId);
+            DbUserEducation userEducation = _educationRepository.Get(educationId);
+
             if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userId)
+                  && senderId != userEducation.UserId)
             {
                 throw new ForbiddenException("Not enough rights.");
             }
 
             _validator.ValidateAndThrowCustom(request);
 
-            DbUserEducation userEducation = _repository.GetEducation(educationId);
-
-            if (userEducation.UserId != userId)
-            {
-                throw new BadRequestException($"Education {educationId} is not linked to this user {userId}");
-            }
-
             JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
 
-            bool result = _repository.EditEducation(userEducation, dbRequest);
+            bool result = _educationRepository.Edit(userEducation, dbRequest);
 
             return new OperationResultResponse<bool>
             {

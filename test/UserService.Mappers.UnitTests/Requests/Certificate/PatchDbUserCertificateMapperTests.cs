@@ -16,7 +16,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Certificate
     {
         private PatchDbUserCertificateMapper _mapper;
 
-
         private Guid _imageId = Guid.NewGuid();
         private JsonPatchDocument<EditCertificateRequest> _request;
         private JsonPatchDocument<DbUserCertificate> _dbRequest;

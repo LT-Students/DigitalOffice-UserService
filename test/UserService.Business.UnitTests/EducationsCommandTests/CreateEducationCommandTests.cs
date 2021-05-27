@@ -95,7 +95,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Returns(new DbUser { IsAdmin = false });
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddEducation(It.IsAny<DbUserEducation>()), Times.Never);
+            _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
@@ -107,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Returns(false);
 
             Assert.Throws<ValidationException>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddEducation(It.IsAny<DbUserEducation>()), Times.Never);
+            _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddEducation(_dbEducation), Times.Never);
+            _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
 
@@ -133,7 +133,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
             };
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
-            _mocker.Verify<IUserRepository>(x => x.AddEducation(_dbEducation), Times.Once);
+            _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Once);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
         }
     }

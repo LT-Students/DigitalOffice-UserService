@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces
     [AutoInject]
     public interface IRemoveCertificateCommand
     {
-        OperationResultResponse<bool> Execute(Guid userId, Guid certificateId);
+        OperationResultResponse<bool> Execute(Guid certificateId);
     }
 }
