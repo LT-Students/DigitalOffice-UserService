@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
     [AutoInject]
     public interface IRemoveEducationCommand
     {
-        OperationResultResponse<bool> Execute(Guid userId, Guid educationId);
+        OperationResultResponse<bool> Execute(Guid educationId);
     }
 }

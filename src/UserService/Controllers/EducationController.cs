@@ -22,20 +22,18 @@ namespace LT.DigitalOffice.UserService.Controllers
         [HttpPatch("edit")]
         public OperationResultResponse<bool> Edit(
             [FromServices] IEditEducationCommand command,
-            [FromQuery] Guid userId,
             [FromQuery] Guid educationId,
             [FromBody] JsonPatchDocument<EditEducationRequest> request)
         {
-            return command.Execute(userId, educationId, request);
+            return command.Execute(educationId, request);
         }
 
         [HttpDelete("remove")]
         public OperationResultResponse<bool> Remove(
             [FromServices] IRemoveEducationCommand command,
-            [FromQuery] Guid userId,
             [FromQuery] Guid educationId)
         {
-            return command.Execute(userId, educationId);
+            return command.Execute(educationId);
         }
     }
 }

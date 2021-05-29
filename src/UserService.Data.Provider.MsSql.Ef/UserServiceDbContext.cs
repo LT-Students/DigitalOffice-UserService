@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Database;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;

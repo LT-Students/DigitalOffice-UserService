@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;

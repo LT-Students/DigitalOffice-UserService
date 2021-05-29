@@ -12,8 +12,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     {
         public JsonPatchDocument<DbUser> Map(
             JsonPatchDocument<EditUserRequest> request,
-            Guid? imageId,
-            Guid userId)
+            Guid? imageId)
         {
             if (request == null)
             {

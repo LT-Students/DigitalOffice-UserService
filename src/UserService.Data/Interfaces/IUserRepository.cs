@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
@@ -56,14 +56,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// Disable user.
         /// </summary>
         bool SwitchActiveStatus(Guid userId, bool status);
-
-        void AddEducation(DbUserEducation education);
-
-        DbUserEducation GetEducation(Guid educationId);
-
-        bool EditEducation(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
-
-        bool RemoveEducation(DbUserEducation education);
 
         bool IsExistUser(Guid userId);
     }

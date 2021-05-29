@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 
             _dbUser = new DbUser
             {
-                Id = Guid.NewGuid(),
+                Id = _userId,
                 IsAdmin = true
             };
 
@@ -150,11 +150,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Returns(true);
 
             _mocker
-                .Setup<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()))
+                .Setup<IEducationRepository, bool>(x => x.Edit(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()))
                 .Returns(true);
 
             _mocker
-                .Setup<IUserRepository, DbUserEducation>(x => x.GetEducation(_educationId))
+                .Setup<IEducationRepository, DbUserEducation>(x => x.Get(_educationId))
                 .Returns(_dbUserEducation);
 
             _mocker
@@ -173,11 +173,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
                 .Returns(false);
 
-            Assert.Throws<ForbiddenException>(() => _command.Execute(_userId, _educationId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()),
+            _dbUserEducation.UserId = Guid.NewGuid();
+
+            Assert.Throws<ForbiddenException>(() => _command.Execute(_educationId, _request));
+            _mocker.Verify<IEducationRepository, bool>(x => x.Edit(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserEducation>(x => x.GetEducation(It.IsAny<Guid>()),
-                Times.Never);
+            _mocker.Verify<IEducationRepository, DbUserEducation>(x => x.Get(_educationId),
+                Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
         }
@@ -189,23 +191,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Setup<IEditEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
                 .Returns(false);
 
-            Assert.Throws<ValidationException>(() => _command.Execute(_userId, _educationId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()),
+            Assert.Throws<ValidationException>(() => _command.Execute(_educationId, _request));
+            _mocker.Verify<IEducationRepository, bool>(x => x.Edit(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserEducation>(x => x.GetEducation(It.IsAny<Guid>()),
-                Times.Never);
-            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
+            _mocker.Verify<IEducationRepository, DbUserEducation>(x => x.Get(_educationId),
                 Times.Once);
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenEducationUserIdDontEqualUserIdFromRequest()
-        {
-            Assert.Throws<BadRequestException>(() => _command.Execute(Guid.NewGuid(), _educationId, _request));
-            _mocker.Verify<IUserRepository, DbUserEducation>(x => x.GetEducation(_educationId),
-                Times.Once);
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserEducation, _dbRequest),
-                Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
         }
@@ -217,10 +207,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Setup<IUserRepository>(x => x.Get(_dbUser.Id))
                 .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => _command.Execute(_userId, _educationId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserEducation, _dbRequest),
+            Assert.Throws<Exception>(() => _command.Execute(_educationId, _request));
+            _mocker.Verify<IEducationRepository, bool>(x => x.Edit(_dbUserEducation, _dbRequest),
                 Times.Never);
-            _mocker.Verify<IUserRepository, DbUserEducation>(x => x.GetEducation(It.IsAny<Guid>()),
+            _mocker.Verify<IEducationRepository, DbUserEducation>(x => x.Get(It.IsAny<Guid>()),
                 Times.Never);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
@@ -235,10 +225,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 Body = true
             };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_userId, _educationId, _request));
-            _mocker.Verify<IUserRepository, bool>(x => x.EditEducation(_dbUserEducation, _dbRequest),
+            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_educationId, _request));
+            _mocker.Verify<IEducationRepository, bool>(x => x.Edit(_dbUserEducation, _dbRequest),
                 Times.Once);
-            _mocker.Verify<IUserRepository, DbUserEducation>(x => x.GetEducation(_educationId),
+            _mocker.Verify<IEducationRepository, DbUserEducation>(x => x.Get(_educationId),
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);

@@ -14,6 +14,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public int EducationType { get; set; }
         public string Name { get; set; }
         public string SchoolName { get; set; }
+        public bool IsActive { get; set; }
         public DateTime ReceivedAt { get; set; }
         public DbUser User { get; set; }
     }

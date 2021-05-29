@@ -10,7 +10,9 @@ using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using LT.DigitalOffice.UserService.Validation.User;
+using LT.DigitalOffice.UserService.Validation.User.Certificates;
 using MassTransit;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 using MassTransit.RabbitMqTransport;
@@ -28,9 +30,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -236,6 +236,8 @@ namespace LT.DigitalOffice.UserService
             //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
             //    "LT.DigitalOffice.UserService.Validation.dll");
             services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
+            services.AddScoped<IValidator<JsonPatchDocument<EditCertificateRequest>>, EditCertificateRequestValidator>();
+            services.AddScoped<IValidator<CreateCertificateRequest>, CreateCertificateRequestValidator>();
 
             services
                 .AddControllers(options =>

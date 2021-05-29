@@ -20,13 +20,11 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         private JsonPatchDocument<EditUserRequest> _request;
         private JsonPatchDocument<DbUser> _result;
 
-        private Guid _userId;
         private Guid? _imageId;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _userId = Guid.NewGuid();
             _imageId = Guid.NewGuid();
 
             _mapper = new PatchDbUserMapper();
@@ -94,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldReturnCorrectResponse()
         {
-            var dbUserPatch = _mapper.Map(_request, _imageId, _userId);
+            var dbUserPatch = _mapper.Map(_request, _imageId);
 
             SerializerAssert.AreEqual(_result, dbUserPatch);
         }
@@ -103,7 +101,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         public void ShouldThrowExceptionWhenRequestNull()
         {
             _request = null;
-            Assert.Throws<ArgumentNullException>(() => _mapper.Map(_request, _imageId, _userId));
+            Assert.Throws<ArgumentNullException>(() => _mapper.Map(_request, _imageId));
         }
     }
 }

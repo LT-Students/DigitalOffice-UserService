@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -197,60 +197,6 @@ namespace LT.DigitalOffice.UserService.Data
 
             _provider.PendingUsers.Remove(dbPendingUser);
             _provider.Save();
-        }
-
-        public void AddEducation(DbUserEducation education)
-        {
-            if (education == null)
-            {
-                throw new ArgumentNullException(nameof(education));
-            }
-
-            _provider.UserEducations.Add(education);
-            _provider.Save();
-        }
-
-        public DbUserEducation GetEducation(Guid educationId)
-        {
-            DbUserEducation education = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
-
-            if (education == null)
-            {
-                throw new NotFoundException($"User education with ID '{educationId}' was not found.");
-            }
-
-            return education;
-        }
-
-        public bool EditEducation(DbUserEducation education, JsonPatchDocument<DbUserEducation> request)
-        {
-            if (education == null)
-            {
-                throw new ArgumentNullException(nameof(education));
-            }
-
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            request.ApplyTo(education);
-            _provider.Save();
-
-            return true;
-        }
-
-        public bool RemoveEducation(DbUserEducation education)
-        {
-            if (education == null)
-            {
-                throw new ArgumentNullException(nameof(education));
-            }
-
-            education.IsActive = false;
-            _provider.Save();
-
-            return true;
         }
 
         public bool IsExistUser(Guid userId)

@@ -20,27 +20,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         private readonly IAccessValidator _accessValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IDbUserEducationMapper _mapper;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IEducationRepository _educationRepository;
         private readonly ICreateEducationRequestValidator _validator;
 
         public CreateEducationCommand(
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
             IDbUserEducationMapper mapper,
-            IUserRepository repository,
+            IUserRepository userRepository,
+            IEducationRepository educationRepository,
             ICreateEducationRequestValidator validator)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
-            _repository = repository;
+            _userRepository = userRepository;
+            _educationRepository = educationRepository;
             _validator = validator;
         }
 
         public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
         {
             var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _repository.Get(senderId);
+            var dbUser = _userRepository.Get(senderId);
             if (!(dbUser.IsAdmin ||
                   _accessValidator.HasRights(Rights.AddEditRemoveUsers))
                   && senderId != request.UserId)
@@ -52,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
             var dbEducation = _mapper.Map(request);
 
-            _repository.AddEducation(dbEducation);
+            _educationRepository.Add(dbEducation);
 
             return new OperationResultResponse<Guid>
             {
