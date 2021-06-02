@@ -42,14 +42,61 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IAccessValidator _accessValidator;
 
         #region private methods
+
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
-            // TODO add user department
+            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
+
+            try
+            {
+                var response = _rcDepartment.GetResponse<IOperationResult<bool>>(
+                    IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(
+                        "Сan't assign user {userId} to the department {departmentId}. Please try again later.",
+                        userId, departmentId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogWarning(
+                    exc,
+                    "Сan't assign user {userId} to the department {departmentId}. Please try again later.",
+                    userId, departmentId);
+
+                errors.Add(errorMessage);
+            }
         }
 
         private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
-            // TODO add user position
+            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
+
+            try
+            {
+                var response = _rcPosition.GetResponse<IOperationResult<bool>>(
+                    IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(
+                        "Сan't assign position {positionId} to the user {userId}",
+                        positionId, userId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogWarning(
+                    exc,
+                    "Сan't assign position {positionId} in department {departmentId} to the user {userId}",
+                    positionId, userId);
+
+                errors.Add(errorMessage);
+            }
         }
 
         private void SendEmail(DbUser dbUser, string password, List<string> errors)
