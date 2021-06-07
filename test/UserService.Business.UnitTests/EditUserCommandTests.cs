@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -8,7 +7,6 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
@@ -19,9 +17,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json.Serialization;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Broker.Responses;
 using System.Threading.Tasks;
 using System.Text.Json;
+using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Requests.File;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {

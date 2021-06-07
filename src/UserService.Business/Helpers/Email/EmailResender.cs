@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Broker.Requests;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Models.Broker.Requests.Message;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;

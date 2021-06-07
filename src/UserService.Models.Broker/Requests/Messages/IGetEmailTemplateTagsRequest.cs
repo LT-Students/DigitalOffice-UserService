@@ -1,11 +1,8 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.MessageService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+﻿using LT.DigitalOffice.MessageService.Models.Dto.Enums;
 using System;
 
 namespace LT.DigitalOffice.Broker.Requests
 {
-    [AutoInjectRequest(nameof(RabbitMqConfig.GetTempalateTagsEndpoint))]
     public interface IGetEmailTemplateTagsRequest
     {
         Guid? TemplateId { get; }

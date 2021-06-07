@@ -14,6 +14,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// <summary>
         /// Returns the list of user models using pagination and filter by full name.
         /// </summary>
-        UsersResponse Execute(int skipCount, int takeCount, Guid departmentId);
+        UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId);
     }
 }

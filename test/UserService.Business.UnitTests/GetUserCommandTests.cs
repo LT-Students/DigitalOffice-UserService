@@ -1,8 +1,12 @@
-﻿using LT.DigitalOffice.Broker.Models;
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Project;
+using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -85,16 +89,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _projects = new List<ProjectShortInfo>
             {
-                new ProjectShortInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Project1"
-                },
-                new ProjectShortInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Project2"
-                }
+                new ProjectShortInfo(Guid.NewGuid(), "Project1", "Suspend"),
+                new ProjectShortInfo(Guid.NewGuid(), "Project2", "Suspend")
             };
 
             _userResponse = new UserResponse
@@ -130,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_userResponse);
 
             _mocker
-                .Setup<IGetDepartmentResponse, Guid>(x => x.Id)
+                .Setup<IGetDepartmentUserResponse, Guid>(x => x.DepartmentId)
                 .Returns(_departmentId);
             _mocker
                 .Setup<IOperationResult<IGetDepartmentResponse>, bool>(x => x.IsSuccess)
@@ -148,7 +144,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_mocker.GetMock<IOperationResult<IGetDepartmentResponse>>().Object);
 
             _mocker
-                .Setup<IPositionResponse, Guid>(x => x.Id)
+                .Setup<IPositionResponse, Guid>(x => x.PositionId)
                 .Returns(_positionId);
             _mocker
                 .Setup<IOperationResult<IPositionResponse>, bool>(x => x.IsSuccess)
@@ -184,22 +180,22 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_mocker.GetMock<IOperationResult<IGetUserProjectsInfoResponse>>().Object);
 
             _mocker
-                .Setup<IFileResponse, Guid>(x => x.Id)
+                .Setup<IGetFileResponse, Guid>(x => x.FileId)
                 .Returns(Guid.NewGuid());
             _mocker
-                .Setup<IOperationResult<IFileResponse>, bool>(x => x.IsSuccess)
+                .Setup<IOperationResult<IGetFileResponse>, bool>(x => x.IsSuccess)
                 .Returns(true);
             _mocker
-                .Setup<IOperationResult<IFileResponse>, IFileResponse>(x => x.Body)
-                .Returns(_mocker.GetMock<IFileResponse>().Object);
+                .Setup<IOperationResult<IGetFileResponse>, IGetFileResponse>(x => x.Body)
+                .Returns(_mocker.GetMock<IGetFileResponse>().Object);
             _mocker
-                .Setup<IRequestClient<IGetFileRequest>, IOperationResult<IFileResponse>>(
-                    x => x.GetResponse<IOperationResult<IFileResponse>>(IGetFileRequest.CreateObj(
-                        _imageId, true),
+                .Setup<IRequestClient<IGetFileRequest>, IOperationResult<IGetFileResponse>>(
+                    x => x.GetResponse<IOperationResult<IGetFileResponse>>(IGetFileRequest.CreateObj(
+                        _imageId),
                         default,
                         default)
                     .Result.Message)
-                .Returns(_mocker.GetMock<IOperationResult<IFileResponse>>().Object);
+                .Returns(_mocker.GetMock<IOperationResult<IGetFileResponse>>().Object);
 
             _loggerMock = new Mock<ILogger<GetUserCommand>>();
 
@@ -207,7 +203,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 _loggerMock.Object,
                 _mocker.GetMock<IUserRepository>().Object,
                 _mocker.GetMock<IUserResponseMapper>().Object,
-                _mocker.GetMock<IRequestClient<IGetDepartmentRequest>>().Object,
+                _mocker.GetMock<IRequestClient<IGetDepartmentUserRequest>>().Object,
                 _mocker.GetMock<IRequestClient<IGetPositionRequest>>().Object,
                 _mocker.GetMock<IRequestClient<IGetUserProjectsInfoRequest>>().Object,
                 _mocker.GetMock<IRequestClient<IGetFileRequest>>().Object);
@@ -234,8 +230,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IFileResponse>>(
-                x => x.GetResponse<IOperationResult<IFileResponse>>(
+            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IGetFileResponse>>(
+                x => x.GetResponse<IOperationResult<IGetFileResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
@@ -272,8 +268,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IFileResponse>>(
-                x => x.GetResponse<IOperationResult<IFileResponse>>(
+            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IGetFileResponse>>(
+                x => x.GetResponse<IOperationResult<IGetFileResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
@@ -311,8 +307,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IFileResponse>>(
-                x => x.GetResponse<IOperationResult<IFileResponse>>(
+            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IGetFileResponse>>(
+                x => x.GetResponse<IOperationResult<IGetFileResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
@@ -344,8 +340,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IFileResponse>>(
-                x => x.GetResponse<IOperationResult<IFileResponse>>(
+            _mocker.Verify<IRequestClient<IGetFileRequest>, IOperationResult<IGetFileResponse>>(
+                x => x.GetResponse<IOperationResult<IGetFileResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Once());
 
             _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(

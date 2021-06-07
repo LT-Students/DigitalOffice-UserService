@@ -1,7 +1,11 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Project;
+using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
@@ -24,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<GetUserCommand> _logger;
         private readonly IUserRepository _repository;
         private readonly IUserResponseMapper _mapper;
-        private readonly IRequestClient<IGetDepartmentRequest> _rcDepartment;
+        private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
         private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
         private readonly IRequestClient<IGetFileRequest> _rcFile;
@@ -37,8 +41,8 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IGetDepartmentResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentResponse>>(
-                    IGetDepartmentRequest.CreateObj(userId, null),
+                IOperationResult<IGetDepartmentUserResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
+                    IGetDepartmentUserRequest.CreateObj(userId),
                     default,
                     RequestTimeout.After(s: 100)).Result.Message;
 
@@ -46,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.DepartmentId,
                         Name = response.Body.Name,
                         StartWorkingAt = response.Body.StartWorkingAt
                     };
@@ -84,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Business
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.PositionId,
                         Name = response.Body.Name,
                         ReceivedAt = response.Body.ReceivedAt
                     };
@@ -162,14 +166,14 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IFileResponse> response = _rcFile.GetResponse<IOperationResult<IFileResponse>>(
-                    IGetFileRequest.CreateObj(imageId.Value, true)).Result.Message;
+                IOperationResult<IGetFileResponse> response = _rcFile.GetResponse<IOperationResult<IGetFileResponse>>(
+                    IGetFileRequest.CreateObj(imageId.Value)).Result.Message;
 
                 if (response.IsSuccess)
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.FileId,
                         ParentId = response.Body.ParentId,
                         Content = response.Body.Content,
                         Extension = response.Body.Extension
@@ -200,7 +204,7 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<GetUserCommand> logger,
             IUserRepository repository,
             IUserResponseMapper mapper,
-            IRequestClient<IGetDepartmentRequest> rcDepartment,
+            IRequestClient<IGetDepartmentUserRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
             IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
             IRequestClient<IGetFileRequest> rcFile)

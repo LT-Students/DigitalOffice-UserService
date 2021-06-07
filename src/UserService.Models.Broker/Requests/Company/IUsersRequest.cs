@@ -1,10 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.UserService.Models.Dto.Configurations;
-using System;
+﻿using System;
 
 namespace LT.DigitalOffice.UserService.Models.Broker.Requests.Company
 {
-    [AutoInjectRequest(nameof(RabbitMqConfig.GetDepartmentEndpoint))]
     public interface IUsersRequest
     {
         Guid DepartmentId { get; }

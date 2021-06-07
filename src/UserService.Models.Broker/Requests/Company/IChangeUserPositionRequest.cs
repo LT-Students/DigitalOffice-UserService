@@ -1,10 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.UserService.Models.Dto.Configurations;
-using System;
+﻿using System;
 
 namespace LT.DigitalOffice.Broker.Requests
 {
-    [AutoInjectRequest(nameof(RabbitMqConfig.ChangeUserPositionEndpoint))]
     public interface IChangeUserPositionRequest
     {
         Guid UserId { get; }
