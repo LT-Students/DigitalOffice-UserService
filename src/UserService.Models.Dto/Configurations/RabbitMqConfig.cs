@@ -28,8 +28,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IGetFileRequest))]
         public string GetFileEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetDepartmentRequest))]
-        public string GetDepartmentEndpoint { get; set; }
+        [AutoInjectRequest(typeof(IGetDepartmentUserRequest))]
+        public string GetDepartmentUserEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetPositionRequest))]
         public string GetPositionEndpoint { get; set; }
@@ -51,5 +51,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         [AutoInjectRequest(typeof(IGetTokenRequest))]
         public string GetTokenEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IGetUsersRequest))]
+        public string GetUsersEndpoint { get; set; }
     }
 }
