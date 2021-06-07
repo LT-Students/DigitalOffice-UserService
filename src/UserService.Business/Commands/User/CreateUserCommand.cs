@@ -46,7 +46,7 @@ namespace LT.DigitalOffice.UserService.Business
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
-            string logMessage = "Сan't assign user {userId} to the department {departmentId}. Please try again later.";
+            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
 
             try
             {
@@ -70,6 +70,7 @@ namespace LT.DigitalOffice.UserService.Business
         private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
+            string logMessage = "Сan't assign position {positionId} to the user {userId}";
 
             try
             {
@@ -77,19 +78,14 @@ namespace LT.DigitalOffice.UserService.Business
                     IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
                 if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    _logger.LogWarning(
-                        "Сan't assign position {positionId} to the user {userId}",
-                        positionId, userId);
+                    _logger.LogWarning(logMessage, positionId, userId);
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(
-                    exc,
-                    "Сan't assign position {positionId} in department {departmentId} to the user {userId}",
-                    positionId, userId);
+                _logger.LogWarning(exc, logMessage, positionId, userId);
 
                 errors.Add(errorMessage);
             }
