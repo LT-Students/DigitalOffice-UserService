@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(
+                _logger.LogError(
                     exc,
                     "Сan't assign user {userId} to the department {departmentId}. Please try again later.",
                     userId, departmentId);
