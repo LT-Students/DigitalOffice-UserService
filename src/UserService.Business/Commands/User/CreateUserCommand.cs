@@ -46,6 +46,7 @@ namespace LT.DigitalOffice.UserService.Business
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
+            string logMessage = "Сan't assign user {userId} to the department {departmentId}. Please try again later.";
 
             try
             {
@@ -53,19 +54,14 @@ namespace LT.DigitalOffice.UserService.Business
                     IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
                 if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    _logger.LogWarning(
-                        "Сan't assign user {userId} to the department {departmentId}. Please try again later.",
-                        userId, departmentId);
+                    _logger.LogWarning(logMessage, userId, departmentId);
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(
-                    exc,
-                    "Сan't assign user {userId} to the department {departmentId}. Please try again later.",
-                    userId, departmentId);
+                _logger.LogError(exc, logMessage, userId, departmentId);
 
                 errors.Add(errorMessage);
             }
