@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string GetUsersDataEndpoint { get; set; }
         public string AddImageEndpoint { get; set; }
         public string GetFileEndpoint { get; set; }
-        public string GetDepartmentEndpoint { get; set; }
+        public string GetUserDepartmentEndpoint { get; set; }
         public string GetPositionEndpoint { get; set; }
         public string ChangeUserDepartmentEndpoint { get; set; }
         public string ChangeUserPositionEndpoint { get; set; }

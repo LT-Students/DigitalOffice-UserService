@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<GetUserCommand> _logger;
         private readonly IUserRepository _repository;
         private readonly IUserResponseMapper _mapper;
-        private readonly IRequestClient<IGetDepartmentRequest> _rcDepartment;
+        private readonly IRequestClient<IGetUserDepartmentRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
         private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
         private readonly IRequestClient<IGetFileRequest> _rcFile;
@@ -37,16 +37,16 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IGetDepartmentResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentResponse>>(
-                    IGetDepartmentRequest.CreateObj(userId, null),
+                IOperationResult<IGetUserDepartmentResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(
+                    IGetUserDepartmentRequest.CreateObj(userId),
                     default,
-                    RequestTimeout.After(s: 100)).Result.Message;
+                    RequestTimeout.After(s: 10)).Result.Message;
 
                 if (response.IsSuccess)
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.DepartmentId,
                         Name = response.Body.Name,
                         StartWorkingAt = response.Body.StartWorkingAt
                     };
@@ -200,7 +200,7 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<GetUserCommand> logger,
             IUserRepository repository,
             IUserResponseMapper mapper,
-            IRequestClient<IGetDepartmentRequest> rcDepartment,
+            IRequestClient<IGetUserDepartmentRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
             IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
             IRequestClient<IGetFileRequest> rcFile)

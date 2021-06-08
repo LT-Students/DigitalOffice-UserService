@@ -2,9 +2,9 @@
 
 namespace LT.DigitalOffice.Broker.Responses
 {
-    public interface IGetDepartmentResponse
+    public interface IGetUserDepartmentResponse
     {
-        Guid Id { get; }
+        Guid DepartmentId { get; }
         string Name { get; }
         DateTime StartWorkingAt { get; }
     }
