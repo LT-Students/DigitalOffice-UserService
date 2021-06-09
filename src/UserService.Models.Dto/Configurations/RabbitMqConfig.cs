@@ -5,13 +5,13 @@ using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
-using LT.DigitalOffice.Models.Broker.Requests.User;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
     public class RabbitMqConfig : BaseRabbitMqConfig
     {
         public string CompanyServiceUrl { get; set; }
+
 
         public string GetUserCredentialsEndpoint { get; set; }
 
