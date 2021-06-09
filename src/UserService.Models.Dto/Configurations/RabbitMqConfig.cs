@@ -13,13 +13,10 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     {
         public string CompanyServiceUrl { get; set; }
 
-        [AutoInjectRequest(typeof(IGetUserCredentialsRequest))]
         public string GetUserCredentialsEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetUserDataRequest))]
         public string GetUserDataEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetUsersDataRequest))]
         public string GetUsersDataEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IAddImageRequest))]
@@ -52,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IGetTokenRequest))]
         public string GetTokenEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetUsersRequest))]
-        public string GetUsersEndpoint { get; set; }
+        [AutoInjectRequest(typeof(IGetDepartmentUsersRequest))]
+        public string GetDepartmentUsersEndpoint { get; set; }
     }
 }
