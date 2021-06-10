@@ -129,19 +129,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup<IGetDepartmentUserResponse, Guid>(x => x.DepartmentId)
                 .Returns(_departmentId);
             _mocker
-                .Setup<IOperationResult<IGetDepartmentResponse>, bool>(x => x.IsSuccess)
+                .Setup<IOperationResult<IGetUserDepartmentResponse>, bool>(x => x.IsSuccess)
                 .Returns(true);
             _mocker
-                .Setup<IOperationResult<IGetDepartmentResponse>, IGetDepartmentResponse>(x => x.Body)
-                .Returns(_mocker.GetMock<IGetDepartmentResponse>().Object);
+                .Setup<IOperationResult<IGetUserDepartmentResponse>, IGetUserDepartmentResponse>(x => x.Body)
+                .Returns(_mocker.GetMock<IGetUserDepartmentResponse>().Object);
             _mocker
-                .Setup<IRequestClient<IGetDepartmentRequest>, IOperationResult<IGetDepartmentResponse>>(
-                    x => x.GetResponse<IOperationResult<IGetDepartmentResponse>>(IGetDepartmentRequest.CreateObj(
-                        _userId, null),
+                .Setup<IRequestClient<IGetUserDepartmentRequest>, IOperationResult<IGetUserDepartmentResponse>>(
+                    x => x.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(IGetUserDepartmentRequest.CreateObj(
+                        _userId),
                         default,
                         100)
                     .Result.Message)
-                .Returns(_mocker.GetMock<IOperationResult<IGetDepartmentResponse>>().Object);
+                .Returns(_mocker.GetMock<IOperationResult<IGetUserDepartmentResponse>>().Object);
 
             _mocker
                 .Setup<IPositionResponse, Guid>(x => x.PositionId)
@@ -218,8 +218,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetDepartmentRequest>, IOperationResult<IGetDepartmentResponse>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentResponse>>(
+            _mocker.Verify<IRequestClient<IGetUserDepartmentRequest>, IOperationResult<IGetUserDepartmentResponse>>(
+                x => x.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
@@ -256,8 +256,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetDepartmentRequest>, IOperationResult<IGetDepartmentResponse>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentResponse>>(
+            _mocker.Verify<IRequestClient<IGetUserDepartmentRequest>, IOperationResult<IGetUserDepartmentResponse>>(
+                x => x.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
@@ -295,8 +295,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetDepartmentRequest>, IOperationResult<IGetDepartmentResponse>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentResponse>>(
+            _mocker.Verify<IRequestClient<IGetUserDepartmentRequest>, IOperationResult<IGetUserDepartmentResponse>>(
+                x => x.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
@@ -328,8 +328,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             SerializerAssert.AreEqual(_userResponse, _command.Execute(_filter));
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetDepartmentRequest>, IOperationResult<IGetDepartmentResponse>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentResponse>>(
+            _mocker.Verify<IRequestClient<IGetUserDepartmentRequest>, IOperationResult<IGetUserDepartmentResponse>>(
+                x => x.GetResponse<IOperationResult<IGetUserDepartmentResponse>>(
                     It.IsAny<object>(), default, default).Result.Message, Times.Never());
 
             _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
