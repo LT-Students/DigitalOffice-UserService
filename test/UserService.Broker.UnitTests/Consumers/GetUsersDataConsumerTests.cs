@@ -1,10 +1,7 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.Broker.Models;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using MassTransit.Testing;
@@ -14,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Requests.User;
+using LT.DigitalOffice.Models.Broker.Responses.User;
 
 namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 {

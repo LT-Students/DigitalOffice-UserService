@@ -1,6 +1,4 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -11,14 +9,16 @@ using System;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using LT.DigitalOffice.Models.Broker.Requests.User;
+using LT.DigitalOffice.Models.Broker.Responses.User;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-    public class UserLoginConsumer : IConsumer<IUserCredentialsRequest>
+    public class UserLoginConsumer : IConsumer<IGetUserCredentialsRequest>
     {
         private readonly IUserCredentialsRepository _credentialsRepository;
 
-        private GetCredentialsFilter CreateCredentialsFilter(IUserCredentialsRequest request)
+        private GetCredentialsFilter CreateCredentialsFilter(IGetUserCredentialsRequest request)
         {
             GetCredentialsFilter result = new();
 
@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             return result;
         }
 
-        private object GetUserCredentials(IUserCredentialsRequest request)
+        private object GetUserCredentials(IGetUserCredentialsRequest request)
         {
             DbUserCredentials dbUserCredentials;
 
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 throw new NotFoundException($"User credentials was not found.");
             }
 
-            return IUserCredentialsResponse.CreateObj(
+            return IGetUserCredentialsResponse.CreateObj(
                 dbUserCredentials.UserId,
                 dbUserCredentials.PasswordHash,
                 dbUserCredentials.Salt,
@@ -94,11 +94,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             _credentialsRepository = credentialsRepository;
         }
 
-        public async Task Consume(ConsumeContext<IUserCredentialsRequest> context)
+        public async Task Consume(ConsumeContext<IGetUserCredentialsRequest> context)
         {
             var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
-            await context.RespondAsync<IOperationResult<IUserCredentialsResponse>>(response);
+            await context.RespondAsync<IOperationResult<IGetUserCredentialsResponse>>(response);
         }
     }
 }
