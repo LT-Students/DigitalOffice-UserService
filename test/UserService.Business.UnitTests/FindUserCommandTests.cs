@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private AutoMocker _mocker;
         private IFindUserCommand _command;
 
-        private Mock<Response<IOperationResult<IGetDepartmentUsersResponse>>> _operationResultBroker;
+        private Mock<Response<IOperationResult<IFindDepartmentUsersResponse>>> _operationResultBroker;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -94,11 +94,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _takeCount = _usersInfo.Count;
 
-            var usersResponse = new Mock<IGetDepartmentUsersResponse>();
+            var usersResponse = new Mock<IFindDepartmentUsersResponse>();
             usersResponse.Setup(x => x.UserIds).Returns(userIds);
             usersResponse.Setup(x => x.TotalCount).Returns(_usersInfo.Count);
 
-            _operationResultBroker = new Mock<Response<IOperationResult<IGetDepartmentUsersResponse>>>();
+            _operationResultBroker = new Mock<Response<IOperationResult<IFindDepartmentUsersResponse>>>();
             _operationResultBroker.Setup(x => x.Message.Body).Returns(usersResponse.Object);
             _operationResultBroker.Setup(x => x.Message.IsSuccess).Returns(true);
             _operationResultBroker.Setup(x => x.Message.Errors).Returns(new List<string> { "Some errors" });
@@ -109,12 +109,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         {
             _mocker.GetMock<IUserRepository>().Reset();
             _mocker.GetMock<IUserInfoMapper>().Reset();
-            _mocker.GetMock<IRequestClient<IGetDepartmentUsersRequest>>().Reset();
+            _mocker.GetMock<IRequestClient<IFindDepartmentUsersRequest>>().Reset();
 
             _mocker
-               .Setup<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-               x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                   IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)))
+               .Setup<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+               x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                   IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)))
                .Returns(Task.FromResult(_operationResultBroker.Object));
         }
 
@@ -131,16 +131,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _operationResultBroker.Setup(x => x.Message.IsSuccess).Returns(false);
 
             _mocker
-               .Setup<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-               x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                   IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)))
+               .Setup<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+               x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                   IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)))
                .Throws(new Exception());
 
             SerializerAssert.AreEqual(result, _command.Execute(_skipCount, _takeCount, _departmentId));
 
-            _mocker.Verify<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                    IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
+            _mocker.Verify<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+                x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                    IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
             _mocker.Verify<IUserRepository, IEnumerable<DbUser>>(x => x.Get(It.IsAny<List<Guid>>()), Times.Never);
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>()), Times.Never);
         }
@@ -158,9 +158,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             SerializerAssert.AreEqual(result, _command.Execute(_skipCount, _takeCount, _departmentId));
 
-            _mocker.Verify<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-                x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                    IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
+            _mocker.Verify<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+                x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                    IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
             _mocker.Verify<IUserRepository, IEnumerable<DbUser>>(x => x.Get(It.IsAny<List<Guid>>()), Times.Never);
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>()), Times.Never);
         }
@@ -187,9 +187,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             SerializerAssert.AreEqual(result, _command.Execute(_skipCount, _takeCount, null));
 
-            _mocker.Verify<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-               x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                   IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Never);
+            _mocker.Verify<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+               x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                   IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Never);
             _mocker.Verify<IUserRepository, IEnumerable<DbUser>>(x => x.Find(_skipCount, _takeCount, out totalCount), Times.Once);
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>()), Times.Exactly(_usersInfo.Count));
         }
@@ -217,9 +217,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             SerializerAssert.AreEqual(result, _command.Execute(_skipCount, _takeCount, _departmentId));
 
-            _mocker.Verify<IRequestClient<IGetDepartmentUsersRequest>, Task<Response<IOperationResult<IGetDepartmentUsersResponse>>>>(
-               x => x.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
-                   IGetDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
+            _mocker.Verify<IRequestClient<IFindDepartmentUsersRequest>, Task<Response<IOperationResult<IFindDepartmentUsersResponse>>>>(
+               x => x.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(
+                   IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, TimeSpan.FromSeconds(2)), Times.Once);
             _mocker.Verify<IUserRepository, IEnumerable<DbUser>>(x => x.Get(It.IsAny<List<Guid>>()), Times.Once);
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>()), Times.Exactly(_usersInfo.Count));
         }
