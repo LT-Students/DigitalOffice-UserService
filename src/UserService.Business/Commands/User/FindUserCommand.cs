@@ -19,17 +19,17 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserInfoMapper _mapper;
         private readonly IUserRepository _repository;
         private readonly ILogger<FindUserCommand> _logger;
-        private readonly IRequestClient<IGetDepartmentUsersRequest> _requestClient;
+        private readonly IRequestClient<IFindDepartmentUsersRequest> _requestClient;
 
-        private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
+        private IFindDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
         {
-            IGetDepartmentUsersResponse users = null;
+            IFindDepartmentUsersResponse users = null;
             string errorMessage = $"Can not get department users with department id {departmentId}. Please try again later.";
 
             try
             {
-                var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-                var response = _requestClient.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(request, timeout: TimeSpan.FromSeconds(2)).Result;
+                var request = IFindDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
+                var response = _requestClient.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: TimeSpan.FromSeconds(2)).Result;
 
                 if (response.Message.IsSuccess)
                 {
@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business
             IUserRepository repository,
             IUserInfoMapper mapper,
             ILogger<FindUserCommand> logger,
-            IRequestClient<IGetDepartmentUsersRequest> requestClient)
+            IRequestClient<IFindDepartmentUsersRequest> requestClient)
         {
             _logger = logger;
             _mapper = mapper;
