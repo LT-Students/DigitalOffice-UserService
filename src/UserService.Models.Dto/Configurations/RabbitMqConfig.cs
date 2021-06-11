@@ -13,7 +13,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     {
         public string CompanyServiceUrl { get; set; }
 
-
         public string GetUserCredentialsEndpoint { get; set; }
 
         public string GetUserDataEndpoint { get; set; }
@@ -30,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string GetDepartmentUserEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IFindDepartmentUsersRequest))]
-        public string GetDepartmentUsersEndpoint { get; set; }
+        public string FindDepartmentUsersEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetPositionRequest))]
         public string GetPositionEndpoint { get; set; }
