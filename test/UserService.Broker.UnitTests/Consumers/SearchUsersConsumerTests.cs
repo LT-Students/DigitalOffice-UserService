@@ -14,9 +14,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LT.DigitalOffice.ProjectService.Broker.UnitTests
+namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 {
-    public class SearchProjectsConsumerTests
+    public class SearchUsersConsumerTests
     {
         private ConsumerTestHarness<SearchUsersConsumer> _consumerTestHarness;
 
