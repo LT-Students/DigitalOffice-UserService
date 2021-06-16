@@ -7,6 +7,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
@@ -21,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
             return ISearchResponse.CreateObj(
                 users.Select(
-                    u => new SearchInfo(u.Id, u.LastName + ' ' + u.FirstName)).ToList());
+                    u => new SearchInfo(u.Id, string.Join(" ", u.LastName, u.FirstName))).ToList());
         }
 
         public SearchUsersConsumer(
