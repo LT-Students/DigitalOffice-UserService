@@ -56,6 +56,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new ForbiddenException();
             }
 
+            _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
+
             try
             {
                 IOperationResult<string> response = _rcToken.GetResponse<IOperationResult<string>>(
@@ -63,13 +65,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
                 if (response.IsSuccess && !string.IsNullOrEmpty(response.Body))
                 {
-                    _userRepository.DeletePendingUser(request.UserId);
-
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
                     string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
                     _userCredentialsRepository.Create(_mapper.Map(request, salt, passwordHash));
+
+                    _userRepository.DeletePendingUser(request.UserId);
 
                     _userRepository.SwitchActiveStatus(request.UserId, true);
 
@@ -90,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 _logger.LogError(exc, "Something went wrong while we were creating the user credentials.");
             }
 
-            throw new InvalidOperationException();
+            throw new BadRequestException();
         }
     }
 }

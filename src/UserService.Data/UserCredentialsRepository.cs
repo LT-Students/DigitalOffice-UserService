@@ -105,18 +105,26 @@ namespace LT.DigitalOffice.UserService.Data
 
         public Guid Create(DbUserCredentials dbUserCredentials)
         {
-            if (_provider.UserCredentials.Any(
-                uc =>
-                    uc.UserId == dbUserCredentials.UserId ||
-                    uc.Login == dbUserCredentials.Login))
-            {
-                throw new BadRequestException("Login is busy.");
-            }
 
             _provider.UserCredentials.Add(dbUserCredentials);
             _provider.Save();
 
             return dbUserCredentials.Id;
+        }
+
+        public void CheckLogin(string login, Guid userId)
+        {
+            if (_provider.UserCredentials.Any(
+                uc => uc.Login == login))
+            {
+                throw new BadRequestException("Login is busy.");
+            }
+
+            if (_provider.UserCredentials.Any(
+                uc => uc.UserId == userId))
+            {
+                throw new BadRequestException("User credentials is exist");
+            }
         }
     }
 }
