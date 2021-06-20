@@ -51,9 +51,10 @@ namespace LT.DigitalOffice.UserService.Controllers
         public UsersResponse Find(
             [FromServices] IFindUserCommand command,
             [FromQuery] int skipCount,
-            [FromQuery] int takeCount)
+            [FromQuery] int takeCount,
+            [FromQuery] Guid? departmentId)
         {
-            return command.Execute(skipCount, takeCount);
+            return command.Execute(skipCount, takeCount, departmentId);
         }
     }
 }

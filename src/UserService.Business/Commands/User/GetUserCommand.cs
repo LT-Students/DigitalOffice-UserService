@@ -1,7 +1,11 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Project;
+using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
@@ -24,10 +28,9 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<GetUserCommand> _logger;
         private readonly IUserRepository _repository;
         private readonly IUserResponseMapper _mapper;
-        private readonly IRequestClient<IGetDepartmentRequest> _rcDepartment;
+        private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
-        private readonly IRequestClient<IGetUserProjectsRequest> _rcProjects;
-        private readonly IRequestClient<IGetProjectRequest> _rcProject;
+        private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
         private readonly IRequestClient<IGetFileRequest> _rcFile;
 
         private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
@@ -38,16 +41,16 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IGetDepartmentResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentResponse>>(
-                    IGetDepartmentRequest.CreateObj(userId, null),
+                IOperationResult<IGetDepartmentUserResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
+                    IGetDepartmentUserRequest.CreateObj(userId),
                     default,
-                    RequestTimeout.After(s: 100)).Result.Message;
+                    RequestTimeout.After(s: 10)).Result.Message;
 
                 if (response.IsSuccess)
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.DepartmentId,
                         Name = response.Body.Name,
                         StartWorkingAt = response.Body.StartWorkingAt
                     };
@@ -85,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Business
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.PositionId,
                         Name = response.Body.Name,
                         ReceivedAt = response.Body.ReceivedAt
                     };
@@ -110,55 +113,27 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<ProjectInfo> GetProjects(Guid userId, List<string> errors)
         {
-            List<ProjectInfo> result = null;
-
             string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
 
             try
             {
-                IOperationResult<IProjectsResponse> response = _rcProjects.GetResponse<IOperationResult<IProjectsResponse>>(
-                    IGetUserProjectsRequest.CreateObj(userId)).Result.Message;
+                var response = _rcProjects.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
+                    IGetUserProjectsInfoRequest.CreateObj(userId)).Result.Message;
 
                 if (response.IsSuccess)
                 {
-                    result = new();
+                    var projects = new List<ProjectInfo>();
 
-                    string subErrorMessage = "Can not get information about project '{0}'. Please try again later.";
-
-                    foreach (Guid projectId in response.Body.ProjectsIds)
+                    foreach(var project in response.Body.Projects)
                     {
-                        try
+                        projects.Add(new ProjectInfo
                         {
-                            IOperationResult<IProjectResponse> projectResponse = _rcProject.GetResponse<IOperationResult<IProjectResponse>>(
-                                IGetProjectRequest.CreateObj(projectId)).Result.Message;
-
-                            if (projectResponse.IsSuccess)
-                            {
-                                result.Add(new ProjectInfo
-                                {
-                                    Id = projectId,
-                                    Name = projectResponse.Body.Name,
-                                    Status = projectResponse.Body.ProjectStatus
-                                });
-                            }
-                            else
-                            {
-                                string err = string.Format(subErrorMessage, projectId);
-
-                                _logger.LogWarning(err);
-
-                                errors.Add(err);
-                            }
-                        }
-                        catch (Exception exc)
-                        {
-                            string err = string.Format(subErrorMessage, projectId);
-
-                            _logger.LogError(exc, err);
-
-                            errors.Add(err);
-                        }
-                    }
+                            Id = project.Id,
+                            Name = project.Name,
+                            Status = project.Status
+                        });
+                    };
+                    return projects;
                 }
                 else
                 {
@@ -175,7 +150,7 @@ namespace LT.DigitalOffice.UserService.Business
                 errors.Add(errorMessage);
             }
 
-            return result;
+            return null;
         }
 
         private ImageInfo GetImage(Guid? imageId, List<string> errors)
@@ -191,14 +166,14 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IFileResponse> response = _rcFile.GetResponse<IOperationResult<IFileResponse>>(
-                    IGetFileRequest.CreateObj(imageId.Value, true)).Result.Message;
+                IOperationResult<IGetFileResponse> response = _rcFile.GetResponse<IOperationResult<IGetFileResponse>>(
+                    IGetFileRequest.CreateObj(imageId.Value)).Result.Message;
 
                 if (response.IsSuccess)
                 {
                     result = new()
                     {
-                        Id = response.Body.Id,
+                        Id = response.Body.FileId,
                         ParentId = response.Body.ParentId,
                         Content = response.Body.Content,
                         Extension = response.Body.Extension
@@ -229,10 +204,9 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<GetUserCommand> logger,
             IUserRepository repository,
             IUserResponseMapper mapper,
-            IRequestClient<IGetDepartmentRequest> rcDepartment,
+            IRequestClient<IGetDepartmentUserRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
-            IRequestClient<IGetUserProjectsRequest> rcProjects,
-            IRequestClient<IGetProjectRequest> rcProject,
+            IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
             IRequestClient<IGetFileRequest> rcFile)
         {
             _logger = logger;
@@ -241,7 +215,6 @@ namespace LT.DigitalOffice.UserService.Business
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
             _rcProjects = rcProjects;
-            _rcProject = rcProject;
             _rcFile = rcFile;
         }
 

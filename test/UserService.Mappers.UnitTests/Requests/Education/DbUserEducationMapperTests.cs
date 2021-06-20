@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Db;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -6,7 +6,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using NUnit.Framework;
 using System;
 
-namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Requests.Education
+namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
 {
     class DbUserEducationMapperTests
     {

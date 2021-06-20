@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.Broker.Models;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
+using LT.DigitalOffice.Models.Broker.Responses.User;
+using LT.DigitalOffice.Models.Broker.Requests.User;
+using LT.DigitalOffice.Models.Broker.Models;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
@@ -35,8 +34,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
             return IGetUsersDataResponse.CreateObj(
                 dbUsers
-                    .Select(dbUser => UserData
-                        .Create(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive)).ToList());
+                    .Select(dbUser => new UserData(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive)).ToList());
         }
     }
 }

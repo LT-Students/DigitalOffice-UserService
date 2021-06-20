@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User;
 using Microsoft.AspNetCore.JsonPatch;
@@ -18,17 +18,13 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
     {
         private IValidator<JsonPatchDocument<EditUserRequest>> _validator;
         private JsonPatchDocument<EditUserRequest> _editUserRequest;
-        
-        Func<string, Operation> GetOperationByPath =>
-            (path) => _editUserRequest.Operations.Find(x => x.path == path);
 
-        
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _validator = new EditUserRequestValidator();
         }
-        
+
         [SetUp]
         public void SetUp()
         {
@@ -40,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                     "",
                     "Name"),
                 new Operation<EditUserRequest>(
-                    "add",
+                    "replace",
                     $"/{nameof(EditUserRequest.MiddleName)}",
                     "",
                     "Middlename"),
@@ -53,12 +49,22 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                     "replace",
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
-                    UserStatus.Vacation),
+                    "Vacation"),
                 new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.AvatarImage)}",
                     "",
-                    Properties.Resources.Base64String),
+                    JsonSerializer.Serialize(new AddImageRequest
+                    {
+                        Name = "Test",
+                        Content = Properties.Resources.Base64String,
+                        Extension = ".jpg"
+                    })),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Rate)}",
+                    "",
+                    1)
             }, new CamelCasePropertyNamesContractResolver());
         }
 
@@ -68,99 +74,177 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             _validator.TestValidate(_editUserRequest).ShouldNotHaveAnyValidationErrors();
         }
 
-        #region Base validate errors
-        
-        [Test]
-        public void ShouldThrowValidationExceptionWhenRequestNotContainsOperations()
-        {
-            _editUserRequest.Operations.Clear();
-
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
-        }
-        
-        [Test]
-        public void ShouldThrowValidationExceptionWhenRequestContainsNotUniqueOperations()
-        {
-            _editUserRequest.Operations.Add(_editUserRequest.Operations.First());
-
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
-        }
-        
-        [Test]
-        public void ShouldThrowValidationExceptionWhenRequestContainsNotSupportedReplace()
-        {
-            _editUserRequest.Operations.Add(new Operation<EditUserRequest>("replace", $"/{nameof(DbUser.Id)}", "", Guid.NewGuid()));
-
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
-        }
-        #endregion
-        
         #region Names size checks
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenFirstNameIsTooLong()
         {
-            GetOperationByPath(EditUserRequestValidator.FirstName).value = "".PadLeft(33);
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.FirstName)}",
+                    "",
+                    "".PadLeft(33))
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenFirstNameIsTooShort()
         {
-            GetOperationByPath(EditUserRequestValidator.FirstName).value = "";
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.FirstName)}",
+                    "",
+                    "")
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenLastNameIsTooLong()
         {
-            GetOperationByPath(EditUserRequestValidator.LastName).value = "".PadLeft(33);
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.LastName)}",
+                    "",
+                    "".PadLeft(101))
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenLastNameIsTooShort()
         {
-            GetOperationByPath(EditUserRequestValidator.LastName).value = "";
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.LastName)}",
+                    "",
+                    "")
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenMiddleNameIsTooLong()
         {
-            GetOperationByPath(EditUserRequestValidator.MiddleName).value = "".PadLeft(33);
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.MiddleName)}",
+                    "",
+                    "".PadLeft(33))
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         [Test]
         public void ShouldThrowValidationExceptionWhenMiddleNameIsTooShort()
         {
-            GetOperationByPath(EditUserRequestValidator.MiddleName).value = "";
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.MiddleName)}",
+                    "",
+                    "")
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-        
+
         #endregion
 
         [Test]
         public void ShouldThrowValidationExceptionWhenStatusIsNotCorrect()
         {
-            GetOperationByPath(EditUserRequestValidator.Status).value = 5;
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Status)}",
+                    "",
+                    "incorrect status")
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
 
         [Test]
         public void ShouldThrowValidationExceptionWhenAvatarImageIsNotCorrect()
         {
-            GetOperationByPath(EditUserRequestValidator.AvatarImage).value = "some string not Base64";
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.FirstName)}",
+                    "",
+                    "some strange json for image")
+            }, new CamelCasePropertyNamesContractResolver());
 
-            _validator.TestValidate(_editUserRequest).ShouldHaveAnyValidationError();
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
+
+        #region rate
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenRateIsNotCorrect()
+        {
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Rate)}",
+                    "",
+                    "incorrect rate")
+            }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenRateIsTooSmall()
+        {
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Rate)}",
+                    "",
+                    -0.3)
+            }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
+        }
+
+        [Test]
+        public void ShouldThrowValidationExceptionWhenRateIsTooBig()
+        {
+            var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+            {
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Rate)}",
+                    "",
+                    13)
+            }, new CamelCasePropertyNamesContractResolver());
+
+            _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
+        }
+
+        #endregion
     }
 }

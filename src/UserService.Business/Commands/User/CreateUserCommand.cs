@@ -1,12 +1,15 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.MessageService.Models.Dto.Enums;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -14,6 +17,7 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
@@ -41,14 +45,53 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IAccessValidator _accessValidator;
 
         #region private methods
+
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
-            // TODO add user department
+            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
+            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
+
+            try
+            {
+                var response = _rcDepartment.GetResponse<IOperationResult<bool>>(
+                    IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(logMessage, userId, departmentId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, logMessage, userId, departmentId);
+
+                errors.Add(errorMessage);
+            }
         }
 
         private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
-            // TODO add user position
+            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
+            string logMessage = "Сan't assign position {positionId} to the user {userId}";
+
+            try
+            {
+                var response = _rcPosition.GetResponse<IOperationResult<bool>>(
+                    IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(logMessage, positionId, userId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogWarning(exc, logMessage, positionId, userId);
+
+                errors.Add(errorMessage);
+            }
         }
 
         private void SendEmail(DbUser dbUser, string password, List<string> errors)
@@ -123,38 +166,45 @@ namespace LT.DigitalOffice.UserService.Business
             }
         }
 
-        private Guid? GetAvatarImageId(CreateUserRequest request, List<string> errors)
+        private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
         {
             Guid? avatarImageId = null;
 
-            if (!string.IsNullOrEmpty(request.AvatarImage))
+            if (avatarRequest == null)
             {
-                string errorMessage = $"Can not add avatar image to user. Please try again later.";
+                return avatarImageId;
+            }
 
-                try
+            Guid userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
+
+            try
+            {
+                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
+                    IAddImageRequest.CreateObj(
+                        avatarRequest.Name,
+                        avatarRequest.Content,
+                        avatarRequest.Extension,
+                        userId)).Result;
+
+                if (!response.Message.IsSuccess)
                 {
-                    Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
-                        IAddImageRequest.CreateObj(request.AvatarImage),
-                        default,
-                        timeout: RequestTimeout.After(ms: 500)).Result;
-
-                    if (!response.Message.IsSuccess)
-                    {
-                        _logger.LogWarning($"Can not add avatar image. Reason: '{string.Join(',', response.Message.Errors)}'");
-
-                        errors.Add(errorMessage);
-                    }
-                    else
-                    {
-                        avatarImageId = response.Message.Body;
-                    }
-                }
-                catch (Exception exc)
-                {
-                    _logger.LogError(exc, errorMessage);
+                    _logger.LogWarning(
+                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
 
                     errors.Add(errorMessage);
                 }
+                else
+                {
+                    avatarImageId = response.Message.Body.Id;
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, "Can not add avatar image to user with id {userId}.", userId);
+
+                errors.Add(errorMessage);
             }
 
             return avatarImageId;
@@ -200,7 +250,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             List<string> errors = new();
 
-            Guid? avatarImageId = GetAvatarImageId(request, errors);
+            Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, errors);
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 

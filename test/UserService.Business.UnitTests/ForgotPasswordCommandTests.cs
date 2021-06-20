@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Broker.Responses;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
@@ -123,7 +123,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 MiddleName = "Ivanovich",
                 Status = UserStatus.Vacation,
                 Password = "12341234",
-                AvatarImage = "[84][104][105][115][32]",
                 StartWorkingAt = "2021-08-23",
                 IsAdmin = false
             };
@@ -143,7 +142,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 LastName = _createUserRequest.LastName,
                 MiddleName = _createUserRequest.MiddleName,
                 Status = (int)_createUserRequest.Status,
-                AvatarFileId = Guid.NewGuid(),
+                AvatarFileId = null,
                 IsAdmin = (bool)_createUserRequest.IsAdmin,
                 IsActive = true,
                 Communications = new List<DbUserCommunication>

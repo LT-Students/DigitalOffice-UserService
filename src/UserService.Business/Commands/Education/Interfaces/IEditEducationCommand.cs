@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
     [AutoInject]
     public interface IEditEducationCommand
     {
-        OperationResultResponse<bool> Execute(Guid userId, Guid educationId, JsonPatchDocument<EditEducationRequest> request);
+        OperationResultResponse<bool> Execute(Guid educationId, JsonPatchDocument<EditEducationRequest> request);
     }
 }
