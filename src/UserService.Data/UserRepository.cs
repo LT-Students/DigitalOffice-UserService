@@ -206,9 +206,9 @@ namespace LT.DigitalOffice.UserService.Data
 
         public IEnumerable<DbUser> Search(string text)
         {
-            return _provider.Users.Where(u => u.FirstName.Contains(text, StringComparison.OrdinalIgnoreCase)
-                                            || u.MiddleName.Contains(text, StringComparison.OrdinalIgnoreCase)
-                                            || u.LastName.Contains(text, StringComparison.OrdinalIgnoreCase));
+            return _provider.Users.Where(u => u.LastName.Contains(text, StringComparison.OrdinalIgnoreCase)
+                                            || u.FirstName.Contains(text, StringComparison.OrdinalIgnoreCase)
+                                            || u.MiddleName.Contains(text, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

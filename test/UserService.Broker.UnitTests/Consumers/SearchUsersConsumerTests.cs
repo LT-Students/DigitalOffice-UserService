@@ -72,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
         }
 
         [Test]
-        public async Task ShouldConsumeSuccessful()
+        public async Task ShouldSearchUsersSuccessful()
         {
             await _harness.Start();
 
