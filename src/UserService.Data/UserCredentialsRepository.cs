@@ -105,7 +105,6 @@ namespace LT.DigitalOffice.UserService.Data
 
         public Guid Create(DbUserCredentials dbUserCredentials)
         {
-
             _provider.UserCredentials.Add(dbUserCredentials);
             _provider.Save();
 
