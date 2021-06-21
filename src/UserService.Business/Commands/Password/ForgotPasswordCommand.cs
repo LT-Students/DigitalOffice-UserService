@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
@@ -57,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
-            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            Guid senderId = Guid.NewGuid() /* _httpContextAccessor.HttpContext.GetUserId()*/;
             EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
