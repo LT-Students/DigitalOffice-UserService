@@ -4,7 +4,6 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
-using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -31,7 +30,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         private readonly ILogger<ForgotPasswordCommand> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
-        private readonly IRequestClient<IGetEmailTemplateTagsRequest> _rcGetTemplateTags;
         private readonly IOptions<CacheConfig> _cacheOptions;
         private readonly IEmailValidator _validator;
         private readonly IUserRepository _repository;
@@ -60,36 +58,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             //TODO: fix add specific template language
             string templateLanguage = "en";
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-            EmailTemplateType templateType = EmailTemplateType.Warning;
+            EmailTemplateType templateType = EmailTemplateType.Greeting;
             try
             {
-                var rcGetTemplateTagsResponse = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   IGetEmailTemplateTagsRequest.CreateObj(
-                       templateLanguage,
-                       templateType)).Result.Message;
+                var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
+                    userFirstName: dbUser.FirstName, userId: dbUser.Id.ToString(), secret: secret.ToString());
 
-                var templateValues = rcGetTemplateTagsResponse.Body.CreateDictionaryTemplate(
-                    dbUser.FirstName, email, dbUser.Id.ToString(), null, secret.ToString());
+                var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email, templateLanguage, templateType, templateValues);
 
-                if (!rcGetTemplateTagsResponse.IsSuccess)
-                {
-                    _logger.LogWarning(
-                        $"Errors while get email template tags of type:'{templateType}':" +
-                        $"{Environment.NewLine}{string.Join('\n', rcGetTemplateTagsResponse.Errors)}.");
-
-                    errors.Add(errorMessage);
-
-                    return false;
-                }
-
-                IOperationResult<bool> response = _rcSendEmail.GetResponse<IOperationResult<bool>>(
-                    ISendEmailRequest.CreateObj(
-                        rcGetTemplateTagsResponse.Body.TemplateId,
-                        senderId,
-                        email,
-                        templateLanguage,
-                        templateValues
-                       )).Result.Message;
+                IOperationResult<bool> response = _rcSendEmail
+                    .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
+                    .Result
+                    .Message;
 
                 if (!response.IsSuccess)
                 {
@@ -116,7 +96,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         public ForgotPasswordCommand(
             ILogger<ForgotPasswordCommand> logger,
             IRequestClient<ISendEmailRequest> rcSendEmail,
-            IRequestClient<IGetEmailTemplateTagsRequest> rcGetTemplateTags,
             IOptions<CacheConfig> cacheOptions,
             IHttpContextAccessor httpContextAccessor,
             IEmailValidator validator,
@@ -125,7 +104,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         {
             _logger = logger;
             _rcSendEmail = rcSendEmail;
-            _rcGetTemplateTags = rcGetTemplateTags;
             _httpContextAccessor = httpContextAccessor;
             _repository = repository;
             _validator = validator;

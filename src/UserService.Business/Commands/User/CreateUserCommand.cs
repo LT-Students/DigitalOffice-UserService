@@ -9,7 +9,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -36,7 +35,6 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<CreateUserCommand> _logger;
         private readonly IRequestClient<IAddImageRequest> _rcImage;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IRequestClient<IGetEmailTemplateTagsRequest> _rcGetTemplateTags;
         private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
         private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
@@ -111,33 +109,15 @@ namespace LT.DigitalOffice.UserService.Business
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
-            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            var senderId = _httpContextAccessor.HttpContext.GetUserId();
             EmailTemplateType templateType = EmailTemplateType.Greeting;
             try
             {
-                var rcGetTemplateTagsResponse = _rcGetTemplateTags.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                    IGetEmailTemplateTagsRequest.CreateObj(
-                        templateLanguage,
-                        templateType), timeout: RequestTimeout.Default).Result.Message;
+                var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
+                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password);
 
-                var templateValues = rcGetTemplateTagsResponse.Body.CreateDictionaryTemplate(
-                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password, null);
+                emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
 
-                if (!rcGetTemplateTagsResponse.IsSuccess)
-                {
-                    _logger.LogWarning(
-                        $"Errors while get email template tags of type:'{templateType}':" +
-                        $"{Environment.NewLine}{string.Join('\n', rcGetTemplateTagsResponse.Errors)}.");
-
-                    errors.Add(errorMessage);
-                }
-
-                emailRequest = ISendEmailRequest.CreateObj(
-                        rcGetTemplateTagsResponse.Body.TemplateId,
-                        senderId,
-                        email.Value,
-                        templateLanguage,
-                        templateValues);
                 IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
                     .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
                     .Result
@@ -215,7 +195,6 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<CreateUserCommand> logger,
             IRequestClient<IAddImageRequest> rcImage,
             IHttpContextAccessor httpContextAccessor,
-            IRequestClient<IGetEmailTemplateTagsRequest> rcGetTemplateTags,
             IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
             IRequestClient<IChangeUserPositionRequest> rcPosition,
             IRequestClient<ISendEmailRequest> rcSendEmail,
@@ -234,7 +213,6 @@ namespace LT.DigitalOffice.UserService.Business
             _userRepository = userRepository;
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
-            _rcGetTemplateTags = rcGetTemplateTags;
         }
 
         /// <inheritdoc/>
