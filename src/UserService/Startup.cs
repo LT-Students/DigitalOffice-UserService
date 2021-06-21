@@ -105,6 +105,7 @@ namespace LT.DigitalOffice.UserService
             x.AddConsumer<GetUserDataConsumer>();
             x.AddConsumer<GetUsersDataConsumer>();
             x.AddConsumer<AccessValidatorConsumer>();
+            x.AddConsumer<SearchUsersConsumer>();
         }
 
         private void ConfigureEndpoints(
@@ -131,6 +132,11 @@ namespace LT.DigitalOffice.UserService
             cfg.ReceiveEndpoint(rabbitMqConfig.GetUserCredentialsEndpoint, ep =>
             {
                 ep.ConfigureConsumer<UserLoginConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.SearchUsersEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<SearchUsersConsumer>(context);
             });
         }
 
