@@ -58,5 +58,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         bool SwitchActiveStatus(Guid userId, bool status);
 
         bool IsExistUser(Guid userId);
+
+        IEnumerable<DbUser> Search(string text);
     }
 }
