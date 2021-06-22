@@ -60,7 +60,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             try
             {
                 var response = _rcToken.GetResponse<IOperationResult<string>>(
-                    IGetTokenRequest.CreateObj(request.UserId)).Result.Message;
+                    IGetTokenRequest.CreateObj(request.UserId))
+                    .Result
+                    .Message;
 
                 if (response.IsSuccess && !string.IsNullOrEmpty(response.Body))
                 {
