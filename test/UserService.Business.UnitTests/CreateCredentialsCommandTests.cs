@@ -15,7 +15,6 @@ using Moq;
 using Moq.AutoMock;
 using NUnit.Framework;
 using System;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
