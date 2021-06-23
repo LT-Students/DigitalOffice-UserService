@@ -114,7 +114,10 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-                    dbUser.FirstName, email.Value, dbUser.Id.ToString(), password);
+                    userFirstName: dbUser.FirstName,
+                    userEmail: email.Value,
+                    userId: dbUser.Id.ToString(),
+                    userPassword: password);
 
                 emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
 

@@ -62,7 +62,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             try
             {
                 var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-                    userFirstName: dbUser.FirstName, userId: dbUser.Id.ToString(), secret: secret.ToString());
+                    userFirstName: dbUser.FirstName,
+                    userId: dbUser.Id.ToString(),
+                    secret: secret.ToString());
 
                 var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email, templateLanguage, templateType, templateValues);
 
