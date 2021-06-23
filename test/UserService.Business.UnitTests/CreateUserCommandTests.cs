@@ -5,7 +5,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -39,13 +38,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
         private Mock<IRequestClient<IChangeUserPositionRequest>> _rcPositionMock;
         private Mock<IRequestClient<IChangeUserDepartmentRequest>> _rcDepartmentMock;
-        private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
 
         private Mock<IOperationResult<IAddImageResponse>> _operationResultAddImageMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
         private Mock<IOperationResult<bool>> _operationResultChangePositionMock;
         private Mock<IOperationResult<bool>> _operationResultChangeDepartmentMock;
-        private Mock<IOperationResult<IGetEmailTemplateTagsResponse>> _operationResultGetTempTagsMock;
 
         private Guid _imageId = Guid.NewGuid();
         private DbUser _dbUser;
@@ -71,35 +68,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
-        }
-
-        private void RcGetTemplateTagSetUp()
-        {
-            var templateTags = new Dictionary<string, string>();
-            templateTags.Add("userFirstName", "");
-            templateTags.Add("userId", "");
-            templateTags.Add("userPassword", "");
-            templateTags.Add("userEmail", "");
-
-            var tempateTagsResponse = new Mock<IGetEmailTemplateTagsResponse>();
-            tempateTagsResponse.Setup(x => x.TemplateId).Returns(Guid.NewGuid());
-            tempateTagsResponse.Setup(x => x.TemplateTags).Returns(templateTags);
-
-            _operationResultGetTempTagsMock = new Mock<IOperationResult<IGetEmailTemplateTagsResponse>>();
-            _operationResultGetTempTagsMock.Setup(x => x.Body).Returns(tempateTagsResponse.Object);
-            _operationResultGetTempTagsMock.Setup(x => x.IsSuccess).Returns(true);
-            _operationResultGetTempTagsMock.Setup(x => x.Errors).Returns(new List<string>());
-
-            var responseBrokerGetTempTagsMock = new Mock<Response<IOperationResult<IGetEmailTemplateTagsResponse>>>();
-
-            responseBrokerGetTempTagsMock
-               .SetupGet(x => x.Message)
-               .Returns(_operationResultGetTempTagsMock.Object);
-
-            _rcGetTemplateTagsMock.Setup(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-               .Returns(Task.FromResult(responseBrokerGetTempTagsMock.Object));
         }
 
         private void RcSendEmailSetUp()
@@ -176,7 +144,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
             _rcPositionMock = new Mock<IRequestClient<IChangeUserPositionRequest>>();
             _rcDepartmentMock = new Mock<IRequestClient<IChangeUserDepartmentRequest>>();
-            _rcGetTemplateTagsMock = new Mock<IRequestClient<IGetEmailTemplateTagsRequest>>();
 
             var userId = Guid.NewGuid();
 
@@ -235,7 +202,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 _loggerMock.Object,
                 _rcImageMock.Object,
                 _httpContextAccessorMock.Object,
-                _rcGetTemplateTagsMock.Object,
                 _rcDepartmentMock.Object,
                 _rcPositionMock.Object,
                 _rcSendEmailMock.Object,
@@ -259,14 +225,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _userRepositoryMock.Reset();
             _accessValidatorMock.Reset();
             _rcImageMock.Reset();
-            _rcGetTemplateTagsMock.Reset();
             _rcDepartmentMock.Reset();
             _rcPositionMock.Reset();
             _rcSendEmailMock.Reset();
 
             RcAddImageSetUp();
             RcSendEmailSetUp();
-            RcGetTemplateTagSetUp();
             RcChangePositionSetUp();
             RcChangeDepartmentSetUp();
 
@@ -318,9 +282,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -355,9 +316,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -391,9 +349,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -427,9 +382,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -461,9 +413,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -495,9 +444,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -509,6 +455,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShouldCreateUserSuccessful()
         {
+            var messageError = new List<string>();
+
+            _expectedOperationResultResponse.Errors = messageError;
+
+            _operationResultSendEmailMock
+                .Setup(x => x.IsSuccess)
+                .Returns(true);
+
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
             _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
             _rcImageMock.Verify(
@@ -517,9 +471,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcSendEmailMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-            _rcGetTemplateTagsMock.Verify(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
             _rcPositionMock.Verify(
                 x => x.GetResponse<IOperationResult<bool>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);

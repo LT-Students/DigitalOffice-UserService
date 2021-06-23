@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 var request = IFindDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-                var response = _requestClient.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: TimeSpan.FromSeconds(2)).Result;
+                var response = _requestClient.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
 
                 if (response.Message.IsSuccess)
                 {

@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
-using LT.DigitalOffice.Models.Broker.Responses.Message;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
@@ -34,8 +33,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
-        private Mock<IRequestClient<IGetEmailTemplateTagsRequest>> _rcGetTemplateTagsMock;
-        private Mock<IOperationResult<IGetEmailTemplateTagsResponse>> _operationResultGetTempTagsMock;
 
         private DbUser _dbUser;
         private IMemoryCache _memoryCache;
@@ -54,26 +51,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             templateTags.Add("userId", "");
             templateTags.Add("userPassword", "");
             templateTags.Add("userEmail", "");
-
-            var tempateTagsResponse = new Mock<IGetEmailTemplateTagsResponse>();
-            tempateTagsResponse.Setup(x => x.TemplateId).Returns(Guid.NewGuid());
-            tempateTagsResponse.Setup(x => x.TemplateTags).Returns(templateTags);
-
-            _operationResultGetTempTagsMock = new Mock<IOperationResult<IGetEmailTemplateTagsResponse>>();
-            _operationResultGetTempTagsMock.Setup(x => x.Body).Returns(tempateTagsResponse.Object);
-            _operationResultGetTempTagsMock.Setup(x => x.IsSuccess).Returns(true);
-            _operationResultGetTempTagsMock.Setup(x => x.Errors).Returns(new List<string>());
-
-            var responseBrokerGetTempTagsMock = new Mock<Response<IOperationResult<IGetEmailTemplateTagsResponse>>>();
-
-            responseBrokerGetTempTagsMock
-               .SetupGet(x => x.Message)
-               .Returns(_operationResultGetTempTagsMock.Object);
-
-            _rcGetTemplateTagsMock.Setup(
-               x => x.GetResponse<IOperationResult<IGetEmailTemplateTagsResponse>>(
-                   It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-               .Returns(Task.FromResult(responseBrokerGetTempTagsMock.Object));
         }
 
         private void RcSendEmailSetUp()
@@ -112,7 +89,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
             _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
-            _rcGetTemplateTagsMock = new Mock<IRequestClient<IGetEmailTemplateTagsRequest>>();
 
             var userId = Guid.NewGuid();
 
@@ -161,7 +137,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _command = new ForgotPasswordCommand(
                 _loggerMock.Object,
                 _rcSendEmailMock.Object,
-                _rcGetTemplateTagsMock.Object,
                 _cacheOptions,
                 _httpContextAccessorMock.Object,
                 _validatorMock.Object,
@@ -200,36 +175,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _expectedOperationResultResponse.Status = OperationResultStatusType.Failed;
 
             _operationResultSendEmailMock
-                .Setup(x => x.IsSuccess)
-                .Returns(false);
-            _operationResultSendEmailMock
-                .Setup(x => x.Errors)
-                .Returns(messageError);
-
-            _validatorMock
-                .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
-
-            _userRepositoryMock
-                .Setup(x => x.Get(It.IsAny<GetUserFilter>()))
-                .Returns(_dbUser);
-
-            SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_dbCommunication.Value));
-        }
-
-        [Test]
-        public void ShoulRequestIsPartialSuccessWhenTemplateTagsNotWereReceived()
-        {
-            _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-            var messageError = new List<string>();
-            messageError.Add($"Can not send email to '{_dbCommunication.Value}'. Please try again latter.");
-
-            _expectedOperationResultResponse.Errors = messageError;
-            _expectedOperationResultResponse.Body = false;
-            _expectedOperationResultResponse.Status = OperationResultStatusType.Failed;
-
-            _operationResultGetTempTagsMock
                 .Setup(x => x.IsSuccess)
                 .Returns(false);
             _operationResultSendEmailMock

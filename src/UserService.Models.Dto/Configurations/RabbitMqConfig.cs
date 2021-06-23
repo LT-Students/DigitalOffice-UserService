@@ -46,9 +46,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(ISendEmailRequest))]
         public string SendEmailEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetEmailTemplateTagsRequest))]
-        public string GetEmailTempalateTagsEndpoint { get; set; }
-
         [AutoInjectRequest(typeof(IGetTokenRequest))]
         public string GetTokenEndpoint { get; set; }
 
