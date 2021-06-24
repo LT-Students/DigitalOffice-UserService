@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object SearchUsers(string text)
         {
-            List<DbUser> users = _userRepository.Search(text).ToList();
+            List<DbUser> users = _userRepository.Search(text);
 
             return ISearchResponse.CreateObj(
                 users.Select(

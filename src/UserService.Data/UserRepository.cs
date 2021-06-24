@@ -204,11 +204,12 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
         }
 
-        public IEnumerable<DbUser> Search(string text)
+        public List<DbUser> Search(string text)
         {
-            return _provider.Users.Where(u => u.LastName.Contains(text, StringComparison.OrdinalIgnoreCase)
-                                            || u.FirstName.Contains(text, StringComparison.OrdinalIgnoreCase)
-                                            || u.MiddleName.Contains(text, StringComparison.OrdinalIgnoreCase));
+            return _provider.Users
+                                .ToList()
+                                .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text, StringComparison.OrdinalIgnoreCase))
+                                .ToList();
         }
     }
 }

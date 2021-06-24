@@ -177,7 +177,7 @@ namespace LT.DigitalOffice.UserService
 
             RunEmailResender();
 
-            Version = "1.2.4";
+            Version = "1.3.0";
             Description = "UserService is an API that intended to work with users.";
             StartTime = DateTime.UtcNow;
             ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";

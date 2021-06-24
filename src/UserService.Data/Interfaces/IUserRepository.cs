@@ -59,6 +59,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         bool IsExistUser(Guid userId);
 
-        IEnumerable<DbUser> Search(string text);
+        List<DbUser> Search(string text);
     }
 }
