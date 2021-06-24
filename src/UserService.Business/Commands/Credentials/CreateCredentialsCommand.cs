@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new NotFoundException($"Pending user with ID '{request.UserId}' was not found.");
             }
 
-                _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
+            _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
 
             if (request.Password != dbPendingUser.Password)
             {
