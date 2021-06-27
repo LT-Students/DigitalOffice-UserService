@@ -71,6 +71,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.LastName),
                     nameof(EditUserRequest.Status),
                     nameof(EditUserRequest.Rate),
+                    nameof(EditUserRequest.City),
+                    nameof(EditUserRequest.Gender),
+                    nameof(EditUserRequest.DayOfBirth),
                     nameof(EditUserRequest.AvatarImage)
                 });
 
@@ -79,6 +82,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.DayOfBirth), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
 
             #endregion
@@ -133,6 +139,40 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status"},
+                });
+
+            #endregion
+
+            #region Rate
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.Rate),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format"},
+                    { x =>
+                        {
+                            if (double.TryParse(x.value?.ToString(), out double rate))
+                            {
+                                return rate > 0;
+                            }
+
+                            return false;
+                        },
+                        "Rate must be greater than 0"
+                    },
+                    { x =>
+                        {
+                            if (double.TryParse(x.value?.ToString(), out double rate))
+                            {
+                                return rate <= 1;
+                            }
+
+                            return false;
+                        },
+                        "Rate must be less than 1"
+                    }
                 });
 
             #endregion

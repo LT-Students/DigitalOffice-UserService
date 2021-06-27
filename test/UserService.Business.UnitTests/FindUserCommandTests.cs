@@ -51,6 +51,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     FirstName = "Ivan",
                     LastName = "Ivanov",
                     MiddleName = "Ivanovich",
+                    DateOfBirth = DateTime.Parse("2021-08-23"),
+                    Gender = (int)UserGender.NotSelected,
+                    City = "Spb",
                     Status = (int)UserStatus.Vacation,
                     AvatarFileId = Guid.NewGuid(),
                     IsAdmin = false
@@ -61,6 +64,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     FirstName = "Ivan",
                     LastName = "Ivanov",
                     MiddleName = "Ivanovich",
+                    DateOfBirth = DateTime.Parse("2021-08-23"),
+                    Gender = (int)UserGender.NotSelected,
+                    City = "Spb",
                     Status = (int)UserStatus.Vacation,
                     AvatarFileId = Guid.NewGuid(),
                     IsAdmin = false
@@ -71,6 +77,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     FirstName = "Ivan",
                     LastName = "Ivanov",
                     MiddleName = "Ivanovich",
+                    DateOfBirth = DateTime.Parse("2021-08-23"),
+                    Gender = (int)UserGender.NotSelected,
+                    City = "Spb",
                     Status = (int)UserStatus.Vacation,
                     AvatarFileId = Guid.NewGuid(),
                     IsAdmin = false
@@ -87,6 +96,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                         FirstName = dbUser.FirstName,
                         LastName = dbUser.LastName,
                         MiddleName = dbUser.MiddleName,
+                        DayOfBirth = "2021-08-23",
+                        Gender = (UserGender)dbUser.Gender,
+                        City = dbUser.City,
                         IsAdmin = dbUser.IsAdmin,
                         Status = (UserStatus)dbUser.Status
                     });

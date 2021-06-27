@@ -6,6 +6,7 @@ using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
@@ -38,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
         private Mock<IRequestClient<IChangeUserPositionRequest>> _rcPositionMock;
         private Mock<IRequestClient<IChangeUserDepartmentRequest>> _rcDepartmentMock;
+        private Mock<IGeneratePasswordCommand> _generatePasswordMock;
 
         private Mock<IOperationResult<IAddImageResponse>> _operationResultAddImageMock;
         private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
@@ -45,6 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private Mock<IOperationResult<bool>> _operationResultChangeDepartmentMock;
 
         private Guid _imageId = Guid.NewGuid();
+        private string _password = "password";
         private DbUser _dbUser;
         private ICreateUserCommand _command;
         private CreateUserRequest _createUserRequest;
@@ -139,6 +142,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _loggerMock = new Mock<ILogger<CreateUserCommand>>();
             _validatorMock = new Mock<ICreateUserRequestValidator>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _generatePasswordMock = new Mock<IGeneratePasswordCommand>();
 
             _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
             _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
@@ -152,8 +156,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Ivan",
                 LastName = "Ivanov",
                 MiddleName = "Ivanovich",
+                DayOfBirth = "2021-08-23",
+                City = "Spb",
+                Gender = UserGender.NotSelected,
                 Status = UserStatus.Vacation,
-                Password = "12341234",
                 AvatarImage = new AddImageRequest
                 {
                     Name = "name",
@@ -180,8 +186,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = _createUserRequest.FirstName,
                 LastName = _createUserRequest.LastName,
                 MiddleName = _createUserRequest.MiddleName,
+                DateOfBirth = DateTime.Parse(_createUserRequest.DayOfBirth),
+                City = _createUserRequest.City,
+                Gender = (int)_createUserRequest.Gender,
                 Status = (int)_createUserRequest.Status,
                 AvatarFileId = _imageId,
+                StartWorkingAt = DateTime.Parse(_createUserRequest.StartWorkingAt),
                 IsAdmin = (bool)_createUserRequest.IsAdmin,
                 IsActive = true,
                 Communications = new List<DbUserCommunication>
@@ -208,7 +218,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 _userRepositoryMock.Object,
                 _validatorMock.Object,
                 _mapperUserMock.Object,
-                _accessValidatorMock.Object);
+                _accessValidatorMock.Object,
+                _generatePasswordMock.Object);
         }
 
         [SetUp]
@@ -228,6 +239,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _rcDepartmentMock.Reset();
             _rcPositionMock.Reset();
             _rcSendEmailMock.Reset();
+            _generatePasswordMock.Reset();
 
             RcAddImageSetUp();
             RcSendEmailSetUp();
@@ -246,8 +258,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body.Id))
                 .Returns(_dbUser);
 
+            _generatePasswordMock
+                .Setup(x => x.Execute())
+                .Returns(_password);
+
             _userRepositoryMock
-                .Setup(x => x.Create(_dbUser, _createUserRequest.Password))
+                .Setup(x => x.Create(_dbUser, _password))
                 .Returns(_dbUser.Id);
         }
 
@@ -275,7 +291,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(_dbUser);
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -309,7 +325,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -342,7 +358,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -375,7 +391,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(messageError);
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -406,7 +422,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Throws(new Exception());
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -437,7 +453,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Throws(new Exception());
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
@@ -464,7 +480,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(true);
 
             SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-            _userRepositoryMock.Verify(x => x.Create(_dbUser, _createUserRequest.Password), Times.Once);
+            _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
             _rcImageMock.Verify(
                 x => x.GetResponse<IOperationResult<IAddImageResponse>>(
                     It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
