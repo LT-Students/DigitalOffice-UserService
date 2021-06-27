@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Broker.Requests;
-using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
@@ -51,25 +50,29 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new NotFoundException($"Pending user with ID '{request.UserId}' was not found.");
             }
 
+            _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
+
             if (request.Password != dbPendingUser.Password)
             {
-                throw new ForbiddenException();
+                throw new ForbiddenException("Wrong password");
             }
 
             try
             {
-                IOperationResult<string> response = _rcToken.GetResponse<IOperationResult<string>>(
-                    IGetTokenRequest.CreateObj(request.UserId)).Result.Message;
+                var response = _rcToken.GetResponse<IOperationResult<string>>(
+                    IGetTokenRequest.CreateObj(request.UserId))
+                    .Result
+                    .Message;
 
                 if (response.IsSuccess && !string.IsNullOrEmpty(response.Body))
                 {
-                    _userRepository.DeletePendingUser(request.UserId);
-
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
                     string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
                     _userCredentialsRepository.Create(_mapper.Map(request, salt, passwordHash));
+
+                    _userRepository.DeletePendingUser(request.UserId);
 
                     _userRepository.SwitchActiveStatus(request.UserId, true);
 
@@ -90,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 _logger.LogError(exc, "Something went wrong while we were creating the user credentials.");
             }
 
-            throw new InvalidOperationException();
+            throw new BadRequestException("Something is wrong, please try again later");
         }
     }
 }
