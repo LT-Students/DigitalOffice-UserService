@@ -54,7 +54,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (request.Password != dbPendingUser.Password)
             {
-                throw new ForbiddenException();
+                throw new ForbiddenException("Wrong password");
             }
 
             try
@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 _logger.LogError(exc, "Something went wrong while we were creating the user credentials.");
             }
 
-            throw new BadRequestException();
+            throw new BadRequestException("Something is wrong, please try again later");
         }
     }
 }
