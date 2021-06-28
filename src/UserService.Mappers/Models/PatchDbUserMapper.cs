@@ -28,12 +28,27 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserStatus), item.value.ToString())));
                     continue;
                 }
+                if (item.path.EndsWith(nameof(EditUserRequest.Gender), StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserGender), item.value.ToString())));
+                    continue;
+                }
                 if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;
                 }
-                result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
+                if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.DateOfBirth)}", item.from, DateTime.Parse(item.value.ToString())));
+                    continue;
+                }
+                if (item.path.EndsWith(nameof(EditUserRequest.StartWorkingAt), StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.StartWorkingAt)}", item.from, DateTime.Parse(item.value.ToString())));
+                    continue;
+                }
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
             }
 
             return result;

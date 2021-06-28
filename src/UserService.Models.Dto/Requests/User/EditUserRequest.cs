@@ -13,6 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public UserStatus Status { get; set; }
         public UserGender Gender { get; set; }
         public string City { get; set; }
-        public DateTime DayOfBirth { get; set; }
+        public string DateOfBirth { get; set; }
+        public string StartWorkingAt { get; set; }
     }
 }
