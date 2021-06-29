@@ -85,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 sb.Append(c);
             }
 
-            return sb.Length > 0 && sb.Length < 15;
+            return sb.Length == value.Length;
         }
 
         public UserLoginConsumer(
