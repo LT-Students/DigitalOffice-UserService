@@ -56,16 +56,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
             }
 
-            if (request.DayOfBirth != null)
+            if (request.DateOfBirth != null)
             {
-                if (DateTime.TryParse(request.DayOfBirth, out DateTime dayOfBirth))
+                if (DateTime.TryParse(request.DateOfBirth, out DateTime dayOfBirth))
                 {
                     dbUser.DateOfBirth = dayOfBirth;
                 }
                 else
                 {
                     throw new BadRequestException(
-                        $"You must specify '{nameof(CreateUserRequest.DayOfBirth)}' in format 'YYYY-MM-DD'");
+                        $"You must specify '{nameof(CreateUserRequest.DateOfBirth)}' in format 'YYYY-MM-DD'");
                 }
             }
 
