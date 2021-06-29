@@ -24,14 +24,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
-                City = request.City,
                 Gender = (int)request.Gender,
-                Status = (int)request.Status,
+                City = request.City,
                 AvatarFileId = avatarImageId,
-                IsActive = false,
+                Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
-                CreatedAt = DateTime.UtcNow,
+                IsActive = false,
                 Rate = request.Rate,
+                CreatedAt = DateTime.UtcNow,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
@@ -40,8 +40,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                     UserId = userId
                 }).ToList()
             };
-
-            string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
             if (request.StartWorkingAt != null)
             {

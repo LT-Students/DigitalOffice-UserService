@@ -209,7 +209,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUser.Id,
                 FirstName = _dbUser.FirstName,
                 MiddleName = _dbUser.MiddleName,
-                DayOfBirth = _dbUser.DateOfBirth.ToString(),
+                DateOfBirth = _dbUser.DateOfBirth.ToString(),
                 Gender = (UserGender)_dbUser.Gender,
                 City = _dbUser.City,
                 LastName = _dbUser.LastName,

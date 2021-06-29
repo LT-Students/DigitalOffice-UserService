@@ -96,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                         FirstName = dbUser.FirstName,
                         LastName = dbUser.LastName,
                         MiddleName = dbUser.MiddleName,
-                        DayOfBirth = "2021-08-23",
+                        DateOfBirth = "2021-08-23",
                         Gender = (UserGender)dbUser.Gender,
                         City = dbUser.City,
                         IsAdmin = dbUser.IsAdmin,
