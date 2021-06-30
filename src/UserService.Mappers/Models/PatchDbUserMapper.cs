@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, imageId));
+                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))
