@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
 {
-    public class UserResponse
+    public record UserResponse
     {
         public UserInfo User { get; set; }
         public ImageInfo Avatar { get; set; }

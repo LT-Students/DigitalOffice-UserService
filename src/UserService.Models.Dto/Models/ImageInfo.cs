@@ -2,7 +2,7 @@
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
-    public class ImageInfo
+    public record ImageInfo
     {
         public Guid? Id { get; set; }
         public Guid? ParentId { get; set; }

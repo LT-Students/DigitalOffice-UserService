@@ -2,7 +2,7 @@
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters
 {
-    public class GetCredentialsFilter
+    public record GetCredentialsFilter
     {
         public Guid? UserId { get; set; }
         public string Login { get; set; }
