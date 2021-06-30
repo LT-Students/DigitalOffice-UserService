@@ -1,6 +1,5 @@
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
-using System.Collections.Generic;
+using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
 {
@@ -9,8 +8,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
+        public UserGender Gender { get; set; }
+        public string DateOfBirth { get; set; }
+        public string City { get; set; }
         public AddImageRequest AvatarImage { get; set; }
-        public double Rate { get; set; }
         public UserStatus Status { get; set; }
+        public string StartWorkingAt { get; set; }
+        public double Rate { get; set; }
     }
 }

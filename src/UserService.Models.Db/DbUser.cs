@@ -13,14 +13,17 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
-        public int Status { get; set; }
+        public int Gender { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string City { get; set; }
         public Guid? AvatarFileId { get; set; }
+        public int Status { get; set; }
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
         public string About { get; set; }
         public double Rate { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime StartWorkingAt { get; set; }
+        public DateTime? StartWorkingAt { get; set; }
         public DbUserCredentials Credentials { get; set; }
         public ICollection<DbUserCertificate> Certificates { get; set; }
         public ICollection<DbUserAchievement> Achievements { get; set; }
@@ -62,10 +65,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .Property(p => p.IsActive)
-                .IsRequired();
-
-            builder
-                .Property(u => u.Rate)
                 .IsRequired();
 
             builder

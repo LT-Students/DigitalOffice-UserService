@@ -9,6 +9,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -41,6 +42,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ICreateUserRequestValidator _validator;
         private readonly IDbUserMapper _mapperUser;
         private readonly IAccessValidator _accessValidator;
+        private readonly IGeneratePasswordCommand _generatePassword;
 
         #region private methods
 
@@ -204,7 +206,8 @@ namespace LT.DigitalOffice.UserService.Business
             IUserRepository userRepository,
             ICreateUserRequestValidator validator,
             IDbUserMapper mapperUser,
-            IAccessValidator accessValidator)
+            IAccessValidator accessValidator,
+            IGeneratePasswordCommand generatePassword)
         {
             _logger = logger;
             _rcImage = rcImage;
@@ -216,6 +219,7 @@ namespace LT.DigitalOffice.UserService.Business
             _userRepository = userRepository;
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
+            _generatePassword = generatePassword;
         }
 
         /// <inheritdoc/>
@@ -235,19 +239,18 @@ namespace LT.DigitalOffice.UserService.Business
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 
-            Guid userId = _userRepository.Create(dbUser, request.Password);
+            var password = request.Password ?? _generatePassword.Execute();
 
-            SendEmail(dbUser, request.Password, errors);
+            Guid userId = _userRepository.Create(dbUser, password);
+
+            SendEmail(dbUser, password, errors);
 
             if (request.DepartmentId.HasValue)
             {
                 ChangeUserDepartment(request.DepartmentId.Value, userId, errors);
             }
 
-            if (request.PositionId.HasValue)
-            {
-                ChangeUserPosition(request.PositionId.Value, userId, errors);
-            }
+            ChangeUserPosition(request.PositionId, userId, errors);
 
             return new OperationResultResponse<Guid>
             {

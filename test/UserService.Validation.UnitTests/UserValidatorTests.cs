@@ -82,9 +82,10 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [Test]
-        public void ShouldThrowValidationExceptionWhenPasswordIsEmpty()
+        public void ShouldThrowExceptionWhenGenderIsNull()
         {
-            validator.ShouldHaveValidationErrorFor(x => x.Password, "");
+            var gender = (UserGender)5;
+            validator.ShouldHaveValidationErrorFor(x => x.Gender, gender);
         }
 
         [Test]
@@ -103,8 +104,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25
             };
@@ -120,8 +122,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25
             };
@@ -137,8 +140,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Example",
                 LastName = "Example",
                 MiddleName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25
             };
@@ -154,8 +158,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                 FirstName = "Пример",
                 LastName = "Пример",
                 MiddleName = "Пример",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25
             };
@@ -178,8 +183,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             {
                 FirstName = "Example",
                 LastName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25,
                 Communications = new List<CommunicationInfo>()
@@ -195,8 +201,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             {
                 FirstName = "Example",
                 LastName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Rate = 0.25,
                 Communications = new List<CommunicationInfo>()
@@ -219,8 +226,9 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             {
                 FirstName = "Example",
                 LastName = "Example",
+                Gender = UserGender.NotSelected,
+                City = "Spb",
                 Status = UserStatus.Sick,
-                Password = "Example",
                 IsAdmin = false,
                 Communications = new List<CommunicationInfo>()
                 {

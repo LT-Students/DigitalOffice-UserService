@@ -168,6 +168,9 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = Guid.NewGuid(),
                 FirstName = "Name",
                 LastName = "LastName",
+                DateOfBirth = DateTime.Parse("2021-01-01"),
+                Gender = 0,
+                City = "Spb",
                 Status = 0,
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
@@ -206,12 +209,15 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUser.Id,
                 FirstName = _dbUser.FirstName,
                 MiddleName = _dbUser.MiddleName,
+                DateOfBirth = _dbUser.DateOfBirth.ToString(),
+                Gender = (UserGender)_dbUser.Gender,
+                City = _dbUser.City,
                 LastName = _dbUser.LastName,
                 Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
                 About = _dbUser.About,
                 Rate = _dbUser.Rate,
-                StartWorkingAt = _dbUser.StartWorkingAt.ToShortDateString()
+                StartWorkingAt = _dbUser.StartWorkingAt.ToString()
             };
 
             _departmentInfo = new DepartmentInfo

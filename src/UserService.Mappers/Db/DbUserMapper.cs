@@ -18,27 +18,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
             Guid userId = Guid.NewGuid();
 
-            string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
-
-            if (!DateTime.TryParse(request.StartWorkingAt, out DateTime startWorkingAt))
-            {
-                throw new BadRequestException(
-                    $"You must specify '{nameof(CreateUserRequest.StartWorkingAt)}' in format 'YYYY-MM-DD'");
-            }
-
-            return new DbUser
+            DbUser dbUser = new()
             {
                 Id = userId,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
-                Status = (int)request.Status,
+                Gender = (int)request.Gender,
+                City = request.City,
                 AvatarFileId = avatarImageId,
-                IsActive = false,
+                Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
-                CreatedAt = DateTime.UtcNow,
-                StartWorkingAt = startWorkingAt,
+                IsActive = false,
                 Rate = request.Rate,
+                CreatedAt = DateTime.UtcNow,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
@@ -47,6 +40,34 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                     UserId = userId
                 }).ToList()
             };
+
+            if (request.StartWorkingAt != null)
+            {
+                if (DateTime.TryParse(request.StartWorkingAt, out DateTime startWorkingAt))
+                {
+                    dbUser.StartWorkingAt = startWorkingAt;
+                }
+                else {
+                    throw new BadRequestException(
+                        $"You must specify '{nameof(CreateUserRequest.StartWorkingAt)}' in format 'YYYY-MM-DD'");
+                }
+
+            }
+
+            if (request.DateOfBirth != null)
+            {
+                if (DateTime.TryParse(request.DateOfBirth, out DateTime dayOfBirth))
+                {
+                    dbUser.DateOfBirth = dayOfBirth;
+                }
+                else
+                {
+                    throw new BadRequestException(
+                        $"You must specify '{nameof(CreateUserRequest.DateOfBirth)}' in format 'YYYY-MM-DD'");
+                }
+            }
+
+            return dbUser;
         }
     }
 }

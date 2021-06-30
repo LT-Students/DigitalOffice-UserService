@@ -94,9 +94,29 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     "Lastname"),
                 new Operation<EditUserRequest>(
                     "replace",
+                    $"/{nameof(EditUserRequest.City)}",
+                    "",
+                    "City"),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.DateOfBirth)}",
+                    "",
+                    "05/01/2009 14:57:32.8"),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.Gender)}",
+                    "",
+                    UserGender.NotSelected),
+                new Operation<EditUserRequest>(
+                    "replace",
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
                     UserStatus.Vacation),
+                new Operation<EditUserRequest>(
+                    "replace",
+                    $"/{nameof(EditUserRequest.StartWorkingAt)}",
+                    "",
+                    "05/01/2009 14:57:32.8"),
                 new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.AvatarImage)}",
@@ -128,9 +148,29 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     "Lastname"),
                 new Operation<DbUser>(
                     "replace",
+                    $"/{nameof(DbUser.City)}",
+                    "",
+                    "City"),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.DateOfBirth)}",
+                    "",
+                    "05/01/2009 14:57:32.8"),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.Gender)}",
+                    "",
+                    UserGender.NotSelected),
+                new Operation<DbUser>(
+                    "replace",
                     $"/{nameof(DbUser.Status)}",
                     "",
                     UserStatus.Vacation),
+                new Operation<DbUser>(
+                    "replace",
+                    $"/{nameof(DbUser.StartWorkingAt)}",
+                    "",
+                    "05/01/2009 14:57:32.8"),
                 new Operation<DbUser>(
                     "replace",
                     $"/{nameof(DbUser.AvatarFileId)}",

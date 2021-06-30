@@ -71,6 +71,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.LastName),
                     nameof(EditUserRequest.Status),
                     nameof(EditUserRequest.Rate),
+                    nameof(EditUserRequest.City),
+                    nameof(EditUserRequest.Gender),
+                    nameof(EditUserRequest.DateOfBirth),
+                    nameof(EditUserRequest.StartWorkingAt),
                     nameof(EditUserRequest.AvatarImage)
                 });
 
@@ -79,6 +83,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
 
             #endregion
@@ -121,6 +129,56 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "MiddleName is too short" },
                     { x => x.value.ToString().Length < 32, "MiddleName is too long" },
                     { x => NameRegex.IsMatch(x.value.ToString()), "MiddleName has incorrect format" }
+                });
+
+            #endregion
+
+            #region City
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.City),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is too short" },
+                    { x => x.value.ToString().Length < 32, "City name is too long" },
+                    { x => NameRegex.IsMatch(x.value.ToString()), "City name has incorrect format" }
+                });
+
+            #endregion
+
+            #region Gender
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.Gender),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => Enum.TryParse(typeof(UserGender), x.value?.ToString(), out _), "Incorrect user gender"},
+                });
+
+            #endregion
+
+            #region DateOfBirth
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.DateOfBirth),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Date of birth has incorrect format" }
+                });
+
+            #endregion
+
+            #region StartWorkingAt
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.StartWorkingAt),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Start working at has incorrect format" }
                 });
 
             #endregion
