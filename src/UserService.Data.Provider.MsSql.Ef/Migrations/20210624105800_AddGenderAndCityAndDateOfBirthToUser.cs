@@ -6,8 +6,8 @@ using System;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
-    [Migration("20210624105800_AddGenderAndSityAndDateOfBirthToUser")]
-    public class AddGenderAndSityAndDateOfBirthToUser : Migration
+    [Migration("20210624105800_AddGenderAndCityAndDateOfBirthToUser")]
+    public class AddGenderAndCityAndDateOfBirthToUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
