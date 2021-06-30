@@ -239,7 +239,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 
-            var password = request.Password != null ? request.Password : _generatePassword.Execute();
+            var password = request.Password ?? _generatePassword.Execute();
 
             Guid userId = _userRepository.Create(dbUser, password);
 

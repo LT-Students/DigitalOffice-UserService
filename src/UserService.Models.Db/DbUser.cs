@@ -64,15 +64,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .IsRequired();
 
             builder
-                .Property(p => p.Gender)
-                .IsRequired();
-
-            builder
                 .Property(p => p.IsActive)
-                .IsRequired();
-
-            builder
-                .Property(u => u.Rate)
                 .IsRequired();
 
             builder
