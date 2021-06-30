@@ -35,17 +35,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, imageId));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.DateOfBirth)}", item.from, DateTime.Parse(item.value.ToString())));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(item.value.ToString())));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.StartWorkingAt), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.StartWorkingAt)}", item.from, DateTime.Parse(item.value.ToString())));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(item.value.ToString())));
                     continue;
                 }
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
