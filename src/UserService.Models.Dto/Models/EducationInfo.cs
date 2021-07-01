@@ -3,7 +3,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
-    public class EducationInfo
+    public record EducationInfo
     {
         public Guid Id { get; set; }
         public string UniversityName { get; set; }

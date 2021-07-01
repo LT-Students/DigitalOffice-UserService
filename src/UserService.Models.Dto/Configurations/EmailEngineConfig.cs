@@ -1,6 +1,6 @@
 ﻿namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
-    public class EmailEngineConfig
+    public record EmailEngineConfig
     {
         public const string SectionName = "EmailEngineConfig";
 

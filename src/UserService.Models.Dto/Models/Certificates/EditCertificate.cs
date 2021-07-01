@@ -3,7 +3,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models.Certificates
 {
-    public class EditCertificate
+    public record EditCertificate
     {
         public Guid? Id { get; set; }
         public string Name { get; set; }

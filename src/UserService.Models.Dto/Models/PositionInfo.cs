@@ -2,7 +2,7 @@
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
-    public class PositionInfo
+    public record PositionInfo
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

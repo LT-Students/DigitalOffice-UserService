@@ -3,7 +3,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
-    public class UserAchievementInfo
+    public record UserAchievementInfo
     {
         public Guid Id { get; set; }
         public Guid AchievementId { get; set; }
