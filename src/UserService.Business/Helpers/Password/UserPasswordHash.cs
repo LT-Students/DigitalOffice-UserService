@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
+[assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Broker")]
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Business.UnitTests")]
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests")]
 namespace LT.DigitalOffice.UserService.Business.Helpers.Password

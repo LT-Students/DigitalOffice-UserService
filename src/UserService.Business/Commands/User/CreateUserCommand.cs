@@ -109,7 +109,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
+            var senderId = Guid.NewGuid();//_httpContextAccessor.HttpContext.GetUserId();
             EmailTemplateType templateType = EmailTemplateType.Greeting;
             try
             {

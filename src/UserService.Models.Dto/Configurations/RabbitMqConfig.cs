@@ -18,6 +18,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string GetUserDataEndpoint { get; set; }
 
         public string GetUsersDataEndpoint { get; set; }
+        public string CreateAdminEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IAddImageRequest))]
         public string AddImageEndpoint { get; set; }

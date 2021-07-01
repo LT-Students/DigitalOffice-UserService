@@ -86,6 +86,25 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUser.Id;
         }
 
+        public Guid Create(DbUser dbUser, DbUserCredentials credentials)
+        {
+            if (dbUser == null)
+            {
+                throw new ArgumentNullException(nameof(dbUser));
+            }
+
+            if(credentials == null)
+            {
+                throw new ArgumentNullException(nameof(credentials));
+            }
+
+            _provider.Users.Add(dbUser);
+            _provider.UserCredentials.Add(credentials);
+            _provider.Save();
+
+            return dbUser.Id;
+        }
+
         public DbUser Get(Guid id)
         {
             GetUserFilter filter = new()
