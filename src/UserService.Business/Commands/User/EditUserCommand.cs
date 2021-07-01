@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Requests.File;
@@ -96,11 +97,10 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var status = OperationResultStatusType.FullSuccess;
 
-            bool isAdmin = _userRepository.Get(_httpContext.GetUserId()).IsAdmin;
-            bool hasRight = _accessValidator.HasRights(Kernel.Constants.Rights.AddEditRemoveUsers);
-            bool hasEditRate = patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null;
-
-            if (!(isAdmin || hasRight || (userId == _httpContext.GetUserId() && !hasEditRate)))
+            if (!(_userRepository.Get(_httpContext.GetUserId()).IsAdmin ||
+                _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
+                (userId == _httpContext.GetUserId() &&
+                !(patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null))))
             {
                 throw new ForbiddenException("Not enough rights.");
             }

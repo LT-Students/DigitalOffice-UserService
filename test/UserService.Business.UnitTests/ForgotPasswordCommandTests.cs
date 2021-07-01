@@ -97,9 +97,9 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = "Ivan",
                 LastName = "Ivanov",
                 MiddleName = "Ivanovich",
+                Gender = UserGender.Male,
+                PositionId = Guid.NewGuid(),
                 Status = UserStatus.Vacation,
-                Password = "12341234",
-                StartWorkingAt = "2021-08-23",
                 IsAdmin = false
             };
 
@@ -117,6 +117,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 FirstName = _createUserRequest.FirstName,
                 LastName = _createUserRequest.LastName,
                 MiddleName = _createUserRequest.MiddleName,
+                Gender = (int)_createUserRequest.Gender,
                 Status = (int)_createUserRequest.Status,
                 AvatarFileId = null,
                 IsAdmin = (bool)_createUserRequest.IsAdmin,

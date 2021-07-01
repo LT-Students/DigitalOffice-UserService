@@ -29,11 +29,19 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         .MinimumLength(1).WithMessage("Middle name is too short.")
                         .Matches("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$").WithMessage("Middle name with error."));
 
+            When(
+                user => !string.IsNullOrEmpty(user.City),
+                () =>
+                    RuleFor(user => user.City)
+                        .MaximumLength(32).WithMessage("City name is too long.")
+                        .MinimumLength(1).WithMessage("City name is too short.")
+                        .Matches("[A-Z][a-z]+$|[А-ЯЁ][а-яё]+$").WithMessage("City name with error."));
+
+            RuleFor(user => user.Gender)
+                .IsInEnum().WithMessage("Wrong gender value.");
+
             RuleFor(user => user.Status)
                 .IsInEnum().WithMessage("Wrong status value.");
-
-            RuleFor(user => user.Password)
-                .NotEmpty();
 
             When(user => user.Communications != null && user.Communications.Any(), () =>
             {

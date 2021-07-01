@@ -76,6 +76,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
             StringBuilder sb = new();
 
+            if (value.IndexOf("+") == 0)
+            {
+                sb.Append(value[0]);
+            }
+
             foreach (char c in value)
             {
                 if (!char.IsNumber(c))
@@ -85,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 sb.Append(c);
             }
 
-            return sb.Length > 0 && sb.Length < 15;
+            return sb.Length == value.Length;
         }
 
         public UserLoginConsumer(
