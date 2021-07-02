@@ -26,7 +26,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
         private CreateCredentialsRequest _request;
         private DbPendingUser _dbPendingUser;
-        private string _userToken;
+        private string _userAccessToken;
+        private string _userRefreshToken;
         private Guid _userId = Guid.NewGuid();
         private string _password = "password";
         private CredentialsResponse _responce;
@@ -47,14 +48,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Password = _password
             };
 
-            _userToken = "token";
-            _userToken = "token";
+            _userAccessToken = "Access";
+            _userRefreshToken = "Refresh";
 
             _responce = new()
             {
                 UserId = _userId,
-                AccessToken = _userToken,
-                RefreshToken = _userToken
+                AccessToken = _userAccessToken,
+                RefreshToken = _userRefreshToken
             };
 
             _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
@@ -92,19 +93,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Returns(new Guid());
 
             _mocker
-                .Setup<IOperationResult<string>, string>(x => x.Body)
-                .Returns(_userToken);
+                .Setup<IOperationResult<(string, string)>, (string, string)>(x => x.Body)
+                .Returns(("Access", "Refresh"));
             _mocker
-                .Setup<IOperationResult<string>, bool>(x => x.IsSuccess)
+                .Setup<IOperationResult<(string, string)>, bool>(x => x.IsSuccess)
                 .Returns(true);
             _mocker
-                .Setup<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                    x => x.GetResponse<IOperationResult<string>>(
+                .Setup<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                    x => x.GetResponse<IOperationResult<(string, string)>>(
                         IGetTokenRequest.CreateObj(_userId),
                         default,
                         default)
                     .Result.Message)
-                .Returns(_mocker.GetMock<IOperationResult<string>>().Object);
+                .Returns(_mocker.GetMock<IOperationResult<(string, string)>>().Object);
 
             _command = new CreateCredentialsCommand(
                 _mocker.GetMock<IDbUserCredentialsMapper>().Object,
@@ -135,8 +136,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<string>()),
                 Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -181,8 +182,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<string>()),
                 Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -226,8 +227,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<string>()),
                 Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -268,8 +269,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<string>()),
                 Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -290,10 +291,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         }
 
         [Test]
-        public void ThrowExсeptionWhenBrokerResponceIsNotSuccess()
+        public void ThrowExceptionWhenBrokerResponseIsNotSuccess()
         {
             _mocker
-                .Setup<IOperationResult<string>, bool>(x => x.IsSuccess)
+                .Setup<IOperationResult<(string, string)>, bool>(x => x.IsSuccess)
                 .Returns(false);
 
             Assert.Throws<BadRequestException>(() => _command.Execute(_request));
@@ -312,8 +313,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     It.IsAny<string>()),
                 Times.Never());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -352,8 +353,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -397,8 +398,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -442,8 +443,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -487,8 +488,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
@@ -527,8 +528,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<string>>(
-                x => x.GetResponse<IOperationResult<string>>(
+            _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<(string, string)>>(
+                x => x.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(_userId),
                     default,
                     default)
