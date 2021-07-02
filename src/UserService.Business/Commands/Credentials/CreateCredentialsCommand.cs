@@ -59,12 +59,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             try
             {
-                var response = _rcToken.GetResponse<IOperationResult<string>>(
+                var response = _rcToken.GetResponse<IOperationResult<(string, string)>>(
                     IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;
 
-                if (response.IsSuccess && !string.IsNullOrEmpty(response.Body))
+                if (response.IsSuccess &&
+                    !string.IsNullOrEmpty(response.Body.Item1) &&
+                    !string.IsNullOrEmpty(response.Body.Item2))
                 {
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
@@ -79,7 +81,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                     return new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        Token = response.Body
+                        AccessToken = response.Body.Item1,
+                        RefreshToken = response.Body.Item2
                     };
                 }
                 else

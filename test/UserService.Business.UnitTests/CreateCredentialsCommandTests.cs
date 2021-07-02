@@ -48,11 +48,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             };
 
             _userToken = "token";
+            _userToken = "token";
 
             _responce = new()
             {
                 UserId = _userId,
-                Token = _userToken
+                AccessToken = _userToken,
+                RefreshToken = _userToken
             };
 
             _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
