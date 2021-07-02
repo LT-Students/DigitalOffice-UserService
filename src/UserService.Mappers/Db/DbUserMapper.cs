@@ -93,7 +93,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 IsActive = true,
                 IsAdmin = true,
                 CreatedAt = DateTime.UtcNow,
-                StartWorkingAt = DateTime.UtcNow,
                 Rate = 1,
                 Communications = new List<DbUserCommunication> {
                     new DbUserCommunication
