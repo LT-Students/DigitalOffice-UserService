@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
@@ -13,5 +14,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
     public interface IDbUserMapper
     {
         DbUser Map(CreateUserRequest request, Guid? avatarImageId);
+
+        DbUser Map(ICreateAdminRequest request);
     }
 }

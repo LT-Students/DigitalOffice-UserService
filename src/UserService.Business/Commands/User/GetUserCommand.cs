@@ -174,7 +174,6 @@ namespace LT.DigitalOffice.UserService.Business
                     result = new()
                     {
                         Id = response.Body.FileId,
-                        ParentId = response.Body.ParentId,
                         Content = response.Body.Content,
                         Extension = response.Body.Extension
                     };

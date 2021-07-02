@@ -31,6 +31,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         Guid Create(DbUser dbUser, string password);
 
+        Guid Create(DbUser dbUser, DbUserCredentials credentials);
+
         /// <summary>
         /// Edit existing dbUser. Returns whether it was successful to edit.
         /// </summary>
