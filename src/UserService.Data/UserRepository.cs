@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Data
                 throw new ArgumentNullException(nameof(dbUser));
             }
 
-            if(credentials == null)
+            if (credentials == null)
             {
                 throw new ArgumentNullException(nameof(credentials));
             }
