@@ -81,8 +81,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                     return new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        AccessToken = response.Body.Item1,
-                        RefreshToken = response.Body.Item2
+                        AccessToken = response.Body.accessToken,
+                        RefreshToken = response.Body.refreshToken
                     };
                 }
                 else
