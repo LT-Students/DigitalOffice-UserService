@@ -17,6 +17,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         public string GetUserDataEndpoint { get; set; }
 
+        [AutoInjectRequest(typeof(IGetUsersDataRequest))]
         public string GetUsersDataEndpoint { get; set; }
         public string CreateAdminEndpoint { get; set; }
 
