@@ -42,9 +42,7 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 IOperationResult<IGetDepartmentUserResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-                    IGetDepartmentUserRequest.CreateObj(userId),
-                    default,
-                    RequestTimeout.After(s: 10)).Result.Message;
+                    IGetDepartmentUserRequest.CreateObj(userId)).Result.Message;
 
                 if (response.IsSuccess)
                 {

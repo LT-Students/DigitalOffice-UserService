@@ -2,7 +2,7 @@
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
-    public class CommunicationInfo
+    public record CommunicationInfo
     {
         public CommunicationType Type { get; set; }
         public string Value { get; set; }

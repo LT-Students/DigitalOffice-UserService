@@ -195,5 +195,44 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.IsTrue(_repository.IsExistUser(_dbUser.Id));
             Assert.IsFalse(_repository.IsExistUser(Guid.NewGuid()));
         }
+
+        [Test]
+        public void ShouldCreateUser()
+        {
+            DbUser user = new()
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Ivan",
+                LastName = "Ivanov",
+                MiddleName = "Ivanovich",
+                CreatedAt = DateTime.Now,
+                StartWorkingAt = DateTime.Now,
+                IsActive = true,
+                IsAdmin = true
+            };
+
+            DbUserCredentials credentials = new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Login = "login",
+                PasswordHash = "hash",
+                Salt = "salt"
+            };
+
+            Assert.AreEqual(user.Id, _repository.Create(user, credentials));
+        }
+
+        [Test]
+        public void ShouldThrowArgumentNullExceptionWhenAddedUserIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.Create(null, new DbUserCredentials()));
+        }
+
+        [Test]
+        public void ShouldThrowArgumentNullExceptionWhenAddedCredentialsIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _repository.Create(new DbUser(), null as DbUserCredentials));
+        }
     }
 }
