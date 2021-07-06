@@ -185,7 +185,7 @@ namespace LT.DigitalOffice.UserService.Business
                     .Result
                     .Message;
 
-                if (!rcSendEmailResponse.IsSuccess)
+                if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
                 {
                     _logger.LogWarning(
                         $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}.");
