@@ -8,6 +8,7 @@ using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Email;
@@ -38,6 +39,8 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
         private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
+        private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
+        private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
         private readonly ICreateUserRequestValidator _validator;
         private readonly IDbUserMapper _mapperUser;
@@ -89,6 +92,60 @@ namespace LT.DigitalOffice.UserService.Business
             catch (Exception exc)
             {
                 _logger.LogWarning(exc, logMessage, positionId, userId);
+
+                errors.Add(errorMessage);
+            }
+        }
+
+        private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+        {
+            string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
+            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'";
+
+            try
+            {
+                var response = _rcRole.GetResponse<IOperationResult<bool>>(
+                    IChangeUserRoleRequest.CreateObj(
+                        roleId,
+                        userId,
+                        _httpContextAccessor.HttpContext.GetUserId())).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(logMessage, roleId, userId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogWarning(exc, logMessage, roleId, userId);
+
+                errors.Add(errorMessage);
+            }
+        }
+
+        private void ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
+        {
+            string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
+            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'";
+
+            try
+            {
+                var response = _rcOffice.GetResponse<IOperationResult<bool>>(
+                    IChangeUserOfficeRequest.CreateObj(
+                        officeId,
+                        userId,
+                        _httpContextAccessor.HttpContext.GetUserId())).Result;
+                if (!response.Message.IsSuccess || !response.Message.Body)
+                {
+                    _logger.LogWarning(logMessage, officeId, userId);
+
+                    errors.Add(errorMessage);
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogWarning(exc, logMessage, officeId, userId);
 
                 errors.Add(errorMessage);
             }
@@ -202,6 +259,8 @@ namespace LT.DigitalOffice.UserService.Business
             IHttpContextAccessor httpContextAccessor,
             IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
             IRequestClient<IChangeUserPositionRequest> rcPosition,
+            IRequestClient<IChangeUserRoleRequest> rcRole,
+            IRequestClient<IChangeUserOfficeRequest> rcOffice,
             IRequestClient<ISendEmailRequest> rcSendEmail,
             IUserRepository userRepository,
             ICreateUserRequestValidator validator,
@@ -213,6 +272,8 @@ namespace LT.DigitalOffice.UserService.Business
             _rcImage = rcImage;
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
+            _rcRole = rcRole;
+            _rcOffice = rcOffice;
             _rcSendEmail = rcSendEmail;
             _validator = validator;
             _httpContextAccessor = httpContextAccessor;
@@ -251,6 +312,13 @@ namespace LT.DigitalOffice.UserService.Business
             }
 
             ChangeUserPosition(request.PositionId, userId, errors);
+
+            if (request.RoleId.HasValue)
+            {
+                ChangeUserRole(request.RoleId.Value, userId, errors);
+            }
+
+            ChangeUserOffice(request.OfficeId, userId, errors);
 
             return new OperationResultResponse<Guid>
             {

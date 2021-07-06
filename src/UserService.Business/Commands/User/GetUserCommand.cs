@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
         private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
-        private readonly IRequestClient<IGetFileRequest> _rcFile;
+        private readonly IRequestClient<IGetImageRequest> _rcFile;
 
         private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
         {
@@ -166,14 +166,14 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IGetFileResponse> response = _rcFile.GetResponse<IOperationResult<IGetFileResponse>>(
-                    IGetFileRequest.CreateObj(imageId.Value)).Result.Message;
+                IOperationResult<IGetImageResponse> response = _rcFile.GetResponse<IOperationResult<IGetImageResponse>>(
+                    IGetImageRequest.CreateObj(imageId.Value)).Result.Message;
 
                 if (response.IsSuccess)
                 {
                     result = new()
                     {
-                        Id = response.Body.FileId,
+                        Id = response.Body.ImageId,
                         ParentId = response.Body.ParentId,
                         Content = response.Body.Content,
                         Extension = response.Body.Extension
@@ -207,7 +207,7 @@ namespace LT.DigitalOffice.UserService.Business
             IRequestClient<IGetDepartmentUserRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
             IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
-            IRequestClient<IGetFileRequest> rcFile)
+            IRequestClient<IGetImageRequest> rcFile)
         {
             _logger = logger;
             _repository = repository;
