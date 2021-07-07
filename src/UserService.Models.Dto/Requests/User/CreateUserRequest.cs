@@ -20,6 +20,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public string StartWorkingAt { get; set; }
         public double Rate { get; set; }
         public Guid PositionId { get; set; }
+        public Guid OfficeId { get; set; }
+        public Guid? RoleId { get; set; }
         public Guid? DepartmentId { get; set; }
         public string Password { get; set; }
         public IEnumerable<CommunicationInfo> Communications { get; set; }

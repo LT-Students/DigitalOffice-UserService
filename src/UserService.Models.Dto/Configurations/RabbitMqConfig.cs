@@ -4,6 +4,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
+using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
@@ -23,8 +24,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IAddImageRequest))]
         public string AddImageEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetFileRequest))]
-        public string GetFileEndpoint { get; set; }
+        [AutoInjectRequest(typeof(IGetImageRequest))]
+        public string GetImageEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetDepartmentUserRequest))]
         public string GetDepartmentUserEndpoint { get; set; }
@@ -52,5 +53,11 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         [AutoInjectRequest(typeof(ISearchUsersRequest))]
         public string SearchUsersEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IChangeUserRoleRequest))]
+        public string ChangeUserRoleEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IChangeUserOfficeRequest))]
+        public string ChangeUserOfficeEndpoint { get; set; }
     }
 }
