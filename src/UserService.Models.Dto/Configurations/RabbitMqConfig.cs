@@ -56,5 +56,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         [AutoInjectRequest(typeof(IChangeUserOfficeRequest))]
         public string ChangeUserOfficeEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IGetUsersDepartmentsUsersPositionsRequest))]
+        public string GetUsersDepartmentsUsersPositionsEndpoint { get; set; }
     }
 }

@@ -129,7 +129,7 @@ namespace LT.DigitalOffice.UserService.Data
             return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
         }
 
-        public IEnumerable<DbUser> Get(IEnumerable<Guid> userIds)
+        public List<DbUser> Get(IEnumerable<Guid> userIds)
         {
             return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
         }
@@ -206,9 +206,8 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             totalCount = _provider.Users.Count();
-            var b = _provider.Users.ToList();
-            var a = _provider.Users.Skip(skipCount * takeCount).Take(takeCount).ToList();
-            return b;
+
+            return _provider.Users.Skip(skipCount).Take(takeCount).ToList();
         }
 
         public DbPendingUser GetPendingUser(Guid userId)

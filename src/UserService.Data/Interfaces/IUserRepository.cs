@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         DbUser Get(Guid id);
 
-        IEnumerable<DbUser> Get(IEnumerable<Guid> userIds);
+        List<DbUser> Get(IEnumerable<Guid> userIds);
 
         List<DbUser> Find(int skipCount, int takeCount, out int totalCount);
 
