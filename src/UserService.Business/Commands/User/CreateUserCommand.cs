@@ -118,7 +118,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(exc, logMessage, roleId, userId);
+                _logger.LogError(exc, logMessage, roleId, userId);
 
                 errors.Add(errorMessage);
             }
@@ -145,7 +145,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(exc, logMessage, officeId, userId);
+                _logger.LogError(exc, logMessage, officeId, userId);
 
                 errors.Add(errorMessage);
             }
