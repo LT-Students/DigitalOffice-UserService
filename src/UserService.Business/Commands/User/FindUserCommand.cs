@@ -10,7 +10,6 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
