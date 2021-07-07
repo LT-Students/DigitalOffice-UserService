@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         IEnumerable<DbUser> Get(IEnumerable<Guid> userIds);
 
-        IEnumerable<DbUser> Find(int skipCount, int takeCount, out int totalCount);
+        List<DbUser> Find(int skipCount, int takeCount, out int totalCount);
 
         DbPendingUser GetPendingUser(Guid userId);
 

@@ -12,11 +12,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public class RabbitMqConfig : BaseRabbitMqConfig
     {
         public string CompanyServiceUrl { get; set; }
-
         public string GetUserCredentialsEndpoint { get; set; }
-
         public string GetUserDataEndpoint { get; set; }
-
         public string GetUsersDataEndpoint { get; set; }
         public string CreateAdminEndpoint { get; set; }
 
@@ -52,5 +49,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         [AutoInjectRequest(typeof(ISearchUsersRequest))]
         public string SearchUsersEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IGetUsersDepartmentsAndPositionsRequest))]
+        public string GetUsersDepartmentsAndPositionsEndpoint { get; set; }
     }
 }

@@ -198,11 +198,17 @@ namespace LT.DigitalOffice.UserService.Data
             return true;
         }
 
-        public IEnumerable<DbUser> Find(int skipCount, int takeCount, out int totalCount)
+        public List<DbUser> Find(int skipCount, int takeCount, out int totalCount)
         {
-            totalCount = _provider.Users.Count();
+            if (takeCount <= 0)
+            {
+                throw new BadRequestException("Take count can't be equal or less than 0.");
+            }
 
-            return _provider.Users.Skip(skipCount * takeCount).Take(takeCount).ToList();
+            totalCount = _provider.Users.Count();
+            var b = _provider.Users.ToList();
+            var a = _provider.Users.Skip(skipCount * takeCount).Take(takeCount).ToList();
+            return b;
         }
 
         public DbPendingUser GetPendingUser(Guid userId)
