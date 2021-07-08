@@ -294,6 +294,8 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(request);
 
+            _userRepository.IsExistCommunicationValue(request.Communications.Select(x => x.Value).ToList());
+
             List<string> errors = new();
 
             Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, errors);
