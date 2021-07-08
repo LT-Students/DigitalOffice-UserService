@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Business
 
                 if (response.Message.IsSuccess)
                 {
-                    users = response.Message.Body;
+                    return response.Message.Body;
                 }
                 else
                 {
@@ -46,9 +46,9 @@ namespace LT.DigitalOffice.UserService.Business
             catch (Exception exc)
             {
                 _logger.LogError(exc, errorMessage);
-
-                errors.Add(errorMessage);
             }
+
+            errors.Add(errorMessage);
 
             return users;
         }
@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Business
 
                 if (response.Message.IsSuccess)
                 {
-                    departmentsAndPositions = response.Message.Body;
+                    return response.Message.Body;
                 }
                 else
                 {
