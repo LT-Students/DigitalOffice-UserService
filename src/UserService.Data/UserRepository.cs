@@ -129,7 +129,7 @@ namespace LT.DigitalOffice.UserService.Data
             return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
         }
 
-        public IEnumerable<DbUser> Get(IEnumerable<Guid> userIds)
+        public List<DbUser> Get(IEnumerable<Guid> userIds)
         {
             return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
         }
@@ -198,11 +198,16 @@ namespace LT.DigitalOffice.UserService.Data
             return true;
         }
 
-        public IEnumerable<DbUser> Find(int skipCount, int takeCount, out int totalCount)
+        public List<DbUser> Find(int skipCount, int takeCount, out int totalCount)
         {
+            if (takeCount <= 0)
+            {
+                throw new BadRequestException("Take count can't be equal or less than 0.");
+            }
+
             totalCount = _provider.Users.Count();
 
-            return _provider.Users.Skip(skipCount * takeCount).Take(takeCount).ToList();
+            return _provider.Users.Skip(skipCount).Take(takeCount).ToList();
         }
 
         public DbPendingUser GetPendingUser(Guid userId)

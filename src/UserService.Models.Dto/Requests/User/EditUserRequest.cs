@@ -15,5 +15,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public UserStatus Status { get; set; }
         public string StartWorkingAt { get; set; }
         public double Rate { get; set; }
+        public bool IsActive { get; set; }
     }
 }

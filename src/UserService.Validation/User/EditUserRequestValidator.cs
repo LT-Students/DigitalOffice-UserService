@@ -75,7 +75,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.Gender),
                     nameof(EditUserRequest.DateOfBirth),
                     nameof(EditUserRequest.StartWorkingAt),
-                    nameof(EditUserRequest.AvatarImage)
+                    nameof(EditUserRequest.AvatarImage),
+                    nameof(EditUserRequest.IsActive)
                 });
 
             AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
@@ -88,6 +89,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
 
             #endregion
 
@@ -190,7 +192,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status"},
+                    { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status"}
                 });
 
             #endregion
@@ -250,6 +252,18 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         },
                         "Incorrect Image format"
                     }
+            });
+
+            #endregion
+
+            #region IsActive
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.IsActive),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format" }
             });
 
             #endregion

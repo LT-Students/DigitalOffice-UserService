@@ -10,6 +10,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -19,7 +20,8 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IUserInfoMapper _mapper;
         private readonly IUserRepository _repository;
         private readonly ILogger<FindUserCommand> _logger;
-        private readonly IRequestClient<IFindDepartmentUsersRequest> _requestClient;
+        private readonly IRequestClient<IFindDepartmentUsersRequest> _findDepartmentUserRequestClient;
+        private readonly IRequestClient<IGetUsersDepartmentsUsersPositionsRequest> _getUsersDepartmentsUsersPositionsRequestClient;
 
         private IFindDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
         {
@@ -29,45 +31,84 @@ namespace LT.DigitalOffice.UserService.Business
             try
             {
                 var request = IFindDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-                var response = _requestClient.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
+                var response = _findDepartmentUserRequestClient.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
 
                 if (response.Message.IsSuccess)
                 {
-                    users = response.Message.Body;
+                    return response.Message.Body;
                 }
                 else
                 {
-                    _logger.LogInformation("Errors while getting department users with department id {DepartmentId}." +
+                    _logger.LogWarning("Errors while getting department users with department id {DepartmentId}." +
                         "Reason: {Errors}", departmentId, string.Join('\n', response.Message.Errors));
                 }
             }
             catch (Exception exc)
             {
                 _logger.LogError(exc, errorMessage);
-
-                errors.Add(errorMessage);
             }
 
+            errors.Add(errorMessage);
+
             return users;
+        }
+
+        private IGetUsersDepartmentsUsersPositionsResponse GetUsersDepartmentsUsersPositions(
+            List<Guid> userIds,
+            bool includeDepartments,
+            bool includePositions,
+            List<string> errors)
+        {
+            IGetUsersDepartmentsUsersPositionsResponse departmentsAndPositions = null;
+            string errorMessage = $"Can not get users departments and positions. Please try again later.";
+
+            try
+            {
+                var request = IGetUsersDepartmentsUsersPositionsRequest.CreateObj(userIds, includeDepartments, includePositions);
+                var response = _getUsersDepartmentsUsersPositionsRequestClient
+                    .GetResponse<IOperationResult<IGetUsersDepartmentsUsersPositionsResponse>>(request)
+                    .Result;
+
+                if (response.Message.IsSuccess)
+                {
+                    return response.Message.Body;
+                }
+                else
+                {
+                    _logger.LogWarning("Errors while getting users departments and positions." +
+                        "Reason: {Errors}", string.Join('\n', response.Message.Errors));
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, errorMessage);
+            }
+
+            errors.Add(errorMessage);
+
+            return departmentsAndPositions;
         }
 
         public FindUserCommand(
             IUserRepository repository,
             IUserInfoMapper mapper,
             ILogger<FindUserCommand> logger,
-            IRequestClient<IFindDepartmentUsersRequest> requestClient)
+            IRequestClient<IFindDepartmentUsersRequest> findDepartmentUserRequestClient,
+            IRequestClient<IGetUsersDepartmentsUsersPositionsRequest> getUsersDepartmentsUsersPositionsRequestClient)
         {
             _logger = logger;
             _mapper = mapper;
             _repository = repository;
-            _requestClient = requestClient;
+            _findDepartmentUserRequestClient = findDepartmentUserRequestClient;
+            _getUsersDepartmentsUsersPositionsRequestClient = getUsersDepartmentsUsersPositionsRequestClient;
         }
 
         /// <inheritdoc/>
         public UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId)
         {
             int totalCount = 0;
-            IEnumerable<DbUser> dbUsers = new List<DbUser>();
+
+            List<DbUser> dbUsers = null;
 
             UsersResponse result = new();
 
@@ -78,20 +119,31 @@ namespace LT.DigitalOffice.UserService.Business
                 if (users != null)
                 {
                     dbUsers = _repository.Get(users.UserIds);
+
                     totalCount = users.TotalCount;
+
+                    var positions = GetUsersDepartmentsUsersPositions(dbUsers.Select(x => x.Id).ToList(), false, true, result.Errors);
+
+                    result.Users.AddRange(dbUsers.Select(dbUser => _mapper.Map(
+                        dbUser,
+                        null,
+                        positions?.UsersPosition?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id)))));
                 }
             }
             else
             {
                 dbUsers = _repository.Find(skipCount, takeCount, out totalCount);
+
+                var departmentsAndPositions = GetUsersDepartmentsUsersPositions(dbUsers.Select(x => x.Id).ToList(), true, true, result.Errors);
+
+                result.Users
+                    .AddRange(dbUsers.Select(dbUser => _mapper.Map(
+                        dbUser,
+                        departmentsAndPositions?.UsersDepartment?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id)),
+                        departmentsAndPositions?.UsersPosition?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id)))));
             }
 
             result.TotalCount = totalCount;
-
-            foreach (DbUser dbUser in dbUsers)
-            {
-                result.Users.Add(_mapper.Map(dbUser));
-            }
 
             return result;
         }
