@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business
                 }
                 else
                 {
-                    _logger.LogInformation("Errors while getting department users with department id {DepartmentId}." +
+                    _logger.LogWarning("Errors while getting department users with department id {DepartmentId}." +
                         "Reason: {Errors}", departmentId, string.Join('\n', response.Message.Errors));
                 }
             }
@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Business
                 }
                 else
                 {
-                    _logger.LogInformation("Errors while getting users departments and positions." +
+                    _logger.LogWarning("Errors while getting users departments and positions." +
                         "Reason: {Errors}", string.Join('\n', response.Message.Errors));
                 }
             }
