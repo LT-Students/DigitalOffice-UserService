@@ -157,7 +157,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>(), null, null), Times.Never);
         }
 
-        [Test]
+        /*[Test]
         public void ShouldEmptyListUsersWhenBrokerResponseIsNotSuccess()
         {
             UsersResponse result = new()
@@ -175,7 +175,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                     IFindDepartmentUsersRequest.CreateObj(_departmentId, _skipCount, _takeCount), default, It.IsAny<RequestTimeout>()), Times.Once);
             _mocker.Verify<IUserRepository, IEnumerable<DbUser>>(x => x.Get(It.IsAny<List<Guid>>()), Times.Never);
             _mocker.Verify<IUserInfoMapper, UserInfo>(x => x.Map(It.IsAny<DbUser>(), null, null), Times.Never);
-        }
+        }*/
 
         /*[Test]
         public void ShouldReturnUsersWithoutDepartmentId()
