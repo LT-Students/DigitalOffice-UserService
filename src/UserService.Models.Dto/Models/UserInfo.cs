@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string StartWorkingAt { get; set; }
         public double Rate { get; set; }
 
-        public PositionInfo Position { get; set; }
         public DepartmentInfo Department { get; set; }
+        public PositionInfo Position { get; set; }
     }
 }
