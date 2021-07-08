@@ -82,9 +82,9 @@ namespace LT.DigitalOffice.UserService.Business
             catch (Exception exc)
             {
                 _logger.LogError(exc, errorMessage);
-
-                errors.Add(errorMessage);
             }
+
+            errors.Add(errorMessage);
 
             return departmentsAndPositions;
         }
