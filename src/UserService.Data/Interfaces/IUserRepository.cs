@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         bool IsExistUser(Guid userId);
 
-        void IsExistCommunicationValue(List<string> value);
+        bool IsExistCommunicationValue(List<string> value);
 
         List<DbUser> Search(string text);
     }

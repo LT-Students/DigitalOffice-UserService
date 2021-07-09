@@ -228,12 +228,9 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
         }
 
-        public void IsExistCommunicationValue(List<string> value)
+        public bool IsExistCommunicationValue(List<string> value)
         {
-            if (_provider.UserCommunications.Any(v => value.Contains(v.Value)))
-            {
-                throw new BadRequestException("Communication value already exist");
-            }
+            return _provider.UserCommunications.Any(v => value.Contains(v.Value));
         }
 
         public List<DbUser> Search(string text)

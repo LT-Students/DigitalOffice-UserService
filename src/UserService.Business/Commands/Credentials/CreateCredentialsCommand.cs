@@ -5,7 +5,9 @@ using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
+using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -35,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             _logger = logger;
         }
 
-        public CredentialsResponse Execute(CreateCredentialsRequest request)
+        public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
         {
             // TODO add request validation
 
@@ -44,29 +46,47 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new BadRequestException();
             }
 
+            OperationResultResponse<CredentialsResponse> response = new ();
+
             var dbPendingUser = _userRepository.GetPendingUser(request.UserId);
             if (dbPendingUser == null)
             {
-                throw new NotFoundException($"Pending user with ID '{request.UserId}' was not found.");
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add($"Pending user with ID '{request.UserId}' was not found.");
+                return response;
             }
 
-            _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
+            if (_userCredentialsRepository.LoginIsExist(request.Login))
+            {
+                response.Status = OperationResultStatusType.Conflict;
+                response.Errors.Add("The login is busy");
+                return response;
+            }
+
+            if (_userCredentialsRepository.CredentialsIsExist(request.UserId))
+            {
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add("Credentials already exists");
+                return response;
+            }
 
             if (request.Password != dbPendingUser.Password)
             {
-                throw new ForbiddenException("Wrong password");
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add("Wrong password");
+                return response;
             }
 
             try
             {
-                var response = _rcToken.GetResponse<IOperationResult<(string accessToken, string refreshToken)>>(
+                var tokenRequest = _rcToken.GetResponse<IOperationResult<(string accessToken, string refreshToken)>>(
                         IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;
 
-                if (response.IsSuccess &&
-                    !string.IsNullOrEmpty(response.Body.accessToken) &&
-                    !string.IsNullOrEmpty(response.Body.refreshToken))
+                if (tokenRequest.IsSuccess &&
+                    !string.IsNullOrEmpty(tokenRequest.Body.accessToken) &&
+                    !string.IsNullOrEmpty(tokenRequest.Body.refreshToken))
                 {
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
@@ -78,12 +98,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
                     _userRepository.SwitchActiveStatus(request.UserId, true);
 
-                    return new CredentialsResponse
+                    response.Body = new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        AccessToken = response.Body.accessToken,
-                        RefreshToken = response.Body.refreshToken
+                        AccessToken = tokenRequest.Body.accessToken,
+                        RefreshToken = tokenRequest.Body.refreshToken
                     };
+
+                    return response;
                 }
                 else
                 {
