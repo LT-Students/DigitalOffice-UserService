@@ -20,5 +20,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
 
         public DepartmentInfo Department { get; set; }
         public PositionInfo Position { get; set; }
+        public ImageInfo Avatar { get; set; }
+        public RoleInfo Role { get; set; }
+        public OfficeInfo Office { get; set; }
     }
 }
