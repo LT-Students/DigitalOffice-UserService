@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Kernel.Enums;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
