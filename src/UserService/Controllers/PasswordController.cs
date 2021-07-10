@@ -1,6 +1,6 @@
-﻿using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LT.DigitalOffice.UserService.Controllers

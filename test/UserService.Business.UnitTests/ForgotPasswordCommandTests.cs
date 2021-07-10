@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
@@ -10,7 +12,6 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Validation.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
