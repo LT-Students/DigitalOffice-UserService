@@ -1,7 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Responses;
+﻿using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
