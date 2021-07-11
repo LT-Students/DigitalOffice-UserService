@@ -84,7 +84,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                         UserId = request.UserId,
                         AccessToken = response.Body.AccessToken,
                         RefreshToken = response.Body.RefreshToken,
-                        TokenLifeTime = response.Body.TokenLifeTime
+                        AccessTokenLifeTime = response.Body.AccessTokenLifeTime,
+                        RefreshTokenLifeTime = response.Body.RefreshTokenLifeTime
                     };
                 }
                 else
