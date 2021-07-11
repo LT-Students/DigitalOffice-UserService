@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
-    [Migration("20210708115900_AddUniqueIdToLoginProperty")]
-    public class AddUniqueIdToLoginProperty : Migration
+    [Migration("20210708115900_AddUniqueConstraintToLoginAndCommunicationValue")]
+    public class AddUniqueConstraintToLoginAndCommunicationValue : Migration
     {
         protected override void Up(MigrationBuilder builder)
         {

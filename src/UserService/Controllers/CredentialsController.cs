@@ -1,7 +1,7 @@
-﻿using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
+﻿using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
