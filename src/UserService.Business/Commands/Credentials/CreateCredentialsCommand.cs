@@ -1,13 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -56,17 +56,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 return response;
             }
 
-            if (_userCredentialsRepository.LoginIsExist(request.Login))
+            if (_userCredentialsRepository.IsExistLogin(request.Login))
             {
                 response.Status = OperationResultStatusType.Conflict;
-                response.Errors.Add("The login is busy");
+                response.Errors.Add("The login already exist");
                 return response;
             }
 
-            if (_userCredentialsRepository.CredentialsIsExist(request.UserId))
+            if (_userCredentialsRepository.IsExistCredentials(request.UserId))
             {
                 response.Status = OperationResultStatusType.Failed;
-                response.Errors.Add("Credentials already exists");
+                response.Errors.Add("The credentials already exist");
                 return response;
             }
 

@@ -111,12 +111,12 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUserCredentials.Id;
         }
 
-        public bool LoginIsExist(string login)
+        public bool IsExistLogin(string login)
         {
             return _provider.UserCredentials.Any(uc => uc.Login == login);
         }
 
-        public bool CredentialsIsExist(Guid userId)
+        public bool IsExistCredentials(Guid userId)
         {
             return _provider.UserCredentials.Any(uc => uc.UserId == userId);
         }
