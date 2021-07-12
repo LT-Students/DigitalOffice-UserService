@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
         {
-            string logMessage = "Can not get images.";
+            string logMessage = "Can not get images: {ids}.";
             string errorMessage = "Can not get images. Please try again later.";
 
             try
@@ -52,11 +52,11 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Images;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join("\n", response.Errors));
+                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", imageIds), string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, logMessage);
+                _logger.LogError(exc, logMessage, string.Join(", ", imageIds));
             }
 
             errors.Add(errorMessage);
@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
         {
-            string logMessage = "Can not get roles.";
+            string logMessage = "Can not get roles for users with ids: {ids}.";
             string errorMessage = "Can not get roles. Please try again later.";
 
             try
@@ -79,11 +79,11 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Roles;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join("\n", response.Errors));
+                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", userIds), string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, logMessage);
+                _logger.LogError(exc, logMessage, string.Join(", ", userIds));
             }
 
             errors.Add(errorMessage);
@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<OfficeData> GetOffice(List<Guid> userIds, List<string> errors)
         {
-            string logMessage = "Can not get offices.";
+            string logMessage = "Can not get offices for users with ids: {ids}.";
             string errorMessage = "Can not get offices. Please try again later.";
 
             try
@@ -106,11 +106,11 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Offices;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join("\n", response.Errors));
+                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", userIds), string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, logMessage);
+                _logger.LogError(exc, logMessage, string.Join(", ", userIds));
             }
 
             errors.Add(errorMessage);

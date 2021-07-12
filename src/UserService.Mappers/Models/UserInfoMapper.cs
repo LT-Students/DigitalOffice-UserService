@@ -32,6 +32,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 StartWorkingAt = dbUser.DateOfBirth?.ToShortDateString(),
                 About = dbUser.About,
                 IsAdmin = dbUser.IsAdmin,
+                IsActive = dbUser.IsActive,
                 Status = (UserStatus)dbUser.Status,
                 Rate = dbUser.Rate,
                 Office = office,
