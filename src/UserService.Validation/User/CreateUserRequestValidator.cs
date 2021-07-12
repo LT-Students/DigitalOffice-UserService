@@ -8,38 +8,51 @@ namespace LT.DigitalOffice.UserService.Validation.User
 {
     public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>, ICreateUserRequestValidator
     {
-        private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
+        private static Regex NameRegex = new(@"\d");
         public CreateUserRequestValidator()
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .MaximumLength(32).WithMessage("First name is too long.");
+                .Must(x => !NameRegex.IsMatch(x))
+                .WithMessage("First name has incorrect format")
+                .MaximumLength(32)
+                .WithMessage("First name is too long.");
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
-                .MaximumLength(32).WithMessage("Last name is too long.");
+                .Must(x => !NameRegex.IsMatch(x))
+                .WithMessage("Last name has incorrect format")
+                .MaximumLength(32)
+                .WithMessage("Last name is too long.");
 
             When(
                 user => !string.IsNullOrEmpty(user.MiddleName),
                 () =>
                     RuleFor(user => user.MiddleName)
-                        .MaximumLength(32).WithMessage("Middle name is too long."));
+                        .Must(x => !NameRegex.IsMatch(x))
+                        .WithMessage("Middle name has incorrect format")
+                        .MaximumLength(32)
+                        .WithMessage("Middle name is too long."));
 
             When(
                 user => !string.IsNullOrEmpty(user.City),
                 () =>
                     RuleFor(user => user.City)
-                        .MaximumLength(32).WithMessage("City name is too long."));
+                        .MaximumLength(32)
+                        .WithMessage("City name is too long."));
 
             RuleFor(user => user.Gender)
-                .IsInEnum().WithMessage("Wrong gender value.");
+                .IsInEnum()
+                .WithMessage("Wrong gender value.");
 
             RuleFor(user => user.Status)
-                .IsInEnum().WithMessage("Wrong status value.");
+                .IsInEnum()
+                .WithMessage("Wrong status value.");
 
             When(user => user.Communications != null && user.Communications.Any(), () =>
             {
-                RuleForEach(user => user.Communications).ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
+                RuleForEach(user => user.Communications)
+                    .ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
             });
 
             RuleFor(user => user.Rate)
