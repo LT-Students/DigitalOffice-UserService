@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces
 {
