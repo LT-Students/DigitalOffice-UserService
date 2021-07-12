@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
         {
             _repositoryMock = new Mock<IUserRepository>();
             _repositoryMock
-                .Setup(x => x.IsExistUser(It.IsAny<Guid>()))
+                .Setup(x => x.IsUserExist(It.IsAny<Guid>()))
                 .Returns(true);
 
             _validator = new CreateEducationRequestValidator(_repositoryMock.Object);
@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Education
             };
 
             _repositoryMock
-                .Setup(x => x.IsExistUser(It.IsAny<Guid>()))
+                .Setup(x => x.IsUserExist(It.IsAny<Guid>()))
                 .Returns(false);
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.UniversityName);
