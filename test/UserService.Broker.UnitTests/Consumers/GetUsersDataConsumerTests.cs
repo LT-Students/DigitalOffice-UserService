@@ -43,10 +43,19 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 FirstName = "Ivan",
                 LastName = "Ivanov",
                 MiddleName = "Ivnovich",
-                IsActive = false
+                IsActive = false,
+                AvatarFileId = Guid.NewGuid(),
+                Rate = 0.25
             };
 
-            _userData = new UserData(_dbUser.Id, _dbUser.FirstName, _dbUser.MiddleName, _dbUser.LastName, _dbUser.IsActive, null, null);
+            _userData = new UserData(
+                _dbUser.Id,
+                _dbUser.FirstName,
+                _dbUser.MiddleName,
+                _dbUser.LastName,
+                _dbUser.IsActive,
+                _dbUser.AvatarFileId,
+                (float)_dbUser.Rate);
         }
 
         [Test]
