@@ -11,27 +11,23 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .MaximumLength(32).WithMessage("First name is too long.")
-                .MinimumLength(1).WithMessage("First name is too short.");
+                .MaximumLength(32).WithMessage("First name is too long.");
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
-                .MaximumLength(32).WithMessage("Last name is too long.")
-                .MinimumLength(1).WithMessage("Last name is too short.");
+                .MaximumLength(32).WithMessage("Last name is too long.");
 
             When(
                 user => !string.IsNullOrEmpty(user.MiddleName),
                 () =>
                     RuleFor(user => user.MiddleName)
-                        .MaximumLength(32).WithMessage("Middle name is too long.")
-                        .MinimumLength(1).WithMessage("Middle name is too short."));
+                        .MaximumLength(32).WithMessage("Middle name is too long."));
 
             When(
                 user => !string.IsNullOrEmpty(user.City),
                 () =>
                     RuleFor(user => user.City)
-                        .MaximumLength(32).WithMessage("City name is too long.")
-                        .MinimumLength(1).WithMessage("City name is too short."));
+                        .MaximumLength(32).WithMessage("City name is too long."));
 
             RuleFor(user => user.Gender)
                 .IsInEnum().WithMessage("Wrong gender value.");
