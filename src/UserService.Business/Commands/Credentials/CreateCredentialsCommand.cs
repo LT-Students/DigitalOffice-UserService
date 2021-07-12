@@ -56,14 +56,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 return response;
             }
 
-            if (_userCredentialsRepository.IsExistLogin(request.Login))
+            if (_userCredentialsRepository.IsLoginExist(request.Login))
             {
                 response.Status = OperationResultStatusType.Conflict;
                 response.Errors.Add("The login already exist");
                 return response;
             }
 
-            if (_userCredentialsRepository.IsExistCredentials(request.UserId))
+            if (_userCredentialsRepository.IsCredentialsExist(request.UserId))
             {
                 response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("The credentials already exist");

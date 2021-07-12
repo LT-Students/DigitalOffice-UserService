@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Validation.User.Education
         public CreateEducationRequestValidator(IUserRepository repository)
         {
             RuleFor(education => education.UserId)
-                .Must(id => repository.IsExistUser(id));
+                .Must(id => repository.IsUserExist(id));
 
             RuleFor(education => education.UniversityName)
                 .NotEmpty()

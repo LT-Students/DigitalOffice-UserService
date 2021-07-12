@@ -26,8 +26,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// <returns>Whether it was successful to edit.</returns>
         bool Edit(DbUserCredentials userCredentials);
 
-        bool IsExistLogin(string login);
+        bool IsLoginExist(string login);
 
-        bool IsExistCredentials(Guid userId);
+        bool IsCredentialsExist(Guid userId);
     }
 }

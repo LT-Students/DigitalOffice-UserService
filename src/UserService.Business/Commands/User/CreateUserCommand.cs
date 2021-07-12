@@ -297,7 +297,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             OperationResultResponse<Guid> response = new ();
 
-            if (_userRepository.IsExistCommunicationValue(request.Communications.Select(x => x.Value).ToList()))
+            if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
             {
                 response.Status = OperationResultStatusType.Conflict;
                 response.Errors.Add("Comunication value already exist");

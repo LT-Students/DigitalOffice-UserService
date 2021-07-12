@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Validation.User.Certificates
                 o => o == OperationType.Replace,
                 new Dictionary<Func<Operation<EditCertificateRequest>, bool>, string>
                 {
-                    { x => Guid.TryParse(x.value.ToString(), out Guid id) && _repository.IsExistUser(id), "The user must exist"}
+                    { x => Guid.TryParse(x.value.ToString(), out Guid id) && _repository.IsUserExist(id), "The user must exist"}
                 });
 
             AddFailureForPropertyIf(

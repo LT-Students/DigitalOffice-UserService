@@ -223,12 +223,12 @@ namespace LT.DigitalOffice.UserService.Data
             _provider.Save();
         }
 
-        public bool IsExistUser(Guid userId)
+        public bool IsUserExist(Guid userId)
         {
             return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
         }
 
-        public bool IsExistCommunicationValue(List<string> value)
+        public bool IsCommunicationValueExist(List<string> value)
         {
             return _provider.UserCommunications.Any(v => value.Contains(v.Value));
         }
