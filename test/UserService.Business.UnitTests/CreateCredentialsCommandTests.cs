@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private string _userRefreshToken;
         private Guid _userId = Guid.NewGuid();
         private string _password = "password";
-        private CredentialsResponse _responce;
+        private CredentialsResponse _response;
 
         [SetUp]
         public void SetUp()
@@ -52,12 +52,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _userAccessToken = "Access";
             _userRefreshToken = "Refresh";
 
-            _responce = new()
+            _response = new()
             {
                 UserId = _userId,
                 AccessToken = _userAccessToken,
                 RefreshToken = _userRefreshToken,
-                TokenLifeTime = 100
+                AccessTokenLifeTime = 100,
+                RefreshTokenLifeTime = 250
             };
 
             _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
@@ -97,7 +98,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             var getTokenResponseMock = new Mock<IGetTokenResponse>();
             getTokenResponseMock.Setup(x => x.AccessToken).Returns("Access");
             getTokenResponseMock.Setup(x => x.RefreshToken).Returns("Refresh");
-            getTokenResponseMock.Setup(x => x.TokenLifeTime).Returns(100);
+            getTokenResponseMock.Setup(x => x.AccessTokenLifeTime).Returns(100);
+            getTokenResponseMock.Setup(x => x.RefreshTokenLifeTime).Returns(250);
 
             _mocker
                 .Setup<IOperationResult<IGetTokenResponse>, IGetTokenResponse>(x => x.Body)
@@ -525,7 +527,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void SuccessTest()
         {
-            SerializerAssert.AreEqual(_responce, _command.Execute(_request));
+            SerializerAssert.AreEqual(_response, _command.Execute(_request));
 
             _mocker.Verify<IUserRepository, DbPendingUser>(
                 x => x.GetPendingUser(It.IsAny<Guid>()),
