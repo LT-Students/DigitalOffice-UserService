@@ -57,8 +57,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 UserId = _userId,
                 AccessToken = _userAccessToken,
                 RefreshToken = _userRefreshToken,
-                AccessTokenLifeTime = 100,
-                RefreshTokenLifeTime = 250
+                AccessTokenExpiresIn = 100,
+                RefreshTokenExpiresIn = 250
             };
 
             _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
@@ -98,8 +98,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             var getTokenResponseMock = new Mock<IGetTokenResponse>();
             getTokenResponseMock.Setup(x => x.AccessToken).Returns("Access");
             getTokenResponseMock.Setup(x => x.RefreshToken).Returns("Refresh");
-            getTokenResponseMock.Setup(x => x.AccessTokenLifeTime).Returns(100);
-            getTokenResponseMock.Setup(x => x.RefreshTokenLifeTime).Returns(250);
+            getTokenResponseMock.Setup(x => x.AccessTokenExpiresIn).Returns(100);
+            getTokenResponseMock.Setup(x => x.RefreshTokenExpiresIn).Returns(250);
 
             _mocker
                 .Setup<IOperationResult<IGetTokenResponse>, IGetTokenResponse>(x => x.Body)
