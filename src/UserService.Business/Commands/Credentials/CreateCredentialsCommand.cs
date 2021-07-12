@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
+using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -59,14 +60,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             try
             {
-                var response = _rcToken.GetResponse<IOperationResult<(string accessToken, string refreshToken)>>(
+                var response = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
                         IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;
 
                 if (response.IsSuccess &&
-                    !string.IsNullOrEmpty(response.Body.accessToken) &&
-                    !string.IsNullOrEmpty(response.Body.refreshToken))
+                    !string.IsNullOrEmpty(response.Body.AccessToken) &&
+                    !string.IsNullOrEmpty(response.Body.RefreshToken))
                 {
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
@@ -81,8 +82,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                     return new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        AccessToken = response.Body.accessToken,
-                        RefreshToken = response.Body.refreshToken
+                        AccessToken = response.Body.AccessToken,
+                        RefreshToken = response.Body.RefreshToken,
+                        AccessTokenLifeTime = response.Body.AccessTokenLifeTime,
+                        RefreshTokenLifeTime = response.Body.RefreshTokenLifeTime
                     };
                 }
                 else
