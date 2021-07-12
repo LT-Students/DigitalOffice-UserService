@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.Validators;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -98,8 +97,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "First тame is empty" },
-                    { x => x.value.ToString().Length < 32, "FirstName is too long" }
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "First name is empty" },
+                    { x => x.value.ToString().Length < 32, "First name is too long" }
                 });
 
             #endregion
@@ -112,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name is empty" },
-                    { x => x.value.ToString().Length < 100, "LastName is too long" }
+                    { x => x.value.ToString().Length < 100, "Last name is too long" }
                 });
 
             #endregion
@@ -125,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "Middle name is empty" },
-                    { x => x.value.ToString().Length < 32, "MiddleName is too long" }
+                    { x => x.value.ToString().Length < 32, "Middle name is too long" }
                 });
 
             #endregion
