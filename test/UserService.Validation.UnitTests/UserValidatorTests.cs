@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             validator = new CreateUserRequestValidator();
         }
 
-        [TestCaseSource(nameof(NamePropertyCases))]
+        /*[TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
             Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
@@ -78,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             var request = new CreateUserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
-        }
+        }*/
 
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
@@ -152,13 +152,13 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
 
-        [Test]
+        /*[Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
             string middleName = null;
 
             validator.ShouldNotHaveValidationErrorFor(x => x.MiddleName, middleName);
-        }
+        }*/
 
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
