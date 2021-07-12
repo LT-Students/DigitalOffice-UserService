@@ -329,10 +329,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetPendingUser(It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IUserCredentialsRepository>(
-                x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
-                Times.Once());
-
             _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
                 x => x.GetResponse<IOperationResult<IGetTokenResponse>>(
                     IGetTokenRequest.CreateObj(_userId),
@@ -372,10 +368,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mocker.Verify<IUserRepository, DbPendingUser>(
                 x => x.GetPendingUser(It.IsAny<Guid>()),
-                Times.Once());
-
-            _mocker.Verify<IUserCredentialsRepository>(
-                x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
             _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
@@ -419,10 +411,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 x => x.GetPendingUser(It.IsAny<Guid>()),
                 Times.Once());
 
-            _mocker.Verify<IUserCredentialsRepository>(
-                x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
-                Times.Once());
-
             _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
                 x => x.GetResponse<IOperationResult<IGetTokenResponse>>(
                     IGetTokenRequest.CreateObj(_userId),
@@ -462,10 +450,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
 
             _mocker.Verify<IUserRepository, DbPendingUser>(
                 x => x.GetPendingUser(It.IsAny<Guid>()),
-                Times.Once());
-
-            _mocker.Verify<IUserCredentialsRepository>(
-                x => x.CheckLogin(It.IsAny<string>(), It.IsAny<Guid>()),
                 Times.Once());
 
             _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
