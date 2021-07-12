@@ -98,7 +98,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "FirstName is too short" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "First тame is empty" },
                     { x => x.value.ToString().Length < 32, "FirstName is too long" }
                 });
 
@@ -111,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "LastName is too short" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name is empty" },
                     { x => x.value.ToString().Length < 100, "LastName is too long" }
                 });
 
@@ -124,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace || x == OperationType.Add,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "MiddleName is too short" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Middle name is empty" },
                     { x => x.value.ToString().Length < 32, "MiddleName is too long" }
                 });
 
@@ -137,7 +137,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace || x == OperationType.Add,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is too short" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is empty" },
                     { x => x.value.ToString().Length < 32, "City name is too long" }
                 });
 
