@@ -52,26 +52,10 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
-        public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
-        {
-            validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
-        }
-
-        [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
             Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression,
-            [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
-            string name)
-        {
-            validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, name);
         }
 
         [Test]

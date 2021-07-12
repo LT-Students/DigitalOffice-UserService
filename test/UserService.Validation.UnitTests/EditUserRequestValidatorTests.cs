@@ -190,7 +190,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             {
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.FirstName)}",
+                    $"/{nameof(EditUserRequest.AvatarImage)}",
                     "",
                     "some strange json for image")
             }, new CamelCasePropertyNamesContractResolver());
