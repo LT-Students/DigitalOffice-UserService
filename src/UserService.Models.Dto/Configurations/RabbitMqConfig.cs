@@ -24,6 +24,9 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IGetImageRequest))]
         public string GetImageEndpoint { get; set; }
 
+        [AutoInjectRequest(typeof(IGetImagesRequest))]
+        public string GetImagesEndpoint { get; set; }
+
         [AutoInjectRequest(typeof(IGetDepartmentUserRequest))]
         public string GetDepartmentUserEndpoint { get; set; }
 
@@ -54,8 +57,14 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IChangeUserRoleRequest))]
         public string ChangeUserRoleEndpoint { get; set; }
 
+        [AutoInjectRequest(typeof(IGetUserRolesRequest))]
+        public string GetUserRolesEndpoint { get; set; }
+
         [AutoInjectRequest(typeof(IChangeUserOfficeRequest))]
         public string ChangeUserOfficeEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IGetUserOfficesRequest))]
+        public string GetUserOfficesEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetUsersDepartmentsUsersPositionsRequest))]
         public string GetUsersDepartmentsUsersPositionsEndpoint { get; set; }

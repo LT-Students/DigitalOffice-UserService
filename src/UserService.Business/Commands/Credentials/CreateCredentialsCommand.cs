@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
+using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -79,14 +80,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             try
             {
-                var tokenRequest = _rcToken.GetResponse<IOperationResult<(string accessToken, string refreshToken)>>(
+                var response = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
                         IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;
 
-                if (tokenRequest.IsSuccess &&
-                    !string.IsNullOrEmpty(tokenRequest.Body.accessToken) &&
-                    !string.IsNullOrEmpty(tokenRequest.Body.refreshToken))
+                if (response.IsSuccess &&
+                    !string.IsNullOrEmpty(response.Body.AccessToken) &&
+                    !string.IsNullOrEmpty(response.Body.RefreshToken))
                 {
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
@@ -101,8 +102,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                     response.Body = new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        AccessToken = tokenRequest.Body.accessToken,
-                        RefreshToken = tokenRequest.Body.refreshToken
+                        AccessToken = response.Body.AccessToken,
+                        RefreshToken = response.Body.RefreshToken,
+                        AccessTokenExpiresIn = response.Body.AccessTokenExpiresIn,
+                        RefreshTokenExpiresIn = response.Body.RefreshTokenExpiresIn
                     };
 
                     return response;

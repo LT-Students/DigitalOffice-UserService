@@ -96,9 +96,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
             _userResponse = new UserResponse
             {
                 User = new UserInfo(),
-                Avatar = new ImageInfo(),
-                Department = new DepartmentInfo(),
-                Position = new PositionInfo(),
                 Skills = new List<string>(),
                 Communications = new List<CommunicationInfo>(),
                 Certificates = new List<CertificateInfo>(),

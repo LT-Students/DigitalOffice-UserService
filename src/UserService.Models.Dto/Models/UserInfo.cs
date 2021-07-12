@@ -17,8 +17,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string About { get; set; }
         public string StartWorkingAt { get; set; }
         public double Rate { get; set; }
+        public bool IsActive { get; set; }
 
         public DepartmentInfo Department { get; set; }
         public PositionInfo Position { get; set; }
+        public ImageInfo Avatar { get; set; }
+        public RoleInfo Role { get; set; }
+        public OfficeInfo Office { get; set; }
     }
 }
