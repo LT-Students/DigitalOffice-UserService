@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
+using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.Models.Broker.Responses.Project;
@@ -31,7 +32,9 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
         private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
-        private readonly IRequestClient<IGetImageRequest> _rcFile;
+        private readonly IRequestClient<IGetImageRequest> _rcImage;
+        private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
+        private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
 
         private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
         {
@@ -164,7 +167,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             try
             {
-                IOperationResult<IGetImageResponse> response = _rcFile.GetResponse<IOperationResult<IGetImageResponse>>(
+                IOperationResult<IGetImageResponse> response = _rcImage.GetResponse<IOperationResult<IGetImageResponse>>(
                     IGetImageRequest.CreateObj(imageId.Value)).Result.Message;
 
                 if (response.IsSuccess)
@@ -205,7 +208,9 @@ namespace LT.DigitalOffice.UserService.Business
             IRequestClient<IGetDepartmentUserRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
             IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
-            IRequestClient<IGetImageRequest> rcFile)
+            IRequestClient<IGetImageRequest> rcFile,
+            IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
+            IRequestClient<IGetUserOfficesRequest> rcGetUserOffices)
         {
             _logger = logger;
             _repository = repository;
@@ -213,7 +218,9 @@ namespace LT.DigitalOffice.UserService.Business
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
             _rcProjects = rcProjects;
-            _rcFile = rcFile;
+            _rcImage = rcFile;
+            _rcGetUserRoles = rcGetUserRoles;
+            _rcGetUserOffices = rcGetUserOffices;
         }
 
         /// <inheritdoc />

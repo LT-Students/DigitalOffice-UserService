@@ -23,6 +23,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             foreach (var item in request.Operations)
             {
+                if (item.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase)
+                    || item.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)
+                    || item.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase)
+                    || item.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
                 if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserStatus), item.value.ToString())));
