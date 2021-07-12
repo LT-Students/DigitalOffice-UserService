@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 maxLength: 100);
 
             builder.AddUniqueConstraint(
-                name: $"UX_{nameof(DbUserCredentials.Login)}_unique",
+                name: $"UX_Login_unique",
                 table: DbUserCredentials.TableName,
                 column: nameof(DbUserCredentials.Login));
 
@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 maxLength: 100);
 
             builder.AddUniqueConstraint(
-                name: $"UX_Login_unique",
+                name: $"UX_Value_unique",
                 table: DbUserCommunication.TableName,
                 column: nameof(DbUserCommunication.Value));
         }
