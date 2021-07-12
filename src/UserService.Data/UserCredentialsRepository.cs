@@ -111,19 +111,14 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUserCredentials.Id;
         }
 
-        public void CheckLogin(string login, Guid userId)
+        public bool IsLoginExist(string login)
         {
-            if (_provider.UserCredentials.Any(
-                uc => uc.Login == login))
-            {
-                throw new BadRequestException("Login is busy.");
-            }
+            return _provider.UserCredentials.Any(uc => uc.Login == login);
+        }
 
-            if (_provider.UserCredentials.Any(
-                uc => uc.UserId == userId))
-            {
-                throw new BadRequestException("User credentials is exist");
-            }
+        public bool IsCredentialsExist(Guid userId)
+        {
+            return _provider.UserCredentials.Any(uc => uc.UserId == userId);
         }
     }
 }

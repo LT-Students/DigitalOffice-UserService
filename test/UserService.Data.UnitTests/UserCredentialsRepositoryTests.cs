@@ -151,22 +151,5 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         }
         #endregion
 
-        #region CheckLogin
-        [Test]
-        public void ShouldThrowExceptionWhenLoginIsBusy()
-        {
-            var login = _dbUserCredentials.Login;
-
-            Assert.Throws<BadRequestException>(() => _repository.CheckLogin(login, It.IsAny<Guid>()));
-        }
-
-        [Test]
-        public void ShouldThrowExceptionWhenUserIdIsExist()
-        {
-            var userId = _dbUserCredentials.UserId;
-
-            Assert.Throws<BadRequestException>(() => _repository.CheckLogin(It.IsAny<string>(), userId));
-        }
-        #endregion
     }
 }
