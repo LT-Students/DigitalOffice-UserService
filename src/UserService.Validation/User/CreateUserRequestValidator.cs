@@ -2,11 +2,13 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
 {
     public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>, ICreateUserRequestValidator
     {
+        private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
         public CreateUserRequestValidator()
         {
             RuleFor(user => user.FirstName)
