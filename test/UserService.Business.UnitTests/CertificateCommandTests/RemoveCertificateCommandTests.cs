@@ -1,13 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Moq.AutoMock;

@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 

@@ -1,6 +1,6 @@
-﻿using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;

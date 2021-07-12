@@ -7,9 +7,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
     public record UserResponse
     {
         public UserInfo User { get; set; }
-        public ImageInfo Avatar { get; set; }
-        public DepartmentInfo Department { get; set; }
-        public PositionInfo Position { get; set; }
         public IEnumerable<string> Skills { get; set; }
         public IEnumerable<CommunicationInfo> Communications { get; set; }
         public IEnumerable<CertificateInfo> Certificates { get; set; }
