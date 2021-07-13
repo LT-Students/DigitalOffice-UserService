@@ -18,6 +18,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
             DbUser dbUser,
             DepartmentInfo department,
             PositionInfo position,
+            OfficeInfo office,
+            RoleInfo role,
             List<ProjectInfo> projects,
             List<ImageInfo> images,
             GetUserFilter filter,
