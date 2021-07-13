@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 {
     public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
     {
-        private static Regex NameRegex = new("^[A-Z][a-z]+$|^[А-ЯЁ][а-яё]+$");
+        private static Regex NameRegex = new(@"\d");
 
         private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
         {
@@ -100,9 +100,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "FirstName is too short" },
-                    { x => x.value.ToString().Length < 32, "FirstName is too long" },
-                    { x => NameRegex.IsMatch(x.value.ToString()), "FirstName has incorrect format" }
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "First name is empty" },
+                    { x => x.value.ToString().Length < 32, "First name is too long" }
                 });
 
             #endregion
@@ -114,9 +114,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "LastName is too short" },
-                    { x => x.value.ToString().Length < 100, "LastName is too long" },
-                    { x => NameRegex.IsMatch(x.value.ToString()), "LastName has incorrect format" }
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name is empty" },
+                    { x => x.value.ToString().Length < 100, "Last name is too long" }
                 });
 
             #endregion
@@ -128,9 +128,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace || x == OperationType.Add,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "MiddleName is too short" },
-                    { x => x.value.ToString().Length < 32, "MiddleName is too long" },
-                    { x => NameRegex.IsMatch(x.value.ToString()), "MiddleName has incorrect format" }
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "Middle name must not contain numbers" },
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Middle name is empty" },
+                    { x => x.value.ToString().Length < 32, "Middle name is too long" }
                 });
 
             #endregion
@@ -142,9 +142,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace || x == OperationType.Add,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is too short" },
-                    { x => x.value.ToString().Length < 32, "City name is too long" },
-                    { x => NameRegex.IsMatch(x.value.ToString()), "City name has incorrect format" }
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is empty" },
+                    { x => x.value.ToString().Length < 32, "City name is too long" }
                 });
 
             #endregion

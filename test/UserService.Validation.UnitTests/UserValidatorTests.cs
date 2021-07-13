@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             validator = new CreateUserRequestValidator();
         }
 
-        [TestCaseSource(nameof(NamePropertyCases))]
+        /*[TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldThrowValidationExceptionWhenNameIsEmpty(
             Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
@@ -52,26 +52,10 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
         }
 
         [TestCaseSource(nameof(NamePropertyCases))]
-        public void ShouldHaveValidationErrorWhenNameIsTooShort(
-            Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
-        {
-            validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, "a");
-        }
-
-        [TestCaseSource(nameof(NamePropertyCases))]
         public void ShouldHaveValidationErrorWhenNameIsTooLong(
             Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression)
         {
             validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, new string('a', 100));
-        }
-
-        [Test]
-        public void ShouldThrowValidationExceptionWhenNameDoesNotMatchRegularExpression(
-            [ValueSource(nameof(NamePropertyCases))] Expression<Func<CreateUserRequest, string>> gettingNamePropertyExpression,
-            [ValueSource(nameof(NamesThatDoesNotMatchPatternCases))]
-            string name)
-        {
-            validator.ShouldHaveValidationErrorFor(gettingNamePropertyExpression, name);
         }
 
         [Test]
@@ -94,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             var request = new CreateUserRequest();
 
             validator.TestValidate(request).ShouldHaveAnyValidationError();
-        }
+        }*/
 
         [Test]
         public void ShouldNotThrowValidationExceptionWhenDataIsValid()
@@ -168,13 +152,13 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             validator.TestValidate(request).ShouldNotHaveAnyValidationErrors();
         }
 
-        [Test]
+        /*[Test]
         public void ShouldPassWhenDataIsValidWithoutMiddleName()
         {
             string middleName = null;
 
             validator.ShouldNotHaveValidationErrorFor(x => x.MiddleName, middleName);
-        }
+        }*/
 
         [Test]
         public void ShouldPassWhenDataIsValidWithEmptyConnections()
