@@ -7,8 +7,10 @@ using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.Models.Broker.Responses.Project;
+using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
@@ -18,6 +20,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -29,12 +32,17 @@ namespace LT.DigitalOffice.UserService.Business
         private readonly ILogger<GetUserCommand> _logger;
         private readonly IUserRepository _repository;
         private readonly IUserResponseMapper _mapper;
+        private readonly IOfficeInfoMapper _officeMapper;
+        private readonly IRoleInfoMapper _roleMapper;
+        private readonly IImageInfoMapper _imageMapper;
         private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
         private readonly IRequestClient<IGetPositionRequest> _rcPosition;
         private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
-        private readonly IRequestClient<IGetImageRequest> _rcImage;
+        private readonly IRequestClient<IGetImagesRequest> _rcImages;
         private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
         private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
+
+        #region private methods
 
         private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
         {
@@ -112,6 +120,60 @@ namespace LT.DigitalOffice.UserService.Business
             return result;
         }
 
+        private RoleInfo GetRole(Guid userId, List<string> errors)
+        {
+            string logMessage = "Can not get role for user with id: {id}.";
+            string errorMessage = "Can not get role. Please try again later.";
+
+            try
+            {
+                var response = _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
+                    IGetUserRolesRequest.CreateObj(new() { userId })).Result.Message;
+
+                if (response.IsSuccess)
+                {
+                    return _roleMapper.Map(response.Body.Roles[0]);
+                }
+
+                _logger.LogWarning(logMessage + "Reason: {Errors}", userId, string.Join("\n", response.Errors));
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, logMessage, userId);
+            }
+
+            errors.Add(errorMessage);
+
+            return new();
+        }
+
+        private OfficeInfo GetOffice(Guid userId, List<string> errors)
+        {
+            string logMessage = "Can not get office for user with id: {id}.";
+            string errorMessage = "Can not get office. Please try again later.";
+
+            try
+            {
+                var response = _rcGetUserOffices.GetResponse<IOperationResult<IGetUserOfficesResponse>>(
+                    IGetUserOfficesRequest.CreateObj(new() { userId })).Result.Message;
+
+                if (response.IsSuccess)
+                {
+                    return _officeMapper.Map(response.Body.Offices[0]);
+                }
+
+                _logger.LogWarning(logMessage + "Reason: {Errors}", userId, string.Join("\n", response.Errors));
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, logMessage, userId);
+            }
+
+            errors.Add(errorMessage);
+
+            return new();
+        }
+
         private List<ProjectInfo> GetProjects(Guid userId, List<string> errors)
         {
             string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
@@ -154,49 +216,44 @@ namespace LT.DigitalOffice.UserService.Business
             return null;
         }
 
-        private ImageInfo GetImage(Guid? imageId, List<string> errors)
+        private List<ImageInfo> GetImages(List<Guid> imageIds, List<string> errors)
         {
-            if (imageId == null)
+            if (imageIds == null || imageIds.Count == 0)
             {
-                return null;
+                return new();
             }
 
-            ImageInfo result = null;
-
-            string errorMessage = $"Can not get image '{imageId}' information. Please try again later.";
+            string errorMessage = $"Can not get images. Please try again later.";
+            string logMessage = "Errors while getting images with ids: {ids)}.";
 
             try
             {
-                IOperationResult<IGetImageResponse> response = _rcImage.GetResponse<IOperationResult<IGetImageResponse>>(
-                    IGetImageRequest.CreateObj(imageId.Value)).Result.Message;
+                IOperationResult<IGetImagesResponse> response = _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+                    IGetImagesRequest.CreateObj(imageIds)).Result.Message;
 
                 if (response.IsSuccess)
                 {
-                    result = new()
-                    {
-                        Id = response.Body.ImageId,
-                        ParentId = response.Body.ParentId,
-                        Content = response.Body.Content,
-                        Extension = response.Body.Extension
-                    };
+                    return response.Body.Images.Select(_imageMapper.Map).ToList();
                 }
                 else
                 {
                     _logger.LogWarning(
-                        $"Errors while getting images:{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        logMessage + "Errors: { errors }.", string.Join(", ", imageIds), string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, logMessage, string.Join(", ", imageIds));
 
                 errors.Add(errorMessage);
             }
 
-            return result;
+            return new();
         }
+
+        #endregion
 
         /// <summary>
         /// Initialize new instance of <see cref="GetUserCommand"/> class with specified repository.
@@ -205,20 +262,26 @@ namespace LT.DigitalOffice.UserService.Business
             ILogger<GetUserCommand> logger,
             IUserRepository repository,
             IUserResponseMapper mapper,
+            IRoleInfoMapper roleMapper,
+            IOfficeInfoMapper officeMapper,
+            IImageInfoMapper imageMapper,
             IRequestClient<IGetDepartmentUserRequest> rcDepartment,
             IRequestClient<IGetPositionRequest> rcPosition,
             IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
-            IRequestClient<IGetImageRequest> rcFile,
+            IRequestClient<IGetImagesRequest> rcImages,
             IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
             IRequestClient<IGetUserOfficesRequest> rcGetUserOffices)
         {
             _logger = logger;
             _repository = repository;
             _mapper = mapper;
+            _roleMapper = roleMapper;
+            _officeMapper = officeMapper;
+            _imageMapper = imageMapper;
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
             _rcProjects = rcProjects;
-            _rcImage = rcFile;
+            _rcImages = rcImages;
             _rcGetUserRoles = rcGetUserRoles;
             _rcGetUserOffices = rcGetUserOffices;
         }
@@ -242,37 +305,19 @@ namespace LT.DigitalOffice.UserService.Business
                 throw new NotFoundException($"User was not found.");
             }
 
-            DepartmentInfo department = null;
-            if (filter.IsIncludeDepartment)
-            {
-                department = GetDepartment(dbUser.Id, errors);
-            }
-
-            PositionInfo position = null;
-            if (filter.IsIncludePosition)
-            {
-                position = GetPosition(dbUser.Id, errors);
-            }
-
-            List<ProjectInfo> projects = null;
-            if (filter.IsIncludeProjects)
-            {
-                projects = GetProjects(dbUser.Id, errors);
-            }
-
-            List<ImageInfo> images = new();
+            List<Guid> images = new();
             if (filter.IsIncludeImages)
             {
                 if (dbUser.AvatarFileId.HasValue)
                 {
-                    images.Add(GetImage(dbUser.AvatarFileId.Value, errors));
+                    images.Add(dbUser.AvatarFileId.Value);
                 }
 
                 if (filter.IsIncludeCertificates)
                 {
                     foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
                     {
-                        images.Add(GetImage(dbUserCertificate.ImageId, errors));
+                        images.Add(dbUserCertificate.ImageId);
                     }
                 }
 
@@ -280,12 +325,21 @@ namespace LT.DigitalOffice.UserService.Business
                 {
                     foreach (DbUserAchievement dbUserAchievement in dbUser.Achievements)
                     {
-                        images.Add(GetImage(dbUserAchievement.Achievement?.ImageId, errors));
+                        images.Add(dbUserAchievement.Achievement.ImageId);
                     }
                 }
             }
 
-            return _mapper.Map(dbUser, department, position, projects, images, filter, errors);
+            return _mapper.Map(
+                dbUser,
+                filter.IsIncludeDepartment ? GetDepartment(dbUser.Id, errors) : null,
+                filter.IsIncludePosition ? GetPosition(dbUser.Id, errors) : null,
+                filter.IsIncludeOffice ? GetOffice(dbUser.Id, errors) : null,
+                filter.IsIncludeRole ? GetRole(dbUser.Id, errors) : null,
+                filter.IsIncludeProjects ? GetProjects(dbUser.Id, errors) : null,
+                GetImages(images, errors), 
+                filter, 
+                errors);
         }
     }
 }

@@ -29,6 +29,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
         [FromQuery(Name = "includeposition")]
         public bool? IncludePosition { get; set; }
 
+        [FromQuery(Name = "includeoffice")]
+        public bool? IncludeOffice { get; set; }
+
+        [FromQuery(Name = "includerole")]
+        public bool? IncludeRole { get; set; }
+
         [FromQuery(Name = "includeskills")]
         public bool? IncludeSkills { get; set; }
 
@@ -43,6 +49,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 
         public bool IsIncludeDepartment => IncludeDepartment.HasValue && IncludeDepartment.Value;
         public bool IsIncludePosition => IncludePosition.HasValue && IncludePosition.Value;
+        public bool IsIncludeOffice => IncludeOffice.HasValue && IncludeOffice.Value;
+        public bool IsIncludeRole => IncludeRole.HasValue && IncludeRole.Value;
         public bool IsIncludeAchievements => IncludeAchievements.HasValue && IncludeAchievements.Value;
         public bool IsIncludeCertificates => IncludeCertificates.HasValue && IncludeCertificates.Value;
         public bool IsIncludeCommunications => IncludeCommunications.HasValue && IncludeCommunications.Value;
