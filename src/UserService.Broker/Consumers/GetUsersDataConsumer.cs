@@ -32,6 +32,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
             var dbUsers = _repository.Get(request.UserIds);
 
+            // TODO: need write double type instead float for rate property in IGetUsersDataResponse.
             return IGetUsersDataResponse.CreateObj(
                 dbUsers
                     .Select(dbUser => new UserData(
