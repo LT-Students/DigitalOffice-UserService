@@ -46,7 +46,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 IsActive = false
             };
 
-            _userData = new UserData(_dbUser.Id, _dbUser.FirstName, _dbUser.MiddleName, _dbUser.LastName, _dbUser.IsActive);
+            _userData = new UserData(_dbUser.Id, _dbUser.FirstName, _dbUser.MiddleName, _dbUser.LastName, _dbUser.IsActive, null, null);
         }
 
         [Test]

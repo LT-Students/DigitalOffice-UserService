@@ -1,6 +1,9 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
+using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -35,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             _logger = logger;
         }
 
-        public CredentialsResponse Execute(CreateCredentialsRequest request)
+        public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
         {
             // TODO add request validation
 
@@ -44,29 +47,47 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new BadRequestException();
             }
 
+            OperationResultResponse<CredentialsResponse> response = new ();
+
             var dbPendingUser = _userRepository.GetPendingUser(request.UserId);
             if (dbPendingUser == null)
             {
-                throw new NotFoundException($"Pending user with ID '{request.UserId}' was not found.");
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add($"Pending user with ID '{request.UserId}' was not found.");
+                return response;
             }
 
-            _userCredentialsRepository.CheckLogin(request.Login, request.UserId);
+            if (_userCredentialsRepository.IsLoginExist(request.Login))
+            {
+                response.Status = OperationResultStatusType.Conflict;
+                response.Errors.Add("The login already exist");
+                return response;
+            }
+
+            if (_userCredentialsRepository.IsCredentialsExist(request.UserId))
+            {
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add("The credentials already exist");
+                return response;
+            }
 
             if (request.Password != dbPendingUser.Password)
             {
-                throw new ForbiddenException("Wrong password");
+                response.Status = OperationResultStatusType.Failed;
+                response.Errors.Add("Wrong password");
+                return response;
             }
 
             try
             {
-                var response = _rcToken.GetResponse<IOperationResult<(string accessToken, string refreshToken)>>(
+                var tokenResponse = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
                         IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;
 
-                if (response.IsSuccess &&
-                    !string.IsNullOrEmpty(response.Body.accessToken) &&
-                    !string.IsNullOrEmpty(response.Body.refreshToken))
+                if (tokenResponse.IsSuccess &&
+                    !string.IsNullOrEmpty(tokenResponse.Body.AccessToken) &&
+                    !string.IsNullOrEmpty(tokenResponse.Body.RefreshToken))
                 {
                     string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
@@ -78,12 +99,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
                     _userRepository.SwitchActiveStatus(request.UserId, true);
 
-                    return new CredentialsResponse
+                    response.Body = new CredentialsResponse
                     {
                         UserId = request.UserId,
-                        AccessToken = response.Body.accessToken,
-                        RefreshToken = response.Body.refreshToken
+                        AccessToken = tokenResponse.Body.AccessToken,
+                        RefreshToken = tokenResponse.Body.RefreshToken,
+                        AccessTokenExpiresIn = tokenResponse.Body.AccessTokenExpiresIn,
+                        RefreshTokenExpiresIn = tokenResponse.Body.RefreshTokenExpiresIn
                     };
+
+                    return response;
                 }
                 else
                 {

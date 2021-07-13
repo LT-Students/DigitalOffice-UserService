@@ -295,9 +295,16 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(request);
 
-            List<string> errors = new();
+            OperationResultResponse<Guid> response = new ();
 
-            Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, errors);
+            if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
+            {
+                response.Status = OperationResultStatusType.Conflict;
+                response.Errors.Add("Comunication value already exist");
+                return response;
+            }
+
+            Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 
@@ -305,30 +312,27 @@ namespace LT.DigitalOffice.UserService.Business
 
             Guid userId = _userRepository.Create(dbUser, password);
 
-            SendEmail(dbUser, password, errors);
+            SendEmail(dbUser, password, response.Errors);
 
             if (request.DepartmentId.HasValue)
             {
-                ChangeUserDepartment(request.DepartmentId.Value, userId, errors);
+                ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
             }
 
-            ChangeUserPosition(request.PositionId, userId, errors);
+            ChangeUserPosition(request.PositionId, userId, response.Errors);
 
             if (request.RoleId.HasValue)
             {
-                ChangeUserRole(request.RoleId.Value, userId, errors);
+                ChangeUserRole(request.RoleId.Value, userId, response.Errors);
             }
 
-            ChangeUserOffice(request.OfficeId, userId, errors);
+            ChangeUserOffice(request.OfficeId, userId, response.Errors);
 
-            return new OperationResultResponse<Guid>
-            {
-                Body = userId,
-                Status = errors.Any()
+            response.Body = userId;
+            response.Status = response.Errors.Any()
                     ? OperationResultStatusType.PartialSuccess
-                    : OperationResultStatusType.FullSuccess,
-                Errors = errors
-            };
+                    : OperationResultStatusType.FullSuccess;
+            return response;
         }
     }
 }
