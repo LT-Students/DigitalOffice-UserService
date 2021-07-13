@@ -229,10 +229,23 @@ namespace LT.DigitalOffice.UserService.Business
         {
             var status = OperationResultStatusType.FullSuccess;
 
+            Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)); ;
+            Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
+            Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
+            Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
+
             if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
                 _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-                (userId == _httpContextAccessor.HttpContext.GetUserId() &&
-                !(patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null))))
+                (userId == _httpContextAccessor.HttpContext.GetUserId() 
+                && !(patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null)
+                && positionOperation == null
+                && departmentOperation == null
+                && roleOperation == null
+                && officeOperation == null)))
             {
                 throw new ForbiddenException("Not enough rights.");
             }
@@ -252,9 +265,6 @@ namespace LT.DigitalOffice.UserService.Business
                 }
             }
 
-            Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
-
             if (positionOperation != null)
             {
                 if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString()), userId, errors))
@@ -262,9 +272,6 @@ namespace LT.DigitalOffice.UserService.Business
                     status = OperationResultStatusType.PartialSuccess;
                 }
             }
-
-            Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
 
             if (departmentOperation != null)
             {
@@ -274,9 +281,6 @@ namespace LT.DigitalOffice.UserService.Business
                 }
             }
 
-            Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
-
             if (roleOperation != null)
             {
                 if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString()), userId, errors))
@@ -284,9 +288,6 @@ namespace LT.DigitalOffice.UserService.Business
                     status = OperationResultStatusType.PartialSuccess;
                 }
             }
-
-            Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
 
             if (officeOperation != null)
             {
