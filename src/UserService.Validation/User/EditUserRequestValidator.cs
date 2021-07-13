@@ -75,6 +75,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.Gender),
                     nameof(EditUserRequest.DateOfBirth),
                     nameof(EditUserRequest.StartWorkingAt),
+                    nameof(EditUserRequest.About),
                     nameof(EditUserRequest.AvatarImage),
                     nameof(EditUserRequest.IsActive),
                     nameof(EditUserRequest.DepartmentId),
@@ -98,6 +99,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
 
             #endregion
 
@@ -320,6 +322,18 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new()
                 {
                     { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format" }
+                });
+
+            #endregion
+
+            #region About
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.About),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new()
+                {
+                    { x => !string.IsNullOrEmpty(x.value.ToString()), "About must not be empty." },
                 });
 
             #endregion
