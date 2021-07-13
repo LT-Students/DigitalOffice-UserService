@@ -14,14 +14,14 @@ namespace LT.DigitalOffice.UserService.Validation.User
             RuleFor(user => user.FirstName)
                 .NotEmpty()
                 .Must(x => !NameRegex.IsMatch(x))
-                .WithMessage("First name has incorrect format")
+                .WithMessage("First name must not contain numbers")
                 .MaximumLength(32)
                 .WithMessage("First name is too long.");
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
                 .Must(x => !NameRegex.IsMatch(x))
-                .WithMessage("Last name has incorrect format")
+                .WithMessage("Last name must not contain numbers")
                 .MaximumLength(32)
                 .WithMessage("Last name is too long.");
 
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 () =>
                     RuleFor(user => user.MiddleName)
                         .Must(x => !NameRegex.IsMatch(x))
-                        .WithMessage("Middle name has incorrect format")
+                        .WithMessage("Middle name must not contain numbers")
                         .MaximumLength(32)
                         .WithMessage("Middle name is too long."));
 

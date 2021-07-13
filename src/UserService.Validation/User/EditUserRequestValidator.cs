@@ -100,7 +100,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !NameRegex.IsMatch(x.value.ToString()), "First name has incorrect format" },
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers" },
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "First name is empty" },
                     { x => x.value.ToString().Length < 32, "First name is too long" }
                 });
@@ -114,7 +114,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !NameRegex.IsMatch(x.value.ToString()), "Last name has incorrect format" },
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers" },
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name is empty" },
                     { x => x.value.ToString().Length < 100, "Last name is too long" }
                 });
@@ -128,7 +128,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 x => x == OperationType.Replace || x == OperationType.Add,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
-                    { x => !NameRegex.IsMatch(x.value.ToString()), "Middle name has incorrect format" },
+                    { x => !NameRegex.IsMatch(x.value.ToString()), "Middle name must not contain numbers" },
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "Middle name is empty" },
                     { x => x.value.ToString().Length < 32, "Middle name is too long" }
                 });
