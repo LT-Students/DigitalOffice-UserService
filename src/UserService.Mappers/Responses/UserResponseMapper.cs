@@ -48,6 +48,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             DbUser dbUser,
             DepartmentInfo department,
             PositionInfo position,
+            OfficeInfo office,
+            RoleInfo role,
             List<ProjectInfo> projects,
             List<ImageInfo> images,
             GetUserFilter filter,
@@ -70,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
             return new UserResponse
             {
-                User = _userInfoMapper.Map(dbUser, department, position, avatar, null, null),
+                User = _userInfoMapper.Map(dbUser, department, position, avatar, role, office),
                 Projects = projects,
                 Skills = filter.IsIncludeSkills
                     ? dbUser.Skills.Select(s => s.Skill.SkillName)

@@ -192,8 +192,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldFindExistUserAndDontFindNoExist()
         {
-            Assert.IsTrue(_repository.IsExistUser(_dbUser.Id));
-            Assert.IsFalse(_repository.IsExistUser(Guid.NewGuid()));
+            Assert.IsTrue(_repository.IsUserExist(_dbUser.Id));
+            Assert.IsFalse(_repository.IsUserExist(Guid.NewGuid()));
         }
 
         [Test]
