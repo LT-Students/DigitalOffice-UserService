@@ -241,7 +241,7 @@ namespace LT.DigitalOffice.UserService.Business
             if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
                 _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
                 (userId == _httpContextAccessor.HttpContext.GetUserId() 
-                && !(patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) != null)
+                && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
                 && positionOperation == null
                 && departmentOperation == null
                 && roleOperation == null
