@@ -5,6 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -21,6 +22,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             var result = new JsonPatchDocument<DbUser>();
 
+            Func<Operation<EditUserRequest>, string> value = item => !string.IsNullOrEmpty(item.value.ToString()) && item.value.ToString().Trim().Any()
+                ? item.value.ToString().Trim() : null;
+
             foreach (var item in request.Operations)
             {
                 if (item.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase)
@@ -30,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 {
                     continue;
                 }
+
                 if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, Enum.Parse(typeof(UserStatus), item.value.ToString())));
@@ -47,16 +52,21 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(item.value.ToString())));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(value(item))));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.StartWorkingAt), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(item.value.ToString())));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.Parse(value(item))));
+                    continue;
+                }
+                if (item.path.EndsWith(nameof(EditUserRequest.City), StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, value(item)));
                     continue;
                 }
 
-                result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
+                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
             }
 
             return result;
