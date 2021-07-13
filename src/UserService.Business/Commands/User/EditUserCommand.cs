@@ -98,7 +98,7 @@ namespace LT.DigitalOffice.UserService.Business
         private bool ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'";
+            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'.";
 
             try
             {
@@ -113,7 +113,7 @@ namespace LT.DigitalOffice.UserService.Business
                     return true;
                 }
 
-                _logger.LogWarning(logMessage, roleId, userId);
+                _logger.LogWarning(logMessage + " Errors: {errors}", roleId, userId, string.Join("\n", response.Message.Errors));
             }
             catch (Exception exc)
             {
@@ -128,7 +128,7 @@ namespace LT.DigitalOffice.UserService.Business
         private bool ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'";
+            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'.";
 
             try
             {
@@ -142,7 +142,7 @@ namespace LT.DigitalOffice.UserService.Business
                     return true;                    
                 }
 
-                _logger.LogWarning(logMessage, officeId, userId);
+                _logger.LogWarning(logMessage + " Errors: {errors}", officeId, userId, string.Join("\n", response.Message.Errors));
             }
             catch (Exception exc)
             {
