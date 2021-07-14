@@ -308,7 +308,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             var dbUser = _mapperUser.Map(request, avatarImageId);
 
-            var password = request.Password ?? _generatePassword.Execute();
+            string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
 
             Guid userId = _userRepository.Create(dbUser, password);
 
