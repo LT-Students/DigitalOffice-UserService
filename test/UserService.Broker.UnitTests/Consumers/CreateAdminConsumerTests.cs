@@ -71,9 +71,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             await _harness.Start();
 
-            string requestValue = null;
-            var value = !string.IsNullOrEmpty(requestValue?.Trim()) ? requestValue.Trim() : null;
-
             try
             {
                 _requestClient = await _harness.ConnectRequestClient<ICreateAdminRequest>();
