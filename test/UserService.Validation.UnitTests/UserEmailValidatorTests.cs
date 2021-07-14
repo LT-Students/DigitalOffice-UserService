@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.TestHelper;
 using NUnit.Framework;
+using LT.DigitalOffice.UserService.Validation.Email;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {

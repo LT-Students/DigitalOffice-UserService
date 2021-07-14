@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             {
                 if (item.path.EndsWith(nameof(EditCertificateRequest.EducationType), StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Operations.Add(new Operation<DbUserCertificate>(item.op, item.path, item.from, Enum.Parse(typeof(EducationType), item.value.ToString())));
+                    result.Operations.Add(new Operation<DbUserCertificate>(item.op, item.path, item.from, (int)Enum.Parse(typeof(EducationType), item.value.ToString())));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase) && imageId.HasValue)

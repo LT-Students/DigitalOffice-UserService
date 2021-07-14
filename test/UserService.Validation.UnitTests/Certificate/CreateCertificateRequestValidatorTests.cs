@@ -2,7 +2,7 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
-using LT.DigitalOffice.UserService.Validation.User.Certificates;
+using LT.DigitalOffice.UserService.Validation.Certificates;
 using Moq;
 using NUnit.Framework;
 using System;

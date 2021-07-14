@@ -12,7 +12,7 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Moq.AutoMock;

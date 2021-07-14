@@ -1,6 +1,6 @@
 ﻿using FluentValidation.TestHelper;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
-using LT.DigitalOffice.UserService.Validation.User.Education;
+using LT.DigitalOffice.UserService.Validation.Education;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json.Serialization;

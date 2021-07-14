@@ -9,7 +9,7 @@ using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 

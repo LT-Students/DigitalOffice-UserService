@@ -12,7 +12,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
-using LT.DigitalOffice.UserService.Validation.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Email.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;

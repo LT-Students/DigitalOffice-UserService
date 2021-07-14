@@ -5,7 +5,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using Moq;
@@ -76,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUserCertificate.Id,
                 Name = _dbUserCertificate.Name,
                 SchoolName = _dbUserCertificate.SchoolName,
-                EducationType = (EducationType)_dbUserCertificate.EducationType,
+                EducationType = ((EducationType)_dbUserCertificate.EducationType).ToString(),
                 ReceivedAt = _dbUserCertificate.ReceivedAt,
                 Image = _imageCertificate
             };
@@ -126,7 +125,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             _communicationInfo = new CommunicationInfo
             {
-                Type = (CommunicationType)_dbUserCommunication.Type,
+                Type = ((CommunicationType)_dbUserCommunication.Type).ToString(),
                 Value = _dbUserCommunication.Value
             };
 
@@ -150,7 +149,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUserEducation.Id,
                 UniversityName = _dbUserEducation.UniversityName,
                 QualificationName = _dbUserEducation.QualificationName,
-                FormEducation = (FormEducation)_dbUserEducation.FormEducation,
+                FormEducation = ((FormEducation)_dbUserEducation.FormEducation).ToString(),
                 AdmissionAt = _dbUserEducation.AdmissionAt,
                 IssueAt = _dbUserEducation.IssueAt
             };
@@ -210,10 +209,10 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 FirstName = _dbUser.FirstName,
                 MiddleName = _dbUser.MiddleName,
                 DateOfBirth = _dbUser.DateOfBirth.ToString(),
-                Gender = (UserGender)_dbUser.Gender,
+                Gender = ((UserGender)_dbUser.Gender).ToString(),
                 City = _dbUser.City,
                 LastName = _dbUser.LastName,
-                Status = (UserStatus)_dbUser.Status,
+                Status = ((UserStatus)_dbUser.Status).ToString(),
                 IsAdmin = _dbUser.IsAdmin,
                 About = _dbUser.About,
                 Rate = _dbUser.Rate,

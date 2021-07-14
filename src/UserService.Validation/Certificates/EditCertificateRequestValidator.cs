@@ -11,12 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Validation.User.Certificates
+namespace LT.DigitalOffice.UserService.Validation.Certificates
 {
     public class EditCertificateRequestValidator : AbstractValidator<JsonPatchDocument<EditCertificateRequest>>
     {
-        private readonly IUserRepository _repository;
-
         private void HandleInternalPropertyValidation(Operation<EditCertificateRequest> requestedOperation, CustomContext context)
         {
             #region local functions
@@ -71,7 +69,6 @@ namespace LT.DigitalOffice.UserService.Validation.User.Certificates
                     nameof(EditCertificateRequest.ReceivedAt),
                     nameof(EditCertificateRequest.SchoolName),
                     nameof(EditCertificateRequest.Image),
-                    nameof(EditCertificateRequest.UserId),
                     nameof(EditCertificateRequest.EducationType),
                     nameof(EditCertificateRequest.IsActive)
                 });
@@ -80,7 +77,6 @@ namespace LT.DigitalOffice.UserService.Validation.User.Certificates
             AddСorrectOperations(nameof(EditCertificateRequest.ReceivedAt), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditCertificateRequest.SchoolName), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditCertificateRequest.Image), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditCertificateRequest.UserId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditCertificateRequest.EducationType), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditCertificateRequest.IsActive), new List<OperationType> { OperationType.Replace });
 
@@ -112,14 +108,6 @@ namespace LT.DigitalOffice.UserService.Validation.User.Certificates
                 new Dictionary<Func<Operation<EditCertificateRequest>, bool>, string>
                 {
                     { x => Enum.TryParse(typeof(EducationType), x.value?.ToString(), out _), "Incorrect format EducationType"}
-                });
-
-            AddFailureForPropertyIf(
-                nameof(EditCertificateRequest.UserId),
-                o => o == OperationType.Replace,
-                new Dictionary<Func<Operation<EditCertificateRequest>, bool>, string>
-                {
-                    { x => Guid.TryParse(x.value.ToString(), out Guid id) && _repository.IsUserExist(id), "The user must exist"}
                 });
 
             AddFailureForPropertyIf(
@@ -162,10 +150,8 @@ namespace LT.DigitalOffice.UserService.Validation.User.Certificates
             #endregion
         }
 
-        public EditCertificateRequestValidator(IUserRepository repository)
+        public EditCertificateRequestValidator()
         {
-            _repository = repository;
-
             RuleForEach(x => x.Operations)
                 .Custom(HandleInternalPropertyValidation);
         }

@@ -2,7 +2,7 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 
-namespace LT.DigitalOffice.UserService.Validation.User.Certificates
+namespace LT.DigitalOffice.UserService.Validation.Certificates
 {
     public class CreateCertificateRequestValidator : AbstractValidator<CreateCertificateRequest>
     {

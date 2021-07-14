@@ -3,7 +3,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates
 {
-    public class EditCertificateRequest
+    public record EditCertificateRequest
     {
         public Guid UserId { get; set; }
         public AddImageRequest Image { get; set; }

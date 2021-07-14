@@ -3,7 +3,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
-using LT.DigitalOffice.UserService.Validation.User.Certificates;
+using LT.DigitalOffice.UserService.Validation.Certificates;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
@@ -22,18 +22,12 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Certificate
     {
         private EditCertificateRequestValidator _validator;
 
-        private Mock<IUserRepository> _repository;
         private Guid _existUser = Guid.NewGuid();
 
         [SetUp]
         public void SetUp()
         {
-            _repository = new Mock<IUserRepository>();
-            _repository
-                .Setup(x => x.IsUserExist(_existUser))
-                .Returns(true);
-
-            _validator = new(_repository.Object);
+            _validator = new();
         }
 
         [Test]
@@ -76,12 +70,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Certificate
                         op = "replace",
                         path = $"/{nameof(EditCertificateRequest.IsActive)}",
                         value = false
-                    },
-                    new Operation<EditCertificateRequest>
-                    {
-                        op = "replace",
-                        path = $"/{nameof(EditCertificateRequest.UserId)}",
-                        value = _existUser
                     }
                 },
                 new CamelCasePropertyNamesContractResolver());
@@ -119,24 +107,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Certificate
                         path = $"/{nameof(EditCertificateRequest.SchoolName)}",
                         value = ""
                     },
-                },
-                new CamelCasePropertyNamesContractResolver());
-
-            _validator.TestValidate(editCertificateRequest).ShouldHaveAnyValidationError();
-        }
-
-        [Test]
-        public void ShouldthrowExceptionWhenUserIdIsIncorrect()
-        {
-            var editCertificateRequest = new JsonPatchDocument<EditCertificateRequest>(
-                new List<Operation<EditCertificateRequest>>
-                {
-                    new Operation<EditCertificateRequest>
-                    {
-                        op = "replace",
-                        path = $"/{nameof(EditCertificateRequest.UserId)}",
-                        value = Guid.NewGuid()
-                    }
                 },
                 new CamelCasePropertyNamesContractResolver());
 

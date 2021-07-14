@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests.Models
                 Id = _dbEducation.Id,
                 UniversityName = _dbEducation.UniversityName,
                 QualificationName = _dbEducation.QualificationName,
-                FormEducation = (FormEducation)_dbEducation.FormEducation,
+                FormEducation = ((FormEducation)_dbEducation.FormEducation).ToString(),
                 AdmissionAt = _dbEducation.AdmissionAt,
                 IssueAt = _dbEducation.IssueAt
             };
