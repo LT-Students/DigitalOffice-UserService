@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     continue;
                 }
 
-                    result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
+                result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
             }
 
             return result;
