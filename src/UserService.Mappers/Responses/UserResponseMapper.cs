@@ -60,15 +60,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                 throw new ArgumentNullException(nameof(dbUser));
             }
 
-            ImageInfo avatar = new()
-            {
-                Id = dbUser.AvatarFileId
-            };
-
-            if (images != null && images.Any())
-            {
-                avatar = images.FirstOrDefault(i => i.Id == avatar.Id) ?? avatar;
-            }
+            ImageInfo avatar = images.FirstOrDefault(i => i.Id == dbUser.AvatarFileId);
 
             return new UserResponse
             {

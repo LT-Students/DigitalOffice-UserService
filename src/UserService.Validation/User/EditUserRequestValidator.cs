@@ -273,7 +273,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format" }
-            });
+                });
 
             #endregion
 
