@@ -91,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                     ? dbUser.Communications.Select(
                         c => new CommunicationInfo
                         {
-                            Type = (CommunicationType)c.Type,
+                            Type = ((CommunicationType)c.Type).ToString(),
                             Value = c.Value
                         })
                     : null,

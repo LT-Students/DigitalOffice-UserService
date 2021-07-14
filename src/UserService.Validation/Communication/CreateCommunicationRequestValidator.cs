@@ -17,7 +17,8 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
                 .WithMessage("Incorrect communication type format.");
 
             RuleFor(x => x.UserId)
-                .Must(id => userRepository.IsUserExist(id))
+                .NotNull()
+                .Must(id => userRepository.IsUserExist(id.Value))
                 .WithMessage("The user must exist");
         }
     }

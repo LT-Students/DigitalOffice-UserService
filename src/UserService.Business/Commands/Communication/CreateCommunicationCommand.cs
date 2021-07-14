@@ -43,11 +43,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
         public OperationResultResponse<Guid> Execute(CreateCommunicationRequest request)
         {
-            DbUser user = _userRepository.Get(request.UserId);
+            DbUser user = _userRepository.Get(_httpContextAccessor.HttpContext.GetUserId());
 
             if (!(user.IsAdmin
                 || _accessValidator.HasRights(Rights.AddEditRemoveUsers)
-                || user.Id == _httpContextAccessor.HttpContext.GetUserId()))
+                || request.UserId == _httpContextAccessor.HttpContext.GetUserId()))
             {
                 throw new ForbiddenException("Not enough rights.");
             }

@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             {
                 Id = Guid.NewGuid(),
                 Type = (int)request.Type,
-                UserId = request.UserId,
+                UserId = request.UserId.Value,
                 Value = request.Value
             };
         }

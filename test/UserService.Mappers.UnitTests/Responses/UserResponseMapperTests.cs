@@ -125,7 +125,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             _communicationInfo = new CommunicationInfo
             {
-                Type = (CommunicationType)_dbUserCommunication.Type,
+                Type = ((CommunicationType)_dbUserCommunication.Type).ToString(),
                 Value = _dbUserCommunication.Value
             };
 
