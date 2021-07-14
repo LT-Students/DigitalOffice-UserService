@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             var result = new JsonPatchDocument<DbUser>();
 
-            Func<Operation<EditUserRequest>, string> value = item => !string.IsNullOrEmpty(item.value.ToString()) && item.value.ToString().Trim().Any()
+            Func<Operation<EditUserRequest>, string> value = item => !string.IsNullOrEmpty(item.value?.ToString().Trim())
                 ? item.value.ToString().Trim() : null;
 
             foreach (var item in request.Operations)

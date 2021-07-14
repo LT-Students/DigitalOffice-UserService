@@ -26,11 +26,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Id = userId,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                MiddleName = !string.IsNullOrEmpty(request.MiddleName) && request.MiddleName.Trim().Any()
-                    ? request.MiddleName.Trim() : null,
+                MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Gender = (int)request.Gender,
-                City = !string.IsNullOrEmpty(request.City) && request.City.Trim().Any()
-                    ? request.City.Trim() : null,
+                City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
                 AvatarFileId = avatarImageId,
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
@@ -46,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 }).ToList()
             };
 
-            if (!string.IsNullOrEmpty(request.StartWorkingAt) && request.StartWorkingAt.Trim().Any())
+            if (!string.IsNullOrEmpty(request.StartWorkingAt?.Trim()))
             {
                 if (DateTime.TryParse(request.StartWorkingAt.Trim(), out DateTime startWorkingAt))
                 {
@@ -59,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
             }
 
-            if (!string.IsNullOrEmpty(request.DateOfBirth) && request.DateOfBirth.Trim().Any())
+            if (!string.IsNullOrEmpty(request.DateOfBirth?.Trim()))
             {
                 if (DateTime.TryParse(request.DateOfBirth.Trim(), out DateTime dayOfBirth))
                 {
@@ -89,8 +87,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Id = userId,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                MiddleName = !string.IsNullOrEmpty(request.MiddleName) && request.MiddleName.Trim().Any()
-                    ? request.MiddleName.Trim() : null,
+                MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Status = (int)UserStatus.WorkFromOffice,
                 AvatarFileId = null,
                 IsActive = true,
