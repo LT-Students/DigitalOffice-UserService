@@ -12,9 +12,9 @@ namespace LT.DigitalOffice.UserService.Data
     {
         private readonly IDataProvider _provider;
 
-        public CommunicationRepository(IDataProvider dataProvider)
+        public CommunicationRepository(IDataProvider provider)
         {
-            _provider = dataProvider;
+            _provider = provider;
         }
 
         public Guid Add(DbUserCommunication userCommunication)

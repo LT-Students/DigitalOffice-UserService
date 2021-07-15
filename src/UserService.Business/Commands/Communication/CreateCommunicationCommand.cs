@@ -43,9 +43,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
         public OperationResultResponse<Guid> Execute(CreateCommunicationRequest request)
         {
-            DbUser user = _userRepository.Get(_httpContextAccessor.HttpContext.GetUserId());
+            DbUser sender = _userRepository.Get(_httpContextAccessor.HttpContext.GetUserId());
 
-            if (!(user.IsAdmin
+            if (!(sender.IsAdmin
                 || _accessValidator.HasRights(Rights.AddEditRemoveUsers)
                 || request.UserId == _httpContextAccessor.HttpContext.GetUserId()))
             {

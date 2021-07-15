@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
-    public class CreateUserRequest
+    public record CreateUserRequest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

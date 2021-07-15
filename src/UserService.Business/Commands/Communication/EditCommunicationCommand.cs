@@ -47,8 +47,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
             Guid communicationId, 
             JsonPatchDocument<EditCommunicationRequest> request)
         {
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var sender = _userRepository.Get(senderId);
+            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+            DbUser sender = _userRepository.Get(senderId);
 
             DbUserCommunication communication = _repository.Get(communicationId);
 
