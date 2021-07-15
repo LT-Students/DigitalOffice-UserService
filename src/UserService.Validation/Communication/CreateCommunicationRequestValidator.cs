@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
 {
     public class CreateCommunicationRequestValidator : AbstractValidator<CreateCommunicationRequest>, ICreateCommunicationRequestValidator
     {
-        private static Regex PhoneRegex = new(@"\d");
+        private static Regex PhoneRegex = new(@"^\d+$");
         private static Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
         public CreateCommunicationRequestValidator(IUserRepository userRepository)
@@ -23,11 +23,13 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
 
             When(x => x.Type == CommunicationType.Phone, () => 
                 RuleFor(x => x.Value)
-                    .Must(v => PhoneRegex.IsMatch(v.Trim())));
+                    .Must(v => PhoneRegex.IsMatch(v.Trim()))
+                    .WithMessage("Incorrect phone number."));
 
             When(x => x.Type == CommunicationType.Email, () =>
                 RuleFor(x => x.Value)
-                    .Must(v => EmailRegex.IsMatch(v.Trim())));
+                    .Must(v => EmailRegex.IsMatch(v.Trim()))
+                    .WithMessage("Incorrect email address."));
 
             RuleFor(x => x.UserId)
                 .NotNull()
