@@ -25,6 +25,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .MaximumLength(32)
                 .WithMessage("Last name is too long.");
 
+            RuleFor(user => user.PositionId)
+                .NotEmpty();
+
             When(
                 user => !string.IsNullOrEmpty(user.MiddleName),
                 () =>
