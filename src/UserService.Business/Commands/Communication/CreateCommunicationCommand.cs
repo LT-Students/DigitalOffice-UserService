@@ -52,6 +52,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
                 throw new ForbiddenException("Not enough rights.");
             }
 
+            if (_repository.IsCommunicationValueExist(request.Value))
+            {
+                return new OperationResultResponse<Guid>
+                {
+                    Status = OperationResultStatusType.Conflict,
+                    Errors = new() { $"The communication '{request.Value}' already exists." }
+                };
+            }
+
             _validator.ValidateAndThrowCustom(request);
 
             return new OperationResultResponse<Guid>

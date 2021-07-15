@@ -47,6 +47,11 @@ namespace LT.DigitalOffice.UserService.Data
                 ?? throw new NotFoundException($"User communication with ID '{communicationId}' was not found.");
         }
 
+        public bool IsCommunicationValueExist(string value)
+        {
+            return _provider.UserCommunications.Any(uc => uc.Value == value);
+        }
+
         public bool Remove(DbUserCommunication communication)
         {
             if (communication == null)

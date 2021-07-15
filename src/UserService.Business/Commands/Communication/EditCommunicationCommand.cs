@@ -13,7 +13,9 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -58,6 +60,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
             }
 
             _validator.ValidateAndThrowCustom(request);
+
+            Operation<EditCommunicationRequest> valueOperation = request.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase));
+
+            if (_repository.IsCommunicationValueExist(valueOperation.value.ToString()))
+            {
+                return new OperationResultResponse<bool>
+                {
+                    Status = OperationResultStatusType.Conflict,
+                    Errors = new() { $"The communication '{valueOperation.value}' already exists." }
+                };
+            }
 
             return new OperationResultResponse<bool>
             {

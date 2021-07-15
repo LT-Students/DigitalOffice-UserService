@@ -15,5 +15,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         bool Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
 
         bool Remove(DbUserCommunication communication);
+
+        bool IsCommunicationValueExist(string value);
     }
 }
