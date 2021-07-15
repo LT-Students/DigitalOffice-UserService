@@ -318,15 +318,15 @@ namespace LT.DigitalOffice.UserService.Business
 
             SendEmail(dbUser, password, response.Errors);
 
-            if (request.DepartmentId.HasValue)
-            {
-                ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
-            }
-
             if (!ChangeUserPosition(request.PositionId, userId, response.Errors))
             {
                 response.Status = OperationResultStatusType.Failed;
                 return response;
+            }
+
+            if (request.DepartmentId.HasValue)
+            {
+                ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
             }
 
             if (request.RoleId.HasValue)
