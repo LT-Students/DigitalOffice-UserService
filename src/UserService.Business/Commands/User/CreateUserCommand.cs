@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business
 
         #region private methods
 
-        private bool ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
+        private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
             string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
@@ -65,8 +65,6 @@ namespace LT.DigitalOffice.UserService.Business
 
                     errors.Add(errorMessage);
                 }
-
-                return response.Message.IsSuccess && response.Message.Body;
             }
             catch (Exception exc)
             {
@@ -74,8 +72,6 @@ namespace LT.DigitalOffice.UserService.Business
 
                 errors.Add(errorMessage);
             }
-
-            return false;
         }
 
         private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
@@ -322,10 +318,9 @@ namespace LT.DigitalOffice.UserService.Business
 
             SendEmail(dbUser, password, response.Errors);
 
-            if (request.DepartmentId.HasValue && !ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors))
+            if (request.DepartmentId.HasValue)
             {
-                response.Status = OperationResultStatusType.Failed;
-                return response;
+                ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
             }
 
             if (!ChangeUserPosition(request.PositionId, userId, response.Errors))
