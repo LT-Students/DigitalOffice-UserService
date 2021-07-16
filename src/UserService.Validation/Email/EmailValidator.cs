@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.UserService.Validation.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Email.Interfaces;
 
-namespace LT.DigitalOffice.UserService.Validation
+namespace LT.DigitalOffice.UserService.Validation.Email
 {
     public class EmailValidator : AbstractValidator<string>, IEmailValidator
     {
