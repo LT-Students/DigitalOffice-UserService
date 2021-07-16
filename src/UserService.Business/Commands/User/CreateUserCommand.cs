@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
         }
 
-        private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
+        private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
             string logMessage = "Сan't assign position {positionId} to the user {userId}";
@@ -89,6 +89,8 @@ namespace LT.DigitalOffice.UserService.Business
 
                     errors.Add(errorMessage);
                 }
+
+                return response.Message.IsSuccess && response.Message.Body;
             }
             catch (Exception exc)
             {
@@ -96,6 +98,8 @@ namespace LT.DigitalOffice.UserService.Business
 
                 errors.Add(errorMessage);
             }
+
+            return false;
         }
 
         private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
@@ -295,7 +299,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(request);
 
-            OperationResultResponse<Guid> response = new ();
+            OperationResultResponse<Guid> response = new();
 
             if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
             {
@@ -314,12 +318,16 @@ namespace LT.DigitalOffice.UserService.Business
 
             SendEmail(dbUser, password, response.Errors);
 
+            if (!ChangeUserPosition(request.PositionId, userId, response.Errors))
+            {
+                response.Status = OperationResultStatusType.Failed;
+                return response;
+            }
+
             if (request.DepartmentId.HasValue)
             {
                 ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
             }
-
-            ChangeUserPosition(request.PositionId, userId, response.Errors);
 
             if (request.RoleId.HasValue)
             {
