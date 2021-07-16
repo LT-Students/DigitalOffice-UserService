@@ -6,7 +6,6 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
-using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
@@ -146,23 +145,6 @@ namespace LT.DigitalOffice.UserService
             });
         }
 
-        private void RunEmailResender()
-        {
-            var resendInterval = Environment.GetEnvironmentVariable("ResendIntervalInMinutes");
-            if (!string.IsNullOrEmpty(resendInterval))
-            {
-                Task.Run(() => EmailResender.Start(Convert.ToInt32(resendInterval)));
-            }
-            else
-            {
-                var emailEngineConfig = Configuration
-                    .GetSection(EmailEngineConfig.SectionName)
-                    .Get<EmailEngineConfig>();
-
-                Task.Run(() => EmailResender.Start(emailEngineConfig.ResendIntervalInMinutes));
-            }
-        }
-
         #endregion
 
         #endregion
@@ -180,8 +162,6 @@ namespace LT.DigitalOffice.UserService
             _rabbitMqConfig = Configuration
                 .GetSection(BaseRabbitMqConfig.SectionName)
                 .Get<RabbitMqConfig>();
-
-            RunEmailResender();
 
             Version = "1.3.3";
             Description = "UserService is an API that intended to work with users.";

@@ -13,7 +13,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
-using LT.DigitalOffice.UserService.Business.Helpers.Email;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
@@ -192,8 +191,6 @@ namespace LT.DigitalOffice.UserService.Business
                         $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}.");
 
                     errors.Add(errorMessage);
-
-                    EmailResender.AddToQueue(emailRequest);
                 }
             }
             catch (Exception exc)
@@ -201,11 +198,6 @@ namespace LT.DigitalOffice.UserService.Business
                 _logger.LogError(exc, errorMessage);
 
                 errors.Add(errorMessage);
-
-                if (emailRequest != null)
-                {
-                    EmailResender.AddToQueue(emailRequest);
-                }
             }
         }
 
