@@ -251,11 +251,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         [Test]
         public void ShouldEditCertificateSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = true
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
             _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, _dbRequest),
@@ -320,12 +320,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IPatchDbUserCertificateMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request, null))
                 .Returns(dbRequest);
 
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.PartialSuccess,
-                Body = true,
-                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.PartialSuccess,
+                new List<string> {"Can not add certificate image to certificate. Please try again later."}
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
             _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, dbRequest),
@@ -399,12 +398,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Setup<IPatchDbUserCertificateMapper, JsonPatchDocument<DbUserCertificate>>(x => x.Map(_request, null))
                 .Returns(dbRequest);
 
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.PartialSuccess,
-                Body = true,
-                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.PartialSuccess,
+                new List<string> {"Can not add certificate image to certificate. Please try again later."}
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId, _request));
             _mocker.Verify<ICertificateRepository, bool>(x => x.Edit(_dbUserCertificate, dbRequest),

@@ -314,7 +314,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 Times.Never());
         }
         [Test]
-        public void ThrowExсeptionWhenMapperThrowsIt()
+        public void ThrowExceptionWhenMapperThrowsIt()
         {
             _mocker
                 .Setup<IDbUserCredentialsMapper, DbUserCredentials>(

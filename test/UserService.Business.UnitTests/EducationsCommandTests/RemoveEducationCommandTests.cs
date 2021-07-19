@@ -115,11 +115,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
         [Test]
         public void ShouldRemoveEducationSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = true
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_educationId));
             _mocker.Verify<IEducationRepository, bool>(x => x.Remove(_dbUserEducation), Times.Once);

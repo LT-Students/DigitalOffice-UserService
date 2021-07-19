@@ -149,12 +149,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [SetUp]
         public void SetUp()
         {
-            _expectedOperationResultResponse = new OperationResultResponse<bool>()
-            {
-                Body = true,
-                Status = OperationResultStatusType.FullSuccess,
-                Errors = new List<string>()
-            };
+            _expectedOperationResultResponse =
+                new OperationResultResponse<bool>(true, OperationResultStatusType.FullSuccess, new List<string>());
 
             _userRepositoryMock.Reset();
 
@@ -167,14 +163,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [Test]
         public void ShoulRequestIsPartialSuccessWhenEmailWasNotSended()
         {
-            _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
+            _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess.ToString();
 
             var messageError = new List<string>();
             messageError.Add($"Can not send email to '{_dbCommunication.Value}'. Please try again latter.");
 
             _expectedOperationResultResponse.Errors = messageError;
             _expectedOperationResultResponse.Body = false;
-            _expectedOperationResultResponse.Status = OperationResultStatusType.Failed;
+            _expectedOperationResultResponse.Status = OperationResultStatusType.Failed.ToString();
 
             _operationResultSendEmailMock
                 .Setup(x => x.IsSuccess)

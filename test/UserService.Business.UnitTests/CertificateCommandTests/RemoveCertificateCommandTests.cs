@@ -111,11 +111,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         [Test]
         public void ShouldRemoveCertificateSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = true
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId));
             _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(_dbUserCertificate), Times.Once);

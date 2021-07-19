@@ -150,11 +150,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         [Test]
         public void ShouldAddCertificateSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _dbCertificate.Id
-            };
+            var expectedResponse = new OperationResultResponse<Guid>(
+                _dbCertificate.Id,
+                OperationResultStatusType.FullSuccess,
+                new List<string>());
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Once);
@@ -173,11 +172,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                .Throws(new Exception());
 
-            var expectedResponse = new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.Failed,
-                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
-            };
+            var expectedResponse = new OperationResultResponse<Guid>(
+                default,
+                OperationResultStatusType.Failed,
+                new List<string> { "Can not add certificate image to certificate. Please try again later." });
+            
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);
@@ -205,11 +204,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                         It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
 
-            var expectedResponse = new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.Failed,
-                Errors = new List<string> { "Can not add certificate image to certificate. Please try again later." }
-            };
+            var expectedResponse = new OperationResultResponse<Guid>(
+                default,
+                OperationResultStatusType.Failed,
+                new List<string> {"Can not add certificate image to certificate. Please try again later."}
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<ICertificateRepository>(x => x.Add(_dbCertificate), Times.Never);

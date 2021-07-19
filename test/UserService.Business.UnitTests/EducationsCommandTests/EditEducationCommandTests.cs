@@ -219,11 +219,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
         [Test]
         public void ShouldEditEducationSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = true
-            };
+            var expectedResponse = new OperationResultResponse<bool>(
+                true,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_educationId, _request));
             _mocker.Verify<IEducationRepository, bool>(x => x.Edit(_dbUserEducation, _dbRequest),

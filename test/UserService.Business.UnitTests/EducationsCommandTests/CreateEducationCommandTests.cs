@@ -127,11 +127,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
         [Test]
         public void ShouldAddEducationSuccesfull()
         {
-            var expectedResponse = new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _dbEducation.Id
-            };
+            var expectedResponse = new OperationResultResponse<Guid>(
+                _dbEducation.Id,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
             _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Once);
