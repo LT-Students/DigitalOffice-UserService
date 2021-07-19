@@ -139,7 +139,7 @@ namespace LT.DigitalOffice.UserService.Business
                         _httpContextAccessor.HttpContext.GetUserId())).Result;
                 if (response.Message.IsSuccess && response.Message.Body)
                 {
-                    return true;                    
+                    return true;
                 }
 
                 _logger.LogWarning(logMessage + " Errors: {errors}", officeId, userId, string.Join("\n", response.Message.Errors));
@@ -240,7 +240,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
                 _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-                (userId == _httpContextAccessor.HttpContext.GetUserId() 
+                (userId == _httpContextAccessor.HttpContext.GetUserId()
                 && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
                 && positionOperation == null
                 && departmentOperation == null

@@ -25,6 +25,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .MaximumLength(32)
                 .WithMessage("Last name is too long.");
 
+            RuleFor(user => user.PositionId)
+                .NotEmpty();
+
             When(
                 user => !string.IsNullOrEmpty(user.MiddleName),
                 () =>
@@ -52,7 +55,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
             When(user => user.Communications != null && user.Communications.Any(), () =>
             {
                 RuleForEach(user => user.Communications)
-                    .ChildRules(c => c.RuleFor(uc => uc.Value).NotEmpty());
+                    .ChildRules(c =>
+                    {
+                        c.RuleFor(uc => uc.Value).NotEmpty();
+                        c.RuleFor(uc => uc.UserId).Null();
+                    });
             });
 
             RuleFor(user => user.Rate)
