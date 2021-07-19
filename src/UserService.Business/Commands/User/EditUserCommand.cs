@@ -43,8 +43,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
-            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
+            string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
+            const string logMessage = "Can't assign user {userId} to the department {departmentId}.";
 
             try
             {
@@ -70,8 +70,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
-            string logMessage = "Сan't assign position {positionId} to the user {userId}";
+            string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
+            const string logMessage = "Can't assign position {positionId} to the user {userId}";
 
             try
             {
@@ -97,8 +97,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'.";
+            string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign role '{roleId}' to the user '{userId}'.";
 
             try
             {
@@ -127,8 +127,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'.";
+            string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign office '{officeId}' to the user '{userId}'.";
 
             try
             {
@@ -179,7 +179,8 @@ namespace LT.DigitalOffice.UserService.Business
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        "Can not add avatar image to user with id {UserId}.Reason: '{Errors}'", userId,
+                        string.Join(',', response.Message.Errors));
 
                     errors.Add(errorMessage);
                 }
@@ -267,7 +268,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (positionOperation != null)
             {
-                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString()), userId, errors))
+                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -275,7 +276,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (departmentOperation != null)
             {
-                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString()), userId, errors))
+                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -283,7 +284,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (roleOperation != null)
             {
-                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString()), userId, errors))
+                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -291,7 +292,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (officeOperation != null)
             {
-                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString()), userId, errors))
+                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -300,12 +301,7 @@ namespace LT.DigitalOffice.UserService.Business
             var dbUserPatch = _mapperUser.Map(patch, imageId);
             _userRepository.EditUser(userId, dbUserPatch);
 
-            return new OperationResultResponse<bool>
-            {
-                Status = status,
-                Body = true,
-                Errors = errors
-            };
+            return new OperationResultResponse<bool>(true, status, errors);
         }
 
         // TODO fix

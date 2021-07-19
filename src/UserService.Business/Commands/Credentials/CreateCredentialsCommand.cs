@@ -47,33 +47,33 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new BadRequestException();
             }
 
-            OperationResultResponse<CredentialsResponse> response = new ();
+            OperationResultResponse<CredentialsResponse> response = new (default, default, default);
 
             var dbPendingUser = _userRepository.GetPendingUser(request.UserId);
             if (dbPendingUser == null)
             {
-                response.Status = OperationResultStatusType.Failed;
+                response.Status = OperationResultStatusType.Failed.ToString();
                 response.Errors.Add($"Pending user with ID '{request.UserId}' was not found.");
                 return response;
             }
 
             if (_userCredentialsRepository.IsLoginExist(request.Login))
             {
-                response.Status = OperationResultStatusType.Conflict;
+                response.Status = OperationResultStatusType.Conflict.ToString();
                 response.Errors.Add("The login already exist");
                 return response;
             }
 
             if (_userCredentialsRepository.IsCredentialsExist(request.UserId))
             {
-                response.Status = OperationResultStatusType.Failed;
+                response.Status = OperationResultStatusType.Failed.ToString();
                 response.Errors.Add("The credentials already exist");
                 return response;
             }
 
             if (request.Password != dbPendingUser.Password)
             {
-                response.Status = OperationResultStatusType.Failed;
+                response.Status = OperationResultStatusType.Failed.ToString();
                 response.Errors.Add("Wrong password");
                 return response;
             }

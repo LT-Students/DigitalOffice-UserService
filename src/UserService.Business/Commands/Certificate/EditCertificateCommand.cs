@@ -123,12 +123,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             bool result = _certificateRepository.Edit(certificate, dbRequest);
 
-            return new OperationResultResponse<bool>
-            {
-                Status = errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess,
-                Body = result,
-                Errors = errors
-            };
+            return new OperationResultResponse<bool>(
+                result,
+                errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess,
+                errors
+            );
         }
     }
 }

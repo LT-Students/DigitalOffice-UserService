@@ -13,6 +13,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -56,19 +57,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
             if (_repository.IsCommunicationValueExist(request.Value))
             {
-                return new OperationResultResponse<Guid>
-                {
-                    Status = OperationResultStatusType.Conflict,
-                    Errors = new() { $"The communication '{request.Value}' already exists." }
-                };
+                return new OperationResultResponse<Guid>(
+                    Guid.Empty,
+                    OperationResultStatusType.Conflict,
+                    new() {$"The communication '{request.Value}' already exists."});
             }
 
-            return new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _repository.Add(_mapper.Map(request)),
-                Errors = new()
-            };
+            return new OperationResultResponse<Guid>(
+                _repository.Add(_mapper.Map(request)),
+                OperationResultStatusType.FullSuccess,
+                new List<string>());
         }
     }
 }

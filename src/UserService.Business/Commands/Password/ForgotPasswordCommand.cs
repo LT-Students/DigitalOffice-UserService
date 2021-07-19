@@ -134,16 +134,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
             List<string> errors = new();
 
-            bool result = SendEmail(dbUser, userEmail, secret, errors);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = errors.Any()
+            return new OperationResultResponse<bool>(
+                SendEmail(dbUser, userEmail, secret, errors),
+                errors.Any()
                     ? OperationResultStatusType.Failed
                     : OperationResultStatusType.FullSuccess,
-                Body = result,
-                Errors = errors
-            };
+                errors);
         }
     }
 }

@@ -8,6 +8,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password
 {
@@ -62,11 +63,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
             dbUserCredentials.PasswordHash = GetNewUserPasswordHash(request);
 
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _repository.Edit(dbUserCredentials)
-            };
+            return new OperationResultResponse<bool>(
+                _repository.Edit(dbUserCredentials),
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
         }
     }
 }

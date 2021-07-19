@@ -9,6 +9,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
@@ -46,11 +47,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             bool result = _certificateRepository.Remove(userCertificate);
 
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = result
-            };
+            return new OperationResultResponse<bool>(
+                result,
+                OperationResultStatusType.FullSuccess,
+                new List<string>());
         }
     }
 }

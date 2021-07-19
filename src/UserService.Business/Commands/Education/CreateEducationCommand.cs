@@ -12,6 +12,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
@@ -57,11 +58,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
             _educationRepository.Add(dbEducation);
 
-            return new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = dbEducation.Id
-            };
+            return new OperationResultResponse<Guid>(
+                dbEducation.Id,
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
         }
     }
 }

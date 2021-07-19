@@ -109,22 +109,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             if (!imageId.HasValue)
             {
-                return new OperationResultResponse<Guid>
-                {
-                    Status = OperationResultStatusType.Failed,
-                    Errors = errors
-                };
+                return new OperationResultResponse<Guid>(
+                    Guid.Empty,
+                    OperationResultStatusType.Failed,
+                    errors);
             }
 
             var dbUserCertificate = _mapper.Map(request, imageId.Value);
 
             _certificateRepository.Add(dbUserCertificate);
 
-            return new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = dbUserCertificate.Id
-            };
+            return new OperationResultResponse<Guid>(
+                dbUserCertificate.Id,
+                OperationResultStatusType.FullSuccess,
+                new List<string>());
         }
     }
 }

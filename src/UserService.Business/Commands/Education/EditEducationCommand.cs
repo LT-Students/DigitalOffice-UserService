@@ -14,6 +14,7 @@ using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
@@ -59,13 +60,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
             JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
 
-            bool result = _educationRepository.Edit(userEducation, dbRequest);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = result
-            };
+            return new OperationResultResponse<bool>(
+                _educationRepository.Edit(userEducation, dbRequest),
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
         }
     }
 }

@@ -299,11 +299,11 @@ namespace LT.DigitalOffice.UserService.Business
 
             _validator.ValidateAndThrowCustom(request);
 
-            OperationResultResponse<Guid> response = new();
+            OperationResultResponse<Guid> response = new(default, default, default);
 
             if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
             {
-                response.Status = OperationResultStatusType.Conflict;
+                response.Status = OperationResultStatusType.Conflict.ToString();
                 response.Errors.Add("Comunication value already exist");
                 return response;
             }
@@ -320,7 +320,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (!ChangeUserPosition(request.PositionId, userId, response.Errors))
             {
-                response.Status = OperationResultStatusType.Failed;
+                response.Status = OperationResultStatusType.Failed.ToString();
                 return response;
             }
 
@@ -337,9 +337,9 @@ namespace LT.DigitalOffice.UserService.Business
             ChangeUserOffice(request.OfficeId, userId, response.Errors);
 
             response.Body = userId;
-            response.Status = response.Errors.Any()
+            response.Status = (response.Errors.Any()
                     ? OperationResultStatusType.PartialSuccess
-                    : OperationResultStatusType.FullSuccess;
+                    : OperationResultStatusType.FullSuccess).ToString();
             return response;
         }
     }

@@ -6,6 +6,7 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business
 {
@@ -31,11 +32,11 @@ namespace LT.DigitalOffice.UserService.Business
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _repository.SwitchActiveStatus(userId, false)
-            };
+            return new OperationResultResponse<bool>(
+                _repository.SwitchActiveStatus(userId, false),
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
         }
     }
 }

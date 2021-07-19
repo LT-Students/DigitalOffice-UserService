@@ -66,19 +66,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
             if (_repository.IsCommunicationValueExist(valueOperation.value.ToString()))
             {
-                return new OperationResultResponse<bool>
-                {
-                    Status = OperationResultStatusType.Conflict,
-                    Errors = new() { $"The communication '{valueOperation.value}' already exists." }
-                };
+                return new OperationResultResponse<bool>(
+                    default,
+                    OperationResultStatusType.Conflict,
+                    new() {$"The communication '{valueOperation.value}' already exists."});
             }
 
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _repository.Edit(communicationId, _mapper.Map(request)),
-                Errors = new()
-            };
+            return new OperationResultResponse<bool>(
+                _repository.Edit(communicationId, _mapper.Map(request)),
+                OperationResultStatusType.FullSuccess,
+                new());
         }
     }
 }

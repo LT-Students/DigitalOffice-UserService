@@ -31,16 +31,15 @@ namespace LT.DigitalOffice.UserService.Controllers
         {
             var result = command.Execute(request);
 
-            if (result.Status == OperationResultStatusType.Conflict)
+            Enum.TryParse(result.Status, out OperationResultStatusType statusType);
+            switch (statusType)
             {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-                return result;
-            }
-
-            if (result.Status != OperationResultStatusType.Failed)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+                case OperationResultStatusType.Conflict:
+                    _httpContextAccessor.HttpContext.Response.StatusCode = (int) HttpStatusCode.Conflict;
+                    break;
+                case OperationResultStatusType.Failed:
+                    _httpContextAccessor.HttpContext.Response.StatusCode = (int) HttpStatusCode.Created;
+                    break;
             }
 
             return result;

@@ -46,12 +46,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
             bool result = _communicationRepository.Remove(userCommunication);
 
-            return new OperationResultResponse<bool>
-            {
-                Status = result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
-                Body = result,
-                Errors = new()
-            };
+            return new OperationResultResponse<bool>(
+                result,
+                result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
+                new());
         }
     }
 }

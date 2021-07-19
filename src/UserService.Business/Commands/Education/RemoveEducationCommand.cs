@@ -9,6 +9,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
@@ -44,13 +45,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
                 throw new ForbiddenException("Not enough rights.");
             }
 
-            bool result = _educationRepository.Remove(userEducation);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = result
-            };
+            return new OperationResultResponse<bool>(
+                _educationRepository.Remove(userEducation),
+                OperationResultStatusType.FullSuccess,
+                new List<string>()
+            );
         }
     }
 }
