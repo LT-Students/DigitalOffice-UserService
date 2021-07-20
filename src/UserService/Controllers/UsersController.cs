@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
@@ -56,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpGet("get")]
-        public UserResponse Get(
+        public OperationResultResponse<UserResponse> Get(
             [FromServices] IGetUserCommand command,
             [FromQuery] GetUserFilter filter)
         {
@@ -72,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpGet("find")]
-        public UsersResponse Find(
+        public FindResultResponse<UserInfo> Find(
             [FromServices] IFindUserCommand command,
             [FromQuery] int skipCount,
             [FromQuery] int takeCount,

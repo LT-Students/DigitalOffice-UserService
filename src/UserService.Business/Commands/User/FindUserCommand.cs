@@ -1,4 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
@@ -11,7 +13,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
@@ -215,13 +216,13 @@ namespace LT.DigitalOffice.UserService.Business
         }
 
         /// <inheritdoc/>
-        public UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId)
+        public FindResultResponse<UserInfo> Execute(int skipCount, int takeCount, Guid? departmentId)
         {
+            List<DbUser> dbUsers = null;
             int totalCount = 0;
 
-            List<DbUser> dbUsers = null;
-
-            UsersResponse result = new();
+            FindResultResponse<UserInfo> result = new();
+            result.Body = new();
 
             if (departmentId.HasValue)
             {
@@ -231,7 +232,7 @@ namespace LT.DigitalOffice.UserService.Business
                 {
                     dbUsers = _repository.Get(users.UserIds);
 
-                    totalCount = users.TotalCount;
+                    result.TotalCount = users.TotalCount;
                 }
             }
             else
@@ -249,7 +250,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             var offices = GetOffice(userIds, result.Errors);
 
-            result.Users
+            result.Body
                 .AddRange(dbUsers.Select(dbUser =>
                     _mapper.Map(
                         dbUser,
@@ -260,7 +261,9 @@ namespace LT.DigitalOffice.UserService.Business
                         _officeInfoMapper.Map(offices.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))))));
 
             result.TotalCount = totalCount;
-
+            result.Status = result.Errors.Any()
+                ? OperationResultStatusType.PartialSuccess
+                : OperationResultStatusType.FullSuccess;
             return result;
         }
     }
