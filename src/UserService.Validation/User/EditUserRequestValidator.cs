@@ -170,30 +170,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
-            #region DateOfBirth
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.DateOfBirth),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Date of birth has incorrect format" }
-                });
-
-            #endregion
-
-            #region StartWorkingAt
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.StartWorkingAt),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Start working at has incorrect format" }
-                });
-
-            #endregion
-
             #region Status
 
             AddFailureForPropertyIf(

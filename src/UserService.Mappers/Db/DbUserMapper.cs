@@ -35,6 +35,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 IsActive = false,
                 Rate = request.Rate,
                 CreatedAt = DateTime.UtcNow,
+                StartWorkingAt = request.StartWorkingAt,
+                DateOfBirth = request.DateOfBirth,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
@@ -43,32 +45,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                     UserId = userId
                 }).ToList()
             };
-
-            if (!string.IsNullOrEmpty(request.StartWorkingAt?.Trim()))
-            {
-                if (DateTime.TryParse(request.StartWorkingAt.Trim(), out DateTime startWorkingAt))
-                {
-                    dbUser.StartWorkingAt = startWorkingAt;
-                }
-                else {
-                    throw new BadRequestException(
-                        $"You must specify '{nameof(CreateUserRequest.StartWorkingAt)}' in format 'YYYY-MM-DD'");
-                }
-
-            }
-
-            if (!string.IsNullOrEmpty(request.DateOfBirth?.Trim()))
-            {
-                if (DateTime.TryParse(request.DateOfBirth.Trim(), out DateTime dayOfBirth))
-                {
-                    dbUser.DateOfBirth = dayOfBirth;
-                }
-                else
-                {
-                    throw new BadRequestException(
-                        $"You must specify '{nameof(CreateUserRequest.DateOfBirth)}' in format 'YYYY-MM-DD'");
-                }
-            }
 
             return dbUser;
         }
