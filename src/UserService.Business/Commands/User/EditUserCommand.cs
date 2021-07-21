@@ -1,4 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -19,11 +22,8 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Business
+namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
     /// <inheritdoc/>
     public class EditUserCommand : IEditUserCommand
@@ -43,8 +43,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
-            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
+            string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
+            const string logMessage = "Can't assign user {UserId} to the department {DepartmentId}.";
 
             try
             {
@@ -70,8 +70,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
-            string logMessage = "Сan't assign position {positionId} to the user {userId}";
+            string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
+            const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
 
             try
             {
@@ -97,8 +97,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'.";
+            string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
 
             try
             {
@@ -113,7 +113,8 @@ namespace LT.DigitalOffice.UserService.Business
                     return true;
                 }
 
-                _logger.LogWarning(logMessage + " Errors: {errors}", roleId, userId, string.Join("\n", response.Message.Errors));
+                const string warningMessage = logMessage + "Errors: {Errors}";
+                _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
             }
             catch (Exception exc)
             {
@@ -127,8 +128,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'.";
+            string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign office '{OfficeId}' to the user '{UserId}'.";
 
             try
             {
@@ -142,7 +143,8 @@ namespace LT.DigitalOffice.UserService.Business
                     return true;
                 }
 
-                _logger.LogWarning(logMessage + " Errors: {errors}", officeId, userId, string.Join("\n", response.Message.Errors));
+                const string warningMessage = logMessage + "Errors: {Errors}";
+                _logger.LogWarning(warningMessage, officeId, userId, string.Join("\n", response.Message.Errors));
             }
             catch (Exception exc)
             {
@@ -160,7 +162,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (avatarRequest == null)
             {
-                return avatarImageId;
+                return null;
             }
 
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
@@ -179,7 +181,9 @@ namespace LT.DigitalOffice.UserService.Business
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
+                        userId,
+                        string.Join(',', response.Message.Errors));
 
                     errors.Add(errorMessage);
                 }
@@ -190,7 +194,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, "Can not add avatar image to user with id {userId}.", userId);
+                _logger.LogError(exc, "Can not add avatar image to user with id {UserId}", userId);
 
                 errors.Add(errorMessage);
             }
@@ -230,7 +234,7 @@ namespace LT.DigitalOffice.UserService.Business
             var status = OperationResultStatusType.FullSuccess;
 
             Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)); ;
+                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
@@ -267,7 +271,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (positionOperation != null)
             {
-                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString()), userId, errors))
+                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -275,7 +279,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (departmentOperation != null)
             {
-                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString()), userId, errors))
+                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -283,7 +287,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (roleOperation != null)
             {
-                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString()), userId, errors))
+                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }
@@ -291,7 +295,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (officeOperation != null)
             {
-                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString()), userId, errors))
+                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString() ?? string.Empty), userId, errors))
                 {
                     status = OperationResultStatusType.PartialSuccess;
                 }

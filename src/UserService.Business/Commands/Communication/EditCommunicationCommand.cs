@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
             Operation<EditCommunicationRequest> valueOperation = request.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase));
 
-            if (_repository.IsCommunicationValueExist(valueOperation.value.ToString()))
+            if (valueOperation != null && _repository.IsCommunicationValueExist(valueOperation.value.ToString()))
             {
                 return new OperationResultResponse<bool>
                 {

@@ -1,4 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
@@ -18,11 +21,8 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Business
+namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
     /// <summary>
     /// Represents command class in command pattern. Provides method for getting user model by id.
@@ -67,14 +67,15 @@ namespace LT.DigitalOffice.UserService.Business
                 else
                 {
                     _logger.LogWarning(
-                        $"Errors while getting department info:{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        "Errors while getting department info:\n{Errors}",
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not get department info for user '{UserId}'", userId);
 
                 errors.Add(errorMessage);
             }
@@ -105,14 +106,15 @@ namespace LT.DigitalOffice.UserService.Business
                 else
                 {
                     _logger.LogWarning(
-                        $"Errors while getting position info:{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        "Errors while getting position info:\n{Errors}",
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not get position info for user '{UserId}'", userId);
 
                 errors.Add(errorMessage);
             }
@@ -122,8 +124,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private RoleInfo GetRole(Guid userId, List<string> errors)
         {
-            string logMessage = "Can not get role for user with id: {id}.";
             string errorMessage = "Can not get role. Please try again later.";
+            const string logMessage = "Can not get role for user with id: {Id}";
 
             try
             {
@@ -135,7 +137,8 @@ namespace LT.DigitalOffice.UserService.Business
                     return _roleMapper.Map(response.Body.Roles[0]);
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", userId, string.Join("\n", response.Errors));
+                const string warningMessage = logMessage + "Reason: {Errors}";
+                _logger.LogWarning(warningMessage, userId, string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
@@ -149,8 +152,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private OfficeInfo GetOffice(Guid userId, List<string> errors)
         {
-            string logMessage = "Can not get office for user with id: {id}.";
             string errorMessage = "Can not get office. Please try again later.";
+            const string logMessage = "Can not get office for user with id: {Id}.";
 
             try
             {
@@ -162,7 +165,8 @@ namespace LT.DigitalOffice.UserService.Business
                     return _officeMapper.Map(response.Body.Offices[0]);
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", userId, string.Join("\n", response.Errors));
+                const string warningMessage = logMessage + "Reason: {Errors}";
+                _logger.LogWarning(warningMessage, userId, string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
@@ -195,20 +199,21 @@ namespace LT.DigitalOffice.UserService.Business
                             Name = project.Name,
                             Status = project.Status
                         });
-                    };
+                    }
                     return projects;
                 }
                 else
                 {
                     _logger.LogWarning(
-                        $"Errors while getting projects list:{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        "Errors while getting projects list:\n{Errors}",
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not get projects list for user '{UserId}'. Please try again later", userId);
 
                 errors.Add(errorMessage);
             }
@@ -223,8 +228,8 @@ namespace LT.DigitalOffice.UserService.Business
                 return new();
             }
 
-            string errorMessage = $"Can not get images. Please try again later.";
-            string logMessage = "Errors while getting images with ids: {ids)}.";
+            string errorMessage = "Can not get images. Please try again later.";
+            const string logMessage = "Errors while getting images with ids: {Ids}.";
 
             try
             {
@@ -237,8 +242,11 @@ namespace LT.DigitalOffice.UserService.Business
                 }
                 else
                 {
+                    const string warningMessage = logMessage + "Errors: {Errors}";
                     _logger.LogWarning(
-                        logMessage + "Errors: { errors }.", string.Join(", ", imageIds), string.Join('\n', response.Errors));
+                        warningMessage,
+                        string.Join(", ", imageIds),
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
                 }

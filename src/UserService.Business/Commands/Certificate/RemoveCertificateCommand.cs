@@ -23,12 +23,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             IAccessValidator accessValidator,
             IHttpContextAccessor httpContextAccessor,
             IUserRepository userRepository,
-            ICertificateRepository certificateRepostory)
+            ICertificateRepository certificateRepository)
         {
             _accessValidator = accessValidator;
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
-            _certificateRepository = certificateRepostory;
+            _certificateRepository = certificateRepository;
         }
 
         public OperationResultResponse<bool> Execute(Guid certificateId)

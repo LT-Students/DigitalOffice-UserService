@@ -1,4 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
@@ -10,15 +13,11 @@ using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Business
+namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
     public class FindUserCommand : IFindUserCommand
     {
@@ -39,8 +38,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
         {
-            string logMessage = "Can not get images: {ids}.";
             string errorMessage = "Can not get images. Please try again later.";
+            const string logMessage = "Can not get images: {Ids}.";
 
             try
             {
@@ -52,7 +51,10 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Images;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", imageIds), string.Join("\n", response.Errors));
+                const string warningMessage = logMessage + "Reason: {Errors}";
+                _logger.LogWarning(warningMessage,
+                    string.Join(", ", imageIds),
+                    string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
@@ -66,8 +68,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
         {
-            string logMessage = "Can not get roles for users with ids: {ids}.";
             string errorMessage = "Can not get roles. Please try again later.";
+            const string logMessage = "Can not get roles for users with ids: {Ids}";
 
             try
             {
@@ -79,7 +81,10 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Roles;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", userIds), string.Join("\n", response.Errors));
+                const string warningMessage = logMessage + "Reason: {Errors}";
+                _logger.LogWarning(warningMessage,
+                    string.Join(", ", userIds),
+                    string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
@@ -93,8 +98,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private List<OfficeData> GetOffice(List<Guid> userIds, List<string> errors)
         {
-            string logMessage = "Can not get offices for users with ids: {ids}.";
             string errorMessage = "Can not get offices. Please try again later.";
+            const string logMessage = "Can not get offices for users with ids: {Ids}";
 
             try
             {
@@ -106,7 +111,10 @@ namespace LT.DigitalOffice.UserService.Business
                     return response.Body.Offices;
                 }
 
-                _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", userIds), string.Join("\n", response.Errors));
+                const string warningMessage = logMessage + "Reason: {Errors}";
+                _logger.LogWarning(warningMessage,
+                    string.Join(", ", userIds),
+                    string.Join("\n", response.Errors));
             }
             catch (Exception exc)
             {
@@ -120,8 +128,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private IFindDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
         {
-            IFindDepartmentUsersResponse users = null;
-            string errorMessage = $"Can not get department users with department id {departmentId}. Please try again later.";
+            string errorMessage =
+                $"Can not get department users with department id {departmentId}. Please try again later.";
 
             try
             {
@@ -134,18 +142,19 @@ namespace LT.DigitalOffice.UserService.Business
                 }
                 else
                 {
-                    _logger.LogWarning("Errors while getting department users with department id {DepartmentId}." +
-                        "Reason: {Errors}", departmentId, string.Join('\n', response.Message.Errors));
+                    _logger.LogWarning(
+                        "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
+                        departmentId,
+                        string.Join('\n', response.Message.Errors));
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not get department users with department id {DepartmentId}", departmentId);
             }
 
             errors.Add(errorMessage);
-
-            return users;
+            return null;
         }
 
         private IGetUsersDepartmentsUsersPositionsResponse GetUsersDepartmentsUsersPositions(
@@ -154,8 +163,7 @@ namespace LT.DigitalOffice.UserService.Business
             bool includePositions,
             List<string> errors)
         {
-            IGetUsersDepartmentsUsersPositionsResponse departmentsAndPositions = null;
-            string errorMessage = $"Can not get users departments and positions. Please try again later.";
+            const string errorMessage = "Can not get user's departments and positions. Please try again later.";
 
             try
             {
@@ -170,8 +178,8 @@ namespace LT.DigitalOffice.UserService.Business
                 }
                 else
                 {
-                    _logger.LogWarning("Errors while getting users departments and positions." +
-                        "Reason: {Errors}", string.Join('\n', response.Message.Errors));
+                    _logger.LogWarning("Errors while getting users departments and positions. Reason: {Errors}",
+                        string.Join('\n', response.Message.Errors));
                 }
             }
             catch (Exception exc)
@@ -181,7 +189,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             errors.Add(errorMessage);
 
-            return departmentsAndPositions;
+            return null;
         }
 
         public FindUserCommand(
@@ -217,10 +225,8 @@ namespace LT.DigitalOffice.UserService.Business
         /// <inheritdoc/>
         public UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId)
         {
-            int totalCount = 0;
-
-            List<DbUser> dbUsers = null;
-
+            int totalCount;
+            List<DbUser> dbUsers;
             UsersResponse result = new();
 
             if (departmentId.HasValue)
@@ -232,6 +238,10 @@ namespace LT.DigitalOffice.UserService.Business
                     dbUsers = _repository.Get(users.UserIds);
 
                     totalCount = users.TotalCount;
+                }
+                else
+                {
+                    return result;
                 }
             }
             else
