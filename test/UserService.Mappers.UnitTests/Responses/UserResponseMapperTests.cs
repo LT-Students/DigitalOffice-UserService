@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUserCertificate.Id,
                 Name = _dbUserCertificate.Name,
                 SchoolName = _dbUserCertificate.SchoolName,
-                EducationType = ((EducationType)_dbUserCertificate.EducationType).ToString(),
+                EducationType = (EducationType)_dbUserCertificate.EducationType,
                 ReceivedAt = _dbUserCertificate.ReceivedAt,
                 Image = _imageCertificate
             };
@@ -125,7 +125,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             _communicationInfo = new CommunicationInfo
             {
-                Type = ((CommunicationType)_dbUserCommunication.Type).ToString(),
+                Type = (CommunicationType)_dbUserCommunication.Type,
                 Value = _dbUserCommunication.Value
             };
 
@@ -149,7 +149,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Id = _dbUserEducation.Id,
                 UniversityName = _dbUserEducation.UniversityName,
                 QualificationName = _dbUserEducation.QualificationName,
-                FormEducation = ((FormEducation)_dbUserEducation.FormEducation).ToString(),
+                FormEducation = (FormEducation)_dbUserEducation.FormEducation,
                 AdmissionAt = _dbUserEducation.AdmissionAt,
                 IssueAt = _dbUserEducation.IssueAt
             };
@@ -209,10 +209,10 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 FirstName = _dbUser.FirstName,
                 MiddleName = _dbUser.MiddleName,
                 DateOfBirth = _dbUser.DateOfBirth.ToString(),
-                Gender = ((UserGender)_dbUser.Gender).ToString(),
+                Gender = (UserGender)_dbUser.Gender,
                 City = _dbUser.City,
                 LastName = _dbUser.LastName,
-                Status = ((UserStatus)_dbUser.Status).ToString(),
+                Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
                 About = _dbUser.About,
                 Rate = _dbUser.Rate,
