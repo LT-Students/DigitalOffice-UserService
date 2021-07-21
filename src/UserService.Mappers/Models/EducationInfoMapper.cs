@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 Id = dbUserEducation.Id,
                 UniversityName = dbUserEducation.UniversityName,
                 QualificationName = dbUserEducation.QualificationName,
-                FormEducation = ((FormEducation)dbUserEducation.FormEducation).ToString(),
+                FormEducation = (FormEducation)dbUserEducation.FormEducation,
                 AdmissionAt = dbUserEducation.AdmissionAt,
                 IssueAt = dbUserEducation.IssueAt
             };

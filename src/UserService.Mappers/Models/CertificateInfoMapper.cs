@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             {
                 Id = dbUserCertificate.Id,
                 Name = dbUserCertificate.Name,
-                EducationType = ((EducationType)dbUserCertificate.EducationType).ToString(),
+                EducationType = (EducationType)dbUserCertificate.EducationType,
                 ReceivedAt = dbUserCertificate.ReceivedAt,
                 SchoolName = dbUserCertificate.SchoolName,
                 Image = image

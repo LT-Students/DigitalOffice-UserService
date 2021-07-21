@@ -1,4 +1,5 @@
 ﻿using System;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
@@ -8,10 +9,10 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MiddleName { get; set; }
-        public string Gender { get; set; }
+        public UserGender Gender { get; set; }
         public string DateOfBirth { get; set; }
         public string City { get; set; }
-        public string Status { get; set; }
+        public UserStatus Status { get; set; }
         public bool IsAdmin { get; set; }
         public string About { get; set; }
         public string StartWorkingAt { get; set; }
