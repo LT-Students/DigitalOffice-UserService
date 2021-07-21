@@ -1,5 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
@@ -287,7 +289,7 @@ namespace LT.DigitalOffice.UserService.Business
         }
 
         /// <inheritdoc />
-        public UserResponse Execute(GetUserFilter filter)
+        public OperationResultResponse<UserResponse> Execute(GetUserFilter filter)
         {
             if (filter == null ||
                 (filter.UserId == null &&
@@ -297,7 +299,7 @@ namespace LT.DigitalOffice.UserService.Business
                 throw new BadRequestException("You must specify 'userId' or|and 'name' or|and 'email'.");
             }
 
-            List<string> errors = new();
+            OperationResultResponse<UserResponse> response = new();
 
             DbUser dbUser = _repository.Get(filter);
             if (dbUser == null)
@@ -330,16 +332,21 @@ namespace LT.DigitalOffice.UserService.Business
                 }
             }
 
-            return _mapper.Map(
+            response.Body = _mapper.Map(
                 dbUser,
-                filter.IsIncludeDepartment ? GetDepartment(dbUser.Id, errors) : null,
-                filter.IsIncludePosition ? GetPosition(dbUser.Id, errors) : null,
-                filter.IsIncludeOffice ? GetOffice(dbUser.Id, errors) : null,
-                filter.IsIncludeRole ? GetRole(dbUser.Id, errors) : null,
-                filter.IsIncludeProjects ? GetProjects(dbUser.Id, errors) : null,
-                GetImages(images, errors), 
-                filter, 
-                errors);
+                filter.IsIncludeDepartment ? GetDepartment(dbUser.Id, response.Errors) : null,
+                filter.IsIncludePosition ? GetPosition(dbUser.Id, response.Errors) : null,
+                filter.IsIncludeOffice ? GetOffice(dbUser.Id, response.Errors) : null,
+                filter.IsIncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
+                filter.IsIncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
+                GetImages(images, response.Errors),
+                filter);
+
+            response.Status = response.Errors.Any()
+                ? OperationResultStatusType.PartialSuccess
+                : OperationResultStatusType.FullSuccess;
+
+            return response;
         }
     }
 }

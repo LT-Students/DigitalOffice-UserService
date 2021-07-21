@@ -12,6 +12,5 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
         public IEnumerable<UserAchievementInfo> Achievements { get; set; }
         public IEnumerable<ProjectInfo> Projects { get; set; }
         public IEnumerable<EducationInfo> Educations { get; set; }
-        public List<string> Errors { get; set; } = new();
     }
 }
