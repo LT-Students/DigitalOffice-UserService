@@ -299,8 +299,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Educations = new List<EducationInfo>
                 {
                     _educationInfo
-                },
-                Errors = _errors
+                }
             };
         }
 
@@ -345,8 +344,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     null,
                     _projects,
                     _images,
-                    _filter,
-                    _errors));
+                    _filter));
         }
 
         //[Test]
@@ -393,8 +391,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     null,
                     _projects,
                     _images,
-                    _filter,
-                    _errors));
+                    _filter));
         }
     }
 }

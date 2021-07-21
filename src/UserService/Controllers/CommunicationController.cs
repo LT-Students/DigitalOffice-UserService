@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromBody] CreateCommunicationRequest request)
         {
             OperationResultResponse<Guid> result = command.Execute(request);
-            
+
             if (result.Status == OperationResultStatusType.Conflict)
             {
                 _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
