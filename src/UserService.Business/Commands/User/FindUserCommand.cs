@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
@@ -13,6 +16,7 @@ using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -223,11 +227,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
 
         /// <inheritdoc/>
-        public UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId)
+        public FindResultResponse<UserInfo> Execute(int skipCount, int takeCount, Guid? departmentId)
         {
-            int totalCount;
-            List<DbUser> dbUsers;
-            UsersResponse result = new();
+            List<DbUser> dbUsers = null;
+            int totalCount = 0;
+
+            FindResultResponse<UserInfo> result = new();
+            result.Body = new();
 
             if (departmentId.HasValue)
             {
@@ -237,7 +243,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 {
                     dbUsers = _repository.Get(users.UserIds);
 
-                    totalCount = users.TotalCount;
+                    result.TotalCount = users.TotalCount;
                 }
                 else
                 {
@@ -259,7 +265,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             var offices = GetOffice(userIds, result.Errors);
 
-            result.Users
+            result.Body
                 .AddRange(dbUsers.Select(dbUser =>
                     _mapper.Map(
                         dbUser,
@@ -270,7 +276,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                         _officeInfoMapper.Map(offices.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))))));
 
             result.TotalCount = totalCount;
-
+            result.Status = result.Errors.Any()
+                ? OperationResultStatusType.PartialSuccess
+                : OperationResultStatusType.FullSuccess;
             return result;
         }
     }
