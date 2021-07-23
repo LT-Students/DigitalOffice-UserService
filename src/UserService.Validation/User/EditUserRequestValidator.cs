@@ -220,7 +220,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             AddFailureForPropertyIf(
                 nameof(EditUserRequest.DateOfBirth),
-                x => x == OperationType.Replace || x == OperationType.Add,
+                x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x =>
@@ -241,7 +241,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             AddFailureForPropertyIf(
                 nameof(EditUserRequest.StartWorkingAt),
-                x => x == OperationType.Replace || x == OperationType.Add,
+                x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                      { x =>
