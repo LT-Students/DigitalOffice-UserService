@@ -97,10 +97,10 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                         LastName = dbUser.LastName,
                         MiddleName = dbUser.MiddleName,
                         DateOfBirth = "2021-08-23",
-                        Gender = ((UserGender)dbUser.Gender).ToString(),
+                        Gender = (UserGender)dbUser.Gender,
                         City = dbUser.City,
                         IsAdmin = dbUser.IsAdmin,
-                        Status = ((UserStatus)dbUser.Status).ToString()
+                        Status = (UserStatus)dbUser.Status
                     });
             }
 

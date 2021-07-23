@@ -52,8 +52,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             RoleInfo role,
             List<ProjectInfo> projects,
             List<ImageInfo> images,
-            GetUserFilter filter,
-            List<string> errors)
+            GetUserFilter filter)
         {
             if (dbUser == null)
             {
@@ -83,15 +82,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                     ? dbUser.Communications.Select(
                         c => new CommunicationInfo
                         {
-                            Type = ((CommunicationType)c.Type).ToString(),
+                            Type = (CommunicationType)c.Type,
                             Value = c.Value
                         })
                     : null,
                 Educations = filter.IsIncludeEducation
                     ? dbUser.Educations.Select(
                         e => _educationInfoMapper.Map(e))
-                    : null,
-                Errors = errors
+                    : null
             };
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
@@ -7,7 +8,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public Guid Id { get; set; }
         public string UniversityName { get; set; }
         public string QualificationName { get; set; }
-        public string FormEducation { get; set; }
+        public FormEducation FormEducation { get; set; }
         public DateTime AdmissionAt { get; set; }
         public DateTime? IssueAt { get; set; }
     }
