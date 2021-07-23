@@ -216,6 +216,48 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
+            #region DateOfBirth
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.DateOfBirth),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Date of birth has incorrect format"
+                    }
+                });
+
+            #endregion
+
+            #region StartWorkingAt
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.StartWorkingAt),
+                x => x == OperationType.Replace || x == OperationType.Add,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                     { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Start working at has incorrect format"
+                     }
+                });
+
+            #endregion
+
             #region AvatarImage
 
             AddFailureForPropertyIf(

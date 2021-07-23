@@ -9,12 +9,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string LastName { get; set; }
         public string MiddleName { get; set; }
         public string Gender { get; set; }
-        public string DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string City { get; set; }
         public string Status { get; set; }
         public bool IsAdmin { get; set; }
         public string About { get; set; }
-        public string StartWorkingAt { get; set; }
+        public DateTime? StartWorkingAt { get; set; }
         public double Rate { get; set; }
         public bool IsActive { get; set; }
 

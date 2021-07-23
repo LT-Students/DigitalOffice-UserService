@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -61,6 +62,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         c.RuleFor(uc => uc.UserId).Null();
                     });
             });
+
+            When(
+                user => user.StartWorkingAt != null,
+                () =>
+                    RuleFor(user => user.StartWorkingAt)
+                        .NotEqual(new DateTime()));
 
             RuleFor(user => user.Rate)
                 .GreaterThan(0)
