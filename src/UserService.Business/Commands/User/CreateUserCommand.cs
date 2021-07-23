@@ -1,4 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -24,11 +27,8 @@ using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Business
+namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
     /// <inheritdoc/>
     public class CreateUserCommand : ICreateUserCommand
@@ -51,8 +51,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
-            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
+            string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
+            const string logMessage = "Can't assign user {UserId} to the department {DepartmentId}.";
 
             try
             {
@@ -75,8 +75,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
-            string logMessage = "Сan't assign position {positionId} to the user {userId}";
+            string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
+            const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
 
             try
             {
@@ -103,8 +103,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'";
+            string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'";
 
             try
             {
@@ -130,8 +130,8 @@ namespace LT.DigitalOffice.UserService.Business
 
         private void ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
         {
-            string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'";
+            string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
+            const string logMessage = "Can't assign office '{OfficeId}' to the user '{UserId}'";
 
             try
             {
@@ -166,9 +166,7 @@ namespace LT.DigitalOffice.UserService.Business
                 return;
             }
 
-            string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resended in 1 hour.";
-
-            object emailRequest = null;
+            string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.";
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
@@ -182,7 +180,7 @@ namespace LT.DigitalOffice.UserService.Business
                     userId: dbUser.Id.ToString(),
                     userPassword: password);
 
-                emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
+                var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
 
                 IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
                     .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
@@ -192,14 +190,16 @@ namespace LT.DigitalOffice.UserService.Business
                 if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
                 {
                     _logger.LogWarning(
-                        $"Errors while sending email to '{email.Value}':{Environment.NewLine}{string.Join('\n', rcSendEmailResponse.Errors)}.");
+                        "Errors while sending email to '{Email}':\n {Errors}", 
+                        email.Value,
+                        string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
 
                     errors.Add(errorMessage);
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not send email to '{Email}'", email.Value);
 
                 errors.Add(errorMessage);
             }
@@ -211,7 +211,7 @@ namespace LT.DigitalOffice.UserService.Business
 
             if (avatarRequest == null)
             {
-                return avatarImageId;
+                return null;
             }
 
             Guid userId = _httpContextAccessor.HttpContext.GetUserId();
@@ -230,7 +230,9 @@ namespace LT.DigitalOffice.UserService.Business
                 if (!response.Message.IsSuccess)
                 {
                     _logger.LogWarning(
-                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
+                        "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
+                        userId,
+                        string.Join(',', response.Message.Errors));
 
                     errors.Add(errorMessage);
                 }
@@ -241,7 +243,7 @@ namespace LT.DigitalOffice.UserService.Business
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, "Can not add avatar image to user with id {userId}.", userId);
+                _logger.LogError(exc, "Can not add avatar image to user with id {UserId}", userId);
 
                 errors.Add(errorMessage);
             }
@@ -296,7 +298,7 @@ namespace LT.DigitalOffice.UserService.Business
             if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
             {
                 response.Status = OperationResultStatusType.Conflict;
-                response.Errors.Add("Comunication value already exist");
+                response.Errors.Add("Communication value already exist");
                 return response;
             }
 
