@@ -174,7 +174,7 @@ namespace LT.DigitalOffice.UserService.Business
                     avatarRequest.Content,
                     avatarRequest.Extension,
                     userId);
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(imageRequest, timeout: TimeSpan.FromSeconds(2)).Result;
+                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(imageRequest).Result;
 
                 if (!response.Message.IsSuccess)
                 {
@@ -230,7 +230,7 @@ namespace LT.DigitalOffice.UserService.Business
             var status = OperationResultStatusType.FullSuccess;
 
             Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)); ;
+                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
