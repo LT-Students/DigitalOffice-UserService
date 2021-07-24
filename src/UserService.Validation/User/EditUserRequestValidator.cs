@@ -91,8 +91,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
@@ -170,30 +170,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
-            #region DateOfBirth
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.DateOfBirth),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Date of birth has incorrect format" }
-                });
-
-            #endregion
-
-            #region StartWorkingAt
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.StartWorkingAt),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Start working at has incorrect format" }
-                });
-
-            #endregion
-
             #region Status
 
             AddFailureForPropertyIf(
@@ -236,6 +212,48 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         },
                         "Rate must be less than 1"
                     }
+                });
+
+            #endregion
+
+            #region DateOfBirth
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.DateOfBirth),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Date of birth has incorrect format"
+                    }
+                });
+
+            #endregion
+
+            #region StartWorkingAt
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.StartWorkingAt),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                     { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Start working at has incorrect format"
+                     }
                 });
 
             #endregion
