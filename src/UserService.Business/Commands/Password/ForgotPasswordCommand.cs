@@ -76,7 +76,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
                 if (!response.IsSuccess)
                 {
                     _logger.LogWarning(
-                        $"Errors while sending email to '{email}':{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        "Errors while sending email to '{Email}':\n{Errors}",
+                        email,
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
 
@@ -87,7 +89,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not send email to '{Email}'", email);
 
                 errors.Add(errorMessage);
 

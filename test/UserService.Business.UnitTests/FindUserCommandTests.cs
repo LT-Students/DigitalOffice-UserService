@@ -16,6 +16,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using LT.DigitalOffice.UserService.Business.Commands.User;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {

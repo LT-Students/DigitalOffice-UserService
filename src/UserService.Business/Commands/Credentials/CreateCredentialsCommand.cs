@@ -113,12 +113,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 else
                 {
                     _logger.LogWarning(
-                        $"Can not get token for pending user '{request.UserId}' reason:{Environment.NewLine} '{string.Join('\n',response.Errors)}'");
+                        "Can not get token for pending user '{UserId}' reason:\n{Errors}",
+                        request.UserId,
+                        string.Join('\n',response.Errors));
                 }
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, "Something went wrong while we were creating the user credentials.");
+                _logger.LogError(exc, "Something went wrong while we were creating the user credentials");
             }
 
             throw new BadRequestException("Something is wrong, please try again later");
