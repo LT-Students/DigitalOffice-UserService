@@ -6,6 +6,7 @@ using MassTransit;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
@@ -37,12 +38,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 dbUsers
                     .Select(dbUser => new UserData(
                         dbUser.Id,
+                        dbUser.AvatarFileId,
                         dbUser.FirstName,
                         dbUser.MiddleName,
                         dbUser.LastName,
-                        dbUser.IsActive,
-                        dbUser.AvatarFileId,
-                        (float)dbUser.Rate))
+                        ((UserStatus)dbUser.Status).ToString(),
+                        (float)dbUser.Rate,
+                        dbUser.IsActive))
                     .ToList());
         }
     }
