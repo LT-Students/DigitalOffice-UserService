@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LT.DigitalOffice.Kernel.Broker;
-﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models;

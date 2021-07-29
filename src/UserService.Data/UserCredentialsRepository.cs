@@ -105,10 +105,29 @@ namespace LT.DigitalOffice.UserService.Data
 
         public Guid Create(DbUserCredentials dbUserCredentials)
         {
+            if (dbUserCredentials == null)
+            {
+                throw new ArgumentNullException(nameof(dbUserCredentials));
+            }
+
             _provider.UserCredentials.Add(dbUserCredentials);
             _provider.Save();
 
             return dbUserCredentials.Id;
+        }
+
+        public bool Remove(Guid userId)
+        {
+            DbUserCredentials credentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
+
+            if (credentials != null)
+            {
+                _provider.UserCredentials.Remove(credentials);
+                _provider.Save();
+                return true;
+            }
+
+            return false;
         }
 
         public bool IsLoginExist(string login)

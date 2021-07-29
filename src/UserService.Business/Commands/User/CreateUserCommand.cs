@@ -308,7 +308,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
 
-            Guid userId = _userRepository.Create(dbUser, password);
+            Guid userId = _userRepository.Create(dbUser);
+            _userRepository.CreatePending(new DbPendingUser () { UserId = dbUser.Id, Password = password });
 
             SendEmail(dbUser, password, response.Errors);
 
