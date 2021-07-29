@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
@@ -29,11 +28,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "UserCredentials",
-                keyColumn: "Id",
-                keyValue: new Guid("AD4E3116-55FD-4769-B80D-A6C7E6436296"));
-
             migrationBuilder.DropColumn(
                 name: "Email",
                 table: "Users");
