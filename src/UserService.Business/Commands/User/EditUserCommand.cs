@@ -10,10 +10,8 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -40,9 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
         private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
         private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
-        private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IGeneratePasswordCommand _generatePassword;
 
         #region private method
 
@@ -212,9 +208,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             IRequestClient<IChangeUserPositionRequest> rcPosition,
             IRequestClient<IChangeUserRoleRequest> rcRole,
             IRequestClient<IChangeUserOfficeRequest> rcOffice,
-            IRequestClient<ISendEmailRequest> rcSendEmail,
-            IHttpContextAccessor httpContextAccessor,
-            IGeneratePasswordCommand generatePassword)
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _credentialsRepository = credentialsRepository;
@@ -226,9 +220,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             _rcPosition = rcPosition;
             _rcRole = rcRole;
             _rcOffice = rcOffice;
-            _rcSendEmail = rcSendEmail;
             _httpContextAccessor = httpContextAccessor;
-            _generatePassword = generatePassword;
         }
 
         /// <inheritdoc/>
