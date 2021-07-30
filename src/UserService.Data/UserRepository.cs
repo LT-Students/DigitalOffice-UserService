@@ -71,38 +71,33 @@ namespace LT.DigitalOffice.UserService.Data
             _provider = provider;
         }
 
-        public Guid Create(DbUser dbUser, string password)
-        {
-            DbPendingUser dbPendingUser = new()
-            {
-                UserId = dbUser.Id,
-                Password = password
-            };
-
-            _provider.Users.Add(dbUser);
-            _provider.PendingUsers.Add(dbPendingUser);
-            _provider.Save();
-
-            return dbUser.Id;
-        }
-
-        public Guid Create(DbUser dbUser, DbUserCredentials credentials)
+        public Guid Create(DbUser dbUser)
         {
             if (dbUser == null)
             {
                 throw new ArgumentNullException(nameof(dbUser));
             }
 
-            if (credentials == null)
-            {
-                throw new ArgumentNullException(nameof(credentials));
-            }
-
             _provider.Users.Add(dbUser);
-            _provider.UserCredentials.Add(credentials);
             _provider.Save();
 
             return dbUser.Id;
+        }
+
+        public void CreatePending(DbPendingUser dbPendingUser)
+        {
+            if (dbPendingUser == null)
+            {
+                throw new ArgumentNullException(nameof(dbPendingUser));
+            }
+
+            if (_provider.PendingUsers.FirstOrDefault(p => p.UserId == dbPendingUser.UserId) != null)
+            {
+                throw new BadRequestException($"Pending user with Id:{dbPendingUser.UserId} already exists");
+            }
+
+            _provider.PendingUsers.Add(dbPendingUser);
+            _provider.Save();
         }
 
         public DbUser Get(Guid id)

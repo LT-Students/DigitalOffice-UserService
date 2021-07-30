@@ -196,7 +196,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.IsFalse(_repository.IsUserExist(Guid.NewGuid()));
         }
 
-        [Test]
+        /*[Test]
         public void ShouldCreateUser()
         {
             DbUser user = new()
@@ -221,18 +221,18 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             };
 
             Assert.AreEqual(user.Id, _repository.Create(user, credentials));
-        }
+        }*/
 
-        [Test]
+        /*[Test]
         public void ShouldThrowArgumentNullExceptionWhenAddedUserIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.Create(null, new DbUserCredentials()));
-        }
+        }*/
 
-        [Test]
+        /*[Test]
         public void ShouldThrowArgumentNullExceptionWhenAddedCredentialsIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.Create(new DbUser(), null as DbUserCredentials));
-        }
+        }*/
     }
 }

@@ -19,6 +19,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         Guid Create(DbUserCredentials dbUserCredentials);
 
+        void SwitchActiveStatus(Guid userId, bool isActiveStatus);
+
         /// <summary>
         /// Edit existing user credentials. Returns whether it was successful to edit.
         /// </summary>

@@ -23,7 +23,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Login = request.Login,
                 Salt = salt,
                 UserId = request.UserId,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                IsActive = true
             };
         }
     }
