@@ -90,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(exc, logMessage, positionId, userId);
+                _logger.LogError(exc, logMessage, positionId, userId);
 
                 errors.Add(errorMessage);
             }
