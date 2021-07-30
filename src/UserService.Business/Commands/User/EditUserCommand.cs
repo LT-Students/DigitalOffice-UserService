@@ -8,7 +8,6 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
@@ -18,10 +17,7 @@ using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -49,56 +45,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         private readonly IGeneratePasswordCommand _generatePassword;
 
         #region private method
-
-        private void SendEmail(DbUser dbUser, string password, List<string> errors)
-        {
-            var email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
-
-            if (email == null)
-            {
-                errors.Add("User does not have any linked email.");
-
-                return;
-            }
-
-            string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.";
-
-            //TODO: fix add specific template language
-            string templateLanguage = "en";
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            EmailTemplateType templateType = EmailTemplateType.Greeting;
-            try
-            {
-                var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-                    userFirstName: dbUser.FirstName,
-                    userEmail: email.Value,
-                    userId: dbUser.Id.ToString(),
-                    userPassword: password);
-
-                var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
-
-                IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
-                    .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
-                    .Result
-                    .Message;
-
-                if (!rcSendEmailResponse.IsSuccess || rcSendEmailResponse.Body)
-                {
-                    _logger.LogWarning(
-                        "Errors while sending email to '{Email}':\n {Errors}",
-                        email.Value,
-                        string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
-
-                    errors.Add(errorMessage);
-                }
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc, "Can not send email to '{Email}'", email.Value);
-
-                errors.Add(errorMessage);
-            }
-        }
 
         private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
@@ -344,23 +290,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             if (isActiveOperation != null)
             {
-                bool dbUserIsActive = _userRepository.Get(userId).IsActive;
-
-                if (bool.Parse(isActiveOperation.value.ToString()) && !dbUserIsActive)
-                {
-                    string password = _generatePassword.Execute();
-
-                    _userRepository.CreatePending(new() { UserId = userId, Password = password });
-                    SendEmail(_userRepository.Get(new GetUserFilter() { UserId = userId, IncludeCommunications = true }), password, errors);
-                }
-                else if (!bool.Parse(isActiveOperation.value.ToString()) && dbUserIsActive)
-                {
-                    _credentialsRepository.Remove(userId);
-                }
-                else
-                {
-                    errors.Add("Can not change user is active condition.");
-                }
+                _credentialsRepository.SwitchActiveStatus(
+                    userId,
+                    bool.Parse(isActiveOperation.value.ToString()));
             }
 
             var dbUserPatch = _mapperUser.Map(patch, imageId);

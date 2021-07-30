@@ -73,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             }
         }
 
-        private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
+        private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
             const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
@@ -88,8 +88,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
                     errors.Add(errorMessage);
                 }
-
-                return response.Message.IsSuccess && response.Message.Body;
             }
             catch (Exception exc)
             {
@@ -97,8 +95,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
                 errors.Add(errorMessage);
             }
-
-            return false;
         }
 
         private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
@@ -313,11 +309,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             SendEmail(dbUser, password, response.Errors);
 
-            if (!ChangeUserPosition(request.PositionId, userId, response.Errors))
-            {
-                response.Status = OperationResultStatusType.Failed;
-                return response;
-            }
+            ChangeUserPosition(request.PositionId, userId, response.Errors);
 
             if (request.DepartmentId.HasValue)
             {
