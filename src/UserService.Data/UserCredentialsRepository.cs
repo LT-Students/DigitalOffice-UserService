@@ -125,7 +125,7 @@ namespace LT.DigitalOffice.UserService.Data
 
             if (dbUserCredentials == null)
             {
-                throw new NotFoundException($"User with ID '{userId}' was not found.");
+                throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
             }
 
             dbUserCredentials.IsActive = status;
