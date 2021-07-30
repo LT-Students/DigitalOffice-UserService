@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUserCredentials.Id;
         }
 
-        public void SwitchActiveStatus(Guid userId, bool status)
+        public void SwitchActiveStatus(Guid userId, bool isActiveStatus)
         {
             DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
 
@@ -128,7 +128,7 @@ namespace LT.DigitalOffice.UserService.Data
                 throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
             }
 
-            dbUserCredentials.IsActive = status;
+            dbUserCredentials.IsActive = isActiveStatus;
 
             _provider.UserCredentials.Update(dbUserCredentials);
             _provider.Save();
