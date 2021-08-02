@@ -36,13 +36,15 @@ namespace LT.DigitalOffice.UserService.Data
             {
                 dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
                     uc =>
-                        uc.UserId == filter.UserId.Value);
+                        uc.UserId == filter.UserId.Value &&
+                        uc.IsActive);
             }
             else if (!string.IsNullOrEmpty(filter.Login))
             {
                 dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
                     uc =>
-                        uc.Login == filter.Login);
+                        uc.Login == filter.Login &&
+                        uc.IsActive);
             }
             else if (!string.IsNullOrEmpty(filter.Email) || !string.IsNullOrEmpty(filter.Phone))
             {
@@ -51,6 +53,7 @@ namespace LT.DigitalOffice.UserService.Data
                         .ThenInclude(u => u.Communications)
                     .FirstOrDefault(
                         uc =>
+                            uc.IsActive &&
                             uc.User.Communications.Any(
                                 c =>
                                     (c.Type == (int)CommunicationType.Email &&
@@ -105,10 +108,30 @@ namespace LT.DigitalOffice.UserService.Data
 
         public Guid Create(DbUserCredentials dbUserCredentials)
         {
+            if (dbUserCredentials == null)
+            {
+                throw new ArgumentNullException(nameof(dbUserCredentials));
+            }
+
             _provider.UserCredentials.Add(dbUserCredentials);
             _provider.Save();
 
             return dbUserCredentials.Id;
+        }
+
+        public void SwitchActiveStatus(Guid userId, bool isActiveStatus)
+        {
+            DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
+
+            if (dbUserCredentials == null)
+            {
+                throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
+            }
+
+            dbUserCredentials.IsActive = isActiveStatus;
+
+            _provider.UserCredentials.Update(dbUserCredentials);
+            _provider.Save();
         }
 
         public bool IsLoginExist(string login)

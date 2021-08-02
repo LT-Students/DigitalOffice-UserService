@@ -13,6 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string Login { get; set; }
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
+        public bool IsActive { get; set; }
         public DbUser User { get; set; }
     }
 

@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LT.DigitalOffice.Kernel.Attributes.ParseEntity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
+    [ParseEntity]
     public class DbSkill
     {
         public const string TableName = "Skills";

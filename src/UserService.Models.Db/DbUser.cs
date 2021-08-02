@@ -1,3 +1,5 @@
+using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Attributes.ParseEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -5,6 +7,7 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
+    [ParseEntity]
     public class DbUser
     {
         public const string TableName = "Users";
@@ -24,11 +27,17 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public double Rate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? StartWorkingAt { get; set; }
+        [IgnoreParse]
         public DbUserCredentials Credentials { get; set; }
+        [IgnoreParse]
         public ICollection<DbUserCertificate> Certificates { get; set; }
+        [IgnoreParse]
         public ICollection<DbUserAchievement> Achievements { get; set; }
+        [IgnoreParse]
         public ICollection<DbUserCommunication> Communications { get; set; }
+        [IgnoreParse]
         public ICollection<DbUserSkill> Skills { get; set; }
+        [IgnoreParse]
         public ICollection<DbUserEducation> Educations { get; set; }
 
         public DbUser()

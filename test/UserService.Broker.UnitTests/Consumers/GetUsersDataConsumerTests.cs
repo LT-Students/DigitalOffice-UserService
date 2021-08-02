@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 {
@@ -50,12 +51,13 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 
             _userData = new UserData(
                 _dbUser.Id,
+                _dbUser.AvatarFileId,
                 _dbUser.FirstName,
                 _dbUser.MiddleName,
                 _dbUser.LastName,
-                _dbUser.IsActive,
-                _dbUser.AvatarFileId,
-                (float)_dbUser.Rate);
+                ((UserStatus)_dbUser.Status).ToString(),
+                (float)_dbUser.Rate,
+                _dbUser.IsActive);
         }
 
         [Test]
