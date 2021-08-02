@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
+using LT.DigitalOffice.Kernel.Broker.Consumer;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
@@ -31,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -106,6 +106,7 @@ namespace LT.DigitalOffice.UserService
             x.AddConsumer<AccessValidatorConsumer>();
             x.AddConsumer<SearchUsersConsumer>();
             x.AddConsumer<CreateAdminConsumer>();
+            x.AddConsumer<FindParseEntitiesConsumer>();
         }
 
         private void ConfigureEndpoints(
@@ -142,6 +143,11 @@ namespace LT.DigitalOffice.UserService
             cfg.ReceiveEndpoint(rabbitMqConfig.CreateAdminEndpoint, ep =>
             {
                 ep.ConfigureConsumer<CreateAdminConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.FindParseEntitiesEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<FindParseEntitiesConsumer>(context);
             });
         }
 
