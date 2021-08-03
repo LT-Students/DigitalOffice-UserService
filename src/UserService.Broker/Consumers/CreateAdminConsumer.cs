@@ -29,7 +29,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 UserId = admin.Id,
                 Login = request.Login,
                 Salt = salt,
-                PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password)
+                PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password),
+                IsActive = true
             };
             _credentialsRepository.Create(adminCredentials);
 
