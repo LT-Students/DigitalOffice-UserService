@@ -11,5 +11,14 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         {
             migrationBuilder.DropColumn(name: "About", table: "Users");
         }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "About",
+                table: "Users",
+                type: "nvarchar(150)",
+                nullable: true);
+        }
     }
 }
