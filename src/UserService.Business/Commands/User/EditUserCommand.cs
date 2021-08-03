@@ -11,7 +11,6 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -169,7 +168,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                     avatarRequest.Content,
                     avatarRequest.Extension,
                     userId);
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(imageRequest).Result;
+                var response = _rcImage.GetResponse<IOperationResult<Guid>>(imageRequest).Result;
 
                 if (!response.Message.IsSuccess)
                 {
@@ -182,7 +181,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 }
                 else
                 {
-                    avatarImageId = response.Message.Body.Id;
+                    avatarImageId = response.Message.Body;
                 }
             }
             catch (Exception exc)
