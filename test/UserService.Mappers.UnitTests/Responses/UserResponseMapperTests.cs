@@ -213,7 +213,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 LastName = _dbUser.LastName,
                 Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
-                //About = _dbUser.About,
                 Rate = _dbUser.Rate,
                 StartWorkingAt = _dbUser.StartWorkingAt.ToString()
             };
