@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 defaultValue: new DateTime(2021, 1, 1));
 
             migrationBuilder.AddColumn<string>(
-                name: nameof(DbUser.About),
+                name: "About",
                 table: DbUser.TableName,
                 type: "nvarchar(150)",
                 nullable: true);
