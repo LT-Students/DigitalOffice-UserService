@@ -14,7 +14,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -186,7 +185,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
                 {
                     _logger.LogWarning(
-                        "Errors while sending email to '{Email}':\n {Errors}", 
+                        "Errors while sending email to '{Email}':\n {Errors}",
                         email.Value,
                         string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
 
@@ -216,7 +215,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             try
             {
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
+                var response = _rcImage.GetResponse<IOperationResult<Guid>>(
                     IAddImageRequest.CreateObj(
                         avatarRequest.Name,
                         avatarRequest.Content,
@@ -234,7 +233,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 }
                 else
                 {
-                    avatarImageId = response.Message.Body.Id;
+                    avatarImageId = response.Message.Body;
                 }
             }
             catch (Exception exc)

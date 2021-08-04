@@ -195,9 +195,14 @@ namespace LT.DigitalOffice.UserService.Data
 
         public List<DbUser> Find(int skipCount, int takeCount, out int totalCount)
         {
-            if (takeCount <= 0)
+            if (skipCount < 0)
             {
-                throw new BadRequestException("Take count can't be equal or less than 0.");
+                throw new BadRequestException("Skip count can't be less than 0.");
+            }
+
+            if (takeCount < 1)
+            {
+                throw new BadRequestException("Take count can't be less than 1.");
             }
 
             totalCount = _provider.Users.Count();
@@ -230,10 +235,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public List<DbUser> Search(string text)
         {
-            return _provider.Users
-                                .ToList()
-                                .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
+            return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
         }
     }
 }
