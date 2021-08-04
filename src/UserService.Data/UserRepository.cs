@@ -230,10 +230,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public List<DbUser> Search(string text)
         {
-            return _provider.Users
-                                .ToList()
-                                .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
+            return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
         }
     }
 }
