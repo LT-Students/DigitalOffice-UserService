@@ -6,7 +6,6 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.File;
-using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -49,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
             try
             {
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(
+                var response = _rcImage.GetResponse<IOperationResult<Guid>>(
                     IAddImageRequest.CreateObj(
                         addImageRequest.Name,
                         addImageRequest.Content,
@@ -65,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
                 }
                 else
                 {
-                    imageId = response.Message.Body.Id;
+                    imageId = response.Message.Body;
                 }
             }
             catch (Exception exc)

@@ -23,9 +23,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string AddImageEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetImagesRequest))]
-        public string GetImageEndpoint { get; set; }
-
-        [AutoInjectRequest(typeof(IGetImagesRequest))]
         public string GetImagesEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IGetDepartmentUserRequest))]
