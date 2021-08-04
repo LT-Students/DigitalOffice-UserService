@@ -29,6 +29,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public class EditUserCommand : IEditUserCommand
     {
         private readonly IUserRepository _userRepository;
+        private readonly IUserCredentialsRepository _credentialsRepository;
         private readonly IPatchDbUserMapper _mapperUser;
         private readonly IAccessValidator _accessValidator;
         private readonly ILogger<EditUserCommand> _logger;
@@ -41,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         #region private method
 
-        private bool ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
+        private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
             const string logMessage = "Can't assign user {UserId} to the department {DepartmentId}.";
@@ -51,24 +52,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 Response<IOperationResult<bool>> response = _rcDepartment.GetResponse<IOperationResult<bool>>(
                     IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
 
-                if (response.Message.IsSuccess && response.Message.Body)
+                if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    return true;
-                }
+                    _logger.LogWarning(logMessage, userId, departmentId);
 
-                _logger.LogWarning(logMessage, userId, departmentId);
+                    errors.Add(errorMessage);
+                }
             }
             catch (Exception exc)
             {
                 _logger.LogError(exc, logMessage, userId, departmentId);
+
+                errors.Add(errorMessage);
             }
-
-            errors.Add(errorMessage);
-
-            return false;
         }
 
-        private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
+        private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
             const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
@@ -78,24 +77,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 Response<IOperationResult<bool>> response = _rcPosition.GetResponse<IOperationResult<bool>>(
                     IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
 
-                if (response.Message.IsSuccess && response.Message.Body)
+                if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    return true;
-                }
+                    _logger.LogWarning(logMessage, positionId, userId);
 
-                _logger.LogWarning(logMessage, positionId, userId);
+                    errors.Add(errorMessage);
+                }
             }
             catch (Exception exc)
             {
-                _logger.LogWarning(exc, logMessage, positionId, userId);
+                _logger.LogError(exc, logMessage, positionId, userId);
+
+                errors.Add(errorMessage);
             }
-
-            errors.Add(errorMessage);
-
-            return false;
         }
 
-        private bool ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+        private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
             const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
@@ -108,25 +105,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                         userId,
                         _httpContextAccessor.HttpContext.GetUserId())).Result;
 
-                if (response.Message.IsSuccess && response.Message.Body)
+                if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    return true;
-                }
+                    const string warningMessage = logMessage + "Errors: {Errors}";
+                    _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
 
-                const string warningMessage = logMessage + "Errors: {Errors}";
-                _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
+                    errors.Add(errorMessage);
+                }
             }
             catch (Exception exc)
             {
                 _logger.LogError(exc, logMessage, roleId, userId);
+
+                errors.Add(errorMessage);
             }
-
-            errors.Add(errorMessage);
-
-            return false;
         }
 
-        private bool ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
+        private void ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
         {
             string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
             const string logMessage = "Can't assign office '{OfficeId}' to the user '{UserId}'.";
@@ -138,22 +133,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                         officeId,
                         userId,
                         _httpContextAccessor.HttpContext.GetUserId())).Result;
-                if (response.Message.IsSuccess && response.Message.Body)
+                if (!response.Message.IsSuccess || !response.Message.Body)
                 {
-                    return true;
-                }
+                    const string warningMessage = logMessage + "Errors: {Errors}";
+                    _logger.LogWarning(warningMessage, officeId, userId, string.Join("\n", response.Message.Errors));
 
-                const string warningMessage = logMessage + "Errors: {Errors}";
-                _logger.LogWarning(warningMessage, officeId, userId, string.Join("\n", response.Message.Errors));
+                    errors.Add(errorMessage);
+                }
             }
             catch (Exception exc)
             {
                 _logger.LogError(exc, logMessage, officeId, userId);
+
+                errors.Add(errorMessage);
             }
-
-            errors.Add(errorMessage);
-
-            return false;
         }
 
         private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
@@ -205,34 +198,34 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         #endregion
 
         public EditUserCommand(
-            ILogger<EditUserCommand> logger,
-            IRequestClient<IAddImageRequest> rcImage,
-            IHttpContextAccessor httpContextAccessor,
             IUserRepository userRepository,
+            IUserCredentialsRepository credentialsRepository,
             IPatchDbUserMapper mapperUser,
             IAccessValidator accessValidator,
+            ILogger<EditUserCommand> logger,
+            IRequestClient<IAddImageRequest> rcImage,
             IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
             IRequestClient<IChangeUserPositionRequest> rcPosition,
             IRequestClient<IChangeUserRoleRequest> rcRole,
-            IRequestClient<IChangeUserOfficeRequest> rcOffice)
+            IRequestClient<IChangeUserOfficeRequest> rcOffice,
+            IHttpContextAccessor httpContextAccessor)
         {
-            _logger = logger;
-            _rcImage = rcImage;
-            _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
+            _credentialsRepository = credentialsRepository;
             _mapperUser = mapperUser;
             _accessValidator = accessValidator;
+            _logger = logger;
+            _rcImage = rcImage;
             _rcDepartment = rcDepartment;
             _rcPosition = rcPosition;
             _rcRole = rcRole;
             _rcOffice = rcOffice;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /// <inheritdoc/>
         public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
         {
-            var status = OperationResultStatusType.FullSuccess;
-
             Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
@@ -241,6 +234,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
                 o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
             Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
+            Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
+                o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
             if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
                 _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
@@ -263,42 +258,33 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             if (imageOperation != null)
             {
                 imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
-                if (imageId == null)
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
             }
 
             if (positionOperation != null)
             {
-                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString() ?? string.Empty), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
+                ChangeUserPosition(Guid.Parse(positionOperation.value.ToString() ?? string.Empty), userId, errors);
             }
 
             if (departmentOperation != null)
             {
-                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString() ?? string.Empty), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
+                ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString() ?? string.Empty), userId, errors);
             }
 
             if (roleOperation != null)
             {
-                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
+                ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
             }
 
             if (officeOperation != null)
             {
-                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString() ?? string.Empty), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
+                ChangeUserOffice(Guid.Parse(officeOperation.value.ToString() ?? string.Empty), userId, errors);
+            }
+
+            if (isActiveOperation != null)
+            {
+                _credentialsRepository.SwitchActiveStatus(
+                    userId,
+                    bool.Parse(isActiveOperation.value.ToString()));
             }
 
             var dbUserPatch = _mapperUser.Map(patch, imageId);
@@ -306,7 +292,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             return new OperationResultResponse<bool>
             {
-                Status = status,
+                Status = errors.Any()
+                    ? OperationResultStatusType.PartialSuccess
+                    : OperationResultStatusType.FullSuccess,
                 Body = true,
                 Errors = errors
             };

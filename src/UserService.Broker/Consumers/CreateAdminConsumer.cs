@@ -12,7 +12,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
     public class CreateAdminConsumer : IConsumer<ICreateAdminRequest>
     {
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserCredentialsRepository _credentialsRepository;
         private readonly IDbUserMapper _mapper;
 
         private object CreateAdmin(ICreateAdminRequest request)
@@ -20,6 +21,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
             DbUser admin = _mapper.Map(request);
+            _userRepository.Create(admin);
 
             DbUserCredentials adminCredentials = new()
             {
@@ -27,20 +29,21 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 UserId = admin.Id,
                 Login = request.Login,
                 Salt = salt,
-                PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password)
+                PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password),
+                IsActive = true
             };
-
-            _repository
-                .Create(admin, adminCredentials);
+            _credentialsRepository.Create(adminCredentials);
 
             return true;
         }
 
         public CreateAdminConsumer(
-            IUserRepository repository,
+            IUserRepository userRepository,
+            IUserCredentialsRepository credentialsRepository,
             IDbUserMapper mapper)
         {
-            _repository = repository;
+            _userRepository = userRepository;
+            _credentialsRepository = credentialsRepository;
             _mapper = mapper;
         }
 

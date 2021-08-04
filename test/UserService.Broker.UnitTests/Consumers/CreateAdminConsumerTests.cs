@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 .Returns(_user);
         }
 
-        [Test]
+        /*[Test]
         public async Task ShouldThrowExceptionWhenRepositoryThrow()
         {
             _mocker
@@ -90,9 +90,9 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
             {
                 await _harness.Stop();
             }
-        }
+        }*/
 
-        [Test]
+        /*[Test]
         public async Task ShouldCreateSMTPSuccessfully()
         {
             await _harness.Start();
@@ -116,6 +116,6 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
             {
                 await _harness.Stop();
             }
-        }
+        }*/
     }
 }
