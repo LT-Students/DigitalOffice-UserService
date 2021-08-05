@@ -18,6 +18,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         public string GetUsersDataEndpoint { get; set; }
         public string CreateAdminEndpoint { get; set; }
         public string FindParseEntitiesEndpoint { get; set; }
+        public string CheckUserExistenceEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(IAddImageRequest))]
         public string AddImageEndpoint { get; set; }

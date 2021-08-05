@@ -145,6 +145,11 @@ namespace LT.DigitalOffice.UserService
             {
                 ep.ConfigureConsumer<CreateAdminConsumer>(context);
             });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.CheckUserExistenceEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<CheckUserExistenceConsumer>(context);
+            });
         }
 
         #endregion

@@ -24,9 +24,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserExistenceInfo(ICheckUserExistence requestIds)
         {
-            var a = _repository.AreExistingIds(requestIds.UserIds);
+            var userIds = _repository.AreExistingIds(requestIds.UserIds);
 
-            return ICheckUserExistence.CreateObj(a);
+            return ICheckUserExistence.CreateObj(userIds);
         }
     }
 }
