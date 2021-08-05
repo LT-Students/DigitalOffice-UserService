@@ -2,6 +2,8 @@
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using MassTransit;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
@@ -24,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
         private object GetUserExistenceInfo(ICheckUserExistence requestIds)
         {
-            var userIds = _repository.AreExistingIds(requestIds.UserIds);
+            List<Guid> userIds = _repository.AreExistingIds(requestIds.UserIds);
 
             return ICheckUserExistence.CreateObj(userIds);
         }
