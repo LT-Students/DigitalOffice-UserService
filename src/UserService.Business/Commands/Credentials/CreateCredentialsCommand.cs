@@ -11,7 +11,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
-using LT.DigitalOffice.UserService.Validation.Login.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         private readonly IUserCredentialsRepository _userCredentialsRepository;
         private readonly IRequestClient<IGetTokenRequest> _rcToken;
         private readonly ILogger<CreateCredentialsCommand> _logger;
-        private readonly ILoginValidator _validator;
+        private readonly ICreateCredentialsRequestValidator _validator;
 
         public CreateCredentialsCommand(
             IDbUserCredentialsMapper mapper,
@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             IUserCredentialsRepository userCredentialsRepository,
             IRequestClient<IGetTokenRequest> rcToken,
             ILogger<CreateCredentialsCommand> logger,
-            ILoginValidator validator)
+            ICreateCredentialsRequestValidator validator)
         {
             _mapper = mapper;
             _userRepository = userRepository;
@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
                 throw new BadRequestException();
             }
 
-            _validator.ValidateAndThrowCustom(request.Login);
+            _validator.ValidateAndThrowCustom(request);
 
             OperationResultResponse<CredentialsResponse> response = new ();
 
