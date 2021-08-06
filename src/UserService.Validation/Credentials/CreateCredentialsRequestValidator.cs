@@ -26,14 +26,14 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
             () =>
             {
                 RuleFor(request => request.Login)
-                .Must(login => char.IsLetter(login[0]))
-                .WithMessage("Login must start with letter")
-                .MinimumLength(3)
-                .WithMessage("Login is too short")
-                .MaximumLength(15)
-                .WithMessage("Login is too long")
-                .Must(login => login.All(char.IsLetterOrDigit))
-                .WithMessage("Login must contain only letters or digits");
+                    .Must(login => char.IsLetter(login[0]))
+                    .WithMessage("Login must start with letter")
+                    .MinimumLength(3)
+                    .WithMessage("Login is too short")
+                    .MaximumLength(15)
+                    .WithMessage("Login is too long")
+                    .Must(login => login.All(char.IsLetterOrDigit))
+                    .WithMessage("Login must contain only letters or digits");
             });
         }
     }
