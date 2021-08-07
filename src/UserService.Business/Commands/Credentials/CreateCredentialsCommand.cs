@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
@@ -10,6 +11,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
+using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,29 +25,32 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         private readonly IUserCredentialsRepository _userCredentialsRepository;
         private readonly IRequestClient<IGetTokenRequest> _rcToken;
         private readonly ILogger<CreateCredentialsCommand> _logger;
+        private readonly ICreateCredentialsRequestValidator _validator;
 
         public CreateCredentialsCommand(
             IDbUserCredentialsMapper mapper,
             IUserRepository userRepository,
             IUserCredentialsRepository userCredentialsRepository,
             IRequestClient<IGetTokenRequest> rcToken,
-            ILogger<CreateCredentialsCommand> logger)
+            ILogger<CreateCredentialsCommand> logger,
+            ICreateCredentialsRequestValidator validator)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _userCredentialsRepository = userCredentialsRepository;
             _rcToken = rcToken;
             _logger = logger;
+            _validator = validator;
         }
 
         public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
         {
-            // TODO add request validation
-
             if (request == null)
             {
                 throw new BadRequestException();
             }
+
+            _validator.ValidateAndThrowCustom(request);
 
             OperationResultResponse<CredentialsResponse> response = new ();
 
