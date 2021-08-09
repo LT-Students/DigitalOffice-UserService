@@ -57,7 +57,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
-            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
             EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
@@ -66,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
                     userId: dbUser.Id.ToString(),
                     secret: secret.ToString());
 
-                var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email, templateLanguage, templateType, templateValues);
+                var emailRequest = ISendEmailRequest.CreateObj(null, dbUser.Id, email, templateLanguage, templateType, templateValues);
 
                 IOperationResult<bool> response = _rcSendEmail
                     .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
