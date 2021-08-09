@@ -119,12 +119,14 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             _dbUserCommunication = new DbUserCommunication
             {
+                Id = Guid.NewGuid(),
                 Value = "value",
                 Type = 0
             };
 
             _communicationInfo = new CommunicationInfo
             {
+                Id = _dbUserCommunication.Id,
                 Type = (CommunicationType)_dbUserCommunication.Type,
                 Value = _dbUserCommunication.Value
             };
