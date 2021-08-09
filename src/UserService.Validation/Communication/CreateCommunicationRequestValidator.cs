@@ -28,9 +28,11 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
 
             When(x => x.Type == CommunicationType.Email, () =>
                 RuleFor(x => x.Value)
+                    .EmailAddress()
+                    .WithMessage("Incorrect email address.")
                     .Must(v => EmailRegex.IsMatch(v.Trim()))
                     .WithMessage("Incorrect email address."));
-
+            
             RuleFor(x => x.UserId)
                 .NotNull()
                 .Must(id => userRepository.IsUserExist(id.Value))

@@ -9,21 +9,28 @@ namespace LT.DigitalOffice.UserService.Validation.User
     public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>, ICreateUserRequestValidator
     {
         private static Regex NameRegex = new(@"\d");
+        private static Regex SpecialCharactersRegex = new("^[a-zA-Z0-9 ]*$");
         public CreateUserRequestValidator()
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .Must(x => !NameRegex.IsMatch(x))
+                .Must(x => !NameRegex.IsMatch(x))bpvt
                 .WithMessage("First name must not contain numbers")
+                .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                .WithMessage("First name must not contain special characters")
                 .MaximumLength(32)
-                .WithMessage("First name is too long.");
+                .WithMessage("First name is too long.")
+                .Must(x => NameRegex.IsMatch(x.Trim()));
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
                 .Must(x => !NameRegex.IsMatch(x))
                 .WithMessage("Last name must not contain numbers")
+                .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                .WithMessage("Last name must not contain special characters")
                 .MaximumLength(32)
-                .WithMessage("Last name is too long.");
+                .WithMessage("Last name is too long.")
+                .Must(x => NameRegex.IsMatch(x.Trim()));
 
             RuleFor(user => user.PositionId)
                 .NotEmpty();
@@ -34,8 +41,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     RuleFor(user => user.MiddleName)
                         .Must(x => !NameRegex.IsMatch(x))
                         .WithMessage("Middle name must not contain numbers")
+                        .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                        .WithMessage("Last name must not contain special characters")
                         .MaximumLength(32)
-                        .WithMessage("Middle name is too long."));
+                        .WithMessage("Middle name is too long.")
+                        .Must(x => NameRegex.IsMatch(x.Trim())));
 
             When(
                 user => !string.IsNullOrEmpty(user.City),
@@ -65,6 +75,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
             RuleFor(user => user.Rate)
                 .GreaterThan(0)
                 .LessThanOrEqualTo(1);
+
+            RuleFor(user => user.Password)
+                .NotEmpty()
+                .MinimumLength(5)
+                .Must(x => NameRegex.IsMatch(x.Trim()));
 
             // TODO move to edit user validation
             //When(user => user.Skills != null && user.Skills.Any(), () =>
