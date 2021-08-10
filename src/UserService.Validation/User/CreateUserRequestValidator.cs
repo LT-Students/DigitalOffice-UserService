@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .WithMessage("The field cannot be empty")
+                .WithMessage("The first name cannot be empty")
                 .Must(x => !NumberRegex.IsMatch(x))
                 .WithMessage("First name must not contain numbers")
                 .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
-                .WithMessage("The field cannot be empty")
+                .WithMessage("The last name cannot be empty")
                 .Must(x => !NumberRegex.IsMatch(x))
                 .WithMessage("Last name must not contain numbers")
                 .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     {
                         c.RuleFor(uc => uc.Value)
                         .NotEmpty()
-                        .WithMessage("The field cannot be empty")
+                        .WithMessage("The email cannot be empty")
                         .Must(x => EmailRegex.IsMatch(x))
                         .WithMessage("Incorrect email address.");
                         c.RuleFor(uc => uc.UserId).Null();
@@ -87,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             RuleFor(user => user.Password)
                 .NotEmpty()
-                .WithMessage("The field cannot be empty")
+                .WithMessage("The password cannot be empty")
                 .MinimumLength(5)
                 .WithMessage("Password is too short.")
                 .Must(x => SpaceRegex.IsMatch(x))
