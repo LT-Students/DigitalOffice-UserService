@@ -25,7 +25,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .WithMessage("First name must not contain special characters.")
                 .MaximumLength(32)
                 .WithMessage("First name is too long.")
-                .Must(x => NameRegex.IsMatch(x.Trim()));
+                .Must(x => NameRegex.IsMatch(x.Trim()))
+                .WithMessage("First name contains invalid characters.");
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
@@ -36,7 +37,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .WithMessage("Last name must not contain special characters.")
                 .MaximumLength(32)
                 .WithMessage("Last name is too long.")
-                .Must(x => NameRegex.IsMatch(x.Trim()));
+                .Must(x => NameRegex.IsMatch(x.Trim()))
+                .WithMessage("Last name contains invalid characters.");
 
             RuleFor(user => user.PositionId)
                 .NotEmpty();
@@ -51,7 +53,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         .WithMessage("Middle name must not contain special characters.")
                         .MaximumLength(32)
                         .WithMessage("Middle name is too long.")
-                        .Must(x => NameRegex.IsMatch(x.Trim())));
+                        .Must(x => NameRegex.IsMatch(x.Trim()))
+                        .WithMessage("Middle name contains invalid characters."));
 
             When(
                 user => !string.IsNullOrEmpty(user.City),
@@ -64,8 +67,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         .Must(x => !SpecialCharactersRegex.IsMatch(x))
                         .WithMessage("City name must not contain special characters.")
                         .MaximumLength(32)
-                        .WithMessage("City name is too long.")
-                        .Must(x => NameRegex.IsMatch(x.Trim())));
+                        .Must(x => NameRegex.IsMatch(x.Trim()))
+                        .WithMessage("City name contains invalid characters."));
 
             RuleFor(user => user.Gender)
                 .IsInEnum()
