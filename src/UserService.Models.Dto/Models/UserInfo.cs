@@ -14,7 +14,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string City { get; set; }
         public UserStatus Status { get; set; }
         public bool IsAdmin { get; set; }
-        public string About { get; set; }
         public string StartWorkingAt { get; set; }
         public double Rate { get; set; }
         public bool IsActive { get; set; }

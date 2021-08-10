@@ -119,12 +119,14 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             _dbUserCommunication = new DbUserCommunication
             {
+                Id = Guid.NewGuid(),
                 Value = "value",
                 Type = 0
             };
 
             _communicationInfo = new CommunicationInfo
             {
+                Id = _dbUserCommunication.Id,
                 Type = (CommunicationType)_dbUserCommunication.Type,
                 Value = _dbUserCommunication.Value
             };
@@ -174,7 +176,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
                 IsAdmin = false,
-                About = "smth about",
                 Rate = 1,
                 CreatedAt = DateTime.UtcNow,
                 StartWorkingAt = DateTime.UtcNow,
@@ -214,7 +215,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 LastName = _dbUser.LastName,
                 Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
-                About = _dbUser.About,
                 Rate = _dbUser.Rate,
                 StartWorkingAt = _dbUser.StartWorkingAt.ToString()
             };
