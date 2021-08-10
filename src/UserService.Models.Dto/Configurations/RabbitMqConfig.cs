@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
@@ -67,5 +68,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
         [AutoInjectRequest(typeof(IGetUsersDepartmentsUsersPositionsRequest))]
         public string GetUsersDepartmentsUsersPositionsEndpoint { get; set; }
+
+        [AutoInjectRequest(typeof(IDisactivateUserRequest))]
+        public string DisactivateUserEndpoint { get; set; }
     }
 }
