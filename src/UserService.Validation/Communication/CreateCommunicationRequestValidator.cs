@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
                 RuleFor(x => x.Value)
                     .Must(v => EmailRegex.IsMatch(v.Trim()))
                     .WithMessage("Incorrect email address."));
-            
+
             RuleFor(x => x.UserId)
                 .NotNull()
                 .Must(id => userRepository.IsUserExist(id.Value))
