@@ -24,8 +24,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             DbUser dbUser = new()
             {
                 Id = userId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                FirstName = request.FirstName.Trim(),
+                LastName = request.LastName.Trim(),
                 MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Gender = (int)request.Gender,
                 City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
