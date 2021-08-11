@@ -60,8 +60,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 user => !string.IsNullOrEmpty(user.City),
                 () =>
                     RuleFor(user => user.City)
-                        .MaximumLength(32)
-                        .WithMessage("City name is too long.")
                         .Must(x => !NumberRegex.IsMatch(x))
                         .WithMessage("City name must not contain numbers.")
                         .Must(x => !SpecialCharactersRegex.IsMatch(x))

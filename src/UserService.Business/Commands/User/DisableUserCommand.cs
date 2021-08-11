@@ -4,8 +4,10 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using MassTransit;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -14,13 +16,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
         private readonly IUserRepository _repository;
         private readonly IAccessValidator _accessValidator;
+        private readonly IBus _bus;
 
         public DisableUserCommand(
             IUserRepository repository,
-            IAccessValidator accessValidator)
+            IAccessValidator accessValidator,
+            IBus bus)
         {
             _repository = repository;
             _accessValidator = accessValidator;
+            _bus = bus;
         }
 
         /// <inheritdoc/>
@@ -30,6 +35,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             {
                 throw new ForbiddenException("Not enough rights.");
             }
+
+            _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(userId));
 
             return new OperationResultResponse<bool>
             {

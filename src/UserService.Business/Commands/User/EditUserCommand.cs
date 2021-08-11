@@ -8,6 +8,7 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
@@ -38,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
         private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IBus _bus;
 
         #region private method
 
@@ -207,7 +209,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             IRequestClient<IChangeUserPositionRequest> rcPosition,
             IRequestClient<IChangeUserRoleRequest> rcRole,
             IRequestClient<IChangeUserOfficeRequest> rcOffice,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IBus bus)
         {
             _userRepository = userRepository;
             _credentialsRepository = credentialsRepository;
@@ -220,6 +223,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             _rcRole = rcRole;
             _rcOffice = rcOffice;
             _httpContextAccessor = httpContextAccessor;
+            _bus = bus;
         }
 
         /// <inheritdoc/>
@@ -281,9 +285,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             if (isActiveOperation != null)
             {
+                bool newValue = bool.Parse(isActiveOperation.value.ToString());
+
                 _credentialsRepository.SwitchActiveStatus(
                     userId,
-                    bool.Parse(isActiveOperation.value.ToString()));
+                    newValue);
+
+                if (!newValue)
+                {
+                    _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(userId));
+                }
             }
 
             var dbUserPatch = _mapperUser.Map(patch, imageId);
