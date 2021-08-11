@@ -1,12 +1,6 @@
 ﻿using FluentValidation.TestHelper;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
-using LT.DigitalOffice.UserService.Validation.Certificates;
 using LT.DigitalOffice.UserService.Validation.Credentials;
-using Moq;
-using Moq.AutoMock;
 using NUnit.Framework;
 using System;
 
@@ -54,10 +48,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
         [Test]
         public void ShouldThrowExceptionWhenLoginTooShort()
         {
-            _request = new CreateCredentialsRequest
-            {
-                Login = new string('a', 2)
-            };
+            _request.Login = new string('a', 2);
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.Login);
         }
@@ -65,10 +56,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
         [Test]
         public void ShouldThrowExceptionWhenLoginTooLong()
         {
-            _request = new CreateCredentialsRequest
-            {
-                Login = new string('a', 16)
-            };
+            _request.Login = new string('a', 16);
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.Login);
         }
@@ -76,10 +64,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
         [Test]
         public void ShouldThrowExceptionWhenLoginStartNotInLetter()
         {
-            _request = new CreateCredentialsRequest
-            {
-                Login = new string("1Login")
-            };
+            _request.Login = new string("1Login");
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.Login);
         }
@@ -87,10 +72,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
         [Test]
         public void ShouldThrowExceptionWhenLoginHaveSpecialCharacters()
         {
-            _request = new CreateCredentialsRequest
-            {
-                Login = new string("Logi:n")
-            };
+            _request.Login = new string("Logi:n");
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.Login);
         }
