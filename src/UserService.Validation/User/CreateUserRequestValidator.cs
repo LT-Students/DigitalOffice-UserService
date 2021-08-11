@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .WithMessage("The first name cannot be empty.")
+                .WithMessage("First name cannot be empty.")
                 .Must(x => !NumberRegex.IsMatch(x))
                 .WithMessage("First name must not contain numbers.")
                 .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -67,6 +67,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         .Must(x => !SpecialCharactersRegex.IsMatch(x))
                         .WithMessage("City name must not contain special characters.")
                         .MaximumLength(32)
+                        .WithMessage("City name is too long.")
                         .Must(x => NameRegex.IsMatch(x.Trim()))
                         .WithMessage("City name contains invalid characters."));
 
@@ -103,15 +104,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .WithMessage("Password is too short.")
                 .Must(x => SpaceRegex.IsMatch(x))
                 .WithMessage("Password must not contain space.");
-
-
-            // TODO move to edit user validation
-            //When(user => user.Skills != null && user.Skills.Any(), () =>
-            //{
-            //    RuleForEach(request => request.Skills)
-            //        .NotEmpty()
-            //        .MaximumLength(30).WithMessage("Skill name is too long");
-            //});
         }
     }
 }
