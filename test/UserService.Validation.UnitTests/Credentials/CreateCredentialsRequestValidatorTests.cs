@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
             {
                 Login = "Login1234567890",
                 Password = "Password",
-                UserId = new Guid("A7249129-B47F-490C-8588-C998A76584AB")
+                UserId = Guid.NewGuid()
             };
         }
 
