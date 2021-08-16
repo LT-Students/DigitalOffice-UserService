@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
                 .WithMessage("UserId can't be empty");
             RuleFor(request => request.Password)
                 .NotEmpty()
-                .WithMessage("Password can't be empty"); 
+                .WithMessage("Password can't be empty");
             When(request => !string.IsNullOrEmpty(request.Login),
             () =>
             {
