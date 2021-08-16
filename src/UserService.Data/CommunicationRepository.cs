@@ -1,7 +1,9 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
@@ -11,10 +13,14 @@ namespace LT.DigitalOffice.UserService.Data
     public class CommunicationRepository : ICommunicationRepository
     {
         private readonly IDataProvider _provider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CommunicationRepository(IDataProvider provider)
+        public CommunicationRepository(
+            IDataProvider provider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _provider = provider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public Guid Add(DbUserCommunication userCommunication)
@@ -36,6 +42,8 @@ namespace LT.DigitalOffice.UserService.Data
                 ?? throw new NotFoundException($"User communication with ID '{communicationId}' was not found.");
 
             request.ApplyTo(communication);
+            communication.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            communication.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;

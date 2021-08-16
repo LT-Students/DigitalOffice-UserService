@@ -14,6 +14,9 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
         public DbUser User { get; set; }
     }
 
@@ -42,8 +45,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasOne(uc => uc.User)
-                .WithOne(u => u.Credentials)
-                .HasForeignKey<DbUserCredentials>(uc => uc.UserId);
+                .WithOne(u => u.Credentials);
         }
     }
 }
