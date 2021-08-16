@@ -21,31 +21,38 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public string City { get; set; }
         public Guid? AvatarFileId { get; set; }
         public int Status { get; set; }
-        public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
         public double Rate { get; set; }
-        public DateTime CreatedAt { get; set; }
         public DateTime? StartWorkingAt { get; set; }
+        public string About { get; set; }
+        public bool IsActive { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
+
+
         [IgnoreParse]
         public DbUserCredentials Credentials { get; set; }
         [IgnoreParse]
-        public ICollection<DbUserCertificate> Certificates { get; set; }
+        public ICollection<DbUserEducation> Educations { get; set; }
         [IgnoreParse]
-        public ICollection<DbUserAchievement> Achievements { get; set; }
+        public ICollection<DbUserCertificate> Certificates { get; set; }
         [IgnoreParse]
         public ICollection<DbUserCommunication> Communications { get; set; }
         [IgnoreParse]
-        public ICollection<DbUserSkill> Skills { get; set; }
+        public ICollection<DbUserAchievement> Achievements { get; set; }
         [IgnoreParse]
-        public ICollection<DbUserEducation> Educations { get; set; }
+        public ICollection<DbUserSkill> Skills { get; set; }
+
 
         public DbUser()
         {
+            Educations = new HashSet<DbUserEducation>();
+            Certificates = new HashSet<DbUserCertificate>();
             Communications = new HashSet<DbUserCommunication>();
             Achievements = new HashSet<DbUserAchievement>();
-            Certificates = new HashSet<DbUserCertificate>();
             Skills = new HashSet<DbUserSkill>();
-            Educations = new HashSet<DbUserEducation>();
         }
     }
 
@@ -58,10 +65,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder.
                 HasKey(p => p.Id);
-
-            builder
-                .Property(u => u.CreatedAt)
-                .HasDefaultValue(new DateTime(2021, 1, 1));
 
             builder
                 .Property(p => p.FirstName)
@@ -80,17 +83,24 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .WithOne(uc => uc.User);
 
             builder
+                .HasMany(u => u.Educations)
+                .WithOne(ue => ue.User);
+
+            builder
+                .HasMany(u => u.Certificates)
+                .WithOne(c => c.User);
+
+            builder
                 .HasMany(u => u.Communications)
-                .WithOne(conn => conn.User);
+                .WithOne(uc => uc.User);
+
+            builder
+                .HasMany(u => u.Achievements)
+                .WithOne(ua => ua.User);
 
             builder
                 .HasMany(u => u.Skills)
                 .WithOne(us => us.User);
-
-            builder
-                .HasMany(u => u.Certificates)
-                .WithOne(c => c.User)
-                .HasForeignKey(c => c.UserId);
         }
     }
 }

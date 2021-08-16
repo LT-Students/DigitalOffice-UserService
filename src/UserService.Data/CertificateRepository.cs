@@ -1,7 +1,9 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
@@ -11,10 +13,14 @@ namespace LT.DigitalOffice.UserService.Data
     public class CertificateRepository : ICertificateRepository
     {
         private readonly IDataProvider _provider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CertificateRepository(IDataProvider provider)
+        public CertificateRepository(
+            IDataProvider provider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _provider = provider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public void Add(DbUserCertificate certificate)
@@ -53,6 +59,8 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             request.ApplyTo(certificate);
+            certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            certificate.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;
@@ -66,7 +74,8 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             certificate.IsActive = false;
-
+            certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            certificate.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;
