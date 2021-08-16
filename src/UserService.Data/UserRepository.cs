@@ -205,7 +205,7 @@ namespace LT.DigitalOffice.UserService.Data
 
             _provider.Users.Update(dbUser);
             dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
-                _httpContextAccessor.HttpContext?.GetUserId() :
+                _httpContextAccessor.HttpContext.GetUserId() :
                 null;
             dbUser.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
