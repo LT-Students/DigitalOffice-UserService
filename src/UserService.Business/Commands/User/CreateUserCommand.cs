@@ -56,7 +56,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             try
             {
                 var response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-                    IChangeUserDepartmentRequest.CreateObj(userId, departmentId, _httpContextAccessor.HttpContext.GetUserId())).Result;
+                    IChangeUserDepartmentRequest.CreateObj(
+                        userId,
+                        departmentId,
+                        _httpContextAccessor.HttpContext.GetUserId())).Result;
                 if (!response.Message.IsSuccess || !response.Message.Body)
                 {
                     _logger.LogWarning(logMessage, userId, departmentId);
