@@ -1,9 +1,12 @@
 using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,6 +19,7 @@ namespace LT.DigitalOffice.UserService.Data
     public class UserRepository : IUserRepository
     {
         private readonly IDataProvider _provider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private IQueryable<DbUser> CreateGetPredicates(
             GetUserFilter filter,
@@ -66,9 +70,12 @@ namespace LT.DigitalOffice.UserService.Data
             return dbUsers;
         }
 
-        public UserRepository(IDataProvider provider)
+        public UserRepository(
+            IDataProvider provider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _provider = provider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public Guid Create(DbUser dbUser)
@@ -129,6 +136,13 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
         }
 
+        public List<Guid> AreExistingIds(List<Guid> userIds)
+        {
+            return _provider.Users
+                .Where(u => userIds.Contains(u.Id) && u.IsActive)
+                .Select(u => u.Id).ToList();
+        }
+
         public bool EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
         {
             if (userPatch == null)
@@ -140,6 +154,8 @@ namespace LT.DigitalOffice.UserService.Data
                             throw new NotFoundException($"User with ID '{userId}' was not found.");
 
             userPatch.ApplyTo(dbUser);
+            dbUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            dbUser.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;
@@ -147,7 +163,7 @@ namespace LT.DigitalOffice.UserService.Data
 
         public DbSkill FindSkillByName(string name)
         {
-            return _provider.Skills.FirstOrDefault(s => s.SkillName == name);
+            return _provider.Skills.FirstOrDefault(s => s.Name == name);
         }
 
         public Guid CreateSkill(string name)
@@ -157,7 +173,7 @@ namespace LT.DigitalOffice.UserService.Data
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var dbSkill = _provider.Skills.FirstOrDefault(s => s.SkillName == name);
+            var dbSkill = _provider.Skills.FirstOrDefault(s => s.Name == name);
 
             if (dbSkill != null)
             {
@@ -167,7 +183,7 @@ namespace LT.DigitalOffice.UserService.Data
             var skill = new DbSkill
             {
                 Id = Guid.NewGuid(),
-                SkillName = name
+                Name = name
             };
 
             _provider.Skills.Add(skill);
@@ -188,6 +204,10 @@ namespace LT.DigitalOffice.UserService.Data
             dbUser.IsActive = status;
 
             _provider.Users.Update(dbUser);
+            dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
+                _httpContextAccessor.HttpContext.GetUserId() :
+                null;
+            dbUser.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;

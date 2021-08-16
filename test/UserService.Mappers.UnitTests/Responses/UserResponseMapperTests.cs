@@ -161,7 +161,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _dbSkill = new DbSkill
             {
                 Id = Guid.NewGuid(),
-                SkillName = "Skill name"
+                Name = "Skill name"
             };
 
             _dbUser = new DbUser
@@ -177,7 +177,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 IsActive = true,
                 IsAdmin = false,
                 Rate = 1,
-                CreatedAt = DateTime.UtcNow,
                 StartWorkingAt = DateTime.UtcNow,
                 Skills = new List<DbUserSkill>
                 {
@@ -281,7 +280,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 User = _userInfo,
                 Skills = new List<string>
                 {
-                    _dbSkill.SkillName
+                    _dbSkill.Name
                 },
                 Communications = new List<CommunicationInfo>
                 {

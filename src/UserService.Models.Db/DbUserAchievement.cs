@@ -12,6 +12,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid UserId { get; set; }
         public Guid AchievementId { get; set; }
         public DateTime ReceivedAt { get; set; }
+        public bool IsActive { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
         public DbUser User { get; set; }
         public DbAchievement Achievement { get; set; }
     }
@@ -28,13 +33,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasOne(ua => ua.Achievement)
-                .WithMany(a => a.UserAchievements)
-                .HasForeignKey(ua => ua.AchievementId);
+                .WithMany(a => a.UserAchievements);
 
             builder
                 .HasOne(ua => ua.User)
-                .WithMany(u => u.Achievements)
-                .HasForeignKey(ua => ua.UserId);
+                .WithMany(u => u.Achievements);
         }
     }
 }

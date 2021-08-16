@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -16,6 +17,7 @@ namespace LT.DigitalOffice.UserService.Data
     public class UserCredentialsRepository : IUserCredentialsRepository
     {
         private readonly HttpContext _httpContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserCredentialsRepository> _logger;
         private readonly IDataProvider _provider;
 
@@ -25,6 +27,7 @@ namespace LT.DigitalOffice.UserService.Data
             IDataProvider provider)
         {
             _httpContext = httpContextAccessor.HttpContext;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _provider = provider;
         }
@@ -94,6 +97,8 @@ namespace LT.DigitalOffice.UserService.Data
             try
             {
                 _provider.UserCredentials.Update(userCredentials);
+                userCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+                userCredentials.ModifiedAtUtc = DateTime.UtcNow;
                 _provider.Save();
             }
             catch (Exception exc)
@@ -131,6 +136,8 @@ namespace LT.DigitalOffice.UserService.Data
             dbUserCredentials.IsActive = isActiveStatus;
 
             _provider.UserCredentials.Update(dbUserCredentials);
+            dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
         }
 
