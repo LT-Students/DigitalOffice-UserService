@@ -16,6 +16,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public DateTime AdmissionAt { get; set; }
         public DateTime? IssueAt { get; set; }
         public bool IsActive { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
 
         public DbUser User { get; set; }
     }
@@ -42,8 +46,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasOne(e => e.User)
-                .WithMany(u => u.Educations)
-                .HasForeignKey(e => e.UserId);
+                .WithMany(u => u.Educations);
         }
     }
 }

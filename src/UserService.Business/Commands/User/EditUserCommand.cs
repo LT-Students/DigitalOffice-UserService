@@ -51,7 +51,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             try
             {
                 Response<IOperationResult<bool>> response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-                    IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
+                    IChangeUserDepartmentRequest.CreateObj(
+                        userId,
+                        departmentId,
+                        _httpContextAccessor.HttpContext.GetUserId())).Result;
 
                 if (!response.Message.IsSuccess || !response.Message.Body)
                 {
@@ -76,7 +79,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             try
             {
                 Response<IOperationResult<bool>> response = _rcPosition.GetResponse<IOperationResult<bool>>(
-                    IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
+                    IChangeUserPositionRequest.CreateObj(
+                        userId,
+                        positionId,
+                        _httpContextAccessor.HttpContext.GetUserId())).Result;
 
                 if (!response.Message.IsSuccess || !response.Message.Body)
                 {
@@ -240,9 +246,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
                 o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
+            Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+
             if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
                 _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-                (userId == _httpContextAccessor.HttpContext.GetUserId()
+                (userId == requestSenderId
                 && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
                 && positionOperation == null
                 && departmentOperation == null
@@ -293,7 +301,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
                 if (!newValue)
                 {
-                    _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(userId));
+                    _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
+                        userId,
+                        requestSenderId));
                 }
             }
 
