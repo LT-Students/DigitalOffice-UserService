@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .WithMessage("The first name cannot be empty.")
+                .WithMessage("First name cannot be empty.")
                 .Must(x => !NumberRegex.IsMatch(x))
                 .WithMessage("First name must not contain numbers.")
                 .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
-                .WithMessage("The last name cannot be empty.")
+                .WithMessage("Last name cannot be empty.")
                 .Must(x => !NumberRegex.IsMatch(x))
                 .WithMessage("Last name must not contain numbers.")
                 .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -60,13 +60,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 user => !string.IsNullOrEmpty(user.City),
                 () =>
                     RuleFor(user => user.City)
-                        .MaximumLength(32)
-                        .WithMessage("City name is too long.")
                         .Must(x => !NumberRegex.IsMatch(x))
                         .WithMessage("City name must not contain numbers.")
                         .Must(x => !SpecialCharactersRegex.IsMatch(x))
                         .WithMessage("City name must not contain special characters.")
                         .MaximumLength(32)
+                        .WithMessage("City name is too long.")
                         .Must(x => NameRegex.IsMatch(x.Trim()))
                         .WithMessage("City name contains invalid characters."));
 
@@ -85,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     {
                         c.RuleFor(uc => uc.Value)
                         .NotEmpty()
-                        .WithMessage("The email cannot be empty.")
+                        .WithMessage("Email cannot be empty.")
                         .Must(x => EmailRegex.IsMatch(x))
                         .WithMessage("Incorrect format email address.");
                         c.RuleFor(uc => uc.UserId).Null();
@@ -98,20 +97,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             RuleFor(user => user.Password)
                 .NotEmpty()
-                .WithMessage("The password cannot be empty.")
+                .WithMessage("Password cannot be empty.")
                 .MinimumLength(5)
                 .WithMessage("Password is too short.")
                 .Must(x => SpaceRegex.IsMatch(x))
                 .WithMessage("Password must not contain space.");
-
-
-            // TODO move to edit user validation
-            //When(user => user.Skills != null && user.Skills.Any(), () =>
-            //{
-            //    RuleForEach(request => request.Skills)
-            //        .NotEmpty()
-            //        .MaximumLength(30).WithMessage("Skill name is too long");
-            //});
         }
     }
 }
