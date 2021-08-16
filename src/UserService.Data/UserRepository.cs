@@ -136,6 +136,13 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
         }
 
+        public List<Guid> AreExistingIds(List<Guid> userIds)
+        {
+            return _provider.Users
+                .Where(u => userIds.Contains(u.Id) && u.IsActive)
+                .Select(u => u.Id).ToList();
+        }
+
         public bool EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
         {
             if (userPatch == null)

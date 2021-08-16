@@ -107,6 +107,7 @@ namespace LT.DigitalOffice.UserService
             x.AddConsumer<SearchUsersConsumer>();
             x.AddConsumer<CreateAdminConsumer>();
             x.AddConsumer<FindParseEntitiesConsumer>();
+            x.AddConsumer<CheckUsersExistenceConsumer>();
         }
 
         private void ConfigureEndpoints(
@@ -148,6 +149,11 @@ namespace LT.DigitalOffice.UserService
             cfg.ReceiveEndpoint(rabbitMqConfig.FindParseEntitiesEndpoint, ep =>
             {
                 ep.ConfigureConsumer<FindParseEntitiesConsumer>(context);
+            });
+
+            cfg.ReceiveEndpoint(rabbitMqConfig.CheckUsersExistenceEndpoint, ep =>
+            {
+                ep.ConfigureConsumer<CheckUsersExistenceConsumer>(context);
             });
         }
 
