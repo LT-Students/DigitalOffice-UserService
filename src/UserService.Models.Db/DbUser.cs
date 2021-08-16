@@ -31,7 +31,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid? ModifiedBy { get; set; }
         public DateTime? ModifiedAtUtc { get; set; }
 
-
         [IgnoreParse]
         public DbUserCredentials Credentials { get; set; }
         [IgnoreParse]
@@ -44,7 +43,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public ICollection<DbUserAchievement> Achievements { get; set; }
         [IgnoreParse]
         public ICollection<DbUserSkill> Skills { get; set; }
-
 
         public DbUser()
         {
