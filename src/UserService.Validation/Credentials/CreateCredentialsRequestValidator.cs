@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         public CreateCredentialsRequestValidator()
         {
             RuleFor(request => request.Login)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Login can't be empty")
                 .Must(login => char.IsLetter(login[0]))
