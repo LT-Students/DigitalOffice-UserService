@@ -1,7 +1,9 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
@@ -11,10 +13,14 @@ namespace LT.DigitalOffice.UserService.Data
     public class EducationRepository : IEducationRepository
     {
         private readonly IDataProvider _provider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EducationRepository(IDataProvider provider)
+        public EducationRepository(
+            IDataProvider provider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _provider = provider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public void Add(DbUserEducation education)
@@ -53,6 +59,8 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             request.ApplyTo(education);
+            education.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            education.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;
@@ -66,6 +74,8 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             education.IsActive = false;
+            education.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+            education.ModifiedAtUtc = DateTime.UtcNow;
             _provider.Save();
 
             return true;

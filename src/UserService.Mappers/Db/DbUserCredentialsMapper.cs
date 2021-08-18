@@ -24,7 +24,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Salt = salt,
                 UserId = request.UserId,
                 PasswordHash = passwordHash,
-                IsActive = true
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             };
         }
     }

@@ -8,22 +8,37 @@ namespace LT.DigitalOffice.UserService.Validation.User
 {
     public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>, ICreateUserRequestValidator
     {
-        private static Regex NameRegex = new(@"\d");
+        private static Regex NumberRegex = new (@"\d");
+        private static Regex SpecialCharactersRegex = new (@"[$&+,:;=?@#|<>.^*()%!]");
+        private static Regex SpaceRegex = new (@"^[^@\s]*$");
+        private static Regex EmailRegex = new (@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        private static Regex NameRegex = new(@"^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ' ]+[a-zA-Zа-яА-ЯёЁ']?$");
+
         public CreateUserRequestValidator()
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
-                .Must(x => !NameRegex.IsMatch(x))
-                .WithMessage("First name must not contain numbers")
+                .WithMessage("First name cannot be empty.")
+                .Must(x => !NumberRegex.IsMatch(x))
+                .WithMessage("First name must not contain numbers.")
+                .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                .WithMessage("First name must not contain special characters.")
                 .MaximumLength(32)
-                .WithMessage("First name is too long.");
+                .WithMessage("First name is too long.")
+                .Must(x => NameRegex.IsMatch(x.Trim()))
+                .WithMessage("First name contains invalid characters.");
 
             RuleFor(user => user.LastName)
                 .NotEmpty()
-                .Must(x => !NameRegex.IsMatch(x))
-                .WithMessage("Last name must not contain numbers")
+                .WithMessage("Last name cannot be empty.")
+                .Must(x => !NumberRegex.IsMatch(x))
+                .WithMessage("Last name must not contain numbers.")
+                .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                .WithMessage("Last name must not contain special characters.")
                 .MaximumLength(32)
-                .WithMessage("Last name is too long.");
+                .WithMessage("Last name is too long.")
+                .Must(x => NameRegex.IsMatch(x.Trim()))
+                .WithMessage("Last name contains invalid characters.");
 
             RuleFor(user => user.PositionId)
                 .NotEmpty();
@@ -32,17 +47,27 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 user => !string.IsNullOrEmpty(user.MiddleName),
                 () =>
                     RuleFor(user => user.MiddleName)
-                        .Must(x => !NameRegex.IsMatch(x))
-                        .WithMessage("Middle name must not contain numbers")
+                        .Must(x => !NumberRegex.IsMatch(x))
+                        .WithMessage("Middle name must not contain numbers.")
+                        .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                        .WithMessage("Middle name must not contain special characters.")
                         .MaximumLength(32)
-                        .WithMessage("Middle name is too long."));
+                        .WithMessage("Middle name is too long.")
+                        .Must(x => NameRegex.IsMatch(x.Trim()))
+                        .WithMessage("Middle name contains invalid characters."));
 
             When(
                 user => !string.IsNullOrEmpty(user.City),
                 () =>
                     RuleFor(user => user.City)
+                        .Must(x => !NumberRegex.IsMatch(x))
+                        .WithMessage("City name must not contain numbers.")
+                        .Must(x => !SpecialCharactersRegex.IsMatch(x))
+                        .WithMessage("City name must not contain special characters.")
                         .MaximumLength(32)
-                        .WithMessage("City name is too long."));
+                        .WithMessage("City name is too long.")
+                        .Must(x => NameRegex.IsMatch(x.Trim()))
+                        .WithMessage("City name contains invalid characters."));
 
             RuleFor(user => user.Gender)
                 .IsInEnum()
@@ -57,7 +82,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 RuleForEach(user => user.Communications)
                     .ChildRules(c =>
                     {
-                        c.RuleFor(uc => uc.Value).NotEmpty();
+                        c.RuleFor(uc => uc.Value)
+                        .NotEmpty()
+                        .WithMessage("Email cannot be empty.")
+                        .Must(x => EmailRegex.IsMatch(x))
+                        .WithMessage("Incorrect format email address.");
                         c.RuleFor(uc => uc.UserId).Null();
                     });
             });
@@ -66,13 +95,13 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .GreaterThan(0)
                 .LessThanOrEqualTo(1);
 
-            // TODO move to edit user validation
-            //When(user => user.Skills != null && user.Skills.Any(), () =>
-            //{
-            //    RuleForEach(request => request.Skills)
-            //        .NotEmpty()
-            //        .MaximumLength(30).WithMessage("Skill name is too long");
-            //});
+            RuleFor(user => user.Password)
+                .NotEmpty()
+                .WithMessage("Password cannot be empty.")
+                .MinimumLength(5)
+                .WithMessage("Password is too short.")
+                .Must(x => SpaceRegex.IsMatch(x))
+                .WithMessage("Password must not contain space.");
         }
     }
 }

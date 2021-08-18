@@ -11,6 +11,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid SkillId { get; set; }
+        public bool IsActive { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
         public DbUser User { get; set; }
         public DbSkill Skill { get; set; }
     }
@@ -35,13 +40,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasOne(us => us.User)
-                .WithMany(u => u.Skills)
-                .HasForeignKey(us => us.UserId);
+                .WithMany(u => u.Skills);
 
             builder
                 .HasOne(us => us.Skill)
-                .WithMany(s => s.UserSkills)
-                .HasForeignKey(us => us.SkillId);
+                .WithMany(s => s.UserSkills);
         }
     }
 }

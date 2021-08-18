@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Data.UnitTests
 {
-    class UserRepositoryTests
+    /*class UserRepositoryTests
     {
         private IDataProvider _provider;
         private IUserRepository _repository;
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             _dbSkillInDb = new DbSkill
             {
                 Id = Guid.NewGuid(),
-                SkillName = "C#"
+                Name = "C#"
             };
 
             var userId = Guid.NewGuid();
@@ -45,7 +45,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 FirstName = "Ivan",
                 LastName = "Ivanov",
                 MiddleName = "Ivanovich",
-                CreatedAt = DateTime.Now,
                 IsActive = true
             };
 
@@ -55,7 +54,6 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
                 FirstName = "Name",
                 LastName = "Lastname",
                 MiddleName = "Middlename",
-                CreatedAt = _dbUser.CreatedAt,
                 Status = (int)UserStatus.Vacation,
                 AvatarFileId = Guid.NewGuid(),
                 IsActive = true
@@ -92,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         public void SetUp()
         {
             _provider = new UserServiceDbContext(_dbContext);
-            _repository = new UserRepository(_provider);
+            //_repository = new UserRepository(_provider);
 
             _provider.UserCertificates.Add(_dbUserCertificate);
             _provider.UserEducations.Add(_dbUserEducation);
@@ -116,7 +114,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             var nameSkill = "new skill";
             var result = _repository.CreateSkill(nameSkill);
 
-            Assert.AreEqual(result, _provider.Skills.FirstOrDefaultAsync(s => s.SkillName == nameSkill).Result.Id);
+            Assert.AreEqual(result, _provider.Skills.FirstOrDefaultAsync(s => s.Name == nameSkill).Result.Id);
         }
 
         [Test]
@@ -178,7 +176,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         [Test]
         public void ShouldFindExistSkillByName()
         {
-            var result = _repository.FindSkillByName(_dbSkillInDb.SkillName);
+            var result = _repository.FindSkillByName(_dbSkillInDb.Name);
 
             SerializerAssert.AreEqual(_dbSkillInDb, result);
         }
@@ -196,7 +194,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.IsFalse(_repository.IsUserExist(Guid.NewGuid()));
         }
 
-        /*[Test]
+        [Test]
         public void ShouldCreateUser()
         {
             DbUser user = new()
@@ -221,18 +219,18 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             };
 
             Assert.AreEqual(user.Id, _repository.Create(user, credentials));
-        }*/
+        }
 
-        /*[Test]
+        [Test]
         public void ShouldThrowArgumentNullExceptionWhenAddedUserIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.Create(null, new DbUserCredentials()));
-        }*/
+        }
 
-        /*[Test]
+        [Test]
         public void ShouldThrowArgumentNullExceptionWhenAddedCredentialsIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => _repository.Create(new DbUser(), null as DbUserCredentials));
-        }*/
-    }
+        }
+    }*/
 }
