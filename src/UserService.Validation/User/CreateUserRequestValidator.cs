@@ -95,13 +95,14 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .GreaterThan(0)
                 .LessThanOrEqualTo(1);
 
-            RuleFor(user => user.Password)
-                .NotEmpty()
-                .WithMessage("Password cannot be empty.")
-                .MinimumLength(5)
-                .WithMessage("Password is too short.")
-                .Must(x => SpaceRegex.IsMatch(x))
-                .WithMessage("Password must not contain space.");
+            When(user => user.Password != null && user.Password.Trim().Any(), () =>
+            {
+                RuleFor(user => user.Password.Trim())
+                    .MinimumLength(5)
+                    .WithMessage("Password is too short.")
+                    .Must(x => SpaceRegex.IsMatch(x))
+                    .WithMessage("Password must not contain space.");
+            });
         }
     }
 }
