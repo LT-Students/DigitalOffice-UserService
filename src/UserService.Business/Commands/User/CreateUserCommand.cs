@@ -56,10 +56,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-            IChangeUserDepartmentRequest.CreateObj(
-                userId,
-                departmentId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+          IChangeUserDepartmentRequest.CreateObj(
+            userId,
+            departmentId,
+            _httpContextAccessor.HttpContext.GetUserId())).Result;
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
           _logger.LogWarning(logMessage, userId, departmentId);
@@ -83,10 +83,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcPosition.GetResponse<IOperationResult<bool>>(
-            IChangeUserPositionRequest.CreateObj(
-                userId,
-                positionId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+          IChangeUserPositionRequest.CreateObj(
+            userId,
+            positionId,
+            _httpContextAccessor.HttpContext.GetUserId())).Result;
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
           _logger.LogWarning(logMessage, positionId, userId);
@@ -110,10 +110,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcRole.GetResponse<IOperationResult<bool>>(
-            IChangeUserRoleRequest.CreateObj(
-                roleId,
-                userId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+          IChangeUserRoleRequest.CreateObj(
+            roleId,
+            userId,
+            _httpContextAccessor.HttpContext.GetUserId())).Result;
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
           _logger.LogWarning(logMessage, roleId, userId);
@@ -137,10 +137,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcOffice.GetResponse<IOperationResult<bool>>(
-            IChangeUserOfficeRequest.CreateObj(
-                officeId,
-                userId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+          IChangeUserOfficeRequest.CreateObj(
+            officeId,
+            userId,
+            _httpContextAccessor.HttpContext.GetUserId())).Result;
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
           _logger.LogWarning(logMessage, officeId, userId);
@@ -176,24 +176,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-            userFirstName: dbUser.FirstName,
-            userEmail: email.Value,
-            userId: dbUser.Id.ToString(),
-            userPassword: password);
+          userFirstName: dbUser.FirstName,
+          userEmail: email.Value,
+          userId: dbUser.Id.ToString(),
+          userPassword: password);
 
         var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
 
         IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
-            .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
-            .Result
-            .Message;
+          .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
+          .Result
+          .Message;
 
         if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
         {
           _logger.LogWarning(
-              "Errors while sending email to '{Email}':\n {Errors}",
-              email.Value,
-              string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
+            "Errors while sending email to '{Email}':\n {Errors}",
+            email.Value,
+            string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
 
           errors.Add(errorMessage);
         }
@@ -222,18 +222,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-            IAddImageRequest.CreateObj(
-                avatarRequest.Name,
-                avatarRequest.Content,
-                avatarRequest.Extension,
-                userId)).Result;
+          IAddImageRequest.CreateObj(
+            avatarRequest.Name,
+            avatarRequest.Content,
+            avatarRequest.Extension,
+            userId)).Result;
 
         if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(
-              "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
-              userId,
-              string.Join(',', response.Message.Errors));
+            "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
+            userId,
+            string.Join(',', response.Message.Errors));
 
           errors.Add(errorMessage);
         }
@@ -287,7 +287,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public OperationResultResponse<Guid> Execute(CreateUserRequest request)
     {
       if (!(_accessValidator.IsAdmin() ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
+        _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
         throw new ForbiddenException("Not enough rights.");
       }

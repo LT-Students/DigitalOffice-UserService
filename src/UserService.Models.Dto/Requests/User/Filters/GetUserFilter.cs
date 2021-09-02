@@ -46,17 +46,5 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 
     [FromQuery(Name = "includeprojects")]
     public bool IncludeProjects { get; set; } = false;
-
-    public bool IsIncludeDepartment => IncludeDepartment;
-    public bool IsIncludePosition => IncludePosition;
-    public bool IsIncludeOffice => IncludeOffice;
-    public bool IsIncludeRole => IncludeRole;
-    public bool IsIncludeAchievements => IncludeAchievements;
-    public bool IsIncludeCertificates => IncludeCertificates;
-    public bool IsIncludeCommunications => IncludeCommunications;
-    public bool IsIncludeImages => IncludeImages;
-    public bool IsIncludeSkills => IncludeSkills;
-    public bool IsIncludeEducation => IncludeEducations;
-    public bool IsIncludeProjects => IncludeProjects;
   }
 }
