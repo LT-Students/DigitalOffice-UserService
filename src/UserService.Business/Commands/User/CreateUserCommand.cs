@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
@@ -298,7 +299,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
             if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
             {
-                response.Status = OperationResultStatusType.Conflict;
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("Communication value already exist");
                 return response;
             }

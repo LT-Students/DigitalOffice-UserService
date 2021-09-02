@@ -11,11 +11,9 @@ namespace LT.DigitalOffice.UserService.Controllers
     public class SkillController : ControllerBase
     {
         [HttpPost("create")]
-        public OperationResultResponse<Guid> Create
-            (
-                [FromServices] ICreateSkillCommand command,
-                [FromBody] CreateSkillRequest request
-            )
+        public OperationResultResponse<Guid> Create(
+            [FromServices] ICreateSkillCommand command, 
+            [FromBody] CreateSkillRequest request)
         {
             return command.Execute(request);
         }

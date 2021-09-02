@@ -15,25 +15,21 @@ namespace LT.DigitalOffice.UserService.Data
             _provider = provider;
         }
 
-
-        public void Add(DbSkill skill)
+        public Guid Add(DbSkill skill)
         {
             if (skill == null)
             {
-                throw new ArgumentNullException(nameof(skill));
+                return default;
             }
 
             _provider.Skills.Add(skill);
             _provider.Save();
+
+            return skill.Id;
         }
 
         public bool DoesSkillAlreadyExist(string skillName)
         {
-            if (string.IsNullOrEmpty(skillName))
-            {
-                throw new ArgumentException(nameof(skillName));
-            }
-
             return _provider.Skills.Any(s => s.Name == skillName);
         }
     }

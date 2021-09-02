@@ -10,6 +10,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 {
@@ -21,14 +22,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
         private readonly ISkillRepository _skillRepository;
         private readonly IAccessValidator _accessValidator;
 
-        public CreateSkillCommand
-            (
-                IHttpContextAccessor httpContextAccessor,
-                IUserRepository userRepository,
-                IDbSkillMapper mapper,
-                ISkillRepository skillRepository,
-                IAccessValidator accessValidator
-            )
+        public CreateSkillCommand(
+            IHttpContextAccessor httpContextAccessor,
+            IUserRepository userRepository,
+            IDbSkillMapper mapper,
+            ISkillRepository skillRepository,
+            IAccessValidator accessValidator)
         {
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
@@ -47,6 +46,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
             {
                 response.Errors.Add("Not enough rights.");
                 response.Status = OperationResultStatusType.Failed;
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
                 return response;
             }
@@ -54,17 +54,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
             if (_skillRepository.DoesSkillAlreadyExist(request.Name))
             {
                 response.Errors.Add($"Skill {request.Name} already exist");
-                response.Status = OperationResultStatusType.Conflict;
+                response.Status = OperationResultStatusType.Failed;
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
 
                 return response;
             }
 
-            DbSkill skill = _mapper.Map(request);
+            response.Body = _skillRepository.Add(_mapper.Map(request));
 
-            _skillRepository.Add(skill);
+            if(response.Body == default)
+            {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.Status = OperationResultStatusType.Failed;
+            }
 
+            _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
             response.Status = OperationResultStatusType.FullSuccess;
-            response.Body = skill.Id;
 
             return response;
         }

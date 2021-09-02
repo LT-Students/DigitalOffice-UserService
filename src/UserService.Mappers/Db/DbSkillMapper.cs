@@ -20,13 +20,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request));
+                return null;
             }
 
             return new DbSkill
             {
                 Id = Guid.NewGuid(),
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 IsActive = true,
                 CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
                 CreatedAtUtc = DateTime.UtcNow,

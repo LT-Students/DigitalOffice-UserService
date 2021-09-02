@@ -13,8 +13,10 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
@@ -26,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         private readonly IRequestClient<IGetTokenRequest> _rcToken;
         private readonly ILogger<CreateCredentialsCommand> _logger;
         private readonly ICreateCredentialsRequestValidator _validator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CreateCredentialsCommand(
             IDbUserCredentialsMapper mapper,
@@ -33,7 +36,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             IUserCredentialsRepository userCredentialsRepository,
             IRequestClient<IGetTokenRequest> rcToken,
             ILogger<CreateCredentialsCommand> logger,
-            ICreateCredentialsRequestValidator validator)
+            ICreateCredentialsRequestValidator validator,
+            IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _userRepository = userRepository;
@@ -41,6 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             _rcToken = rcToken;
             _logger = logger;
             _validator = validator;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
@@ -64,7 +69,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (_userCredentialsRepository.IsLoginExist(request.Login))
             {
-                response.Status = OperationResultStatusType.Conflict;
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("The login already exist");
                 return response;
             }

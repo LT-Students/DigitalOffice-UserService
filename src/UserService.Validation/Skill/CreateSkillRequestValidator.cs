@@ -7,7 +7,7 @@ namespace LT.DigitalOffice.UserService.Validation.Skill
     {
         public CreateSkillRequestValidator()
         {
-            RuleFor(s => s.Name)
+            RuleFor(s => s.Name.Trim())
                 .NotEmpty()
                 .MaximumLength(100)
                 .WithMessage("Name of Skill is too long");
