@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IImageInfoMapper _imageMapper;
     private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
     private readonly IRequestClient<IGetPositionRequest> _rcPosition;
-    private readonly IRequestClient<IGetUserProjectsInfoRequest> _rcProjects;
+    private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetImagesRequest> _rcImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
@@ -186,8 +186,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcProjects.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-          IGetUserProjectsInfoRequest.CreateObj(userId)).Result.Message;
+        var response = _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
+          IGetProjectsRequest.CreateObj(userId: userId)).Result.Message;
 
         if (response.IsSuccess)
         {
@@ -277,7 +277,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IImageInfoMapper imageMapper,
       IRequestClient<IGetDepartmentUserRequest> rcDepartment,
       IRequestClient<IGetPositionRequest> rcPosition,
-      IRequestClient<IGetUserProjectsInfoRequest> rcProjects,
+      IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetImagesRequest> rcImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetUserOfficesRequest> rcGetUserOffices)
@@ -290,7 +290,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _imageMapper = imageMapper;
       _rcDepartment = rcDepartment;
       _rcPosition = rcPosition;
-      _rcProjects = rcProjects;
+      _rcGetProjects = rcGetProjects;
       _rcImages = rcImages;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetUserOffices = rcGetUserOffices;

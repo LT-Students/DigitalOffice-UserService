@@ -42,8 +42,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
         [AutoInjectRequest(typeof(IChangeUserPositionRequest))]
         public string ChangeUserPositionEndpoint { get; set; }
 
-        [AutoInjectRequest(typeof(IGetUserProjectsInfoRequest))]
-        public string GetUserProjectsInfoEndpoint { get; set; }
+        [AutoInjectRequest(typeof(IGetProjectsRequest))]
+        public string GetProjectsEndpoint { get; set; }
 
         [AutoInjectRequest(typeof(ISendEmailRequest))]
         public string SendEmailEndpoint { get; set; }
