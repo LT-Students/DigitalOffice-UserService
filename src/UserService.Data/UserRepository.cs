@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Data
                 dbUsers = dbUsers.Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
             }
 
-            if (filter.IncludeCommunications.HasValue && filter.IncludeCommunications.Value)
+            if (filter.IncludeCommunications)
             {
                 dbUsers = dbUsers.Include(u => u.Communications);
 
@@ -47,22 +47,22 @@ namespace LT.DigitalOffice.UserService.Data
                 }
             }
 
-            if (filter.IncludeCertificates.HasValue && filter.IncludeCertificates.Value)
+            if (filter.IncludeCertificates)
             {
                 dbUsers = dbUsers.Include(u => u.Certificates);
             }
 
-            if (filter.IncludeEducations.HasValue && filter.IncludeEducations.Value)
+            if (filter.IncludeEducations)
             {
                 dbUsers = dbUsers.Include(u => u.Educations.Where(e => e.IsActive));
             }
 
-            if (filter.IncludeAchievements.HasValue && filter.IncludeAchievements.Value)
+            if (filter.IncludeAchievements)
             {
                 dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
             }
 
-            if (filter.IncludeSkills.HasValue && filter.IncludeSkills.Value)
+            if (filter.IncludeSkills)
             {
                 dbUsers = dbUsers.Include(u => u.Skills).ThenInclude(s => s.Skill);
             }

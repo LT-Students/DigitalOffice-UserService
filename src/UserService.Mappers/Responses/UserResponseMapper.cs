@@ -65,20 +65,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             {
                 User = _userInfoMapper.Map(dbUser, department, position, avatar, role, office),
                 Projects = projects,
-                Skills = filter.IsIncludeSkills
+                Skills = filter.IncludeSkills
                     ? dbUser.Skills.Select(s => s.Skill.Name)
                     : null,
-                Achievements = filter.IsIncludeAchievements
+                Achievements = filter.IncludeAchievements
                     ? dbUser.Achievements.Select(
                         ua =>
                             _userAchievementInfoMapper.Map(ua, GetImage(images, ua.Achievement?.ImageId)))
                     : null,
-                Certificates = filter.IsIncludeCertificates
+                Certificates = filter.IncludeCertificates
                     ? dbUser.Certificates.Select(
                         c =>
                             _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
                     : null,
-                Communications = filter.IsIncludeCommunications
+                Communications = filter.IncludeCommunications
                     ? dbUser.Communications.Select(
                         c => new CommunicationInfo
                         {
@@ -87,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                             Value = c.Value
                         })
                     : null,
-                Educations = filter.IsIncludeEducation
+                Educations = filter.IncludeEducations
                     ? dbUser.Educations.Select(
                         e => _educationInfoMapper.Map(e))
                     : null
