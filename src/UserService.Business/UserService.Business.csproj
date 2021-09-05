@@ -5,6 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\UserService.Mappers\UserService.Mappers.csproj" />
+    <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 
