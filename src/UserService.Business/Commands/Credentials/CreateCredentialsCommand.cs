@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (_userCredentialsRepository.IsLoginExist(request.Login))
             {
-                response.Status = OperationResultStatusType.Conflict;
+                response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("The login already exist");
                 return response;
             }

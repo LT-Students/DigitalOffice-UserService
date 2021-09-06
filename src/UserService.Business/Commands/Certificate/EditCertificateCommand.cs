@@ -5,7 +5,8 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -30,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         private readonly IUserRepository _userRepository;
         private readonly ICertificateRepository _certificateRepository;
         private readonly IPatchDbUserCertificateMapper _mapper;
-        private readonly IRequestClient<IAddImageRequest> _rcImage;
+        private readonly IRequestClient<ICreateImagesRequest> _rcImage;
         private readonly ILogger<EditCertificateCommand> _logger;
 
         private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
@@ -49,11 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             try
             {
                 var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-                    IAddImageRequest.CreateObj(
-                        addImageRequest.Name,
-                        addImageRequest.Content,
-                        addImageRequest.Extension,
-                        userId)).Result;
+                    ICreateImagesRequest.CreateObj(null, ImageSource.User)).Result;
 
                 if (!response.Message.IsSuccess)
                 {
@@ -83,7 +80,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             IUserRepository userRepository,
             ICertificateRepository certificateRepository,
             IPatchDbUserCertificateMapper mapper,
-            IRequestClient<IAddImageRequest> rcImage,
+            IRequestClient<ICreateImagesRequest> rcImage,
             ILogger<EditCertificateCommand> logger)
         {
             _accessValidator = accessValidator;

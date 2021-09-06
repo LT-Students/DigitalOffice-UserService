@@ -8,13 +8,15 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
+using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -33,8 +35,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class CreateUserCommand : ICreateUserCommand
   {
     private readonly IUserRepository _userRepository;
+    private readonly IAvatarRepository _avatarRepository;
     private readonly ILogger<CreateUserCommand> _logger;
-    private readonly IRequestClient<IAddImageRequest> _rcImage;
+    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
     private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
@@ -43,6 +46,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ICreateUserRequestValidator _validator;
     private readonly IDbUserMapper _mapperUser;
+    private readonly IDbUserAvatarMapper _userAvatarMapper;
+    private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
 
@@ -208,38 +213,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
     {
-      Guid? avatarImageId = null;
-
       if (avatarRequest == null)
       {
         return null;
       }
 
+      Guid? avatarImageId = null;
       Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
       string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
 
       try
       {
-        var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-          IAddImageRequest.CreateObj(
-            avatarRequest.Name,
-            avatarRequest.Content,
-            avatarRequest.Extension,
-            userId)).Result;
+        Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+          ICreateImagesRequest.CreateObj(
+            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }, userId),
+            ImageSource.User))
+          .Result;
 
-        if (!response.Message.IsSuccess)
+        if (!createResponse.Message.IsSuccess)
         {
           _logger.LogWarning(
             "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
             userId,
-            string.Join(',', response.Message.Errors));
+            string.Join(',', createResponse.Message.Errors));
 
           errors.Add(errorMessage);
         }
         else
         {
-          avatarImageId = response.Message.Body;
+          avatarImageId = createResponse.Message.Body.ImagesIds.FirstOrDefault();
         }
       }
       catch (Exception exc)
@@ -251,11 +254,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       return avatarImageId;
     }
+
+    private List<Guid> AddAvatarToDb(Guid avatarId, Guid userId)
+    {
+      return _avatarRepository.Create(_userAvatarMapper.Map(new List<Guid>() { avatarId }, userId));
+    }
     #endregion
 
     public CreateUserCommand(
         ILogger<CreateUserCommand> logger,
-        IRequestClient<IAddImageRequest> rcImage,
+        IRequestClient<ICreateImagesRequest> rcImage,
         IHttpContextAccessor httpContextAccessor,
         IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
         IRequestClient<IChangeUserPositionRequest> rcPosition,
@@ -265,8 +273,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         IUserRepository userRepository,
         ICreateUserRequestValidator validator,
         IDbUserMapper mapperUser,
+        IDbUserAvatarMapper userAvatarMapper,
+        ICreateImageDataMapper createImageDataMapper,
         IAccessValidator accessValidator,
-        IGeneratePasswordCommand generatePassword)
+        IGeneratePasswordCommand generatePassword,
+        IAvatarRepository avatarRepository)
     {
       _logger = logger;
       _rcImage = rcImage;
@@ -279,8 +290,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
       _mapperUser = mapperUser;
+      _userAvatarMapper = userAvatarMapper;
+      _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
+      _avatarRepository = avatarRepository;
     }
 
     /// <inheritdoc/>
@@ -298,19 +312,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
-        response.Status = OperationResultStatusType.Conflict;
+        response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Communication value already exist");
         return response;
       }
 
       Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
 
-      var dbUser = _mapperUser.Map(request, avatarImageId);
+      DbUser dbUser = _mapperUser.Map(request, avatarImageId);
 
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
 
       Guid userId = _userRepository.Create(dbUser);
       _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
+
+      if (avatarImageId != null)
+      {
+        AddAvatarToDb(avatarImageId.Value, userId);
+      }
 
       SendEmail(dbUser, password, response.Errors);
 

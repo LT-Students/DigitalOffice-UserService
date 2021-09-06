@@ -2,12 +2,13 @@
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
-using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -236,11 +237,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<IGetImagesResponse> response = _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds)).Result.Message;
+          IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
 
         if (response.IsSuccess)
         {
-          return response.Body.Images.Select(_imageMapper.Map).ToList();
+          return response.Body.ImagesData.Select(_imageMapper.Map).ToList();
         }
         else
         {

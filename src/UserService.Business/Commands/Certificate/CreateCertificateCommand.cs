@@ -5,7 +5,9 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
@@ -26,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         private IUserRepository _userRepository;
         private ICertificateRepository _certificateRepository;
         private IDbUserCertificateMapper _mapper;
-        private readonly IRequestClient<IAddImageRequest> _rcImage;
+        private readonly IRequestClient<ICreateImagesRequest> _rcImage;
         private readonly ILogger<CreateCertificateCommand> _logger;
 
         private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
@@ -45,11 +47,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             try
             {
                 var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-                    IAddImageRequest.CreateObj(
-                        addImageRequest.Name,
-                        addImageRequest.Content,
-                        addImageRequest.Extension,
-                        userId), default, TimeSpan.FromSeconds(5)).Result;
+                    ICreateImagesRequest.CreateObj(
+                      new List<CreateImageData>(null), ImageSource.User), default, TimeSpan.FromSeconds(5)).Result;
 
                 if (!response.Message.IsSuccess)
                 {
@@ -80,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
             IDbUserCertificateMapper mapper,
             IUserRepository userRepository,
             ICertificateRepository certificateRepository,
-            IRequestClient<IAddImageRequest> rcAddIImage,
+            IRequestClient<ICreateImagesRequest> rcAddIImage,
             ILogger<CreateCertificateCommand> logger)
         {
             _accessValidator = accessValidator;

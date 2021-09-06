@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
             {
                 return new OperationResultResponse<bool>
                 {
-                    Status = OperationResultStatusType.Conflict,
+                    Status = OperationResultStatusType.Failed,
                     Errors = new() { $"The communication '{valueOperation.value}' already exists." }
                 };
             }
