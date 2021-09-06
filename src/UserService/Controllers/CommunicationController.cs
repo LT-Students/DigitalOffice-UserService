@@ -29,14 +29,8 @@ namespace LT.DigitalOffice.UserService.Controllers
         {
             OperationResultResponse<Guid> result = command.Execute(request);
 
-            if (result.Status == OperationResultStatusType.Conflict)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            }
-            else if (result.Status != OperationResultStatusType.Failed)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-            }
+            _httpContextAccessor.HttpContext.Response.StatusCode = result.Status == OperationResultStatusType.Failed ?
+              (int)HttpStatusCode.Conflict : (int)HttpStatusCode.Created;
 
             return result;
         }

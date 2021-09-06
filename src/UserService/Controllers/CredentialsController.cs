@@ -26,19 +26,10 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromServices] ICreateCredentialsCommand command,
             [FromBody] CreateCredentialsRequest request)
         {
-            var result = command.Execute(request);
+            OperationResultResponse<CredentialsResponse> result = command.Execute(request);
 
-            if (result.Status == OperationResultStatusType.Conflict)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-                return result;
-            }
-
-            if (result.Status != OperationResultStatusType.Failed)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-            }
+            _httpContextAccessor.HttpContext.Response.StatusCode = result.Status == OperationResultStatusType.Failed ?
+              (int)HttpStatusCode.Conflict : (int)HttpStatusCode.Created;
 
             return result;
         }
