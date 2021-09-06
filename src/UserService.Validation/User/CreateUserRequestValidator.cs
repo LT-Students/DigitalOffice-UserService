@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,10 +12,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
         private static Regex NumberRegex = new (@"\d");
         private static Regex SpecialCharactersRegex = new (@"[$&+,:;=?@#|<>.^*()%!]");
         private static Regex SpaceRegex = new (@"^[^@\s]*$");
-        private static Regex EmailRegex = new (@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
         private static Regex NameRegex = new(@"^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ' ]+[a-zA-Zа-яА-ЯёЁ']?$");
 
-        public CreateUserRequestValidator()
+        public CreateUserRequestValidator(ICreateCommunicationRequestValidator communicationValidator)
         {
             RuleFor(user => user.FirstName)
                 .NotEmpty()
@@ -77,31 +77,24 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 .IsInEnum()
                 .WithMessage("Wrong status value.");
 
-            When(user => user.Communications != null && user.Communications.Any(), () =>
-            {
-                RuleForEach(user => user.Communications)
-                    .ChildRules(c =>
-                    {
-                        c.RuleFor(uc => uc.Value)
-                        .NotEmpty()
-                        .WithMessage("Email cannot be empty.")
-                        .Must(x => EmailRegex.IsMatch(x))
-                        .WithMessage("Incorrect format email address.");
-                        c.RuleFor(uc => uc.UserId).Null();
-                    });
-            });
+            RuleFor(user => user.Communications)
+                .NotEmpty();
+
+            RuleForEach(user => user.Communications)
+                .SetValidator(communicationValidator);
 
             RuleFor(user => user.Rate)
                 .GreaterThan(0)
                 .LessThanOrEqualTo(1);
 
-            RuleFor(user => user.Password)
-                .NotEmpty()
-                .WithMessage("Password cannot be empty.")
-                .MinimumLength(5)
-                .WithMessage("Password is too short.")
-                .Must(x => SpaceRegex.IsMatch(x))
-                .WithMessage("Password must not contain space.");
+            When(user => user.Password != null && user.Password.Trim().Any(), () =>
+            {
+                RuleFor(user => user.Password.Trim())
+                    .MinimumLength(5)
+                    .WithMessage("Password is too short.")
+                    .Must(x => SpaceRegex.IsMatch(x))
+                    .WithMessage("Password must not contain space.");
+            });
         }
     }
 }
