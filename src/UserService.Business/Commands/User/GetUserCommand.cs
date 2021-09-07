@@ -49,6 +49,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private (DepartmentInfo department, PositionInfo position, OfficeInfo office) GetCompanyEmployee(
       Guid userId, bool includeDepartment, bool includePosition, bool includeOffice, List<string> errors)
     {
+      if (!includeDepartment && !includePosition && !includeOffice)
+      {
+        return (null, null, null);
+      }
+
       string errorMessage = $"Can not get department, position and office info for user '{userId}'. Please try again later.";
 
       try
@@ -129,7 +134,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             {
               Id = project.Id,
               Name = project.Name,
-              Status = project.Status
+              ShortName = project.ShortName,
+              Status = project.Status,
+              ShortDescription = project.ShortDescription
             });
           }
           return projects;
