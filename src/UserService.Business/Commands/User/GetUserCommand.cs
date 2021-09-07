@@ -35,93 +35,51 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IUserRepository _repository;
     private readonly IUserResponseMapper _mapper;
     private readonly IOfficeInfoMapper _officeMapper;
+    private readonly IDepartmentInfoMapper _departmentMapper;
+    private readonly IPositionInfoMapper _positionMapper;
     private readonly IRoleInfoMapper _roleMapper;
     private readonly IImageInfoMapper _imageMapper;
-    private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
-    private readonly IRequestClient<IGetPositionRequest> _rcPosition;
+    private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployee;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetImagesRequest> _rcImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
-    private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
 
     #region private methods
 
-    private DepartmentInfo GetDepartment(Guid userId, List<string> errors)
+    private (DepartmentInfo department, PositionInfo position, OfficeInfo office) GetCompanyEmployee(
+      Guid userId, bool includeDepartment, bool includePosition, bool includeOffice, List<string> errors)
     {
-      DepartmentInfo result = null;
-
-      string errorMessage = $"Can not get department info for user '{userId}'. Please try again later.";
+      string errorMessage = $"Can not get department, position and office info for user '{userId}'. Please try again later.";
 
       try
       {
-        IOperationResult<IGetDepartmentUserResponse> response = _rcDepartment.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-          IGetDepartmentUserRequest.CreateObj(userId)).Result.Message;
+        IOperationResult<IGetCompanyEmployeesResponse> response = _rcGetCompanyEmployee
+          .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
+            IGetCompanyEmployeesRequest.CreateObj(
+              usersIds: new() { userId },
+              includeDepartments: includeDepartment,
+              includePositions: includePosition,
+              includeOffices: includeOffice)).Result.Message;
 
         if (response.IsSuccess)
         {
-          result = new()
-          {
-            Id = response.Body.DepartmentId,
-            Name = response.Body.Name,
-            StartWorkingAt = response.Body.StartWorkingAt
-          };
+          return (department: _departmentMapper.Map(response.Body.Departments.FirstOrDefault()),
+            position: _positionMapper.Map(response.Body.Positions.FirstOrDefault()),
+            office: _officeMapper.Map(response.Body.Offices.FirstOrDefault()));
         }
-        else
-        {
-          _logger.LogWarning(
-            "Errors while getting department info:\n{Errors}",
-            string.Join('\n', response.Errors));
 
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          "Errors while getting department info:\n{Errors}",
+          string.Join('\n', response.Errors));
       }
       catch (Exception exc)
       {
         _logger.LogError(exc, "Can not get department info for user '{UserId}'", userId);
-
-        errors.Add(errorMessage);
       }
 
-      return result;
-    }
+      errors.Add(errorMessage);
 
-    private PositionInfo GetPosition(Guid userId, List<string> errors)
-    {
-      PositionInfo result = null;
-
-      string errorMessage = $"Can not get position info for user '{userId}'. Please try again later.";
-
-      try
-      {
-        IOperationResult<IPositionResponse> response = _rcPosition.GetResponse<IOperationResult<IPositionResponse>>(
-          IGetPositionRequest.CreateObj(userId, null)).Result.Message;
-
-        if (response.IsSuccess)
-        {
-          result = new()
-          {
-            Id = response.Body.PositionId,
-            Name = response.Body.Name,
-            ReceivedAt = response.Body.ReceivedAt
-          };
-        }
-        else
-        {
-          _logger.LogWarning(
-            "Errors while getting position info:\n{Errors}",
-            string.Join('\n', response.Errors));
-
-          errors.Add(errorMessage);
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Can not get position info for user '{UserId}'", userId);
-
-        errors.Add(errorMessage);
-      }
-
-      return result;
+      return (null, null, null);
     }
 
     private RoleInfo GetRole(Guid userId, List<string> errors)
@@ -137,34 +95,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         if (response.IsSuccess)
         {
           return _roleMapper.Map(response.Body.Roles[0]);
-        }
-
-        const string warningMessage = logMessage + "Reason: {Errors}";
-        _logger.LogWarning(warningMessage, userId, string.Join("\n", response.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, userId);
-      }
-
-      errors.Add(errorMessage);
-
-      return new();
-    }
-
-    private OfficeInfo GetOffice(Guid userId, List<string> errors)
-    {
-      string errorMessage = "Can not get office. Please try again later.";
-      const string logMessage = "Can not get office for user with id: {Id}.";
-
-      try
-      {
-        var response = _rcGetUserOffices.GetResponse<IOperationResult<IGetUserOfficesResponse>>(
-            IGetUserOfficesRequest.CreateObj(new() { userId })).Result.Message;
-
-        if (response.IsSuccess)
-        {
-          return _officeMapper.Map(response.Body.Offices[0]);
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
@@ -273,27 +203,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IUserRepository repository,
       IUserResponseMapper mapper,
       IRoleInfoMapper roleMapper,
+      IDepartmentInfoMapper departmentMapper,
+      IPositionInfoMapper positionMapper,
       IOfficeInfoMapper officeMapper,
       IImageInfoMapper imageMapper,
-      IRequestClient<IGetDepartmentUserRequest> rcDepartment,
-      IRequestClient<IGetPositionRequest> rcPosition,
+      IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployee,
       IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetImagesRequest> rcImages,
-      IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-      IRequestClient<IGetUserOfficesRequest> rcGetUserOffices)
+      IRequestClient<IGetUserRolesRequest> rcGetUserRoles)
     {
       _logger = logger;
       _repository = repository;
       _mapper = mapper;
       _roleMapper = roleMapper;
+      _departmentMapper = departmentMapper;
+      _positionMapper = positionMapper;
       _officeMapper = officeMapper;
       _imageMapper = imageMapper;
-      _rcDepartment = rcDepartment;
-      _rcPosition = rcPosition;
+      _rcGetCompanyEmployee = rcGetCompanyEmployee;
       _rcGetProjects = rcGetProjects;
       _rcImages = rcImages;
       _rcGetUserRoles = rcGetUserRoles;
-      _rcGetUserOffices = rcGetUserOffices;
     }
 
     /// <inheritdoc />
@@ -340,11 +270,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
+      (DepartmentInfo department, PositionInfo position, OfficeInfo office) employeeInfo =
+        GetCompanyEmployee(dbUser.Id, filter.IncludeDepartment, filter.IncludePosition, filter.IncludeOffice, response.Errors);
+
       response.Body = _mapper.Map(
         dbUser,
-        filter.IncludeDepartment ? GetDepartment(dbUser.Id, response.Errors) : null,
-        filter.IncludePosition ? GetPosition(dbUser.Id, response.Errors) : null,
-        filter.IncludeOffice ? GetOffice(dbUser.Id, response.Errors) : null,
+        employeeInfo.department,
+        employeeInfo.position,
+        employeeInfo.office,
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
         GetImages(images, response.Errors),
