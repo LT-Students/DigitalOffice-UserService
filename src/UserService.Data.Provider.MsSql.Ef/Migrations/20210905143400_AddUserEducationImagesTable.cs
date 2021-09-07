@@ -6,7 +6,7 @@ using System;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(UserServiceDbContext))]
-  [Migration("20210824232700_AddProjectsImagesTable")]
+  [Migration("20210905214200_AddUserEducationImagesTable")]
   class AddUserEducationImagesTable : Migration
   {
     protected override void Up(MigrationBuilder builder)

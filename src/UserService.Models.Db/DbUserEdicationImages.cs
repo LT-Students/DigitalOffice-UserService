@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DbUserEducation UserEducation { get; set; }
   }
 
-  public class DbProjectImageConfiguration : IEntityTypeConfiguration<DbUserEducationImages>
+  public class DbUserEducationImageConfiguration : IEntityTypeConfiguration<DbUserEducationImages>
   {
     public void Configure(EntityTypeBuilder<DbUserEducationImages> builder)
     {
