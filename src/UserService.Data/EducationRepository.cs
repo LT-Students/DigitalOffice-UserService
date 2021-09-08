@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Data
         throw new ArgumentNullException(nameof(education));
       }
 
-      ICollection<DbUserEducationImages> userEducationImages = education.Images;
+      ICollection<DbUserEducationImage> userEducationImages = education.Images;
 
       if (userEducationImages.Any())
       {

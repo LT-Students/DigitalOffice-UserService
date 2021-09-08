@@ -23,11 +23,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DateTime? ModifiedAtUtc { get; set; }
     public DbUser User { get; set; }
 
-    public ICollection<DbUserEducationImages> Images { get; set; }
+    public ICollection<DbUserEducationImage> Images { get; set; }
 
     public DbUserEducation()
     {
-      Images = new HashSet<DbUserEducationImages>();
+      Images = new List<DbUserEducationImage>();
     }
   }
 

@@ -13,22 +13,23 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     {
       builder.CreateTable
         (
-          name: DbUserEducationImages.TableName,
+          name: DbUserEducationImage.TableName,
           columns: table => new
           {
+            Id = table.Column<Guid>(),
             UserEducationId = table.Column<Guid>(),
             ImageId = table.Column<Guid>()
           },
           constraints: table =>
           {
-            table.PrimaryKey("PK_UserEducationImages", uei => new { uei.UserEducationId, uei.ImageId });
+            table.PrimaryKey("PK_UserEducationImages", uei => uei.Id);
           }
         );
     }
 
     protected override void Down(MigrationBuilder builder)
     {
-      builder.DropTable(DbUserEducationImages.TableName);
+      builder.DropTable(DbUserEducationImage.TableName);
     }
   }
 }

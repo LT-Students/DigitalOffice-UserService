@@ -4,25 +4,26 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
-  public class DbUserEducationImages
+  public class DbUserEducationImage
   {
     public const string TableName = "UserEducationImages";
 
+    public Guid Id;
     public Guid UserEducationId { get; set; }
     public Guid ImageId { get; set; }
  
     public DbUserEducation UserEducation { get; set; }
   }
 
-  public class DbUserEducationImageConfiguration : IEntityTypeConfiguration<DbUserEducationImages>
+  public class DbUserEducationImageConfiguration : IEntityTypeConfiguration<DbUserEducationImage>
   {
-    public void Configure(EntityTypeBuilder<DbUserEducationImages> builder)
+    public void Configure(EntityTypeBuilder<DbUserEducationImage> builder)
     {
       builder
-        .ToTable(DbUserEducationImages.TableName);
+        .ToTable(DbUserEducationImage.TableName);
 
       builder
-        .HasKey(uei => new { uei.UserEducationId, uei.ImageId });
+        .HasKey(uei => uei.Id);
 
       builder
         .HasOne(uei => uei.UserEducation)

@@ -59,9 +59,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
     public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
     {
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser dbSender = _userRepository.Get(senderId);
-
       OperationResultResponse<Guid> response = new();
 
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
@@ -83,21 +80,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
 		return response;
       }
-
-      DbUserEducation dbEducation = _mapper.Map(request);
       List<Guid> imagesIdsForCreate = CreateImages(request, response.Errors);
-
-      if (imagesIdsForCreate is not null && imagesIdsForCreate.Any())
-      {
-        foreach(Guid createdImageId in imagesIdsForCreate)
-        {
-          dbEducation.Images.Add(new DbUserEducationImages()
-          {
-            ImageId = createdImageId,
-            UserEducationId = dbEducation.Id
-          });
-        }
-      }  
+      DbUserEducation dbEducation = _mapper.Map(request, imagesIdsForCreate);
 
       _educationRepository.Add(dbEducation);
 
