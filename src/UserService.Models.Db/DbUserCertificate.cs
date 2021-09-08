@@ -1,41 +1,51 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
-    public class DbUserCertificate
+  public class DbUserCertificate
+  {
+    public const string TableName = "UserCertificates";
+
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public int EducationType { get; set; }
+    public string Name { get; set; }
+    public string SchoolName { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime ReceivedAt { get; set; }
+    public Guid CreatedBy { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public DateTime? ModifiedAtUtc { get; set; }
+    public ICollection<DbUserCertificateImage> Images { get; set; }
+    public DbUser User { get; set; }
+
+    public DbUserCertificate()
     {
-        public const string TableName = "UserCertificates";
-
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid ImageId { get; set; }
-        public int EducationType { get; set; }
-        public string Name { get; set; }
-        public string SchoolName { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime ReceivedAt { get; set; }
-        public Guid CreatedBy { get; set; }
-        public DateTime CreatedAtUtc { get; set; }
-        public Guid? ModifiedBy { get; set; }
-        public DateTime? ModifiedAtUtc { get; set; }
-        public DbUser User { get; set; }
+      Images = new List<DbUserCertificateImage>();
     }
+  }
 
-    public class DbUserCertificateConfiguration : IEntityTypeConfiguration<DbUserCertificate>
+  public class DbUserCertificateConfiguration : IEntityTypeConfiguration<DbUserCertificate>
+  {
+    public void Configure(EntityTypeBuilder<DbUserCertificate> builder)
     {
-        public void Configure(EntityTypeBuilder<DbUserCertificate> builder)
-        {
-            builder
-                .ToTable(DbUserCertificate.TableName);
+      builder
+        .ToTable(DbUserCertificate.TableName);
 
-            builder
-                .HasKey(c => c.Id);
+      builder
+        .HasKey(c => c.Id);
 
-            builder
-                .HasOne(pm => pm.User)
-                .WithMany(p => p.Certificates);
-        }
+      builder
+        .HasOne(pm => pm.User)
+        .WithMany(p => p.Certificates);
+
+      builder
+        .HasMany(uc => uc.Images)
+        .WithOne(uci => uci.UserCertificate);
     }
+  }
 }

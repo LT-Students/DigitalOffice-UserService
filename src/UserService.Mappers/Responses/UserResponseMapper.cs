@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           Certificates = filter.IncludeCertificates
               ? dbUser.Certificates.Select(
                   c =>
-                      _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
+					_certificateInfoMapper.Map(c, c.Images.Select(i => GetImage(images, i.ImageId)).ToList()))
               : null,
           Communications = filter.IncludeCommunications
               ? dbUser.Communications.Select(

@@ -6,11 +6,13 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
+using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
@@ -19,6 +21,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
@@ -29,60 +33,52 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     private IUserRepository _userRepository;
     private ICertificateRepository _certificateRepository;
     private IDbUserCertificateMapper _mapper;
-    private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly ILogger<CreateCertificateCommand> _logger;
 
-    private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
+    private List<Guid> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
-      Guid? imageId = null;
+      string errorMsg = $"Can not add certificate image for user {userId}.";
+      List<CreateImageData> images = new();
 
-      if (addImageRequest == null)
+      foreach(AddImageRequest imageData in request.Images)
       {
-        return null;
+        images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, userId));
       }
-
-      const string errorMessage = "Can not add certificate image to certificate. Please try again later.";
 
       try
       {
-        Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
-          ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }),
-            ImageSource.User)).Result;
+        IOperationResult<ICreateImagesResponse> responsedMsg = 
+          _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+            ICreateImagesRequest.CreateObj(images, ImageSource.User)).Result.Message;
 
-        if (!response.Message.IsSuccess)
+        if(responsedMsg.IsSuccess)
         {
-          _logger.LogWarning(
-            errorMessage + "Reason:\n{Errors}",
-            string.Join(',', response.Message.Errors));
+          return responsedMsg.Body.ImagesIds;
+        }
 
-          errors.Add(errorMessage);
-        }
-        else
-        {
-          imageId = response.Message.Body;
-        }
+        _logger.LogWarning(
+          "Can not add certificate image for user {userId}. Reason: {errors}", 
+          userId, string.Join(',', responsedMsg.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, errorMessage);
-
-        errors.Add(errorMessage);
+        _logger.LogError(exc, errorMsg);
       }
 
-      return imageId;
+      errors.Add(errorMsg);
+
+      return null;
     }
 
     public CreateCertificateCommand(
-      IAccessValidator accessValidator,
-      IHttpContextAccessor httpContextAccessor,
-      IDbUserCertificateMapper mapper,
-      IUserRepository userRepository,
-      ICertificateRepository certificateRepository,
-      IRequestClient<ICreateImagesRequest> rcAddIImage,
-      ICreateImageDataMapper createImageDataMapper,
-      ILogger<CreateCertificateCommand> logger)
+    IAccessValidator accessValidator,
+    IHttpContextAccessor httpContextAccessor,
+    IDbUserCertificateMapper mapper,
+    IUserRepository userRepository,
+    ICertificateRepository certificateRepository,
+    IRequestClient<ICreateImagesRequest> rcAddIImage,
+    ILogger<CreateCertificateCommand> logger)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
@@ -91,39 +87,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _certificateRepository = certificateRepository;
       _rcImage = rcAddIImage;
       _logger = logger;
-      _createImageDataMapper = createImageDataMapper;
     }
 
     public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
     {
-      if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-        && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
+      OperationResultResponse<Guid> response = new();
+
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUser sender = _userRepository.Get(senderId);
+
+      if (!(sender.IsAdmin || _accessValidator.HasRights(Rights.AddEditRemoveUsers)) && senderId != request.UserId)
       {
-        throw new ForbiddenException("Not enough rights.");
+        response.Errors.Add("Not enough rights");
+
+        response.Status = OperationResultStatusType.Failed;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        return response;
       }
 
-      List<string> errors = new();
-
-      Guid? imageId = GetImageId(request.Image, errors);
-
-      if (!imageId.HasValue)
-      {
-        return new OperationResultResponse<Guid>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = errors
-        };
-      }
-
-      DbUserCertificate dbUserCertificate = _mapper.Map(request, imageId.Value);
+      List<Guid> createdImagesIds = CreateImages(request, senderId, response.Errors);
+      DbUserCertificate dbUserCertificate = _mapper.Map(request, createdImagesIds);
 
       _certificateRepository.Add(dbUserCertificate);
 
-      return new OperationResultResponse<Guid>
-      {
-        Status = OperationResultStatusType.FullSuccess,
-        Body = dbUserCertificate.Id
-      };
+      response.Body = dbUserCertificate.Id;
+      response.Status = response.Errors.Any() ?
+        OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+
+      return response;
     }
   }
 }

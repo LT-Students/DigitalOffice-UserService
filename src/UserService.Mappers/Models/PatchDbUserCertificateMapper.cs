@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 }
                 if (item.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase) && imageId.HasValue)
                 {
-                    result.Operations.Add(new Operation<DbUserCertificate>(item.op, $"/{nameof(DbUserCertificate.ImageId)}", item.from, imageId.Value));
+                    result.Operations.Add(new Operation<DbUserCertificate>(item.op, $"/{nameof(DbUserCertificate.Images)}", item.from, imageId.Value));
                     continue;
                 }
                 result.Operations.Add(new Operation<DbUserCertificate>(item.op, item.path, item.from, item.value));

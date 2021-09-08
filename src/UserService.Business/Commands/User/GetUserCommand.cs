@@ -376,7 +376,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         {
           foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
           {
-            images.Add(dbUserCertificate.ImageId);
+            images.AddRange(dbUserCertificate.Images.Select(i => i.ImageId));
           }
         }
       }

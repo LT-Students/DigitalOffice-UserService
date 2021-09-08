@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
@@ -16,18 +17,33 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public DbUserCertificate Map(CreateCertificateRequest request, Guid imageId)
+        public DbUserCertificate Map(CreateCertificateRequest request, List<Guid> imagesIds)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
+            Guid Id = Guid.NewGuid();
+            List<DbUserCertificateImage> images = new();
+
+            if(imagesIds is not null)
+            {
+              foreach (Guid imageId in imagesIds)
+              {
+                images.Add(new DbUserCertificateImage()
+                {
+                  ImageId = imageId,
+                  UserCertificateId = Id
+                });
+              }
+            }
+
             return new DbUserCertificate
             {
-                Id = Guid.NewGuid(),
+                Id = Id,
                 UserId = request.UserId,
-                ImageId = imageId,
+                Images = images,
                 Name = request.Name,
                 SchoolName = request.SchoolName,
                 EducationType = (int)request.EducationType,

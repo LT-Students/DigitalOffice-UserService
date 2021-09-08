@@ -3,6 +3,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -10,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     {
         public CertificateInfo Map(
             DbUserCertificate dbUserCertificate,
-            ImageInfo image)
+            List<ImageInfo> images)
         {
             if (dbUserCertificate == null)
             {
@@ -24,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 EducationType = (EducationType)dbUserCertificate.EducationType,
                 ReceivedAt = dbUserCertificate.ReceivedAt,
                 SchoolName = dbUserCertificate.SchoolName,
-                Image = image
+                Images = images
             };
         }
     }

@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
@@ -10,6 +11,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public string SchoolName { get; set; }
         public EducationType EducationType { get; set; }
         public DateTime ReceivedAt { get; set; }
-        public ImageInfo Image { get; set; }
+        public List<ImageInfo> Images { get; set; }
     }
 }

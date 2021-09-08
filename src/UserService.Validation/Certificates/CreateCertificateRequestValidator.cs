@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Validation.Certificates
                 .Must(id => repository.Get(id) != null)
                 .WithMessage("The user must exist");
 
-            RuleFor(x => x.Image)
+            RuleFor(x => x.Images)
                 .NotNull();
         }
     }

@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -30,6 +31,13 @@ namespace LT.DigitalOffice.UserService.Data
                 throw new ArgumentNullException(nameof(certificate));
             }
 
+            ICollection<DbUserCertificateImage> images = certificate.Images;
+
+            if(images.Any())
+            {
+              _provider.UserCertificateImages.AddRange(images);
+            }
+            
             _provider.UserCertificates.Add(certificate);
             _provider.Save();
         }
