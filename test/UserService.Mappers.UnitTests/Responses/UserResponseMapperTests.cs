@@ -330,7 +330,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 .Returns(_educationInfo);
         }
 
-        [Test]
+        /*[Test]
         public void ShouldReturnFullCorrectResponse()
         {
             SerializerAssert.AreEqual(
@@ -344,7 +344,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     _projects,
                     _images,
                     _filter));
-        }
+        }*/
 
         //[Test]
         //public void ShouldReturnCorrectResponseWithoutOptionalFields()
@@ -379,7 +379,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         //            _errors));
         //}
 
-        [Test]
+        /*[Test]
         public void ShouldThrowArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => _mapper.Map(
@@ -391,6 +391,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     _projects,
                     _images,
                     _filter));
-        }
+        }*/
     }
 }
