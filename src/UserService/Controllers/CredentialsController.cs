@@ -26,12 +26,7 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromServices] ICreateCredentialsCommand command,
             [FromBody] CreateCredentialsRequest request)
         {
-            OperationResultResponse<CredentialsResponse> result = command.Execute(request);
-
-            _httpContextAccessor.HttpContext.Response.StatusCode = result.Status == OperationResultStatusType.Failed ?
-              (int)HttpStatusCode.Conflict : (int)HttpStatusCode.Created;
-
-            return result;
+            return command.Execute(request);
         }
     }
 }

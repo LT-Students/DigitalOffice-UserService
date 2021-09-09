@@ -9,6 +9,7 @@ using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
@@ -59,9 +60,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             OperationResultResponse<CredentialsResponse> response = new ();
 
-            var dbPendingUser = _userRepository.GetPendingUser(request.UserId);
+            DbPendingUser dbPendingUser = _userRepository.GetPendingUser(request.UserId);
             if (dbPendingUser == null)
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add($"Pending user with ID '{request.UserId}' was not found.");
                 return response;
@@ -77,6 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (_userCredentialsRepository.IsCredentialsExist(request.UserId))
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("The credentials already exist");
                 return response;
@@ -84,6 +87,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (request.Password != dbPendingUser.Password)
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("Wrong password");
                 return response;
@@ -91,7 +95,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             try
             {
-                var tokenResponse = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
+        IOperationResult<IGetTokenResponse> tokenResponse = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
                         IGetTokenRequest.CreateObj(request.UserId))
                     .Result
                     .Message;

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
@@ -30,6 +26,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -290,15 +287,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public OperationResultResponse<Guid> Execute(CreateUserRequest request)
     {
+      OperationResultResponse<Guid> response = new();
+
       if (!(_accessValidator.IsAdmin() ||
         _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+        return response;
       }
 
       _validator.ValidateAndThrowCustom(request);
-
-      OperationResultResponse<Guid> response = new();
 
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
@@ -333,6 +333,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       ChangeUserOffice(request.OfficeId, userId, response.Errors);
 
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;
       response.Status = response.Errors.Any()
               ? OperationResultStatusType.PartialSuccess
