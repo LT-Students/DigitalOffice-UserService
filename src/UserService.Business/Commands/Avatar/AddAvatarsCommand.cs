@@ -61,14 +61,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _logger = logger;
     }
 
-    private List<Guid> AddImages(List<AddImageRequest> request, Guid userId, Guid senderId, List<string> errors)
+    private List<Guid> AddImages(List<AddImageRequest> request, Guid senderId, List<string> errors)
     {
       if (request == null || request.Contains(null))
       {
         return null;
       }
-
-      List<Guid> result = null;
 
       string errorMessage = "Can not add images. Please try again later.";
       string logMessage = "Errors while adding images.";
@@ -83,22 +81,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
         if (createResponse.Message.IsSuccess)
         {
-          result = createResponse.Message.Body.ImagesIds;
-
-          List<DbUserAvatar> dbUsersAvatarsCreate = _dbUserAvatarMapper.Map(result, userId);
-
-          _avatarRepository.Create(dbUsersAvatarsCreate);
+          return createResponse.Message.Body.ImagesIds;
         }
-        else
-        {
-          string warningMessage = logMessage + " Errors: {Errors}";
 
-          _logger.LogWarning(
-            warningMessage,
-            string.Join('\n', createResponse.Message.Errors));
+        string warningMessage = logMessage + " Errors: {Errors}";
 
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          warningMessage,
+          string.Join('\n', createResponse.Message.Errors));
+
+        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
@@ -107,7 +99,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         errors.Add(errorMessage);
       }
 
-      return result;
+      return null;
+    }
+
+    private List<Guid> AddImagesToDb(List<Guid> imageIds, Guid userId)
+    {
+      List<DbUserAvatar> dbUsersAvatarsCreate = _dbUserAvatarMapper.Map(imageIds, userId);
+
+      return _avatarRepository.Create(dbUsersAvatarsCreate);
     }
 
     public OperationResultResponse<List<Guid>> Execute(AddAvatarRequest request)
@@ -116,34 +115,39 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       List<string> errors = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser dbUser = _userRepository.Get(senderId);
 
-      if (!(dbUser.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-            && senderId != request.UserId)
+      if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
+        && senderId != request.UserId)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Not enough rights.");
+
+        return response;
       }
-      else
+
+      if (!_requestValidator.ValidateCustom(request, out errors))
       {
-        if (_requestValidator.ValidateCustom(request, out errors) == false)
-        {
-          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-          response.Status = OperationResultStatusType.Failed;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.AddRange(errors);
 
-          response.Errors.AddRange(errors);
-        }
-        else
-        {
-          response.Body = AddImages(request.Images, request.UserId, senderId, response.Errors);
-
-          response.Status = response.Errors.Any()
-            ? OperationResultStatusType.PartialSuccess
-            : OperationResultStatusType.FullSuccess;
-        }
+        return response;
       }
+
+      List<Guid> result = AddImages(request.Images, senderId, response.Errors);
+
+      if (result != null)
+      {
+        AddImagesToDb(result, request.UserId);
+      }
+
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+      response.Body = result;
+      response.Status = response.Errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
+
       return response;
     }
   }

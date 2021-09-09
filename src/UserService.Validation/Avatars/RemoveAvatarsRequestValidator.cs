@@ -11,8 +11,7 @@ namespace LT.DigitalOffice.UserService.Validation.Avatars
       ICheckImagesToUserAffiliationHelper helper)
     {
       RuleFor(x => x.AvatarIds)
-        .NotEmpty()
-        .WithMessage("Images Ids can not be null.");
+        .NotEmpty().WithMessage("Images Ids can not be null.");
 
       RuleFor(request => request)
         .Must(request => helper.CheckAffiliation(request.AvatarIds, request.UserId))

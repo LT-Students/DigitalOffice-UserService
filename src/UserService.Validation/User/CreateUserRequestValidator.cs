@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,12 +18,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
     private readonly List<string> imageFormats = new()
     {
-      ".jpg",
-      ".jpeg",
-      ".png",
-      ".bmp",
-      ".gif",
-      ".tga"
+      ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tga"
     };
 
     public CreateUserRequestValidator(ICreateCommunicationRequestValidator communicationValidator)
@@ -34,20 +30,17 @@ namespace LT.DigitalOffice.UserService.Validation.User
           .WithMessage("First name must not contain numbers.")
           .Must(x => !SpecialCharactersRegex.IsMatch(x))
           .WithMessage("First name must not contain special characters.")
-          .MaximumLength(32)
-          .WithMessage("First name is too long.")
+          .MaximumLength(32).WithMessage("First name is too long.")
           .Must(x => NameRegex.IsMatch(x.Trim()))
           .WithMessage("First name contains invalid characters.");
 
       RuleFor(user => user.LastName)
-          .NotEmpty()
-          .WithMessage("Last name cannot be empty.")
+          .NotEmpty().WithMessage("Last name cannot be empty.")
           .Must(x => !NumberRegex.IsMatch(x))
           .WithMessage("Last name must not contain numbers.")
           .Must(x => !SpecialCharactersRegex.IsMatch(x))
           .WithMessage("Last name must not contain special characters.")
-          .MaximumLength(32)
-          .WithMessage("Last name is too long.")
+          .MaximumLength(32).WithMessage("Last name is too long.")
           .Must(x => NameRegex.IsMatch(x.Trim()))
           .WithMessage("Last name contains invalid characters.");
 
@@ -84,19 +77,27 @@ namespace LT.DigitalOffice.UserService.Validation.User
         user => (user.AvatarImage != null),
         () =>
           RuleFor(user => user.AvatarImage)
-            .Must(x => !string.IsNullOrEmpty(x.Content))
-            .WithMessage("Content can't be empty")
-            .Must(x => imageFormats.Contains(x.Extension))
-            .WithMessage("Wrong extension")
+            .Must(x => !string.IsNullOrEmpty(x.Content)).WithMessage("Content can't be empty")
+            .Must(x =>
+            {
+              try
+              {
+                var byteString = new Span<byte>(new byte[x.Content.Length]);
+                return Convert.TryFromBase64String(x.Content, byteString, out _);
+              }
+              catch
+              {
+                return false;
+              }
+            }).WithMessage("Wrong image content.")
+            .Must(x => imageFormats.Contains(x.Extension)).WithMessage("Wrong extension")
         );
 
       RuleFor(user => user.Gender)
-          .IsInEnum()
-          .WithMessage("Wrong gender value.");
+          .IsInEnum().WithMessage("Wrong gender value.");
 
       RuleFor(user => user.Status)
-          .IsInEnum()
-          .WithMessage("Wrong status value.");
+          .IsInEnum().WithMessage("Wrong status value.");
 
       RuleFor(user => user.Communications)
           .NotEmpty();
@@ -111,10 +112,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
       When(user => user.Password != null && user.Password.Trim().Any(), () =>
       {
         RuleFor(user => user.Password.Trim())
-            .MinimumLength(5)
-            .WithMessage("Password is too short.")
-            .Must(x => SpaceRegex.IsMatch(x))
-            .WithMessage("Password must not contain space.");
+            .MinimumLength(5).WithMessage("Password is too short.")
+            .Must(x => SpaceRegex.IsMatch(x)).WithMessage("Password must not contain space.");
       });
     }
   }

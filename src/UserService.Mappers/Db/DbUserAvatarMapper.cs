@@ -15,6 +15,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
     {
       List<DbUserAvatar> result = new();
 
+      if (imageIds == null)
+      {
+        return result;
+      }
+
       foreach (Guid imageId in imageIds)
       {
         result.Add(new DbUserAvatar

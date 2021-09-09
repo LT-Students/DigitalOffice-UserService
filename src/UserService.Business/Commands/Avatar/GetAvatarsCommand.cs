@@ -31,8 +31,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
     private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
     {
-      List<ImageData> result = null;
-
       string errorMessage = "Can't get images. Please try again later.";
       string logMessage = "Errors while getting images with ids: {Ids}.";
 
@@ -44,19 +42,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
         if (getResponse.Message.IsSuccess)
         {
-          result = getResponse.Message.Body.ImagesData;
+          return getResponse.Message.Body.ImagesData;
         }
-        else
-        {
-          string warningMessage = logMessage + "Errors: {Errors}";
 
-          _logger.LogWarning(
-            warningMessage,
-            string.Join(", ", imageIds),
-            string.Join('\n', getResponse.Message.Errors));
+        string warningMessage = logMessage + "Errors: {Errors}";
 
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          warningMessage,
+          string.Join(", ", imageIds),
+          string.Join('\n', getResponse.Message.Errors));
+
+        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
@@ -65,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         errors.Add(errorMessage);
       }
 
-      return result;
+      return null;
     }
 
     public GetAvatarsCommand(
@@ -94,36 +90,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("User was not found.");
+
+        return response;
       }
-      else
+
+      List<Guid> dbImagesIds = null;
+
+      if (getOnlyCurrent && dbUser.AvatarFileId != null)
       {
-        List<Guid> dbImagesIds = null;
-
-        if (getOnlyCurrent && dbUser.AvatarFileId != null)
-        {
-          dbImagesIds.Add(dbUser.AvatarFileId.Value);
-        }
-        else if (!getOnlyCurrent)
-        {
-          dbImagesIds = _avatarRepository.Get(userId).Select(x => x.ImageId).ToList();
-        }
-
-        if (dbImagesIds == null)
-        {
-          response.Status = OperationResultStatusType.PartialSuccess;
-          response.Errors.Add("User images was not found.");
-        }
-        else
-        {
-          response.Body = _avatarsResponseMapper.Map(
-            GetImages(dbImagesIds, response.Errors),
-            dbUser.AvatarFileId);
-
-          response.Status = response.Errors.Any()
-            ? OperationResultStatusType.PartialSuccess
-            : OperationResultStatusType.FullSuccess;
-        }
+        dbImagesIds.Add(dbUser.AvatarFileId.Value);
       }
+      else if (!getOnlyCurrent)
+      {
+        dbImagesIds = _avatarRepository.Get(userId).Select(x => x.ImageId).ToList();
+      }
+
+      if (dbImagesIds == null || !dbImagesIds.Any())
+      {
+        response.Status = OperationResultStatusType.PartialSuccess;
+        response.Errors.Add("User images was not found.");
+
+        return response;
+      }
+
+      response.Body = _avatarsResponseMapper.Map(
+          GetImages(dbImagesIds, response.Errors),
+          dbUser.AvatarFileId);
+
+      response.Status = response.Errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
 
       return response;
     }

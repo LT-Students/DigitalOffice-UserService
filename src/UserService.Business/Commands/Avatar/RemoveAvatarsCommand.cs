@@ -35,8 +35,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
     private bool RemoveImages(List<Guid> imageIds, Guid userId, List<string> errors)
     {
-      bool result = false;
-
       string errorMessage = "Can't remove images. Please try again later.";
       string logMessage = "Errors while removing images with ids: {Ids}.";
 
@@ -48,28 +46,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
         if (removeResponse.Message.IsSuccess)
         {
-          _avatarRepository.Remove(imageIds);
-
-          DbUser dbUser = _userRepository.Get(userId);
-
-          if (dbUser.AvatarFileId != null && imageIds.Contains(dbUser.AvatarFileId.Value))
-          {
-            _userRepository.UpdateAvatar(userId, null);
-          }
-
-          result = removeResponse.Message.Body;
+          return removeResponse.Message.Body;
         }
-        else
-        {
-          string warningMessage = logMessage + "Errors: {Errors}";
 
-          _logger.LogWarning(
-            warningMessage,
-            string.Join(", ", imageIds),
-            string.Join('\n', removeResponse.Message.Errors));
+        string warningMessage = logMessage + "Errors: {Errors}";
 
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          warningMessage,
+          string.Join(", ", imageIds),
+          string.Join('\n', removeResponse.Message.Errors));
+
+        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
@@ -78,7 +65,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         errors.Add(errorMessage);
       }
 
-      return result;
+      return false;
+    }
+
+    private bool RemoveImagesFromDb(List<Guid> imageIds, Guid userId)
+    {
+      DbUser dbUser = _userRepository.Get(userId);
+
+      if (dbUser.AvatarFileId != null && imageIds.Contains(dbUser.AvatarFileId.Value))
+      {
+        _userRepository.UpdateAvatar(userId, null);
+      }
+
+      return _avatarRepository.Remove(imageIds);
     }
 
     public RemoveAvatarsCommand(
@@ -105,35 +104,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       List<string> errors = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser dbUser = _userRepository.Get(senderId);
 
-      if (!(dbUser.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-            && senderId != request.UserId)
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers)
+        && senderId != request.UserId)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Not enough rights.");
+
+        return response;
       }
-      else
+
+      if (_removeRequestValidator.ValidateCustom(request, out errors) == false)
       {
-        if (_removeRequestValidator.ValidateCustom(request, out errors) == false)
-        {
-          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-          response.Status = OperationResultStatusType.Failed;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.AddRange(errors);
 
-          response.Errors.AddRange(errors);
-        }
-        else
-        {
-          response.Body = RemoveImages(request.AvatarIds, request.UserId, response.Errors);
-
-          response.Status = response.Errors.Any()
-            ? OperationResultStatusType.PartialSuccess
-            : OperationResultStatusType.FullSuccess;
-        }
+        return response;
       }
 
+      response.Body = RemoveImages(request.AvatarIds, request.UserId, response.Errors);
+
+      if (response.Body)
+      {
+        RemoveImagesFromDb(request.AvatarIds, request.UserId);
+      }
+
+      response.Status = response.Errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
       return response;
     }
   }

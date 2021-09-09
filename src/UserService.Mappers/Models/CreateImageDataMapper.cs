@@ -12,6 +12,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     {
       List<CreateImageData> result = new();
 
+      if (request == null)
+      {
+        return result;
+      }
+
       foreach(AddImageRequest image in request)
       {
         result.Add(new CreateImageData(image.Name, image.Content, image.Extension, senderId));
