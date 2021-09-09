@@ -48,8 +48,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private void EditCompanyEmployee(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-      string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
-      string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
+      string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
       string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
       const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
       const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
@@ -71,9 +71,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         {
           _logger.LogWarning(logMessage, userId);
 
-          errors.Add(departmentErrorMessage);
-          errors.Add(positionErrorMessage);
-          errors.Add(officeErrorMessage);
+          if (departmentId.HasValue)
+          {
+            errors.Add(departmentErrorMessage);
+          }
+
+          if (positionId.HasValue)
+          {
+            errors.Add(positionErrorMessage);
+          }
+
+          if (officeId.HasValue)
+          {
+            errors.Add(officeErrorMessage);
+          }
 
           return;
         }
@@ -103,9 +114,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         _logger.LogError(exc, logMessage, userId);
 
-        errors.Add(departmentErrorMessage);
-        errors.Add(positionErrorMessage);
-        errors.Add(officeErrorMessage);
+        if (departmentId.HasValue)
+        {
+          errors.Add(departmentErrorMessage);
+        }
+
+        if (positionId.HasValue)
+        {
+          errors.Add(positionErrorMessage);
+        }
+
+        if (officeId.HasValue)
+        {
+          errors.Add(officeErrorMessage);
+        }
       }
     }
 

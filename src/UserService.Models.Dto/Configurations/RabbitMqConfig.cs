@@ -71,7 +71,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
     public string GetCompanyEmployeesEndpoint { get; set; }
 
-
     //common
 
     [AutoInjectRequest(typeof(IDisactivateUserRequest))]
