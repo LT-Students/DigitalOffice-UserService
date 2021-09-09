@@ -24,5 +24,10 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
           table.PrimaryKey("PK_UsersAvatars", x => x.Id);
         });
     }
+
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropTable(name: DbUserAvatar.TableName);
+    }
   }
 }

@@ -22,6 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
             RoleInfo role,
             List<ProjectInfo> projects,
             List<ImageInfo> images,
+            ImageInfo avatar,
             GetUserFilter filter);
     }
 }

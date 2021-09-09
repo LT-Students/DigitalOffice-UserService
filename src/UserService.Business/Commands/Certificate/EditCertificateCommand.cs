@@ -16,6 +16,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -50,9 +51,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       try
       {
-        var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-            ICreateImagesRequest.CreateObj(_createImageDataMapper.Map(
-              new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User)).Result;
+        Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
+          ICreateImagesRequest.CreateObj(_createImageDataMapper.Map(
+          new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User)).Result;
 
         if (!response.Message.IsSuccess)
         {
@@ -100,20 +101,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
       List<string> errors = new List<string>();
 
-      var senderId = _httpContextAccessor.HttpContext.GetUserId();
-      var sender = _userRepository.Get(senderId);
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUser sender = _userRepository.Get(senderId);
 
       DbUserCertificate certificate = _certificateRepository.Get(certificateId);
 
-      if (!(sender.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
             && senderId != certificate.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }
 
-      var imageOperation = request.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase));
+      Operation<EditCertificateRequest> imageOperation = request.Operations
+        .FirstOrDefault(o => o.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase));
+
       Guid? imageId = null;
+
       if (imageOperation != null)
       {
         imageId = GetImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);

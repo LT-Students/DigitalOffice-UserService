@@ -73,22 +73,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
       try
       {
-        Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+        IOperationResult<ICreateImagesResponse> createResponse = _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(request, senderId),
             ImageSource.User))
-          .Result;
+          .Result.Message;
 
-        if (createResponse.Message.IsSuccess)
+        if (createResponse.IsSuccess)
         {
-          return createResponse.Message.Body.ImagesIds;
+          return createResponse.Body.ImagesIds;
         }
 
         string warningMessage = logMessage + " Errors: {Errors}";
 
         _logger.LogWarning(
           warningMessage,
-          string.Join('\n', createResponse.Message.Errors));
+          string.Join('\n', createResponse.Errors));
 
         errors.Add(errorMessage);
       }
@@ -112,7 +112,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     public OperationResultResponse<List<Guid>> Execute(AddAvatarRequest request)
     {
       OperationResultResponse<List<Guid>> response = new();
-      List<string> errors = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -125,6 +124,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
         return response;
       }
+
+      List<string> errors = new();
 
       if (!_requestValidator.ValidateCustom(request, out errors))
       {

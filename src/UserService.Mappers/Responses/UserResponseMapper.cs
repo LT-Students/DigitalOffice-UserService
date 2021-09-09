@@ -52,14 +52,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             RoleInfo role,
             List<ProjectInfo> projects,
             List<ImageInfo> images,
+            ImageInfo avatar,
             GetUserFilter filter)
         {
             if (dbUser == null)
             {
                 throw new ArgumentNullException(nameof(dbUser));
             }
-
-            ImageInfo avatar = images.FirstOrDefault(i => i.Id == dbUser.AvatarFileId);
 
             return new UserResponse
             {

@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
@@ -41,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetDepartmentUserRequest> _rcDepartment;
     private readonly IRequestClient<IGetPositionRequest> _rcPosition;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
-    private readonly IRequestClient<IGetImagesRequest> _rcImages;
+    private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
 
@@ -236,7 +237,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        IOperationResult<IGetImagesResponse> response = _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+        IOperationResult<IGetImagesResponse> response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
           IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
 
         if (response.IsSuccess)
@@ -264,6 +265,41 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return new();
     }
 
+    private ImageData GetAvatar(List<Guid> imageIds, List<string> errors)
+    {
+      string errorMessage = "Can't get user's avatar. Please try again later.";
+      string logMessage = "Errors while getting images with ids: {Ids}.";
+
+      try
+      {
+        IOperationResult<IGetImagesResponse> getResponse = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+          IGetImagesRequest.CreateObj(imageIds, ImageSource.User))
+          .Result.Message;
+
+        if (getResponse.IsSuccess)
+        {
+          return getResponse.Body.ImagesData.FirstOrDefault();
+        }
+
+        string warningMessage = logMessage + "Errors: {Errors}";
+
+        _logger.LogWarning(
+          warningMessage,
+          string.Join(", ", imageIds),
+          string.Join('\n', getResponse.Errors));
+
+        errors.Add(errorMessage);
+      }
+      catch (Exception e)
+      {
+        _logger.LogError(e, logMessage, string.Join(", ", imageIds));
+
+        errors.Add(errorMessage);
+      }
+
+      return null;
+    }
+
     #endregion
 
     /// <summary>
@@ -279,7 +315,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetDepartmentUserRequest> rcDepartment,
       IRequestClient<IGetPositionRequest> rcPosition,
       IRequestClient<IGetProjectsRequest> rcGetProjects,
-      IRequestClient<IGetImagesRequest> rcImages,
+      IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetUserOfficesRequest> rcGetUserOffices)
     {
@@ -292,7 +328,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcDepartment = rcDepartment;
       _rcPosition = rcPosition;
       _rcGetProjects = rcGetProjects;
-      _rcImages = rcImages;
+      _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetUserOffices = rcGetUserOffices;
     }
@@ -316,14 +352,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         throw new NotFoundException($"User was not found.");
       }
 
+      List<Guid> avatarId = new();
       List<Guid> images = new();
+
       if (filter.IncludeImages)
       {
-        if (dbUser.AvatarFileId.HasValue)
-        {
-          images.Add(dbUser.AvatarFileId.Value);
-        }
-
         if (filter.IncludeCertificates)
         {
           foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
@@ -339,6 +372,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             images.Add(dbUserAchievement.Achievement.ImageId);
           }
         }
+
+        if (dbUser.AvatarFileId.HasValue)
+        {
+          avatarId.Add(dbUser.AvatarFileId.Value);
+        }
       }
 
       response.Body = _mapper.Map(
@@ -349,6 +387,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
         GetImages(images, response.Errors),
+        _imageMapper.Map(GetAvatar(avatarId, response.Errors)),
         filter);
 
       response.Status = response.Errors.Any()

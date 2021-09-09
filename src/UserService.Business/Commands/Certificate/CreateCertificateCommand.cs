@@ -6,12 +6,12 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using MassTransit;
@@ -48,11 +48,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       try
       {
-        var response = _rcImage.GetResponse<IOperationResult<Guid>>(
-            ICreateImagesRequest.CreateObj(
-              _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User),
-            default, TimeSpan.FromSeconds(5)).Result;
-
+        Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
+          ICreateImagesRequest.CreateObj(
+          _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User),
+          default, TimeSpan.FromSeconds(5)).Result;
         if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(
@@ -100,11 +99,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
       List<string> errors = new();
 
-      var senderId = _httpContextAccessor.HttpContext.GetUserId();
-      var dbUser = _userRepository.Get(senderId);
-      if (!(dbUser.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-            && senderId != request.UserId)
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUser dbUser = _userRepository.Get(senderId);
+      if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+          && senderId != request.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }
@@ -120,7 +118,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         };
       }
 
-      var dbUserCertificate = _mapper.Map(request, imageId.Value);
+      DbUserCertificate dbUserCertificate = _mapper.Map(request, imageId.Value);
 
       _certificateRepository.Add(dbUserCertificate);
 

@@ -24,8 +24,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
     public CreateUserRequestValidator(ICreateCommunicationRequestValidator communicationValidator)
     {
       RuleFor(user => user.FirstName)
-          .NotEmpty()
-          .WithMessage("First name cannot be empty.")
+          .NotEmpty().WithMessage("First name cannot be empty.")
           .Must(x => !NumberRegex.IsMatch(x))
           .WithMessage("First name must not contain numbers.")
           .Must(x => !SpecialCharactersRegex.IsMatch(x))
