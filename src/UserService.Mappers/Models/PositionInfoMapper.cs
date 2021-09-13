@@ -1,10 +1,10 @@
-﻿using LT.DigitalOffice.Models.Broker.Models;
+﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
-    public class PositionInfoMapper : IPositionInfoMapper
+  public class PositionInfoMapper : IPositionInfoMapper
     {
         public PositionInfo Map(PositionData position)
         {

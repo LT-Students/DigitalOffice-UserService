@@ -221,15 +221,13 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _departmentInfo = new DepartmentInfo
             {
                 Id = Guid.NewGuid(),
-                Name = "Department name",
-                StartWorkingAt = DateTime.UtcNow
+                Name = "Department name"
             };
 
             _positionInfo = new PositionInfo
             {
                 Id = Guid.NewGuid(),
-                Name = "Position name",
-                ReceivedAt = DateTime.UtcNow
+                Name = "Position name"
             };
 
             _projects = new List<ProjectInfo>

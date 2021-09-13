@@ -21,32 +21,27 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string FindParseEntitiesEndpoint { get; set; }
     public string CheckUsersExistenceEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetDepartmentUserRequest))]
-    public string GetDepartmentUserEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IFindDepartmentUsersRequest))]
-    public string FindDepartmentUsersEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IGetPositionRequest))]
-    public string GetPositionEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IChangeUserDepartmentRequest))]
-    public string ChangeUserDepartmentEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IChangeUserPositionRequest))]
-    public string ChangeUserPositionEndpoint { get; set; }
+    // project
 
     [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
 
+    // message
+
     [AutoInjectRequest(typeof(ISendEmailRequest))]
     public string SendEmailEndpoint { get; set; }
+
+    // auth
 
     [AutoInjectRequest(typeof(IGetTokenRequest))]
     public string GetTokenEndpoint { get; set; }
 
+    // search
+
     [AutoInjectRequest(typeof(ISearchUsersRequest))]
     public string SearchUsersEndpoint { get; set; }
+
+    // rights
 
     [AutoInjectRequest(typeof(IChangeUserRoleRequest))]
     public string ChangeUserRoleEndpoint { get; set; }
@@ -54,17 +49,26 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetUserRolesRequest))]
     public string GetUserRolesEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IChangeUserOfficeRequest))]
-    public string ChangeUserOfficeEndpoint { get; set; }
+    // company
 
-    [AutoInjectRequest(typeof(IGetUserOfficesRequest))]
-    public string GetUserOfficesEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IGetDepartmentUsersRequest))]
+    public string GetDepartmentUsersEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetUsersDepartmentsUsersPositionsRequest))]
-    public string GetUsersDepartmentsUsersPositionsEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IGetPositionsRequest))]
+    public string GetPositionsEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IEditCompanyEmployeeRequest))]
+    public string EditCompanyEmployeeEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
+    public string GetCompanyEmployeesEndpoint { get; set; }
+
+    // common
 
     [AutoInjectRequest(typeof(IDisactivateUserRequest))]
     public string DisactivateUserEndpoint { get; set; }
+
+    // image
 
     [AutoInjectRequest(typeof(ICreateImagesRequest))]
     public string CreateImagesEndpoint { get; set; }

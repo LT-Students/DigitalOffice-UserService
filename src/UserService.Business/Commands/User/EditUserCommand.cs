@@ -40,68 +40,74 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
-    private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
-    private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
+    private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
-    private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IBus _bus;
 
     #region private method
 
-    private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
+    private void EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-      string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
-      const string logMessage = "Can't assign user {UserId} to the department {DepartmentId}.";
+      string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
+      string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
+      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
+      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
+      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
       try
       {
-        Response<IOperationResult<bool>> response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-            IChangeUserDepartmentRequest.CreateObj(
-                userId,
-                departmentId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+        IOperationResult<(bool department, bool position, bool office)> response =
+          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+          IEditCompanyEmployeeRequest.CreateObj(
+            userId,
+            _httpContextAccessor.HttpContext.GetUserId(),
+            removeUserFromDepartment: removeDepartment,
+            departmentId: departmentId,
+            positionId: positionId,
+            officeId: officeId)).Result.Message;
 
-        if (!response.Message.IsSuccess || !response.Message.Body)
+        if (!response.IsSuccess)
         {
-          _logger.LogWarning(logMessage, userId, departmentId);
+          _logger.LogWarning(logMessage, userId);
 
-          errors.Add(errorMessage);
+          errors.Add(departmentErrorMessage);
+          errors.Add(positionErrorMessage);
+          errors.Add(officeErrorMessage);
+
+          return;
+        }
+
+        if (!response.Body.department)
+        {
+          _logger.LogWarning(departmentLogMessage, userId, departmentId);
+
+          errors.Add(departmentErrorMessage);
+        }
+
+        if (!response.Body.position)
+        {
+          _logger.LogWarning(positionLogMessage, userId, positionId);
+
+          errors.Add(positionErrorMessage);
+        }
+
+        if (!response.Body.office)
+        {
+          _logger.LogWarning(officeLogMessage, userId, officeId);
+
+          errors.Add(officeErrorMessage);
         }
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, userId, departmentId);
+        _logger.LogError(exc, logMessage, userId);
 
-        errors.Add(errorMessage);
-      }
-    }
-
-    private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
-    {
-      string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
-      const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
-
-      try
-      {
-        Response<IOperationResult<bool>> response = _rcPosition.GetResponse<IOperationResult<bool>>(
-            IChangeUserPositionRequest.CreateObj(
-                userId,
-                positionId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
-
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          _logger.LogWarning(logMessage, positionId, userId);
-
-          errors.Add(errorMessage);
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, positionId, userId);
-
-        errors.Add(errorMessage);
+        errors.Add(departmentErrorMessage);
+        errors.Add(positionErrorMessage);
+        errors.Add(officeErrorMessage);
       }
     }
 
@@ -129,34 +135,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       catch (Exception exc)
       {
         _logger.LogError(exc, logMessage, roleId, userId);
-
-        errors.Add(errorMessage);
-      }
-    }
-
-    private void ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
-    {
-      string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-      const string logMessage = "Can't assign office '{OfficeId}' to the user '{UserId}'.";
-
-      try
-      {
-        Response<IOperationResult<bool>> response = _rcOffice.GetResponse<IOperationResult<bool>>(
-            IChangeUserOfficeRequest.CreateObj(
-                officeId,
-                userId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          const string warningMessage = logMessage + "Errors: {Errors}";
-          _logger.LogWarning(warningMessage, officeId, userId, string.Join("\n", response.Message.Errors));
-
-          errors.Add(errorMessage);
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, officeId, userId);
 
         errors.Add(errorMessage);
       }
@@ -223,10 +201,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         IAccessValidator accessValidator,
         ILogger<EditUserCommand> logger,
         IRequestClient<ICreateImagesRequest> rcImage,
-        IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
-        IRequestClient<IChangeUserPositionRequest> rcPosition,
+        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
         IRequestClient<IChangeUserRoleRequest> rcRole,
-        IRequestClient<IChangeUserOfficeRequest> rcOffice,
         IHttpContextAccessor httpContextAccessor,
         IBus bus)
     {
@@ -239,10 +215,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _logger = logger;
       _rcImage = rcImage;
-      _rcDepartment = rcDepartment;
-      _rcPosition = rcPosition;
+      _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
-      _rcOffice = rcOffice;
       _httpContextAccessor = httpContextAccessor;
       _bus = bus;
     }
@@ -291,24 +265,37 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           errors);
       }
 
+      bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
+      Guid? newDepartmentId = null;
+      Guid? newPositionId = null;
+      Guid? newOfficeId = null;
+
+      if (departmentOperation != null && departmentOperation.value != null)
+      {
+        newDepartmentId = Guid.Parse(departmentOperation?.value.ToString());
+      }
+
       if (positionOperation != null)
       {
-        ChangeUserPosition(Guid.Parse(positionOperation.value.ToString() ?? string.Empty), userId, errors);
-      }
-
-      if (departmentOperation != null)
-      {
-        ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString() ?? string.Empty), userId, errors);
-      }
-
-      if (roleOperation != null)
-      {
-        ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
+        newPositionId = Guid.Parse(positionOperation?.value.ToString());
       }
 
       if (officeOperation != null)
       {
-        ChangeUserOffice(Guid.Parse(officeOperation.value.ToString() ?? string.Empty), userId, errors);
+        newOfficeId = Guid.Parse(officeOperation?.value.ToString());
+      }
+
+      EditCompanyEmployee(
+        removeUserFromDepartmen,
+        newDepartmentId,
+        newPositionId,
+        newOfficeId,
+        userId,
+        errors);
+
+      if (roleOperation != null)
+      {
+        ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
       }
 
       if (isActiveOperation != null)

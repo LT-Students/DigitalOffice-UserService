@@ -17,7 +17,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
@@ -34,14 +33,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPositionInfoMapper _positionInfoMapper;
     private readonly IUserRepository _repository;
     private readonly ILogger<FindUserCommand> _logger;
-    private readonly IRequestClient<IFindDepartmentUsersRequest> _rcFindDepartmentUser;
-    private readonly IRequestClient<IGetUsersDepartmentsUsersPositionsRequest> _rcGetUsersDepartmentsUsersPositions;
+    private readonly IRequestClient<IGetDepartmentUsersRequest> _rcGetDepartmentUsers;
+    private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
-    private readonly IRequestClient<IGetUserOfficesRequest> _rcGetUserOffices;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
 
     private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
     {
+      if (imageIds == null || !imageIds.Any())
+      {
+        return null;
+      }
+
       string errorMessage = "Can not get images. Please try again later.";
       const string logMessage = "Can not get images: {Ids}.";
 
@@ -67,11 +70,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       errors.Add(errorMessage);
 
-      return new();
+      return null;
     }
 
     private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
     {
+      if (userIds == null || !userIds.Any())
+      {
+        return null;
+      }
+
       string errorMessage = "Can not get roles. Please try again later.";
       const string logMessage = "Can not get roles for users with ids: {Ids}";
 
@@ -97,48 +105,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       errors.Add(errorMessage);
 
-      return new();
+      return null;
     }
 
-    private List<OfficeData> GetOffice(List<Guid> userIds, List<string> errors)
-    {
-      string errorMessage = "Can not get offices. Please try again later.";
-      const string logMessage = "Can not get offices for users with ids: {Ids}";
-
-      try
-      {
-        var response = _rcGetUserOffices.GetResponse<IOperationResult<IGetUserOfficesResponse>>(
-            IGetUserOfficesRequest.CreateObj(userIds)).Result.Message;
-
-        if (response.IsSuccess)
-        {
-          return response.Body.Offices;
-        }
-
-        const string warningMessage = logMessage + "Reason: {Errors}";
-        _logger.LogWarning(warningMessage,
-            string.Join(", ", userIds),
-            string.Join("\n", response.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, string.Join(", ", userIds));
-      }
-
-      errors.Add(errorMessage);
-
-      return new();
-    }
-
-    private IFindDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
+    private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
       string errorMessage =
           $"Can not get department users with department id {departmentId}. Please try again later.";
 
       try
       {
-        var request = IFindDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-        var response = _rcFindDepartmentUser.GetResponse<IOperationResult<IFindDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
+        var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
+        var response = _rcGetDepartmentUsers.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
 
         if (response.Message.IsSuccess)
         {
@@ -161,19 +139,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private IGetUsersDepartmentsUsersPositionsResponse GetUsersDepartmentsUsersPositions(
+    private IGetCompanyEmployeesResponse GetCompanyEmployess(
         List<Guid> userIds,
         bool includeDepartments,
-        bool includePositions,
         List<string> errors)
     {
       const string errorMessage = "Can not get user's departments and positions. Please try again later.";
 
       try
       {
-        var request = IGetUsersDepartmentsUsersPositionsRequest.CreateObj(userIds, includeDepartments, includePositions);
-        var response = _rcGetUsersDepartmentsUsersPositions
-            .GetResponse<IOperationResult<IGetUsersDepartmentsUsersPositionsResponse>>(request)
+        var request = IGetCompanyEmployeesRequest.CreateObj(userIds, includeDepartments, true, true);
+        var response = _rcGetCompanyEmployees
+            .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(request)
             .Result;
 
         if (response.Message.IsSuccess)
@@ -205,10 +182,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         IDepartmentInfoMapper departmentInfoMapper,
         IPositionInfoMapper positionInfoMapper,
         ILogger<FindUserCommand> logger,
-        IRequestClient<IFindDepartmentUsersRequest> rcFindDepartmentUser,
-        IRequestClient<IGetUsersDepartmentsUsersPositionsRequest> rcGetUsersDepartmentsUsersPositions,
+        IRequestClient<IGetDepartmentUsersRequest> rcGetDepartmentUser,
+        IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
         IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-        IRequestClient<IGetUserOfficesRequest> rcGetUserOffices,
         IRequestClient<IGetImagesRequest> rcGetImages)
     {
       _logger = logger;
@@ -219,10 +195,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _departmentInfoMapper = departmentInfoMapper;
       _positionInfoMapper = positionInfoMapper;
       _repository = repository;
-      _rcFindDepartmentUser = rcFindDepartmentUser;
-      _rcGetUsersDepartmentsUsersPositions = rcGetUsersDepartmentsUsersPositions;
+      _rcGetDepartmentUsers = rcGetDepartmentUser;
+      _rcGetCompanyEmployees = rcGetCompanyEmployees;
       _rcGetUserRoles = rcGetUserRoles;
-      _rcGetUserOffices = rcGetUserOffices;
       _rcGetImages = rcGetImages;
     }
 
@@ -257,28 +232,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> userIds = dbUsers.Select(x => x.Id).ToList();
 
-      var departmentsAndPositions = GetUsersDepartmentsUsersPositions(userIds, !departmentId.HasValue, true, result.Errors);
+      IGetCompanyEmployeesResponse getCompanyEmployeesResponse = GetCompanyEmployess(userIds, !departmentId.HasValue, result.Errors);
 
       var images = GetImages(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), result.Errors);
 
       var roles = GetRoles(userIds, result.Errors);
 
-      var offices = GetOffice(userIds, result.Errors);
-
       result.Body
-          .AddRange(dbUsers.Select(dbUser =>
-              _mapper.Map(
-                  dbUser,
-                  _departmentInfoMapper.Map(departmentsAndPositions?.UsersDepartment?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))),
-                  _positionInfoMapper.Map(departmentsAndPositions?.UsersPosition?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))),
-                  _imageInfoMapper.Map(images.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)),
-                  _roleInfoMapper.Map(roles.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))),
-                  _officeInfoMapper.Map(offices.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))))));
+        .AddRange(dbUsers.Select(dbUser =>
+          _mapper.Map(
+            dbUser,
+            _departmentInfoMapper.Map(getCompanyEmployeesResponse?.Departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
+            _positionInfoMapper.Map(getCompanyEmployeesResponse?.Positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
+            _imageInfoMapper.Map(images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)),
+            _roleInfoMapper.Map(roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))),
+            _officeInfoMapper.Map(getCompanyEmployeesResponse?.Offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))))));
 
       result.TotalCount = totalCount;
       result.Status = result.Errors.Any()
-          ? OperationResultStatusType.PartialSuccess
-          : OperationResultStatusType.FullSuccess;
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
       return result;
     }
   }
