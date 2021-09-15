@@ -53,12 +53,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       {
         Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(_createImageDataMapper.Map(
-          new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User)).Result;
+            new List<AddImageRequest>() { addImageRequest }, userId),ImageSource.User)).Result;
 
         if (!response.Message.IsSuccess)
         {
           _logger.LogWarning("Can not add certificate image to certificate. Reason: '{Errors}'",
-              string.Join(',', response.Message.Errors));
+            string.Join(',', response.Message.Errors));
 
           errors.Add(errorMessage);
         }
@@ -78,14 +78,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     }
 
     public EditCertificateCommand(
-        IAccessValidator accessValidator,
-        IHttpContextAccessor httpContextAccessor,
-        IUserRepository userRepository,
-        ICertificateRepository certificateRepository,
-        IPatchDbUserCertificateMapper mapper,
-        ICreateImageDataMapper createImageDataMapper,
-        IRequestClient<ICreateImagesRequest> rcImage,
-        ILogger<EditCertificateCommand> logger)
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IUserRepository userRepository,
+      ICertificateRepository certificateRepository,
+      IPatchDbUserCertificateMapper mapper,
+      ICreateImageDataMapper createImageDataMapper,
+      IRequestClient<ICreateImagesRequest> rcImage,
+      ILogger<EditCertificateCommand> logger)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
@@ -107,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       DbUserCertificate certificate = _certificateRepository.Get(certificateId);
 
       if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-            && senderId != certificate.UserId)
+        && senderId != certificate.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }

@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.DateOfBirth),
                     nameof(EditUserRequest.StartWorkingAt),
                     nameof(EditUserRequest.About),
-                    nameof(EditUserRequest.AvatarImage),
+                    nameof(EditUserRequest.AvatarId),
                     nameof(EditUserRequest.IsActive),
                     nameof(EditUserRequest.DepartmentId),
                     nameof(EditUserRequest.RoleId),
@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarId), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
@@ -258,10 +258,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
-            #region AvatarImage
+            #region AvatarId
 
             AddFailureForPropertyIf(
-                nameof(EditUserRequest.AvatarImage),
+                nameof(EditUserRequest.AvatarId),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
@@ -269,7 +269,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             try
                             {
-                                _ = JsonConvert.DeserializeObject<AddImageRequest>(x.value?.ToString());
+                                _ = JsonConvert.DeserializeObject<Guid?>(x.value?.ToString());
                                 return true;
                             }
                             catch
@@ -277,7 +277,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                                 return false;
                             }
                         },
-                        "Incorrect Image format"
+                        "Incorrect ImageId format"
                     }
             });
 

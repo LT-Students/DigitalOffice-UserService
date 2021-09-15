@@ -43,8 +43,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserAchievement> Achievements { get; set; }
     [IgnoreParse]
     public ICollection<DbUserSkill> Skills { get; set; }
-    [IgnoreParse]
-    public ICollection<DbUserAvatar> Avatars { get; set; }
 
     public DbUser()
     {
@@ -53,7 +51,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       Communications = new HashSet<DbUserCommunication>();
       Achievements = new HashSet<DbUserAchievement>();
       Skills = new HashSet<DbUserSkill>();
-      Avatars = new HashSet<DbUserAvatar>();
     }
   }
 
@@ -62,50 +59,46 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public void Configure(EntityTypeBuilder<DbUser> builder)
     {
       builder.
-          ToTable(DbUser.TableName);
+        ToTable(DbUser.TableName);
 
       builder.
-          HasKey(p => p.Id);
+        HasKey(p => p.Id);
 
       builder
-          .Property(p => p.FirstName)
-          .IsRequired();
+        .Property(p => p.FirstName)
+        .IsRequired();
 
       builder
-          .Property(p => p.LastName)
-          .IsRequired();
+        .Property(p => p.LastName)
+        .IsRequired();
 
       builder
-          .Property(p => p.IsActive)
-          .IsRequired();
+        .Property(p => p.IsActive)
+        .IsRequired();
 
       builder
-          .HasOne(u => u.Credentials)
-          .WithOne(uc => uc.User);
+        .HasOne(u => u.Credentials)
+        .WithOne(uc => uc.User);
 
       builder
-          .HasMany(u => u.Educations)
-          .WithOne(ue => ue.User);
+        .HasMany(u => u.Educations)
+        .WithOne(ue => ue.User);
 
       builder
-          .HasMany(u => u.Certificates)
-          .WithOne(c => c.User);
+        .HasMany(u => u.Certificates)
+        .WithOne(c => c.User);
 
       builder
-          .HasMany(u => u.Communications)
-          .WithOne(uc => uc.User);
+        .HasMany(u => u.Communications)
+        .WithOne(uc => uc.User);
 
       builder
-          .HasMany(u => u.Achievements)
-          .WithOne(ua => ua.User);
+        .HasMany(u => u.Achievements)
+        .WithOne(ua => ua.User);
 
       builder
-          .HasMany(u => u.Skills)
-          .WithOne(us => us.User);
-
-      builder
-          .HasMany(u => u.Avatars)
-          .WithOne(us => us.User);
+        .HasMany(u => u.Skills)
+        .WithOne(us => us.User);
     }
   }
 }

@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public UserGender Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string City { get; set; }
-        public AddImageRequest AvatarImage { get; set; }
+        public Guid? AvatarId { get; set; }
         public UserStatus Status { get; set; }
         public DateTime? StartWorkingAt { get; set; }
         public double Rate { get; set; }

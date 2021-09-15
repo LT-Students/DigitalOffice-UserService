@@ -115,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
 
             RequestClientMock();
         }
-
+        /*
         [Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {
@@ -147,7 +147,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Never);
         }
 
-        /*[Test]
+        [Test]
         public void ShouldAddCertificateSuccesfull()
         {
             var expectedResponse = new OperationResultResponse<Guid>

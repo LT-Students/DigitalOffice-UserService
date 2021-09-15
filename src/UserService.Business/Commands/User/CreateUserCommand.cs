@@ -28,6 +28,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -35,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class CreateUserCommand : ICreateUserCommand
   {
     private readonly IUserRepository _userRepository;
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ICreateUserRequestValidator _validator;
     private readonly IDbUserMapper _mapperUser;
-    private readonly IDbUserAvatarMapper _userAvatarMapper;
+    private readonly IDbEntityImageMapper _dbEntityImageMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
@@ -256,28 +257,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       return avatarImageId;
     }
-
-    private List<Guid> AddAvatarToDb(Guid avatarId, Guid userId)
-    {
-      return _avatarRepository.Create(_userAvatarMapper.Map(new List<Guid>() { avatarId }, userId));
-    }
     #endregion
 
     public CreateUserCommand(
-        ILogger<CreateUserCommand> logger,
-        IRequestClient<ICreateImagesRequest> rcImage,
-        IHttpContextAccessor httpContextAccessor,
-        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
-        IRequestClient<IChangeUserRoleRequest> rcRole,
-        IRequestClient<ISendEmailRequest> rcSendEmail,
-        IUserRepository userRepository,
-        ICreateUserRequestValidator validator,
-        IDbUserMapper mapperUser,
-        IDbUserAvatarMapper userAvatarMapper,
-        ICreateImageDataMapper createImageDataMapper,
-        IAccessValidator accessValidator,
-        IGeneratePasswordCommand generatePassword,
-        IAvatarRepository avatarRepository)
+      ILogger<CreateUserCommand> logger,
+      IRequestClient<ICreateImagesRequest> rcImage,
+      IHttpContextAccessor httpContextAccessor,
+      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IChangeUserRoleRequest> rcRole,
+      IRequestClient<ISendEmailRequest> rcSendEmail,
+      IUserRepository userRepository,
+      ICreateUserRequestValidator validator,
+      IDbUserMapper mapperUser,
+      IDbEntityImageMapper dbEntityImageMapper,
+      ICreateImageDataMapper createImageDataMapper,
+      IAccessValidator accessValidator,
+      IGeneratePasswordCommand generatePassword,
+      IImageRepository imageRepository)
     {
       _logger = logger;
       _rcImage = rcImage;
@@ -288,30 +284,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
       _mapperUser = mapperUser;
-      _userAvatarMapper = userAvatarMapper;
+      _dbEntityImageMapper = dbEntityImageMapper;
       _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
-      _avatarRepository = avatarRepository;
+      _imageRepository = imageRepository;
     }
 
     /// <inheritdoc/>
     public OperationResultResponse<Guid> Execute(CreateUserRequest request)
     {
+      OperationResultResponse<Guid> response = new();
+
       if (!(_accessValidator.IsAdmin() ||
         _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
       }
 
       _validator.ValidateAndThrowCustom(request);
 
-      OperationResultResponse<Guid> response = new();
-
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
         response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Communication value already exist");
+
         return response;
       }
 
@@ -324,9 +326,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId = _userRepository.Create(dbUser);
       _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
 
-      if (avatarImageId != null)
+      if (avatarImageId.HasValue)
       {
-        AddAvatarToDb(avatarImageId.Value, userId);
+        _imageRepository.Create(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
       }
 
       SendEmail(dbUser, password, response.Errors);

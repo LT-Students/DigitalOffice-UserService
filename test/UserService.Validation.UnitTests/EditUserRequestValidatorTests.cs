@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
                     "Vacation"),
-                new Operation<EditUserRequest>(
+               /* new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.AvatarImage)}",
                     "",
@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                         Name = "Test",
                         Content = Properties.Resources.Base64String,
                         Extension = ".jpg"
-                    })),
+                    })),*/
                 new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.Rate)}",
@@ -183,7 +183,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
             _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
 
-        [Test]
+       /* [Test]
         public void ShouldThrowValidationExceptionWhenAvatarImageIsNotCorrect()
         {
             var editUserRequest = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
@@ -197,7 +197,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
 
             _validator.TestValidate(editUserRequest).ShouldHaveAnyValidationError();
         }
-
+       */
         #region rate
 
         [Test]

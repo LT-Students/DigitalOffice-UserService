@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
             _httpContextAccessor = httpContextAccessor;
         }
         public OperationResultResponse<bool> Execute(
-            Guid communicationId, 
+            Guid communicationId,
             JsonPatchDocument<EditCommunicationRequest> request)
         {
             Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
@@ -66,6 +67,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
             if (valueOperation != null && _repository.IsCommunicationValueExist(valueOperation.value.ToString()))
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 return new OperationResultResponse<bool>
                 {
                     Status = OperationResultStatusType.Failed,

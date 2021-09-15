@@ -13,13 +13,16 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
     public class CreateCredentialsCommand : ICreateCredentialsCommand
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IDbUserCredentialsMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly IUserCredentialsRepository _userCredentialsRepository;
@@ -29,12 +32,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
         public CreateCredentialsCommand(
             IDbUserCredentialsMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
             IUserRepository userRepository,
             IUserCredentialsRepository userCredentialsRepository,
             IRequestClient<IGetTokenRequest> rcToken,
             ILogger<CreateCredentialsCommand> logger,
             ICreateCredentialsRequestValidator validator)
         {
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _userRepository = userRepository;
             _userCredentialsRepository = userCredentialsRepository;
@@ -64,6 +69,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
             if (_userCredentialsRepository.IsLoginExist(request.Login))
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 response.Status = OperationResultStatusType.Failed;
                 response.Errors.Add("The login already exist");
                 return response;

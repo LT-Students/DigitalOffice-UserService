@@ -8,21 +8,21 @@ namespace LT.DigitalOffice.UserService.Validation.Helpers
 {
   public class CheckImagesToUserAffiliationHelper : ICheckImagesToUserAffiliationHelper
   {
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IImageRepository _imageRepository;
 
     public CheckImagesToUserAffiliationHelper(
-      IAvatarRepository avatarRepository)
+      IImageRepository imageRepository)
     {
-      _avatarRepository = avatarRepository;
+      _imageRepository = imageRepository;
     }
 
-    public bool CheckAffiliation(List<Guid> imagesIds, Guid userId)
+    public bool CheckAffiliation(List<Guid> imagesIds, Guid entityId)
     {
-      List<DbUserAvatar> dbUsersAvatars = _avatarRepository.Get(imagesIds);
+      List<DbEntityImage> dbEntityImages = _imageRepository.Get(imagesIds);
 
-      foreach(DbUserAvatar dbUserAvatar in dbUsersAvatars)
+      foreach(DbEntityImage dbEntityImage in dbEntityImages)
       {
-        if (dbUserAvatar.UserId != userId)
+        if (dbEntityImage.EntityId != entityId)
         {
           return false;
         }

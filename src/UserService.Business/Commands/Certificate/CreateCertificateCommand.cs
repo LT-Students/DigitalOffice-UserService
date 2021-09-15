@@ -39,10 +39,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       if (addImageRequest == null)
       {
-        throw new ArgumentNullException(nameof(addImageRequest));
+        return null;
       }
-
-      Guid userId = _httpContextAccessor.HttpContext.GetUserId();
 
       const string errorMessage = "Can not add certificate image to certificate. Please try again later.";
 
@@ -50,13 +48,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       {
         Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(
-          _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }, userId), ImageSource.User),
+            _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest },
+            _httpContextAccessor.HttpContext.GetUserId()),
+            ImageSource.User),
           default, TimeSpan.FromSeconds(5)).Result;
         if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(
-              errorMessage + "Reason:\n{Errors}",
-          string.Join(',', response.Message.Errors));
+            errorMessage + "Reason:\n{Errors}",
+            string.Join(',', response.Message.Errors));
 
           errors.Add(errorMessage);
         }
@@ -76,14 +76,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     }
 
     public CreateCertificateCommand(
-        IAccessValidator accessValidator,
-        IHttpContextAccessor httpContextAccessor,
-        IDbUserCertificateMapper mapper,
-        IUserRepository userRepository,
-        ICertificateRepository certificateRepository,
-        IRequestClient<ICreateImagesRequest> rcAddIImage,
-        ICreateImageDataMapper createImageDataMapper,
-        ILogger<CreateCertificateCommand> logger)
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserCertificateMapper mapper,
+      IUserRepository userRepository,
+      ICertificateRepository certificateRepository,
+      IRequestClient<ICreateImagesRequest> rcAddIImage,
+      ICreateImageDataMapper createImageDataMapper,
+      ILogger<CreateCertificateCommand> logger)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
@@ -100,9 +100,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       List<string> errors = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser dbUser = _userRepository.Get(senderId);
+
       if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-          && senderId != request.UserId)
+        && senderId != request.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }

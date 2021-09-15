@@ -14,12 +14,30 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
       if (request == null)
       {
-        return result;
+        result = null;
+      }
+      else
+      {
+        foreach (AddImageRequest image in request)
+        {
+          result.Add(new CreateImageData(image.Name, image.Content, image.Extension, senderId));
+        }
       }
 
-      foreach(AddImageRequest image in request)
+      return result;
+    }
+
+    public List<CreateImageData> Map(string name, string content, string extension, Guid senderId)
+    {
+      List<CreateImageData> result = new();
+
+      if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(extension))
       {
-        result.Add(new CreateImageData(image.Name, image.Content, image.Extension, senderId));
+        result = null;
+      }
+      else
+      {
+        result.Add(new CreateImageData(name, content, extension, senderId));
       }
 
       return result;

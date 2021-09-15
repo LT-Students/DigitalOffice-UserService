@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
@@ -32,8 +33,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class EditUserCommand : IEditUserCommand
   {
     private readonly IUserRepository _userRepository;
-    private readonly IAvatarRepository _avatarRepository;
-    private readonly IDbUserAvatarMapper _userAvatarMapper;
+    private readonly IImageRepository _imageRepository;
+    private readonly IDbEntityImageMapper _userAvatarMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IPatchDbUserMapper _mapperUser;
@@ -139,64 +140,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         errors.Add(errorMessage);
       }
     }
-
-    private Guid? GetAvatarImageId(AddImageRequest avatarRequest, Guid userId, List<string> errors)
-    {
-      if (avatarRequest == null)
-      {
-        return null;
-      }
-
-      Guid? avatarImageId = null;
-
-      string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
-          ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(
-              new List<AddImageRequest>() { avatarRequest },
-              _httpContextAccessor.HttpContext.GetUserId()),
-            ImageSource.User))
-          .Result;
-
-        if (!createResponse.Message.IsSuccess)
-        {
-          _logger.LogWarning(
-              "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
-              userId,
-              string.Join(',', createResponse.Message.Errors));
-
-          errors.Add(errorMessage);
-        }
-        else
-        {
-          avatarImageId = createResponse.Message.Body.ImagesIds.FirstOrDefault();
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Can not add avatar image to user with id {UserId}", userId);
-
-        errors.Add(errorMessage);
-      }
-
-      return avatarImageId;
-    }
-
-    private List<Guid> AddAvatarToDb(Guid avatarId, Guid userId)
-    {
-      return _avatarRepository.Create(_userAvatarMapper.Map(new List<Guid>() { avatarId }, userId));
-    }
     #endregion
 
     public EditUserCommand(
         IUserRepository userRepository,
         IUserCredentialsRepository credentialsRepository,
         IPatchDbUserMapper mapperUser,
-        IAvatarRepository avatarRepository,
-        IDbUserAvatarMapper userAvatarMapper,
+        IImageRepository imageRepository,
+        IDbEntityImageMapper userAvatarMapper,
         ICreateImageDataMapper createImageDataMapper,
         IAccessValidator accessValidator,
         ILogger<EditUserCommand> logger,
@@ -209,7 +160,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _userRepository = userRepository;
       _credentialsRepository = credentialsRepository;
       _mapperUser = mapperUser;
-      _avatarRepository = avatarRepository;
+      _imageRepository = imageRepository;
       _userAvatarMapper = userAvatarMapper;
       _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
@@ -235,6 +186,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
+      OperationResultResponse<bool> response = new();
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
@@ -246,23 +198,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           && roleOperation == null
           && officeOperation == null)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
       }
 
       List<string> errors = new List<string>();
 
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase));
+          o => o.path.EndsWith(nameof(EditUserRequest.AvatarId), StringComparison.OrdinalIgnoreCase));
+
       Guid? imageId = null;
 
       if (imageOperation != null
-        && (imageOperation.OperationType == OperationType.Add
-          || imageOperation.OperationType == OperationType.Replace))
+        && imageOperation.value != null
+        && imageOperation.OperationType == OperationType.Replace)
       {
-        imageId = GetAvatarImageId(
-          JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()),
-          userId,
-          errors);
+        imageId = JsonConvert.DeserializeObject<Guid>(imageOperation.value?.ToString());
+
+        if (!imageId.HasValue
+          || _imageRepository.Get(new List<Guid> { (Guid)imageId }).FirstOrDefault().EntityId != userId)
+        {
+          imageId = null;
+        }
       }
 
       bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
@@ -314,22 +274,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      var dbUserPatch = _mapperUser.Map(patch, imageId);
+      JsonPatchDocument<Models.Db.DbUser> dbUserPatch = _mapperUser.Map(patch, imageId);
       _userRepository.EditUser(userId, dbUserPatch);
 
-      if (imageId != null)
-      {
-        AddAvatarToDb(imageId.Value, userId);
-      }
+      response.Status = errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
+      response.Body = true;
+      response.Errors.AddRange(errors);
 
-      return new OperationResultResponse<bool>
-      {
-        Status = errors.Any()
-              ? OperationResultStatusType.PartialSuccess
-              : OperationResultStatusType.FullSuccess,
-        Body = true,
-        Errors = errors
-      };
+      return response;
     }
 
     // TODO fix

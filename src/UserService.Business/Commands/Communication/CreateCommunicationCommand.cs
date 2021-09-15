@@ -13,6 +13,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -56,6 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
             if (_repository.IsCommunicationValueExist(request.Value))
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 return new OperationResultResponse<Guid>
                 {
                     Status = OperationResultStatusType.Failed,

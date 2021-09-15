@@ -19,6 +19,6 @@ namespace LT.DigitalOffice.CompanyService.Data.Provider
     DbSet<DbUserEducation> UserEducations { get; set; }
     DbSet<DbUserCommunication> UserCommunications { get; set; }
     DbSet<DbPendingUser> PendingUsers { get; set; }
-    DbSet<DbUserAvatar> UsersAvatars { get; set; }
+    DbSet<DbEntityImage> EntitiesImages { get; set; }
   }
 }

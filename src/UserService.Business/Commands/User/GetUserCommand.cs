@@ -210,7 +210,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<IGetImagesResponse> getResponse = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds, ImageSource.User))
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User))
           .Result.Message;
 
         if (getResponse.IsSuccess)
