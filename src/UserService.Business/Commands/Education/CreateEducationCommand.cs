@@ -80,8 +80,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
 		return response;
       }
-      List<Guid> imagesIdsForCreate = CreateImages(request, response.Errors);
-      DbUserEducation dbEducation = _mapper.Map(request, imagesIdsForCreate);
+
+	List<AddImageRequest> requestImages = request.Images;
+	List<Guid> createdImagesIDs = requestImages is not null && requestImages.Any() ? 
+		CreateImages(request, response.Errors) : new();
+	DbUserEducation dbEducation = _mapper.Map(request, createdImagesIDs);
 
       _educationRepository.Add(dbEducation);
 

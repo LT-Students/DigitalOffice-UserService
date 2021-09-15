@@ -27,16 +27,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             Guid Id = Guid.NewGuid();
             List<DbUserEducationImage> images = new();
 
-            if (imagesIdsForCreate is not null)
+            foreach (Guid createdImageId in imagesIdsForCreate)
             {
-              foreach (Guid createdImageId in imagesIdsForCreate)
+              images.Add(new DbUserEducationImage()
               {
-                images.Add(new DbUserEducationImage()
-                {
-                  ImageId = createdImageId,
-                  UserEducationId = Id
-                });
-              }
+                ImageId = createdImageId,
+                UserEducationId = Id
+              });
             }
 
             return new DbUserEducation

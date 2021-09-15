@@ -6,8 +6,8 @@ using System;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(UserServiceDbContext))]
-  [Migration("20210908225900_Drop_ImageId_Column_Of_UserCertificates_Table")]
-  class Drop_ImageId_Column_Of_UserCertificates_Table : Migration
+  [Migration("20210908225900_DropImageIdColumnOfUserCertificatesTable")]
+  class DropImageIdColumnOfUserCertificatesTable : Migration
   {
     protected override void Up(MigrationBuilder builder)
     {

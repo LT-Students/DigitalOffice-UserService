@@ -27,16 +27,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             Guid Id = Guid.NewGuid();
             List<DbUserCertificateImage> images = new();
 
-            if(imagesIds is not null)
+            foreach (Guid imageId in imagesIds)
             {
-              foreach (Guid imageId in imagesIds)
+              images.Add(new DbUserCertificateImage()
               {
-                images.Add(new DbUserCertificateImage()
-                {
-                  ImageId = imageId,
-                  UserCertificateId = Id
-                });
-              }
+                ImageId = imageId,
+                UserCertificateId = Id
+              });
             }
 
             return new DbUserCertificate

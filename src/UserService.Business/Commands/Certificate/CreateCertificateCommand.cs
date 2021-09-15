@@ -106,7 +106,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         return response;
       }
 
-      List<Guid> createdImagesIds = CreateImages(request, senderId, response.Errors);
+      List<AddImageRequest> requestImages = request.Images;
+      List<Guid> createdImagesIds = requestImages is not null && requestImages.Any()? 
+        CreateImages(request, senderId, response.Errors) : new();
       DbUserCertificate dbUserCertificate = _mapper.Map(request, createdImagesIds);
 
       _certificateRepository.Add(dbUserCertificate);

@@ -5,6 +5,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,9 @@ namespace LT.DigitalOffice.UserService.Data
 
     public DbUserEducation Get(Guid educationId)
     {
-      DbUserEducation education = _provider.UserEducations.FirstOrDefault(e => e.Id == educationId);
+      DbUserEducation education = _provider.UserEducations
+        .Include(e => e.Images)
+        .FirstOrDefault(e => e.Id == educationId);
 
       if (education == null)
       {
@@ -81,9 +84,8 @@ namespace LT.DigitalOffice.UserService.Data
         throw new ArgumentNullException(nameof(education));
       }
 
-      education.IsActive = false;
-      education.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-      education.ModifiedAtUtc = DateTime.UtcNow;
+      _provider.UserEducationImages.RemoveRange(education.Images);
+      _provider.UserEducations.Remove(education);
       _provider.Save();
 
       return true;

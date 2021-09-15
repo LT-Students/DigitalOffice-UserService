@@ -8,7 +8,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
   {
     public const string TableName = "UserEducationImages";
 
-    public Guid Id;
+    public Guid Id { get; set; }
     public Guid UserEducationId { get; set; }
     public Guid ImageId { get; set; }
  

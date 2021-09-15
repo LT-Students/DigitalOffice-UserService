@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -30,11 +31,11 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpDelete("remove")]
-        public OperationResultResponse<bool> Remove(
+        public async Task<OperationResultResponse<bool>> Remove(
             [FromServices] IRemoveEducationCommand command,
             [FromQuery] Guid educationId)
         {
-            return command.Execute(educationId);
+            return await command.Execute(educationId);
         }
     }
 }

@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -29,11 +30,11 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpDelete("remove")]
-        public OperationResultResponse<bool> Remove(
+        public async Task<OperationResultResponse<bool>> Remove(
             [FromServices] IRemoveCertificateCommand command,
             [FromQuery] Guid certificateId)
         {
-            return command.Execute(certificateId);
+            return await command.Execute(certificateId);
         }
     }
 }
