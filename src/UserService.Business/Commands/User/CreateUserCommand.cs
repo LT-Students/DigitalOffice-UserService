@@ -222,23 +222,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       Guid? avatarImageId = null;
-      Guid userId = _httpContextAccessor.HttpContext.GetUserId();
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
+      string errorMessage = $"Can not add avatar image to user. Please try again later.";
 
       try
       {
         Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }, userId),
+            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }, senderId),
             ImageSource.User))
           .Result;
 
         if (!createResponse.Message.IsSuccess)
         {
           _logger.LogWarning(
-            "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
-            userId,
+            "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
+            senderId,
             string.Join(',', createResponse.Message.Errors));
 
           errors.Add(errorMessage);
@@ -250,7 +250,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, "Can not add avatar image to user with id {UserId}", userId);
+        _logger.LogError(exc, "Can not add avatar image to user, senderId:{SenderId}", senderId);
 
         errors.Add(errorMessage);
       }
