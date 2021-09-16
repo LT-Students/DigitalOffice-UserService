@@ -17,6 +17,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
@@ -29,26 +31,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly ILogger<GetImagesCommand> _logger;
 
-    private List<ImageData> GetImages(List<Guid> imagesIds, List<string> errors)
+    private async Task<List<ImageData>> GetImages(List<Guid> imagesIds, List<string> errors)
     {
-      string errorMessage = "Can't get images. Please try again later.";
-      string logMessage = "Errors while getting images with ids: {Ids}.";
+      if (imagesIds == null || !imagesIds.Any())
+      {
+        return null;
+      }
+
+      const string errorMessage = "Can't get images. Please try again later.";
+      const string logMessage = "Errors while getting images with ids: {Ids}.";
 
       try
       {
-        IOperationResult<IGetImagesResponse> response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User))
-          .Result.Message;
+        Response<IOperationResult<IGetImagesResponse>> response = await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return response.Body.ImagesData;
+          return response.Message.Body.ImagesData;
         }
 
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
           string.Join(", ", imagesIds),
-          string.Join('\n', response.Errors));
+          string.Join('\n', response.Message.Errors));
 
         errors.Add(errorMessage);
       }
@@ -78,46 +84,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public OperationResultResponse<ImagesResponse> Execute(Guid entityId, EntityType entityType, bool getCurrentAvatar)
+    public async Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType, bool isCurrentAvatar)
     {
       OperationResultResponse<ImagesResponse> response = new();
 
-      /*Guid? userId = null;
-      switch (entityType)
-      {
-        case EntityType.User:
-          userId = request.EntityId;
-          break;
-
-        case EntityType.Certificate:
-          userId = _certificateRepository.Get(request.EntityId).UserId;
-          break;
-
-        case EntityType.Education:
-          userId = _educationRepository.Get(request.EntityId).UserId;
-          break;
-      }
-
-      DbUser dbUser = _userRepository.Get(userId);
-
-      if (dbUser == null)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("User was not found.");
-
-        return response;
-      }*/
-
       List<Guid> dbImagesIds = null;
 
-      if (getCurrentAvatar)
+      if (isCurrentAvatar)
       {
         DbUser dbUser = _userRepository.Get(entityId);
 
         if (dbUser != null)
         {
           dbImagesIds.Add(dbUser.AvatarFileId.Value);
+        }
+        else
+        {
+          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+          response.Status = OperationResultStatusType.Failed;
+          response.Errors.Add("User was not found.");
+
+          return response;
         }
       }
       else
@@ -134,7 +121,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       }
 
       response.Body = _imagesResponseMapper.Map(
-        GetImages(dbImagesIds, response.Errors));
+        await GetImages(dbImagesIds, response.Errors));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

@@ -30,21 +30,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateUserCommand command,
       [FromBody] CreateUserRequest request)
     {
-      var result = command.Execute(request);
-
-      if (result.Status == OperationResultStatusType.Failed)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-        return result;
-      }
-
-      if (result.Status != OperationResultStatusType.Failed)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-      }
-
-      return result;
+      return command.Execute(request);
     }
 
     [HttpPatch("edit")]

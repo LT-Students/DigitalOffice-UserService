@@ -124,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Data
         throw new ArgumentNullException(nameof(filter));
       }
 
-      var dbUsers = _provider.Users
+      IQueryable<DbUser> dbUsers = _provider.Users
           .AsSingleQuery()
           .AsQueryable();
 
@@ -173,14 +173,14 @@ namespace LT.DigitalOffice.UserService.Data
         throw new ArgumentNullException(nameof(name));
       }
 
-      var dbSkill = _provider.Skills.FirstOrDefault(s => s.Name == name);
+      DbSkill dbSkill = _provider.Skills.FirstOrDefault(s => s.Name == name);
 
       if (dbSkill != null)
       {
         return dbSkill.Id;
       }
 
-      var skill = new DbSkill
+      DbSkill skill = new DbSkill
       {
         Id = Guid.NewGuid(),
         Name = name

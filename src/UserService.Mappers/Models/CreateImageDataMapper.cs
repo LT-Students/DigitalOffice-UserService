@@ -29,18 +29,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
     public List<CreateImageData> Map(string name, string content, string extension, Guid senderId)
     {
-      List<CreateImageData> result = new();
-
-      if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(extension))
-      {
-        result = null;
-      }
-      else
-      {
-        result.Add(new CreateImageData(name, content, extension, senderId));
-      }
-
-      return result;
+      return (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(extension))
+      ? null
+      : new() { new CreateImageData(name, content, extension, senderId) };
     }
   }
 }

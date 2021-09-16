@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
@@ -37,27 +38,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
     private readonly ILogger<AddImagesCommand> _logger;
 
-    private Guid? AddImage(UpdateAvatarRequest request, Guid senderId, List<string> errors)
+    private async Task<Guid?> AddImage(UpdateAvatarRequest request, Guid senderId, List<string> errors)
     {
-      string errorMessage = "Can not add image. Please try again later.";
-      string logMessage = "Errors while adding image.";
+      const string errorMessage = "Can not add image. Please try again later.";
+      const string logMessage = "Errors while adding image.";
 
       try
       {
-        IOperationResult<ICreateImagesResponse> createResponse = _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+        Response<IOperationResult<ICreateImagesResponse>> createResponse = await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(request.Name, request.Content, request.Extension, senderId),
-            ImageSource.User))
-          .Result.Message;
+            ImageSource.User));
 
-        if (createResponse.IsSuccess)
+        if (createResponse.Message.IsSuccess)
         {
-          return createResponse.Body.ImagesIds.FirstOrDefault();
+          return createResponse.Message.Body.ImagesIds.FirstOrDefault();
         }
 
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
-          string.Join('\n', createResponse.Errors));
+          string.Join('\n', createResponse.Message.Errors));
 
         errors.Add(errorMessage);
       }
@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public OperationResultResponse<Guid?> Execute(UpdateAvatarRequest request)
+    public async Task<OperationResultResponse<Guid?>> Execute(UpdateAvatarRequest request)
     {
       OperationResultResponse<Guid?> response = new();
 
@@ -118,7 +118,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      Guid? result = AddImage(request, senderId, response.Errors);
+      Guid? result = await AddImage(request, senderId, response.Errors);
 
       if (result.HasValue)
       {

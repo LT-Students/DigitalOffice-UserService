@@ -340,6 +340,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ChangeUserRole(request.RoleId.Value, userId, response.Errors);
       }
 
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

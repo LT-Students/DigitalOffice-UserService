@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.Image;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -14,37 +15,37 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class ImageController : ControllerBase
   {
     [HttpPost("add")]
-    public OperationResultResponse<List<Guid>> Add(
+    public async Task<OperationResultResponse<List<Guid>>> Add(
       [FromServices] IAddImagesCommand command,
       [FromBody] AddImagesRequest request)
     {
-      return command.Execute(request);
+      return await command.Execute(request);
     }
 
     [HttpPost("updateAvatar")]
-    public OperationResultResponse<Guid?> UpdateAvatar(
+    public async Task<OperationResultResponse<Guid?>> UpdateAvatar(
       [FromServices] IUpdateAvatarCommand command,
       [FromBody] UpdateAvatarRequest request)
     {
-      return command.Execute(request);
+      return await command.Execute(request);
     }
 
     [HttpGet("get")]
-    public OperationResultResponse<ImagesResponse> Get(
+    public async Task<OperationResultResponse<ImagesResponse>> Get(
       [FromServices] IGetImagesCommand command,
       [FromQuery] Guid entityId,
       [FromQuery] EntityType entityType,
       [FromQuery] bool getCurrentAvatar = false)
     {
-      return command.Execute(entityId, entityType, getCurrentAvatar);
+      return await command.Execute(entityId, entityType, getCurrentAvatar);
     }
 
     [HttpPost("remove")]
-    public OperationResultResponse<bool> Remove(
+    public async Task<OperationResultResponse<bool>> Remove(
       [FromServices] IRemoveImagesCommand command,
       [FromBody] RemoveImagesRequest request)
     {
-      return command.Execute(request);
+      return await command.Execute(request);
     }
   }
 }

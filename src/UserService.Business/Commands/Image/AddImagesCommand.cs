@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -25,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
@@ -33,7 +33,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IImageRepository _imageRepository;
     private readonly ICertificateRepository _certificateRepository;
     private readonly IEducationRepository _educationRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IAccessValidator _accessValidator;
     private readonly IAddImagesRequestValidator _requestValidator;
     private readonly IDbEntityImageMapper _dbEntityImageMapper;
@@ -42,32 +41,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
     private readonly ILogger<AddImagesCommand> _logger;
 
-    private List<Guid> AddImages(List<AddImageRequest> request, Guid senderId, List<string> errors)
+    private async Task<List<Guid>> AddImages(List<AddImageRequest> request, Guid senderId, List<string> errors)
     {
       if (request == null || !request.Any())
       {
         return null;
       }
 
-      string errorMessage = "Can not add images. Please try again later.";
-      string logMessage = "Errors while adding images.";
+      const string errorMessage = "Can not add images. Please try again later.";
+      const string logMessage = "Errors while adding images.";
 
       try
       {
-        IOperationResult<ICreateImagesResponse> createResponse = _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+        Response<IOperationResult<ICreateImagesResponse>> createResponse = await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(request, senderId),
-            ImageSource.User))
-          .Result.Message;
+            ImageSource.User));
 
-        if (createResponse.IsSuccess)
+        if (createResponse.Message.IsSuccess)
         {
-          return createResponse.Body.ImagesIds;
+          return createResponse.Message.Body.ImagesIds;
         }
 
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
-          string.Join('\n', createResponse.Errors));
+          string.Join('\n', createResponse.Message.Errors));
 
         errors.Add(errorMessage);
       }
@@ -81,11 +79,32 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       return null;
     }
 
+    private Guid? GetUserIdFromEntity(Guid entityId, EntityType entityType)
+    {
+      Guid? userId = null;
+
+      switch (entityType)
+      {
+        case EntityType.User:
+          userId = entityId;
+          break;
+
+        case EntityType.Certificate:
+          userId = _certificateRepository.Get(entityId).UserId;
+          break;
+
+        case EntityType.Education:
+          userId = _educationRepository.Get(entityId).UserId;
+          break;
+      }
+
+      return userId;
+    }
+
     public AddImagesCommand(
       IImageRepository imageRepository,
       ICertificateRepository certificateRepository,
       IEducationRepository educationRepository,
-      IUserRepository userRepository,
       IAccessValidator accessValidator,
       IAddImagesRequestValidator requestValidator,
       IDbEntityImageMapper dbEntityImageMapper,
@@ -97,7 +116,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;
       _educationRepository = educationRepository;
-      _userRepository = userRepository;
       _accessValidator = accessValidator;
       _requestValidator = requestValidator;
       _dbEntityImageMapper = dbEntityImageMapper;
@@ -107,27 +125,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public OperationResultResponse<List<Guid>> Execute(AddImagesRequest request)
+    public async Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request)
     {
       OperationResultResponse<List<Guid>> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      Guid? userId = null;
-
-      switch (request.EntityType)
-      {
-        case EntityType.User:
-          userId = request.EntityId;
-          break;
-
-        case EntityType.Certificate:
-          userId = _certificateRepository.Get(request.EntityId).UserId;
-          break;
-
-        case EntityType.Education:
-          userId = _educationRepository.Get(request.EntityId).UserId;
-          break;
-      }
+      Guid? userId = GetUserIdFromEntity(request.EntityId, request.EntityType);
 
       if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
         && senderId != userId)
@@ -148,16 +151,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      List<Guid> result = AddImages(request.Images, senderId, response.Errors);
+      List<Guid> result = await AddImages(request.Images, senderId, response.Errors);
 
       if (result != null)
       {
         List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(result, request.EntityId);
 
         result = _imageRepository.Create(dbEntityImages);
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+      }
+      else
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
       }
 
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = result;
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

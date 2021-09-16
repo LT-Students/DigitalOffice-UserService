@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
@@ -35,16 +36,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<RemoveImagesCommand> _logger;
 
-    private bool RemoveImages(List<Guid> imagesIds, Guid entityId, List<string> errors)
+    private async Task<bool> RemoveImages(List<Guid> imagesIds, Guid entityId, List<string> errors)
     {
-      string errorMessage = "Can't remove images. Please try again later.";
-      string logMessage = "Errors while removing images with ids: {Ids}.";
+      const string errorMessage = "Can't remove images. Please try again later.";
+      const string logMessage = "Errors while removing images with ids: {ImagesIds}.";
 
       try
       {
-        Response<IOperationResult<bool>> removeResponse = _rcRemoveImages.GetResponse<IOperationResult<bool>>(
-            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User))
-          .Result;
+        Response<IOperationResult<bool>> removeResponse = await _rcRemoveImages.GetResponse<IOperationResult<bool>>(
+            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User));
 
         if (removeResponse.Message.IsSuccess)
         {
@@ -52,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         }
 
         _logger.LogWarning(
-          logMessage,
+          logMessage + " Errors: {Errors}",
           string.Join(", ", imagesIds),
           string.Join('\n', removeResponse.Message.Errors));
 
@@ -66,6 +66,28 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       }
 
       return false;
+    }
+
+    private Guid? GetUserIdFromEntity(Guid entityId, EntityType entityType)
+    {
+      Guid? userId = null;
+
+      switch (entityType)
+      {
+        case EntityType.User:
+          userId = entityId;
+          break;
+
+        case EntityType.Certificate:
+          userId = _certificateRepository.Get(entityId).UserId;
+          break;
+
+        case EntityType.Education:
+          userId = _educationRepository.Get(entityId).UserId;
+          break;
+      }
+
+      return userId;
     }
 
     public RemoveImagesCommand(
@@ -90,27 +112,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public OperationResultResponse<bool> Execute(RemoveImagesRequest request)
+    public async Task<OperationResultResponse<bool>> Execute(RemoveImagesRequest request)
     {
       OperationResultResponse<bool> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      Guid? userId = null;
-
-      switch (request.EntityType)
-      {
-        case EntityType.User:
-          userId = request.EntityId;
-          break;
-
-        case EntityType.Certificate:
-          userId = _certificateRepository.Get(request.EntityId).UserId;
-          break;
-
-        case EntityType.Education:
-          userId = _educationRepository.Get(request.EntityId).UserId;
-          break;
-      }
+      Guid? userId = GetUserIdFromEntity(request.EntityId, request.EntityType);
 
       if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
         && senderId != userId)
@@ -131,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      response.Body = RemoveImages(request.ImagesIds, request.EntityId, response.Errors);
+      response.Body = await RemoveImages(request.ImagesIds, request.EntityId, response.Errors);
 
       if (response.Body)
       {
