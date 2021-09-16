@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -318,12 +318,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
-
       DbUser dbUser = _mapperUser.Map(request, avatarImageId);
-
-      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
-
+      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
+        request.Password.Trim() : _generatePassword.Execute();
       Guid userId = _userRepository.Create(dbUser);
+
       _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
 
       if (avatarImageId.HasValue)
@@ -332,7 +331,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       SendEmail(dbUser, password, response.Errors);
-
       EditCompanyEmployee(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
 
       if (request.RoleId.HasValue)
@@ -345,6 +343,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
+
       return response;
     }
   }
