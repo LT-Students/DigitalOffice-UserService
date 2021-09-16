@@ -23,15 +23,13 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
     [FromQuery(Name = "includeposition")]
     public bool IncludePosition { get; set; } = false;
 
-    [FromQuery(Name = "includeavatar")]
-    public bool IncludeAvatar { get; set; } = false;
+    [FromQuery(Name = "includeoffice")]
+    public bool IncludeOffice { get; set; } = false;
 
     [FromQuery(Name = "includerole")]
     public bool IncludeRole { get; set; } = false;
 
-    [FromQuery(Name = "includeoffice")]
-    public bool IncludeOffice { get; set; } = false;
-
-
+    [FromQuery(Name = "includeavatar")]
+    public bool IncludeAvatar { get; set; } = false;
   }
 }
