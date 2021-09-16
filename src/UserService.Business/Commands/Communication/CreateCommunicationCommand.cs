@@ -13,6 +13,8 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -49,20 +51,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
                 || _accessValidator.HasRights(Rights.AddEditRemoveUsers)
                 || request.UserId == _httpContextAccessor.HttpContext.GetUserId()))
             {
-                throw new ForbiddenException("Not enough rights.");
+              _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+              return new OperationResultResponse<Guid>
+              {
+                Status = OperationResultStatusType.Failed,
+                Errors = new List<string>() { "Not enought rights" }
+              };
             }
 
             _validator.ValidateAndThrowCustom(request);
 
             if (_repository.IsCommunicationValueExist(request.Value))
             {
+                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 return new OperationResultResponse<Guid>
                 {
-                    Status = OperationResultStatusType.Conflict,
+                    Status = OperationResultStatusType.Failed,
                     Errors = new() { $"The communication '{request.Value}' already exists." }
                 };
             }
 
+            _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
             return new OperationResultResponse<Guid>
             {
                 Status = OperationResultStatusType.FullSuccess,

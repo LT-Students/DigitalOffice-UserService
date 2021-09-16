@@ -1,8 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
@@ -26,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -256,17 +256,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     #endregion
 
     public CreateUserCommand(
-        ILogger<CreateUserCommand> logger,
-        IRequestClient<IAddImageRequest> rcImage,
-        IHttpContextAccessor httpContextAccessor,
-        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
-        IRequestClient<IChangeUserRoleRequest> rcRole,
-        IRequestClient<ISendEmailRequest> rcSendEmail,
-        IUserRepository userRepository,
-        ICreateUserRequestValidator validator,
-        IDbUserMapper mapperUser,
-        IAccessValidator accessValidator,
-        IGeneratePasswordCommand generatePassword)
+      ILogger<CreateUserCommand> logger,
+      IRequestClient<IAddImageRequest> rcImage,
+      IHttpContextAccessor httpContextAccessor,
+      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IChangeUserRoleRequest> rcRole,
+      IRequestClient<ISendEmailRequest> rcSendEmail,
+      IUserRepository userRepository,
+      ICreateUserRequestValidator validator,
+      IDbUserMapper mapperUser,
+      IAccessValidator accessValidator,
+      IGeneratePasswordCommand generatePassword)
     {
       _logger = logger;
       _rcImage = rcImage;
@@ -284,34 +284,39 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public OperationResultResponse<Guid> Execute(CreateUserRequest request)
     {
+      OperationResultResponse<Guid> response = new();
+
       if (!(_accessValidator.IsAdmin() ||
         _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
       }
 
       _validator.ValidateAndThrowCustom(request);
 
-      OperationResultResponse<Guid> response = new();
-
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
-        response.Status = OperationResultStatusType.Conflict;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+
+        response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Communication value already exist");
+
         return response;
       }
 
       Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
-
-      var dbUser = _mapperUser.Map(request, avatarImageId);
-
-      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
-
+      DbUser dbUser = _mapperUser.Map(request, avatarImageId);
+      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
+        request.Password.Trim() : _generatePassword.Execute();
       Guid userId = _userRepository.Create(dbUser);
+
       _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
-
       SendEmail(dbUser, password, response.Errors);
-
       EditCompanyEmployee(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
 
       if (request.RoleId.HasValue)
@@ -319,10 +324,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ChangeUserRole(request.RoleId.Value, userId, response.Errors);
       }
 
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
       response.Body = userId;
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
+
       return response;
     }
   }

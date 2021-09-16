@@ -27,18 +27,7 @@ namespace LT.DigitalOffice.UserService.Controllers
             [FromServices] ICreateCommunicationCommand command,
             [FromBody] CreateCommunicationRequest request)
         {
-            OperationResultResponse<Guid> result = command.Execute(request);
-
-            if (result.Status == OperationResultStatusType.Conflict)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            }
-            else if (result.Status != OperationResultStatusType.Failed)
-            {
-                _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-            }
-
-            return result;
+            return command.Execute(request);
         }
 
         [HttpPatch("edit")]
