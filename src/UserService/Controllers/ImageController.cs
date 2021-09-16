@@ -35,9 +35,9 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IGetImagesCommand command,
       [FromQuery] Guid entityId,
       [FromQuery] EntityType entityType,
-      [FromQuery] bool getCurrentAvatar = false)
+      [FromQuery] bool isCurrentAvatar = false)
     {
-      return await command.Execute(entityId, entityType, getCurrentAvatar);
+      return await command.Execute(entityId, entityType, isCurrentAvatar);
     }
 
     [HttpPost("remove")]
