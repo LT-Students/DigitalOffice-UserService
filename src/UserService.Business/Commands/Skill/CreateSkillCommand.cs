@@ -50,9 +50,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 
       if (!(dbUser.IsAdmin || _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
         response.Errors.Add("Not enough rights.");
         response.Status = OperationResultStatusType.Failed;
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
         return response;
       }
@@ -60,6 +61,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
       if (!_validator.ValidateCustom(request, out List<string> errors))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
         response.Errors.AddRange(errors);
         response.Status = OperationResultStatusType.Failed;
 
@@ -68,25 +70,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 
       if (_skillRepository.DoesSkillAlreadyExist(request.Name))
       {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+
         response.Errors.Add($"Skill {request.Name} already exist");
         response.Status = OperationResultStatusType.Failed;
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
 
         return response;
       }
-
+      
       response.Body = _skillRepository.Add(_mapper.Map(request));
+      response.Status = OperationResultStatusType.FullSuccess;
+
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       if (response.Body == default)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         response.Status = OperationResultStatusType.Failed;
-
-        return response;
       }
-
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-      response.Status = OperationResultStatusType.FullSuccess;
 
       return response;
     }
