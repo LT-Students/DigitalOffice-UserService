@@ -17,8 +17,11 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -37,6 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
     {
@@ -140,18 +144,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     private IGetCompanyEmployeesResponse GetCompanyEmployess(
-        List<Guid> userIds,
+        List<Guid> usersIds,
         bool includeDepartments,
+        bool includePositions,
+        bool includeOffices,
         List<string> errors)
     {
+      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
+      {
+        return null;
+      }
+
       const string errorMessage = "Can not get user's departments and positions. Please try again later.";
 
       try
       {
-        var request = IGetCompanyEmployeesRequest.CreateObj(userIds, includeDepartments, true, true);
+        var request = IGetCompanyEmployeesRequest.CreateObj(
+          usersIds,
+          includeDepartments,
+          includePositions,
+          includeOffices);
+
         var response = _rcGetCompanyEmployees
-            .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(request)
-            .Result;
+          .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(request)
+          .Result;
 
         if (response.Message.IsSuccess)
         {
@@ -185,7 +201,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         IRequestClient<IGetDepartmentUsersRequest> rcGetDepartmentUser,
         IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
         IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-        IRequestClient<IGetImagesRequest> rcGetImages)
+        IRequestClient<IGetImagesRequest> rcGetImages,
+        IHttpContextAccessor httpContextAccessor)
     {
       _logger = logger;
       _mapper = mapper;
@@ -199,60 +216,83 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetCompanyEmployees = rcGetCompanyEmployees;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetImages = rcGetImages;
+      _httpContextAccessor = httpContextAccessor;
     }
 
     /// <inheritdoc/>
-    public FindResultResponse<UserInfo> Execute(int skipCount, int takeCount, Guid? departmentId)
+    public FindResultResponse<UserInfo> Execute(FindUsersFilter filter)
     {
       List<DbUser> dbUsers = null;
-      int totalCount = 0;
 
-      FindResultResponse<UserInfo> result = new();
-      result.Body = new();
+      FindResultResponse<UserInfo> response = new();
+      response.Body = new();
 
-      if (departmentId.HasValue)
+      if (filter.DepartmentId.HasValue)
       {
-        var users = GetUserIdsByDepartment(departmentId.Value, skipCount, takeCount, result.Errors);
+        IGetDepartmentUsersResponse departmentUsers = GetUserIdsByDepartment(
+          filter.DepartmentId.Value,
+          filter.SkipCount,
+          filter.TakeCount,
+          response.Errors);
 
-        if (users != null)
+        if (departmentUsers != null)
         {
-          dbUsers = _repository.Get(users.UserIds);
+          dbUsers = _repository.Get(departmentUsers.UserIds);
 
-          result.TotalCount = users.TotalCount;
+          response.TotalCount = departmentUsers.TotalCount;
         }
         else
         {
-          return result;
+          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+
+          response.Status = OperationResultStatusType.Failed;
+          return response;
         }
       }
       else
       {
-        dbUsers = _repository.Find(skipCount, takeCount, out totalCount);
+        (List<DbUser> dbUsers, int totalCount) findUsersResponse =
+          _repository.Find(filter);
+
+        dbUsers = findUsersResponse.dbUsers;
+        response.TotalCount = findUsersResponse.totalCount;
       }
 
-      List<Guid> userIds = dbUsers.Select(x => x.Id).ToList();
+      List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
-      IGetCompanyEmployeesResponse getCompanyEmployeesResponse = GetCompanyEmployess(userIds, !departmentId.HasValue, result.Errors);
+      IGetCompanyEmployeesResponse getCompanyEmployeesResponse =
+        GetCompanyEmployess(
+          usersIds,
+          filter.IncludeDepartment,
+          filter.IncludePosition,
+          filter.IncludeOffice,
+          response.Errors);
 
-      var images = GetImages(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), result.Errors);
+      List<RoleData> roles = filter.IncludeRole ? GetRoles(usersIds, response.Errors) : null;
 
-      var roles = GetRoles(userIds, result.Errors);
+      List<ImageData> images = filter.IncludeAvatar ? GetImages(dbUsers.Where(x =>
+        x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors) : null;
 
-      result.Body
+      response.Body
         .AddRange(dbUsers.Select(dbUser =>
           _mapper.Map(
             dbUser,
-            _departmentInfoMapper.Map(getCompanyEmployeesResponse?.Departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
-            _positionInfoMapper.Map(getCompanyEmployeesResponse?.Positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
-            _imageInfoMapper.Map(images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)),
-            _roleInfoMapper.Map(roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))),
-            _officeInfoMapper.Map(getCompanyEmployeesResponse?.Offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))))));
+            filter.IncludeDepartment ? _departmentInfoMapper.Map(
+              getCompanyEmployeesResponse?.Departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+            filter.IncludePosition ? _positionInfoMapper.Map(
+              getCompanyEmployeesResponse?.Positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+            filter.IncludeOffice ? _officeInfoMapper.Map(
+              getCompanyEmployeesResponse?.Offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+            filter.IncludeRole ? _roleInfoMapper.Map(
+              roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
+            filter.IncludeAvatar ? _imageInfoMapper.Map(
+              images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
 
-      result.TotalCount = totalCount;
-      result.Status = result.Errors.Any()
+      response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
-      return result;
+
+      return response;
     }
   }
 }

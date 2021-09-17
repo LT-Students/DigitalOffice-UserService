@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
             return new UserResponse
             {
-                User = _userInfoMapper.Map(dbUser, department, position, avatar, role, office),
+                User = _userInfoMapper.Map(dbUser, department, position, office, role, avatar),
                 Projects = projects,
                 Skills = filter.IncludeSkills
                     ? dbUser.Skills.Select(s => s.Skill.Name)
