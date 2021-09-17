@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -22,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
         List<Guid> AreExistingIds(List<Guid> userIds);
 
-        (List<DbUser> dbUsers, int totalCount) Find(int skipCount, int takeCount, bool includeDeactivated = false);
+        (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter);
 
         DbPendingUser GetPendingUser(Guid userId);
 

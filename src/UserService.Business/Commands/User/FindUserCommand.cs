@@ -251,7 +251,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       else
       {
         (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-          _repository.Find(filter.SkipCount, filter.TakeCount, filter.IncludeDeactivated);
+          _repository.Find(filter);
 
         dbUsers = findUsersResponse.dbUsers;
         response.TotalCount = findUsersResponse.totalCount;

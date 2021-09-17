@@ -5,6 +5,7 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -213,22 +214,22 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public (List<DbUser> dbUsers, int totalCount) Find(int skipCount, int takeCount, bool includeDeactivated = false)
+    public (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter)
     {
-      if (skipCount < 0)
+      if (filter.SkipCount < 0)
       {
         throw new BadRequestException("Skip count can't be less than 0.");
       }
 
-      if (takeCount < 1)
+      if (filter.TakeCount < 1)
       {
         throw new BadRequestException("Take count can't be less than 1.");
       }
 
       return (
-        includeDeactivated ?
-          _provider.Users.Skip(skipCount).Take(takeCount).ToList() :
-          _provider.Users.Where(x => x.IsActive).Skip(skipCount).Take(takeCount).ToList(),
+        filter.IncludeDeactivated ?
+          _provider.Users.Skip(filter.SkipCount).Take(filter.TakeCount).ToList() :
+          _provider.Users.Where(x => x.IsActive).Skip(filter.SkipCount).Take(filter.TakeCount).ToList(),
 
         _provider.Users.Count());
     }
