@@ -16,19 +16,7 @@ namespace LT.DigitalOffice.UserService.Validation.Image
     public AddImageRequestValidator()
     {
       RuleFor(x => x.Content)
-        .NotEmpty().WithMessage("Content can't be empty")
-        .Must(content =>
-        {
-          try
-          {
-            Span<byte> byteString = new Span<byte>(new byte[content.Length]);
-            return Convert.TryFromBase64String(content, byteString, out _);
-          }
-          catch
-          {
-            return false;
-          }
-        }).WithMessage("Wrong image content.");
+        .NotEmpty().WithMessage("Content can't be empty");
 
       RuleFor(x => x.Extension)
         .Must(x => imageFormats.Contains(x)).WithMessage("Wrong extension");
