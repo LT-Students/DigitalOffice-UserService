@@ -276,19 +276,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         .AddRange(dbUsers.Select(dbUser =>
           _mapper.Map(
             dbUser,
-
             filter.IncludeDepartment ? _departmentInfoMapper.Map(
               getCompanyEmployeesResponse?.Departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-
             filter.IncludePosition ? _positionInfoMapper.Map(
               getCompanyEmployeesResponse?.Positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-
             filter.IncludeOffice ? _officeInfoMapper.Map(
               getCompanyEmployeesResponse?.Offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-
             filter.IncludeRole ? _roleInfoMapper.Map(
               roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
-
             filter.IncludeAvatar ? _imageInfoMapper.Map(
               images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
 
