@@ -22,14 +22,6 @@ namespace LT.DigitalOffice.UserService.Controllers
       return await command.Execute(request);
     }
 
-    [HttpPost("updateAvatar")]
-    public async Task<OperationResultResponse<Guid?>> UpdateAvatar(
-      [FromServices] IUpdateAvatarCommand command,
-      [FromBody] UpdateAvatarRequest request)
-    {
-      return await command.Execute(request);
-    }
-
     [HttpGet("get")]
     public async Task<OperationResultResponse<ImagesResponse>> Get(
       [FromServices] IGetImagesCommand command,

@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     List<Guid> AreExistingIds(List<Guid> userIds);
 
-        (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter);
+    (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter);
 
     DbPendingUser GetPendingUser(Guid userId);
 
