@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       try
       {
         Response<IOperationResult<IGetImagesResponse>> response = await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(15));
+          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(5));
 
         if (response.Message.IsSuccess)
         {
