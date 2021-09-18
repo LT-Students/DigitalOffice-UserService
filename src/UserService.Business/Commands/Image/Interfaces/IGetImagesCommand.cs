@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces
   [AutoInject]
   public interface IGetImagesCommand
   {
-    Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType, bool getCurrentAvatar);
+    Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType);
   }
 }

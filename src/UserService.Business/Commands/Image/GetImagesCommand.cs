@@ -8,7 +8,6 @@ using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Image;
 using MassTransit;
@@ -44,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       try
       {
         Response<IOperationResult<IGetImagesResponse>> response = await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(5));
+          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(15));
 
         if (response.Message.IsSuccess)
         {
@@ -84,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType, bool isCurrentAvatar)
+    public async Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType)
     {
       OperationResultResponse<ImagesResponse> response = new();
 

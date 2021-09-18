@@ -26,10 +26,9 @@ namespace LT.DigitalOffice.UserService.Controllers
     public async Task<OperationResultResponse<ImagesResponse>> Get(
       [FromServices] IGetImagesCommand command,
       [FromQuery] Guid entityId,
-      [FromQuery] EntityType entityType,
-      [FromQuery] bool isCurrentAvatar = false)
+      [FromQuery] EntityType entityType)
     {
-      return await command.Execute(entityId, entityType, isCurrentAvatar);
+      return await command.Execute(entityId, entityType);
     }
 
     [HttpPost("remove")]

@@ -56,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         Response<IOperationResult<ICreateImagesResponse>> createResponse = await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(request, senderId),
-            ImageSource.User), default, TimeSpan.FromSeconds(5));
+            ImageSource.User), default, TimeSpan.FromSeconds(15));
 
         if (createResponse.Message.IsSuccess)
         {

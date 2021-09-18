@@ -164,7 +164,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private List<ImageInfo> GetImages(List<Guid> imageIds, List<string> errors)
     {
-      if (imageIds == null || imageIds.Count == 0)
+      if (imageIds == null || !imageIds.Any())
       {
         return new();
       }
@@ -195,41 +195,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       catch (Exception exc)
       {
         _logger.LogError(exc, logMessage, string.Join(", ", imageIds));
-
-        errors.Add(errorMessage);
-      }
-
-      return null;
-    }
-
-    private ImageData GetAvatar(List<Guid> imageIds, List<string> errors)
-    {
-      string errorMessage = "Can't get user's avatar. Please try again later.";
-      string logMessage = "Errors while getting images with ids: {Ids}.";
-
-      try
-      {
-        IOperationResult<IGetImagesResponse> getResponse = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds, ImageSource.User), default, TimeSpan.FromSeconds(5))
-          .Result.Message;
-
-        if (getResponse.IsSuccess)
-        {
-          return getResponse.Body.ImagesData.FirstOrDefault();
-        }
-
-        string warningMessage = logMessage + "Errors: {Errors}";
-
-        _logger.LogWarning(
-          warningMessage,
-          string.Join(", ", imageIds),
-          string.Join('\n', getResponse.Errors));
-
-        errors.Add(errorMessage);
-      }
-      catch (Exception e)
-      {
-        _logger.LogError(e, logMessage, string.Join(", ", imageIds));
 
         errors.Add(errorMessage);
       }
@@ -291,6 +256,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> avatarId = new();
       List<Guid> images = new();
+      List<ImageInfo> imagesResult = null;
 
       if (filter.IncludeImages)
       {
@@ -312,8 +278,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (dbUser.AvatarFileId.HasValue)
         {
-          avatarId.Add(dbUser.AvatarFileId.Value);
+          images.Add(dbUser.AvatarFileId.Value);
         }
+
+        imagesResult = GetImages(images, response.Errors);
       }
 
       (DepartmentInfo department, PositionInfo position, OfficeInfo office) employeeInfo =
@@ -326,8 +294,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         employeeInfo.office,
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
-        GetImages(images, response.Errors),
-        _imageMapper.Map(GetAvatar(avatarId, response.Errors)),
+        imagesResult,
+        filter.IncludeImages && dbUser.AvatarFileId.HasValue ? imagesResult.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
         filter);
 
       response.Status = response.Errors.Any()
