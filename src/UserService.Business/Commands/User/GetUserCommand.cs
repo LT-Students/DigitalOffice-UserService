@@ -175,7 +175,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<IGetImagesResponse> response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
+          IGetImagesRequest.CreateObj(imageIds, ImageSource.User), default, TimeSpan.FromSeconds(5)).Result.Message;
 
         if (response.IsSuccess)
         {
@@ -210,7 +210,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<IGetImagesResponse> getResponse = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds, ImageSource.User))
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User), default, TimeSpan.FromSeconds(5))
           .Result.Message;
 
         if (getResponse.IsSuccess)

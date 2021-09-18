@@ -56,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         Response<IOperationResult<ICreateImagesResponse>> createResponse = await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(request, senderId),
-            ImageSource.User));
+            ImageSource.User), default, TimeSpan.FromSeconds(5));
 
         if (createResponse.Message.IsSuccess)
         {
@@ -158,17 +158,21 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(result, request.EntityId);
 
         result = _imageRepository.Create(dbEntityImages);
+
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
+        response.Status = response.Errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
       }
       else
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
+
+        response.Status = OperationResultStatusType.Failed;
       }
 
       response.Body = result;
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
 
       return response;
     }

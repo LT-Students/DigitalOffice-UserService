@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       {
         Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(_createImageDataMapper.Map(
-            new List<AddImageRequest>() { addImageRequest }, userId),ImageSource.User)).Result;
+            new List<AddImageRequest>() { addImageRequest }, userId),ImageSource.User), default, TimeSpan.FromSeconds(5)).Result;
 
         if (!response.Message.IsSuccess)
         {

@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User), default, TimeSpan.FromSeconds(5)).Result.Message;
 
         if (response.IsSuccess)
         {

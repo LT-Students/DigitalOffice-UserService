@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       try
       {
         Response<IOperationResult<bool>> removeResponse = await _rcRemoveImages.GetResponse<IOperationResult<bool>>(
-            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User));
+            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(5));
 
         if (removeResponse.Message.IsSuccess)
         {

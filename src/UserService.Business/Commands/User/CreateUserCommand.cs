@@ -231,7 +231,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }, senderId),
-            ImageSource.User))
+            ImageSource.User), default, TimeSpan.FromSeconds(5))
           .Result;
 
         if (!createResponse.Message.IsSuccess)
