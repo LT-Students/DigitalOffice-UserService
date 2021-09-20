@@ -10,25 +10,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
   {
     public List<DbEntityImage> Map(List<Guid> imagesIds, Guid entityId)
     {
-      List<DbEntityImage> result = new();
-
       if (imagesIds == null || !imagesIds.Any())
       {
-        result = null;
+        return null;
       }
-      else
+
+      return imagesIds.Select(x => new DbEntityImage
       {
-        foreach (Guid imageId in imagesIds)
-        {
-          result.Add(new DbEntityImage
-          {
-            Id = Guid.NewGuid(),
-            EntityId = entityId,
-            ImageId = imageId
-          });
-        }
-      }
-      return result;
+        Id = Guid.NewGuid(),
+        EntityId = entityId,
+        ImageId = x
+      }).ToList();
     }
   }
 }
