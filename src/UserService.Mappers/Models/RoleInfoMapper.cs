@@ -4,21 +4,21 @@ using LT.DigitalOffice.UserService.Models.Dto.Models;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
-    public class RoleInfoMapper : IRoleInfoMapper
+  public class RoleInfoMapper : IRoleInfoMapper
+  {
+    public RoleInfo Map(RoleData role)
     {
-        public RoleInfo Map(RoleData role)
-        {
-            if (role == null)
-            {
-                return null;
-            }
+      if (role == null)
+      {
+        return null;
+      }
 
-            return new RoleInfo
-            {
-                Id = role.Id,
-                Name = role.Name,
-                Description = role.Description
-            };
-        }
+      return new RoleInfo
+      {
+        Id = role.Id,
+        Name = role.Name,
+        Description = role.Description
+      };
     }
+  }
 }

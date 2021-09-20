@@ -16,69 +16,71 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
-    public class EditCommunicationCommand : IEditCommunicationCommand
+  public class EditCommunicationCommand : IEditCommunicationCommand
+  {
+    private readonly IUserRepository _userRepository;
+    private readonly ICommunicationRepository _repository;
+    private readonly IAccessValidator _accessValidator;
+    private readonly IPatchDbUserCommunicationMapper _mapper;
+    private readonly IEditCommunicationRequestValidator _validator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public EditCommunicationCommand(
+      IUserRepository userRepository,
+      ICommunicationRepository repository,
+      IAccessValidator accessValidator,
+      IPatchDbUserCommunicationMapper mapper,
+      IEditCommunicationRequestValidator validator,
+      IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ICommunicationRepository _repository;
-        private readonly IAccessValidator _accessValidator;
-        private readonly IPatchDbUserCommunicationMapper _mapper;
-        private readonly IEditCommunicationRequestValidator _validator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public EditCommunicationCommand(
-            IUserRepository userRepository,
-            ICommunicationRepository repository,
-            IAccessValidator accessValidator,
-            IPatchDbUserCommunicationMapper mapper,
-            IEditCommunicationRequestValidator validator,
-            IHttpContextAccessor httpContextAccessor)
-        {
-            _userRepository = userRepository;
-            _repository = repository;
-            _accessValidator = accessValidator;
-            _mapper = mapper;
-            _validator = validator;
-            _httpContextAccessor = httpContextAccessor;
-        }
-        public OperationResultResponse<bool> Execute(
-            Guid communicationId, 
-            JsonPatchDocument<EditCommunicationRequest> request)
-        {
-            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-            DbUser sender = _userRepository.Get(senderId);
-
-            DbUserCommunication communication = _repository.Get(communicationId);
-
-            if (!(sender.IsAdmin ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != communication.UserId)
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
-
-            _validator.ValidateAndThrowCustom(request);
-
-            Operation<EditCommunicationRequest> valueOperation = request.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase));
-
-            if (valueOperation != null && _repository.IsCommunicationValueExist(valueOperation.value.ToString()))
-            {
-                return new OperationResultResponse<bool>
-                {
-                    Status = OperationResultStatusType.Conflict,
-                    Errors = new() { $"The communication '{valueOperation.value}' already exists." }
-                };
-            }
-
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _repository.Edit(communicationId, _mapper.Map(request)),
-                Errors = new()
-            };
-        }
+      _userRepository = userRepository;
+      _repository = repository;
+      _accessValidator = accessValidator;
+      _mapper = mapper;
+      _validator = validator;
+      _httpContextAccessor = httpContextAccessor;
     }
+    public OperationResultResponse<bool> Execute(
+      Guid communicationId,
+      JsonPatchDocument<EditCommunicationRequest> request)
+    {
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUser sender = _userRepository.Get(senderId);
+      DbUserCommunication communication = _repository.Get(communicationId);
+
+      if (!(sender.IsAdmin ||
+        _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+        && senderId != communication.UserId)
+      {
+        throw new ForbiddenException("Not enough rights.");
+      }
+
+      _validator.ValidateAndThrowCustom(request);
+
+      Operation<EditCommunicationRequest> valueOperation = request.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase));
+
+      if (valueOperation != null && _repository.IsCommunicationValueExist(valueOperation.value.ToString()))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+
+        return new OperationResultResponse<bool>
+        {
+          Status = OperationResultStatusType.Failed,
+          Errors = new() { $"The communication '{valueOperation.value}' already exists." }
+        };
+      }
+
+      return new OperationResultResponse<bool>
+      {
+        Status = OperationResultStatusType.FullSuccess,
+        Body = _repository.Edit(communicationId, _mapper.Map(request)),
+        Errors = new()
+      };
+    }
+  }
 }

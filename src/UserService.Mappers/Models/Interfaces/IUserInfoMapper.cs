@@ -4,14 +4,14 @@ using LT.DigitalOffice.UserService.Models.Dto.Models;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
 {
-    [AutoInject]
-    public interface IUserInfoMapper
-    {
-        UserInfo Map(DbUser dbUser,
-            DepartmentInfo department,
-            PositionInfo position,
-            ImageInfo image,
-            RoleInfo role,
-            OfficeInfo office);
-    }
+  [AutoInject]
+  public interface IUserInfoMapper
+  {
+    UserInfo Map(DbUser dbUser,
+      DepartmentInfo department,
+      PositionInfo position,
+      OfficeInfo office,
+      RoleInfo role,
+      ImageInfo image);
+  }
 }

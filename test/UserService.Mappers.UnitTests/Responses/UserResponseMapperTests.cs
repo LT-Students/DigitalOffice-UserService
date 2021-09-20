@@ -221,15 +221,13 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _departmentInfo = new DepartmentInfo
             {
                 Id = Guid.NewGuid(),
-                Name = "Department name",
-                StartWorkingAt = DateTime.UtcNow
+                Name = "Department name"
             };
 
             _positionInfo = new PositionInfo
             {
                 Id = Guid.NewGuid(),
-                Name = "Position name",
-                ReceivedAt = DateTime.UtcNow
+                Name = "Position name"
             };
 
             _projects = new List<ProjectInfo>
@@ -311,7 +309,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _mapper = _mocker.CreateInstance<UserResponseMapper>();
 
             _mocker
-                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, _avatarInfo, null, null))
+                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, _avatarInfo))
                 .Returns(_userInfo);
 
             _mocker

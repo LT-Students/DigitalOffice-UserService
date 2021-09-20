@@ -1,8 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
@@ -26,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -36,10 +36,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<IAddImageRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
-    private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
+    private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
-    private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ICreateUserRequestValidator _validator;
     private readonly IDbUserMapper _mapperUser;
@@ -48,57 +46,88 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     #region private methods
 
-    private void ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
+    private void EditCompanyEmployee(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-      string errorMessage = $"Can't assign user {userId} to the department {departmentId}. Please try again later.";
-      const string logMessage = "Can't assign user {UserId} to the department {DepartmentId}.";
+      string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
+      string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
+      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
+      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
+      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
       try
       {
-        var response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-          IChangeUserDepartmentRequest.CreateObj(
+        IOperationResult<(bool department, bool position, bool office)> response =
+          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+          IEditCompanyEmployeeRequest.CreateObj(
             userId,
-            departmentId,
-            _httpContextAccessor.HttpContext.GetUserId())).Result;
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          _logger.LogWarning(logMessage, userId, departmentId);
+            _httpContextAccessor.HttpContext.GetUserId(),
+            departmentId: departmentId,
+            positionId: positionId,
+            officeId: officeId)).Result.Message;
 
-          errors.Add(errorMessage);
+        if (!response.IsSuccess)
+        {
+          _logger.LogWarning(logMessage, userId);
+
+          if (departmentId.HasValue)
+          {
+            errors.Add(departmentErrorMessage);
+          }
+
+          if (positionId.HasValue)
+          {
+            errors.Add(positionErrorMessage);
+          }
+
+          if (officeId.HasValue)
+          {
+            errors.Add(officeErrorMessage);
+          }
+
+          return;
+        }
+
+        if (!response.Body.department)
+        {
+          _logger.LogWarning(departmentLogMessage, userId, departmentId);
+
+          errors.Add(departmentErrorMessage);
+        }
+
+        if (!response.Body.position)
+        {
+          _logger.LogWarning(positionLogMessage, userId, positionId);
+
+          errors.Add(positionErrorMessage);
+        }
+
+        if (!response.Body.office)
+        {
+          _logger.LogWarning(officeLogMessage, userId, officeId);
+
+          errors.Add(officeErrorMessage);
         }
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, userId, departmentId);
+        _logger.LogError(exc, logMessage, userId);
 
-        errors.Add(errorMessage);
-      }
-    }
-
-    private void ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
-    {
-      string errorMessage = $"Can't assign position {positionId} to the user {userId}. Please try again later.";
-      const string logMessage = "Can't assign position {PositionId} to the user {UserId}";
-
-      try
-      {
-        var response = _rcPosition.GetResponse<IOperationResult<bool>>(
-          IChangeUserPositionRequest.CreateObj(
-            userId,
-            positionId,
-            _httpContextAccessor.HttpContext.GetUserId())).Result;
-        if (!response.Message.IsSuccess || !response.Message.Body)
+        if (departmentId.HasValue)
         {
-          _logger.LogWarning(logMessage, positionId, userId);
-
-          errors.Add(errorMessage);
+          errors.Add(departmentErrorMessage);
         }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogWarning(exc, logMessage, positionId, userId);
 
-        errors.Add(errorMessage);
+        if (positionId.HasValue)
+        {
+          errors.Add(positionErrorMessage);
+        }
+
+        if (officeId.HasValue)
+        {
+          errors.Add(officeErrorMessage);
+        }
       }
     }
 
@@ -124,33 +153,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       catch (Exception exc)
       {
         _logger.LogError(exc, logMessage, roleId, userId);
-
-        errors.Add(errorMessage);
-      }
-    }
-
-    private void ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
-    {
-      string errorMessage = $"Can't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-      const string logMessage = "Can't assign office '{OfficeId}' to the user '{UserId}'";
-
-      try
-      {
-        var response = _rcOffice.GetResponse<IOperationResult<bool>>(
-          IChangeUserOfficeRequest.CreateObj(
-            officeId,
-            userId,
-            _httpContextAccessor.HttpContext.GetUserId())).Result;
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          _logger.LogWarning(logMessage, officeId, userId);
-
-          errors.Add(errorMessage);
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, officeId, userId);
 
         errors.Add(errorMessage);
       }
@@ -254,26 +256,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     #endregion
 
     public CreateUserCommand(
-        ILogger<CreateUserCommand> logger,
-        IRequestClient<IAddImageRequest> rcImage,
-        IHttpContextAccessor httpContextAccessor,
-        IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
-        IRequestClient<IChangeUserPositionRequest> rcPosition,
-        IRequestClient<IChangeUserRoleRequest> rcRole,
-        IRequestClient<IChangeUserOfficeRequest> rcOffice,
-        IRequestClient<ISendEmailRequest> rcSendEmail,
-        IUserRepository userRepository,
-        ICreateUserRequestValidator validator,
-        IDbUserMapper mapperUser,
-        IAccessValidator accessValidator,
-        IGeneratePasswordCommand generatePassword)
+      ILogger<CreateUserCommand> logger,
+      IRequestClient<IAddImageRequest> rcImage,
+      IHttpContextAccessor httpContextAccessor,
+      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IChangeUserRoleRequest> rcRole,
+      IRequestClient<ISendEmailRequest> rcSendEmail,
+      IUserRepository userRepository,
+      ICreateUserRequestValidator validator,
+      IDbUserMapper mapperUser,
+      IAccessValidator accessValidator,
+      IGeneratePasswordCommand generatePassword)
     {
       _logger = logger;
       _rcImage = rcImage;
-      _rcDepartment = rcDepartment;
-      _rcPosition = rcPosition;
+      _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
-      _rcOffice = rcOffice;
       _rcSendEmail = rcSendEmail;
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
@@ -286,52 +284,53 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public OperationResultResponse<Guid> Execute(CreateUserRequest request)
     {
+      OperationResultResponse<Guid> response = new();
+
       if (!(_accessValidator.IsAdmin() ||
         _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
       }
 
       _validator.ValidateAndThrowCustom(request);
 
-      OperationResultResponse<Guid> response = new();
-
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
-        response.Status = OperationResultStatusType.Conflict;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+
+        response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Communication value already exist");
+
         return response;
       }
 
       Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
-
-      var dbUser = _mapperUser.Map(request, avatarImageId);
-
-      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ? request.Password.Trim() : _generatePassword.Execute();
-
+      DbUser dbUser = _mapperUser.Map(request, avatarImageId);
+      string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
+        request.Password.Trim() : _generatePassword.Execute();
       Guid userId = _userRepository.Create(dbUser);
+
       _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
-
       SendEmail(dbUser, password, response.Errors);
-
-      ChangeUserPosition(request.PositionId, userId, response.Errors);
-
-      if (request.DepartmentId.HasValue)
-      {
-        ChangeUserDepartment(request.DepartmentId.Value, userId, response.Errors);
-      }
+      EditCompanyEmployee(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
 
       if (request.RoleId.HasValue)
       {
         ChangeUserRole(request.RoleId.Value, userId, response.Errors);
       }
 
-      ChangeUserOffice(request.OfficeId, userId, response.Errors);
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       response.Body = userId;
       response.Status = response.Errors.Any()
-              ? OperationResultStatusType.PartialSuccess
-              : OperationResultStatusType.FullSuccess;
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
+
       return response;
     }
   }
