@@ -6,20 +6,16 @@ using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
-using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -34,9 +30,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class EditUserCommand : IEditUserCommand
   {
     private readonly IUserRepository _userRepository;
-    private readonly IImageRepository _imageRepository;
-    private readonly IDbEntityImageMapper _userAvatarMapper;
-    private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
@@ -147,9 +140,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         IUserRepository userRepository,
         IUserCredentialsRepository credentialsRepository,
         IPatchDbUserMapper mapperUser,
-        IImageRepository imageRepository,
-        IDbEntityImageMapper userAvatarMapper,
-        ICreateImageDataMapper createImageDataMapper,
         IAccessValidator accessValidator,
         ILogger<EditUserCommand> logger,
         IRequestClient<ICreateImagesRequest> rcImage,
@@ -161,9 +151,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _userRepository = userRepository;
       _credentialsRepository = credentialsRepository;
       _mapperUser = mapperUser;
-      _imageRepository = imageRepository;
-      _userAvatarMapper = userAvatarMapper;
-      _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
       _logger = logger;
       _rcImage = rcImage;
@@ -216,12 +203,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (imageOperation != null)
       {
         imageId = Guid.Parse(imageOperation.value?.ToString());
-
-        if (!imageId.HasValue
-          || _imageRepository.Get(new List<Guid> { imageId.Value }).FirstOrDefault().EntityId != userId)
-        {
-          imageId = null;
-        }
       }
 
       bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
