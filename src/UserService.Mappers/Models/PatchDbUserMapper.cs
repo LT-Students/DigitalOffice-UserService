@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserGender), item.value.ToString())));
                     continue;
                 }
-                if (item.path.EndsWith(nameof(EditUserRequest.AvatarId), StringComparison.OrdinalIgnoreCase))
+                if (item.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;

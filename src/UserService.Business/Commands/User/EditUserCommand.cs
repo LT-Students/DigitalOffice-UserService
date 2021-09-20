@@ -209,16 +209,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<string> errors = new List<string>();
 
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.AvatarId), StringComparison.OrdinalIgnoreCase));
+          o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
 
       Guid? imageId = null;
 
       if (imageOperation != null)
       {
-        imageId = JsonConvert.DeserializeObject<Guid>(imageOperation.value?.ToString());
+        imageId = Guid.Parse(imageOperation.value?.ToString());
 
         if (!imageId.HasValue
-          || _imageRepository.Get(new List<Guid> { (Guid)imageId }).FirstOrDefault().EntityId != userId)
+          || _imageRepository.Get(new List<Guid> { imageId.Value }).FirstOrDefault().EntityId != userId)
         {
           imageId = null;
         }

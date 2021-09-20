@@ -69,7 +69,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     UserStatus.Vacation),
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.AvatarId)}",
+                    $"/{nameof(EditUserRequest.AvatarFileId)}",
                     "",
                     new AddImageRequest())
 

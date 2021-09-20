@@ -78,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.DateOfBirth),
                     nameof(EditUserRequest.StartWorkingAt),
                     nameof(EditUserRequest.About),
-                    nameof(EditUserRequest.AvatarId),
+                    nameof(EditUserRequest.AvatarFileId),
                     nameof(EditUserRequest.IsActive),
                     nameof(EditUserRequest.DepartmentId),
                     nameof(EditUserRequest.RoleId),
@@ -95,7 +95,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.AvatarId), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
@@ -263,7 +263,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             #region AvatarId
 
             AddFailureForPropertyIf(
-                nameof(EditUserRequest.AvatarId),
+                nameof(EditUserRequest.AvatarFileId),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
@@ -271,10 +271,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             try
                             {
-                                Guid? avatarId = JsonConvert.DeserializeObject<Guid?>(x.value?.ToString());
+                                Guid avatarId = Guid.Parse(x.value?.ToString());
 
-                                if (avatarId.HasValue && _imageRepository.Get(new List<Guid> {(Guid)avatarId }).Count != 0
-                                    || !avatarId.HasValue)
+                                if (_imageRepository.Get(new List<Guid> {avatarId}).Any())
                                 {
                                     return true;
                                 }
