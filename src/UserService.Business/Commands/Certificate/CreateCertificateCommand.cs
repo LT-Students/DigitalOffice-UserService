@@ -48,10 +48,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       {
         Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest },
-            _httpContextAccessor.HttpContext.GetUserId()),
-            ImageSource.User),
-          default, TimeSpan.FromSeconds(5)).Result;
+            _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }),
+            ImageSource.User)).Result;
+
         if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(
@@ -97,15 +96,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
     {
-      List<string> errors = new();
-
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-
       if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-        && senderId != request.UserId)
+        && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }
+
+      List<string> errors = new();
 
       Guid? imageId = GetImageId(request.Image, errors);
 

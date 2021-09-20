@@ -262,7 +262,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
     }
 
-    public bool UpdateAvatar(Guid userId, Guid? avatarId)
+    public bool RemoveAvatar(Guid userId)
     {
       DbUser dbUser = Get(userId);
 
@@ -271,7 +271,7 @@ namespace LT.DigitalOffice.UserService.Data
         return false;
       }
 
-      dbUser.AvatarFileId = avatarId;
+      dbUser.AvatarFileId = null;
 
       _provider.Save();
 

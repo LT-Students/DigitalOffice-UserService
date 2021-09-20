@@ -68,6 +68,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     List<DbUser> Search(string text);
 
-    bool UpdateAvatar(Guid userId, Guid? avatarId);
-    }
+    bool RemoveAvatar(Guid userId);
+  }
 }

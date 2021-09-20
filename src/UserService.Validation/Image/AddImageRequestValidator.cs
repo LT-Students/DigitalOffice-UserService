@@ -16,10 +16,10 @@ namespace LT.DigitalOffice.UserService.Validation.Image
     public AddImageRequestValidator()
     {
       RuleFor(x => x.Content)
-        .NotEmpty().WithMessage("Content can't be empty");
+        .NotEmpty().WithMessage("Content can't be empty.");
 
       RuleFor(x => x.Extension)
-        .Must(x => imageFormats.Contains(x)).WithMessage("Wrong extension");
+        .Must(x => imageFormats.Contains(x)).WithMessage("Wrong extension.");
     }
   }
 }

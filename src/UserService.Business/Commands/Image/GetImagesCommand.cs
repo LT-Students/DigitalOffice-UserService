@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       try
       {
         Response<IOperationResult<IGetImagesResponse>> response = await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(5));
+          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User));
 
         if (response.Message.IsSuccess)
         {
@@ -87,11 +87,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     {
       OperationResultResponse<ImagesResponse> response = new();
 
-      List<Guid> dbImagesIds = _imageRepository.Get(entityId).Select(x => x.ImageId).ToList();
+      List<Guid> dbImagesIds = _imageRepository.GetImagesIds(entityId);
 
       if (dbImagesIds == null || !dbImagesIds.Any())
       {
-        response.Status = OperationResultStatusType.PartialSuccess;
+        response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Images were not found.");
 
         return response;

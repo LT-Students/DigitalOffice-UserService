@@ -19,6 +19,7 @@ using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -212,9 +213,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid? imageId = null;
 
-      if (imageOperation != null
-        && imageOperation.value != null
-        && imageOperation.OperationType == OperationType.Replace)
+      if (imageOperation != null)
       {
         imageId = JsonConvert.DeserializeObject<Guid>(imageOperation.value?.ToString());
 
@@ -274,13 +273,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      JsonPatchDocument<Models.Db.DbUser> dbUserPatch = _mapperUser.Map(patch, imageId);
-      _userRepository.EditUser(userId, dbUserPatch);
+      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch, imageId));
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
-      response.Body = true;
+
       response.Errors.AddRange(errors);
 
       return response;

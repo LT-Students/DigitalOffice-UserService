@@ -52,8 +52,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       try
       {
         Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
-          ICreateImagesRequest.CreateObj(_createImageDataMapper.Map(
-            new List<AddImageRequest>() { addImageRequest }, userId),ImageSource.User), default, TimeSpan.FromSeconds(5)).Result;
+          ICreateImagesRequest.CreateObj(
+            _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }),
+            ImageSource.User))
+          .Result;
 
         if (!response.Message.IsSuccess)
         {
@@ -99,15 +101,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     public OperationResultResponse<bool> Execute(Guid certificateId, JsonPatchDocument<EditCertificateRequest> request)
     {
-      List<string> errors = new List<string>();
-
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser sender = _userRepository.Get(senderId);
-
       DbUserCertificate certificate = _certificateRepository.Get(certificateId);
 
       if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-        && senderId != certificate.UserId)
+        && _httpContextAccessor.HttpContext.GetUserId() != certificate.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
       }
@@ -116,6 +113,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         .FirstOrDefault(o => o.path.EndsWith(nameof(EditCertificateRequest.Image), StringComparison.OrdinalIgnoreCase));
 
       Guid? imageId = null;
+      List<string> errors = new List<string>();
 
       if (imageOperation != null)
       {

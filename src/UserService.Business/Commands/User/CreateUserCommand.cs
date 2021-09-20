@@ -230,8 +230,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }, senderId),
-            ImageSource.User), default, TimeSpan.FromSeconds(5))
+            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }),
+            ImageSource.User))
           .Result;
 
         if (!createResponse.Message.IsSuccess)
@@ -306,7 +306,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return response;
       }
 
-      _validator.ValidateAndThrowCustom(request);
+      if (!_validator.ValidateCustom(request, out List<string> errors))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.AddRange(errors);
+
+        return response;
+      }
 
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {

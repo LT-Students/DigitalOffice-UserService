@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       try
       {
         Response<IOperationResult<bool>> removeResponse = await _rcRemoveImages.GetResponse<IOperationResult<bool>>(
-            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User), default, TimeSpan.FromSeconds(5));
+            IRemoveImagesRequest.CreateObj(imagesIds, ImageSource.User));
 
         if (removeResponse.Message.IsSuccess)
         {
@@ -70,24 +70,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
     private Guid? GetUserIdFromEntity(Guid entityId, EntityType entityType)
     {
-      Guid? userId = null;
-
-      switch (entityType)
+      return entityType switch
       {
-        case EntityType.User:
-          userId = entityId;
-          break;
-
-        case EntityType.Certificate:
-          userId = _certificateRepository.Get(entityId).UserId;
-          break;
-
-        case EntityType.Education:
-          userId = _educationRepository.Get(entityId).UserId;
-          break;
-      }
-
-      return userId;
+        EntityType.User => entityId,
+        EntityType.Certificate => _certificateRepository.Get(entityId).UserId,
+        EntityType.Education => _educationRepository.Get(entityId).UserId,
+        _ => null
+      };
     }
 
     public RemoveImagesCommand(
@@ -117,10 +106,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       OperationResultResponse<bool> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      Guid? userId = GetUserIdFromEntity(request.EntityId, request.EntityType);
 
       if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
-        && senderId != userId)
+        && senderId != GetUserIdFromEntity(request.EntityId, request.EntityType))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         response.Status = OperationResultStatusType.Failed;
@@ -150,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           && dbUser.AvatarFileId.HasValue
           && request.ImagesIds.Contains(dbUser.AvatarFileId.Value))
         {
-          _userRepository.UpdateAvatar(request.EntityId, null);
+          _userRepository.RemoveAvatar(request.EntityId);
         }
 
         _imageRepository.Remove(request.ImagesIds);

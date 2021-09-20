@@ -35,6 +35,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   {
     private readonly ILogger<GetUserCommand> _logger;
     private readonly IUserRepository _repository;
+    private readonly IImageRepository _imageRepository;
     private readonly IUserResponseMapper _mapper;
     private readonly IOfficeInfoMapper _officeMapper;
     private readonly IDepartmentInfoMapper _departmentMapper;
@@ -175,7 +176,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<IGetImagesResponse> response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds, ImageSource.User), default, TimeSpan.FromSeconds(5)).Result.Message;
+          IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
 
         if (response.IsSuccess)
         {
@@ -210,6 +211,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public GetUserCommand(
       ILogger<GetUserCommand> logger,
       IUserRepository repository,
+      IImageRepository imageRepository,
       IUserResponseMapper mapper,
       IRoleInfoMapper roleMapper,
       IDepartmentInfoMapper departmentMapper,
@@ -223,6 +225,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       _logger = logger;
       _repository = repository;
+      _imageRepository = imageRepository;
       _mapper = mapper;
       _roleMapper = roleMapper;
       _departmentMapper = departmentMapper;
@@ -256,6 +259,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> avatarId = new();
       List<Guid> images = new();
+      List<Guid> userImagesIds = new();
       List<ImageInfo> imagesResult = null;
 
       if (filter.IncludeImages)
@@ -275,14 +279,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             images.Add(dbUserAchievement.Achievement.ImageId);
           }
         }
-
-        if (dbUser.AvatarFileId.HasValue)
-        {
-          images.Add(dbUser.AvatarFileId.Value);
-        }
-
-        imagesResult = GetImages(images, response.Errors);
       }
+
+      if (filter.IncludeUserImages)
+      {
+        userImagesIds.AddRange(_imageRepository.GetImagesIds(dbUser.Id));
+        images.AddRange(userImagesIds);
+      }
+
+      if (dbUser.AvatarFileId.HasValue)
+      {
+        images.Add(dbUser.AvatarFileId.Value);
+      }
+
+      imagesResult = GetImages(images, response.Errors);
 
       (DepartmentInfo department, PositionInfo position, OfficeInfo office) employeeInfo =
         GetCompanyEmployee(dbUser.Id, filter.IncludeDepartment, filter.IncludePosition, filter.IncludeOffice, response.Errors);
@@ -295,7 +305,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
         imagesResult,
-        filter.IncludeImages && dbUser.AvatarFileId.HasValue ? imagesResult.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
+        dbUser.AvatarFileId.HasValue ? imagesResult.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
+        userImagesIds,
         filter);
 
       response.Status = response.Errors.Any()

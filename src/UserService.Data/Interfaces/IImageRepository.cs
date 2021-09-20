@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     List<Guid> Create(List<DbEntityImage> dbEntityImages);
 
-    List<DbEntityImage> Get(Guid entityId);
+    List<Guid> GetImagesIds(Guid entityId);
 
     List<DbEntityImage> Get(List<Guid> imagesIds);
 

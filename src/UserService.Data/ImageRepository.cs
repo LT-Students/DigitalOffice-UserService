@@ -29,9 +29,9 @@ namespace LT.DigitalOffice.UserService.Data
       return dbEntityImages.Select(x => x.ImageId).ToList();
     }
 
-    public List<DbEntityImage> Get(Guid entityId)
+    public List<Guid> GetImagesIds(Guid entityId)
     {
-      return _provider.EntitiesImages.Where(x => x.EntityId == entityId).ToList();
+      return _provider.EntitiesImages.Where(x => x.EntityId == entityId).Select(x => x.ImageId).ToList();
     }
 
     public List<DbEntityImage> Get(List<Guid> imagesIds)

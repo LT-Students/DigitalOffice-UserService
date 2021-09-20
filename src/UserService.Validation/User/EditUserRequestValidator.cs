@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.Validators;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
@@ -15,6 +16,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
     public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
     {
         private static Regex NameRegex = new(@"\d");
+        private readonly IImageRepository _imageRepository;
 
         private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
         {
@@ -269,23 +271,29 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             try
                             {
-                                _ = JsonConvert.DeserializeObject<Guid?>(x.value?.ToString());
-                                return true;
+                                Guid? avatarId = JsonConvert.DeserializeObject<Guid?>(x.value?.ToString());
+
+                                if (avatarId.HasValue && _imageRepository.Get(new List<Guid> {(Guid)avatarId }).Count != 0
+                                    || !avatarId.HasValue)
+                                {
+                                    return true;
+                                }
                             }
                             catch
                             {
-                                return false;
                             }
+
+                            return false;
                         },
-                        "Incorrect ImageId format"
+                        "Incorrect ImageId."
                     }
             });
 
-            #endregion
+      #endregion
 
-            #region IsActive
+      #region IsActive
 
-            AddFailureForPropertyIf(
+      AddFailureForPropertyIf(
                 nameof(EditUserRequest.IsActive),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
@@ -356,8 +364,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
             #endregion
         }
 
-        public EditUserRequestValidator()
+        public EditUserRequestValidator(IImageRepository imageRepository)
         {
+            _imageRepository = imageRepository;
+
             RuleForEach(x => x.Operations)
                .Custom(HandleInternalPropertyValidation);
         }

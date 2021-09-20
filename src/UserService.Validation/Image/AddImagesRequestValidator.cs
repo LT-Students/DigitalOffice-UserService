@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Validation.Avatars
       IUserRepository userRepository)
     {
       RuleFor(x => x.EntityId)
-        .Must(x => userRepository.Get(x) != null).WithMessage("Entity doesn't exist");
+        .Must(x => userRepository.Get(x) != null).WithMessage("Entity doesn't exist.");
 
       RuleForEach(x => x.Images)
         .SetValidator(imageValidator);
