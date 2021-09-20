@@ -210,7 +210,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             RequestClientMock();
         }
 
-        [Test]
+        /*[Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {
             _mocker
@@ -248,7 +248,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Times.Once);
         }
 
-        /*[Test]
+        *//*[Test]
         public void ShouldEditCertificateSuccesfull()
         {
             var expectedResponse = new OperationResultResponse<bool>
@@ -264,7 +264,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
-        }*/
+        }*//*
 
         [Test]
         public void ShouldThrowExceptionWhenAddImageRequestThrow()
@@ -413,6 +413,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
-        }
+        }*/
     }
 }

@@ -309,7 +309,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _mapper = _mocker.CreateInstance<UserResponseMapper>();
 
             _mocker
-                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, _avatarInfo))
+                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, _avatarInfo, null))
                 .Returns(_userInfo);
 
             _mocker
