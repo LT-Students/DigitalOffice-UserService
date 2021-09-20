@@ -3,10 +3,6 @@
   <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
 
   <ItemGroup>
-    <None Include="..\..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\UserService.Broker\UserService.Broker.csproj" />
     <ProjectReference Include="..\UserService.Business\UserService.Business.csproj" />
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />

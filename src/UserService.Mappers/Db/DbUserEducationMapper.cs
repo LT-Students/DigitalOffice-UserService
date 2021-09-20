@@ -8,48 +8,48 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
-    public class DbUserEducationMapper : IDbUserEducationMapper
+  public class DbUserEducationMapper : IDbUserEducationMapper
+  {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public DbUserEducationMapper(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public DbUserEducationMapper(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-        public DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIdsForCreate)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            Guid Id = Guid.NewGuid();
-            List<DbUserEducationImage> images = new();
-
-            foreach (Guid createdImageId in imagesIdsForCreate)
-            {
-              images.Add(new DbUserEducationImage()
-              {
-                ImageId = createdImageId,
-                UserEducationId = Id
-              });
-            }
-
-            return new DbUserEducation
-            {
-                Id = Id,
-                UserId = request.UserId,
-                UniversityName = request.UniversityName,
-                QualificationName = request.QualificationName,
-                AdmissionAt = request.AdmissionAt,
-                IssueAt = request.IssueAt,
-                FormEducation = (int)request.FormEducation,
-                IsActive = true,
-                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-                CreatedAtUtc = DateTime.UtcNow,
-                Images = images
-            };
-        }
+      _httpContextAccessor = httpContextAccessor;
     }
+
+    public DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIdsForCreate)
+    {
+      if (request == null)
+      {
+        return null;
+      }
+
+      Guid Id = Guid.NewGuid();
+      List<DbUserEducationImage> images = new();
+
+      foreach (Guid createdImageId in imagesIdsForCreate)
+      {
+        images.Add(new DbUserEducationImage()
+        {
+          ImageId = createdImageId,
+          UserEducationId = Id
+        });
+      }
+
+      return new DbUserEducation
+      {
+        Id = Id,
+        UserId = request.UserId,
+        UniversityName = request.UniversityName,
+        QualificationName = request.QualificationName,
+        AdmissionAt = request.AdmissionAt,
+        IssueAt = request.IssueAt,
+        FormEducation = (int)request.FormEducation,
+        IsActive = true,
+        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+        CreatedAtUtc = DateTime.UtcNow,
+        Images = images
+      };
+    }
+  }
 }

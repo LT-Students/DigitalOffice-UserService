@@ -8,47 +8,47 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
-    public class DbUserCertificateMapper : IDbUserCertificateMapper
+  public class DbUserCertificateMapper : IDbUserCertificateMapper
+  {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public DbUserCertificateMapper(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public DbUserCertificateMapper(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-        public DbUserCertificate Map(CreateCertificateRequest request, List<Guid> imagesIds)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            Guid Id = Guid.NewGuid();
-            List<DbUserCertificateImage> images = new();
-
-            foreach (Guid imageId in imagesIds)
-            {
-              images.Add(new DbUserCertificateImage()
-              {
-                ImageId = imageId,
-                UserCertificateId = Id
-              });
-            }
-
-            return new DbUserCertificate
-            {
-                Id = Id,
-                UserId = request.UserId,
-                Images = images,
-                Name = request.Name,
-                SchoolName = request.SchoolName,
-                EducationType = (int)request.EducationType,
-                ReceivedAt = request.ReceivedAt,
-                IsActive = true,
-                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-                CreatedAtUtc = DateTime.UtcNow,
-            };
-        }
+      _httpContextAccessor = httpContextAccessor;
     }
+
+    public DbUserCertificate Map(CreateCertificateRequest request, List<Guid> imagesIds)
+    {
+      if (request == null)
+      {
+        return null;
+      }
+
+      Guid Id = Guid.NewGuid();
+      List<DbUserCertificateImage> images = new();
+
+      foreach (Guid imageId in imagesIds)
+      {
+        images.Add(new DbUserCertificateImage()
+        {
+          ImageId = imageId,
+          UserCertificateId = Id
+        });
+      }
+
+      return new DbUserCertificate
+      {
+        Id = Id,
+        UserId = request.UserId,
+        Images = images,
+        Name = request.Name,
+        SchoolName = request.SchoolName,
+        EducationType = (int)request.EducationType,
+        ReceivedAt = request.ReceivedAt,
+        IsActive = true,
+        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+        CreatedAtUtc = DateTime.UtcNow,
+      };
+    }
+  }
 }

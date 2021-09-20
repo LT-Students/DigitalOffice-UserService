@@ -16,9 +16,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
           name: DbUserEducationImage.TableName,
           columns: table => new
           {
-            Id = table.Column<Guid>(),
-            UserEducationId = table.Column<Guid>(),
-            ImageId = table.Column<Guid>()
+            Id = table.Column<Guid>(nullable: false),
+            UserEducationId = table.Column<Guid>(nullable: false),
+            ImageId = table.Column<Guid>(nullable: false)
           },
           constraints: table =>
           {

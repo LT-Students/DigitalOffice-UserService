@@ -20,9 +20,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
           name: DbUserCertificateImage.TableName,
           columns: table => new
           {
-            Id = table.Column<Guid>(),
-            UserCertificateId = table.Column<Guid>(),
-            ImageId = table.Column<Guid>()
+            Id = table.Column<Guid>(nullable: false),
+            UserCertificateId = table.Column<Guid>(nullable: false),
+            ImageId = table.Column<Guid>(nullable: false)
           },
           constraints: table =>
           {

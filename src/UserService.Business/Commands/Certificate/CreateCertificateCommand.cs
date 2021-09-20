@@ -2,12 +2,10 @@
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Requests.File;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
@@ -38,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     private List<Guid> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
-      string errorMsg = $"Can not add certificate image for user {userId}.";
+      string logMessage = "Can not add certificate image for user {UserId}. Reason: {Errors}";
       List<CreateImageData> images = new();
 
       foreach(AddImageRequest imageData in request.Images)
@@ -57,16 +55,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
           return responsedMsg.Body.ImagesIds;
         }
 
-        _logger.LogWarning(
-          "Can not add certificate image for user {userId}. Reason: {errors}", 
-          userId, string.Join(',', responsedMsg.Errors));
+        _logger.LogWarning(logMessage, userId, string.Join(',', responsedMsg.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, errorMsg);
+        _logger.LogError(exc, logMessage, userId, exc.Message);
       }
 
-      errors.Add(errorMsg);
+      errors.Add($"Can not add certificate image for user {userId}. Please try again later.");
 
       return null;
     }
@@ -92,11 +88,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
     {
       OperationResultResponse<Guid> response = new();
-
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser sender = _userRepository.Get(senderId);
 
-      if (!(sender.IsAdmin || _accessValidator.HasRights(Rights.AddEditRemoveUsers)) && senderId != request.UserId)
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers) && senderId != request.UserId)
       {
         response.Errors.Add("Not enough rights");
 

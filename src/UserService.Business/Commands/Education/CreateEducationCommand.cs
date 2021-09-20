@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       }
       catch (Exception exc)
       {
-        _logger.LogError(logMsg, userId, exc.Message);
+        _logger.LogError(exc, logMsg, userId, exc.Message);
       }
 
       errors.Add($"Can not add education images to user with id {userId}");
