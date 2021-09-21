@@ -17,7 +17,9 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
@@ -49,13 +51,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
+    public async Task<OperationResultResponse<CredentialsResponse>> Execute(CreateCredentialsRequest request)
     {
-      if (request == null)
-      {
-        throw new BadRequestException();
-      }
-
       _validator.ValidateAndThrowCustom(request);
 
       OperationResultResponse<CredentialsResponse> response = new();
@@ -103,12 +100,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
       try
       {
-        IOperationResult<IGetTokenResponse> tokenResponse = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
-                        IGetTokenRequest.CreateObj(request.UserId)).Result.Message;
+        Response<IOperationResult<IGetTokenResponse>> tokenResponse = await _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
+                        IGetTokenRequest.CreateObj(request.UserId));
 
-        if (tokenResponse.IsSuccess &&
-          !string.IsNullOrEmpty(tokenResponse.Body.AccessToken) &&
-          !string.IsNullOrEmpty(tokenResponse.Body.RefreshToken))
+        IGetTokenResponse responsedBody = tokenResponse.Message.Body;
+
+        if (tokenResponse.Message.IsSuccess &&
+          !string.IsNullOrEmpty(responsedBody.AccessToken) &&
+          !string.IsNullOrEmpty(responsedBody.RefreshToken))
         {
           string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
           string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
@@ -117,23 +116,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           _userRepository.DeletePendingUser(request.UserId);
           _userRepository.SwitchActiveStatus(request.UserId, true);
 
+          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
+          response.Status = OperationResultStatusType.FullSuccess;
           response.Body = new CredentialsResponse
           {
             UserId = request.UserId,
-            AccessToken = tokenResponse.Body.AccessToken,
-            RefreshToken = tokenResponse.Body.RefreshToken,
-            AccessTokenExpiresIn = tokenResponse.Body.AccessTokenExpiresIn,
-            RefreshTokenExpiresIn = tokenResponse.Body.RefreshTokenExpiresIn
+            AccessToken = responsedBody.AccessToken,
+            RefreshToken = responsedBody.RefreshToken,
+            AccessTokenExpiresIn = responsedBody.AccessTokenExpiresIn,
+            RefreshTokenExpiresIn = responsedBody.RefreshTokenExpiresIn
           };
-
-          return response;
         }
         else
         {
+          List<string> errors = tokenResponse.Message.Errors;
+
           _logger.LogWarning(
               "Can not get token for pending user '{UserId}' reason:\n{Errors}",
               request.UserId,
-              string.Join('\n', response.Errors));
+              string.Join('\n', errors));
+
+          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
+
+          response.Status = OperationResultStatusType.Failed;
+          response.Errors.AddRange(errors);
         }
       }
       catch (Exception exc)
@@ -141,7 +148,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         _logger.LogError(exc, "Something went wrong while we were creating the user credentials");
       }
 
-      throw new BadRequestException("Something is wrong, please try again later");
+      return response;
     }
   }
 }

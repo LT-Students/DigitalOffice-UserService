@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -41,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     #region private method
 
-    private void EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
+    private async Task EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
       string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
       string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
@@ -53,17 +55,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        IOperationResult<(bool department, bool position, bool office)> response =
-          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+        Response<IOperationResult<(bool department, bool position, bool office)>> response =
+          await _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
           IEditCompanyEmployeeRequest.CreateObj(
             userId,
             _httpContextAccessor.HttpContext.GetUserId(),
             removeUserFromDepartment: removeDepartment,
             departmentId: departmentId,
             positionId: positionId,
-            officeId: officeId)).Result.Message;
+            officeId: officeId));
 
-        if (!response.IsSuccess)
+        (bool department, bool position, bool office) responsedBody = response.Message.Body;
+
+        if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(logMessage, userId);
 
@@ -74,21 +78,21 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        if (!response.Body.department)
+        if (!responsedBody.department)
         {
           _logger.LogWarning(departmentLogMessage, userId, departmentId);
 
           errors.Add(departmentErrorMessage);
         }
 
-        if (!response.Body.position)
+        if (!responsedBody.position)
         {
           _logger.LogWarning(positionLogMessage, userId, positionId);
 
           errors.Add(positionErrorMessage);
         }
 
-        if (!response.Body.office)
+        if (!responsedBody.office)
         {
           _logger.LogWarning(officeLogMessage, userId, officeId);
 
@@ -105,23 +109,25 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+    private async Task ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
     {
       string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
       const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
 
       try
       {
-        Response<IOperationResult<bool>> response = _rcRole.GetResponse<IOperationResult<bool>>(
+        Response<IOperationResult<bool>> response = await _rcRole.GetResponse<IOperationResult<bool>>(
             IChangeUserRoleRequest.CreateObj(
                 roleId,
                 userId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+                _httpContextAccessor.HttpContext.GetUserId()));
 
-        if (!response.Message.IsSuccess || !response.Message.Body)
+        IOperationResult<bool> responsedMsg = response.Message;
+
+        if (!responsedMsg.IsSuccess || !responsedMsg.Body)
         {
           const string warningMessage = logMessage + "Errors: {Errors}";
-          _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
+          _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", responsedMsg.Errors));
 
           errors.Add(errorMessage);
         }
@@ -160,7 +166,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc/>
-    public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
+    public async Task<OperationResultResponse<bool>> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
       Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
@@ -197,15 +203,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
 
-      /*Guid? imageId = null;
-
-      if (imageOperation != null)
-      {
-        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
-          ? Guid.Parse(imageOperation.value?.ToString())
-          : null;
-      }*/
-
       bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
       Guid? newDepartmentId = null;
       Guid? newPositionId = null;
@@ -226,7 +223,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         newOfficeId = Guid.Parse(officeOperation?.value.ToString());
       }
 
-      EditCompanyEmployee(
+      await EditCompanyEmployee(
         removeUserFromDepartmen,
         newDepartmentId,
         newPositionId,
@@ -236,7 +233,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (roleOperation != null)
       {
-        ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
+        await ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
       }
 
       if (isActiveOperation != null)
@@ -249,7 +246,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (!newValue)
         {
-          _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
+          await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
               userId,
               requestSenderId));
         }
@@ -265,40 +262,5 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       return response;
     }
-
-    // TODO fix
-    //private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
-    //{
-    //    if (request.Skills == null)
-    //    {
-    //        return;
-    //    }
-
-    //    foreach (var skillName in request.Skills)
-    //    {
-    //        var dbSkill = _userRepository.FindSkillByName(skillName);
-
-    //        if (dbSkill != null)
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = dbSkill.Id
-    //                });
-    //        }
-    //        else
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = _userRepository.CreateSkill(skillName)
-    //                });
-    //        }
-    //    }
-    //}
   }
 }

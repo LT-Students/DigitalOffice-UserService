@@ -54,13 +54,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private void EditCompanyEmployee(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-      string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
-      string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
-      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
-      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
-      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
-      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
-      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
+      string positionErrorMessage = "Cannot assign position to user. Please try again later.";
+      string departmentErrorMessage = "Cannot assign department to user. Please try again later.";
+      string officeErrorMessage = "Cannot assign office to user. Please try again later.";
+      string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
+      string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
+      string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+      string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
       try
       {

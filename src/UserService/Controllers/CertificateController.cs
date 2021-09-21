@@ -13,11 +13,11 @@ namespace LT.DigitalOffice.UserService.Controllers
     public class CertificateController : ControllerBase
     {
         [HttpPost("create")]
-        public OperationResultResponse<Guid> Create(
+        public async Task<OperationResultResponse<Guid>> Create(
             [FromServices] ICreateCertificateCommand command,
             [FromBody] CreateCertificateRequest request)
         {
-            return command.Execute(request);
+            return await command.Execute(request);
         }
 
         [HttpPatch("edit")]

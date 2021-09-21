@@ -26,12 +26,12 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpPatch("edit")]
-    public OperationResultResponse<bool> Edit(
+    public async Task<OperationResultResponse<bool>> Edit(
       [FromServices] IEditUserCommand command,
       [FromQuery] Guid userId,
       [FromBody] JsonPatchDocument<EditUserRequest> request)
     {
-      return command.Execute(userId, request);
+      return await command.Execute(userId, request);
     }
 
     [HttpGet("get")]

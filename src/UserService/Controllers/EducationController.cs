@@ -14,11 +14,11 @@ namespace LT.DigitalOffice.UserService.Controllers
     public class EducationController : ControllerBase
     {
         [HttpPost("create")]
-        public OperationResultResponse<Guid?> Create(
+        public async Task<OperationResultResponse<Guid>> Create(
             [FromServices] ICreateEducationCommand command,
             [FromBody] CreateEducationRequest request)
         {
-            return command.Execute(request);
+            return await command.Execute(request);
         }
 
         [HttpPatch("edit")]

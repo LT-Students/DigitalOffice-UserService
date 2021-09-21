@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
@@ -57,7 +58,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _logger = logger;
     }
 
-    public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
+    public async Task<OperationResultResponse<Guid>> Execute(CreateEducationRequest request)
     {
       OperationResultResponse<Guid> response = new();
 
@@ -96,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       return response;
     }
 
-    public List<Guid> CreateImages(CreateEducationRequest request, List<string> errors)
+    public async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
     {
       List<AddImageRequest> imagesToCreate = request.Images;
       Guid userId = request.UserId;
@@ -118,16 +119,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       try
       {
-        Response<IOperationResult<ICreateImagesResponse>> response = _createImagesRequest.GetResponse<IOperationResult<ICreateImagesResponse>>(
+        IOperationResult<ICreateImagesResponse> responsedMsg = 
+          (await _createImagesRequest.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(images, ImageSource.User)
-        ).Result;
+        )).Message;
 
-        if(response.Message.IsSuccess)
+        if(responsedMsg.IsSuccess)
         {
-          return response.Message.Body.ImagesIds;
+          return responsedMsg.Body.ImagesIds;
         }
 
-        _logger.LogWarning(logMsg, userId, string.Join(',', response.Message.Errors));
+        _logger.LogWarning(logMsg, userId, string.Join(',', responsedMsg.Errors));
       }
       catch (Exception exc)
       {

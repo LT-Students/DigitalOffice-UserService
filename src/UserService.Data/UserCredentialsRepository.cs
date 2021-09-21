@@ -64,14 +64,13 @@ namespace LT.DigitalOffice.UserService.Data
       }
       else
       {
-        throw new BadRequestException("You must specify 'userId' or 'login'.");
+        _logger.LogWarning("You must specify 'userId' or 'login'.");
+        return null;
       }
 
       if (dbUserCredentials == null)
       {
         _logger.LogWarning($"Can not find user credentials filter '{filter}'.");
-
-        throw new NotFoundException($"User credentials was not found.");
       }
 
       return dbUserCredentials;
@@ -81,7 +80,8 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (userCredentials == null)
       {
-        throw new ArgumentNullException(nameof(userCredentials));
+        _logger.LogWarning(new ArgumentException(nameof(userCredentials)).Message);
+        return false;
       }
 
       _logger.LogInformation(
@@ -89,7 +89,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (!_provider.UserCredentials.Any(uc => uc.UserId == userCredentials.UserId))
       {
-        throw new NotFoundException("User credentials was not found.");
+        _logger.LogWarning("User credentials was not found.");
+        return false;
       }
 
       try
@@ -113,7 +114,8 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (dbUserCredentials == null)
       {
-        throw new ArgumentNullException(nameof(dbUserCredentials));
+        _logger.LogWarning(new ArgumentException(nameof(dbUserCredentials)).Message);
+        return default;
       }
 
       _provider.UserCredentials.Add(dbUserCredentials);
@@ -128,7 +130,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (dbUserCredentials == null)
       {
-        throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
+        _logger.LogWarning($"User credentials with user ID '{userId}' was not found.");
+        return;
       }
 
       dbUserCredentials.IsActive = isActiveStatus;
