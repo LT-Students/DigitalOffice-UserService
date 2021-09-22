@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class AchievementController
   {
     [HttpPost("create")]
-    public OperationResultResponse<Guid> Create(
+    public OperationResultResponse<Guid?> Create(
     [FromServices] ICreateAchievementCommand command,
     [FromBody] CreateAchievementRequest request)
     {
