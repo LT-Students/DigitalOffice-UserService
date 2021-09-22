@@ -126,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      response.Body = await RemoveImages(request.ImagesIds, response.Errors);
+      response.Body = _imageRepository.Remove(request.ImagesIds);
 
       if (response.Body)
       {
@@ -141,7 +141,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           _userRepository.RemoveAvatar(request.EntityId);
         }
 
-        response.Body = _imageRepository.Remove(request.ImagesIds);
+        await RemoveImages(request.ImagesIds, response.Errors);
       }
 
       response.Status = response.Errors.Any()

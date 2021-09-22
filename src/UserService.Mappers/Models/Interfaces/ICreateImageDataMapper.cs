@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
   public interface ICreateImageDataMapper
   {
     List<CreateImageData> Map(List<AddImageRequest> request);
+
     List<CreateImageData> Map(string name, string content, string extension);
   }
 }

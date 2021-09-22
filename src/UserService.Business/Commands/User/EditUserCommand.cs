@@ -14,7 +14,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
@@ -198,12 +197,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
 
-      Guid? imageId = null;
+      /*Guid? imageId = null;
 
       if (imageOperation != null)
       {
-        imageId = Guid.Parse(imageOperation.value?.ToString());
-      }
+        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
+          ? Guid.Parse(imageOperation.value?.ToString())
+          : null;
+      }*/
 
       bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
       Guid? newDepartmentId = null;

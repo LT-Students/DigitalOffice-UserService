@@ -95,7 +95,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
             AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
@@ -271,9 +271,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             try
                             {
-                                Guid avatarId = Guid.Parse(x.value?.ToString());
+                                Guid? avatarId = !string.IsNullOrEmpty(x.value?.ToString())
+                                    ? Guid.Parse(x.value?.ToString())
+                                    : null;
 
-                                if (_imageRepository.Get(new List<Guid> {avatarId}).Any())
+                                if (!avatarId.HasValue || _imageRepository.Get(new List<Guid> {avatarId.Value}).Any())
                                 {
                                     return true;
                                 }
