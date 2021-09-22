@@ -139,13 +139,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      List<Guid> result = await AddImages(request.Images, response.Errors);
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
+      response.Body = await AddImages(request.Images, response.Errors);
+      response.Status = OperationResultStatusType.Failed;
 
-      if (result != null)
+      if (response.Body != null)
       {
-        List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(result, request.EntityId);
+        List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
 
-        result = _imageRepository.Create(dbEntityImages);
+        _imageRepository.Create(dbEntityImages);
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
@@ -153,14 +155,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
       }
-      else
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
-
-        response.Status = OperationResultStatusType.Failed;
-      }
-
-      response.Body = result;
 
       return response;
     }
