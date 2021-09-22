@@ -139,9 +139,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
       response.Body = await AddImages(request.Images, response.Errors);
-      response.Status = OperationResultStatusType.Failed;
 
       if (response.Body != null)
       {
@@ -154,6 +152,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
+      }
+      else
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
+        response.Status = OperationResultStatusType.Failed;
       }
 
       return response;
