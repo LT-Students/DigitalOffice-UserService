@@ -3,6 +3,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -13,7 +14,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       PositionInfo position,
       OfficeInfo office,
       RoleInfo role,
-      ImageInfo image)
+      ImageInfo image,
+      List<ImageInfo> images = null)
     {
       if (dbUser == null)
       {
@@ -39,7 +41,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Position = position,
         Office = office,
         Role = role,
-        Avatar = image
+        Avatar = image,
+        Images = images
       };
     }
   }

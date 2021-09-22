@@ -1,12 +1,16 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
-using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -17,9 +21,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
@@ -54,11 +55,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds)).Result.Message;
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
 
         if (response.IsSuccess)
         {
-          return response.Body.Images;
+          return response.Body.ImagesData;
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";

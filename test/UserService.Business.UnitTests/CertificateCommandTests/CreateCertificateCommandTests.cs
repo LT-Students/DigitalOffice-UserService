@@ -115,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
 
             RequestClientMock();
         }
-
+        /*
         [Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {
@@ -217,6 +217,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<Guid>>(
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        }
+        }*/
     }
 }
