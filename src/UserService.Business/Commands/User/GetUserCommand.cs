@@ -257,7 +257,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         throw new NotFoundException($"User was not found.");
       }
 
-      List<Guid> avatarId = new();
       List<Guid> images = new();
       List<Guid> userImagesIds = new();
       List<ImageInfo> imagesResult = null;
@@ -292,7 +291,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         images.Add(dbUser.AvatarFileId.Value);
       }
 
-      imagesResult = GetImages(images, response.Errors);
+      imagesResult = filter.IncludeImages || filter.IncludeUserImages
+        ? GetImages(images, response.Errors)
+        : null;
 
       (DepartmentInfo department, PositionInfo position, OfficeInfo office) employeeInfo =
         GetCompanyEmployee(dbUser.Id, filter.IncludeDepartment, filter.IncludePosition, filter.IncludeOffice, response.Errors);
@@ -305,7 +306,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
         imagesResult,
-        dbUser.AvatarFileId.HasValue ? imagesResult.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
+        dbUser.AvatarFileId.HasValue ? imagesResult?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
         userImagesIds,
         filter);
 

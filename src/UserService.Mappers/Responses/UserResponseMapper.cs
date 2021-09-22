@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
     {
       if (dbUser == null)
       {
-        throw new ArgumentNullException(nameof(dbUser));
+        return null;
       }
 
       return new UserResponse

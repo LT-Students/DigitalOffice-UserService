@@ -141,7 +141,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           _userRepository.RemoveAvatar(request.EntityId);
         }
 
-        _imageRepository.Remove(request.ImagesIds);
+        response.Body = _imageRepository.Remove(request.ImagesIds);
       }
 
       response.Status = response.Errors.Any()

@@ -254,7 +254,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch, imageId));
+      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch));
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess
