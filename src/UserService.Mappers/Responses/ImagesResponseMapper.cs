@@ -16,10 +16,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         return null;
       }
 
-      ImagesResponse imagesResponse = new();
-      imagesResponse.Images = new();
-
-      imagesResponse.Images.AddRange(imagesData.Select(
+      return new ImagesResponse
+      {
+        Images = imagesData.Select(
           x => new ImageInfo
           {
             Id = x.ImageId,
@@ -27,9 +26,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             Content = x.Content,
             Extension = x.Extension,
             Name = x.Name
-          }).ToList());
-
-      return imagesResponse;
+          }).ToList()
+      };
     }
   }
 }
