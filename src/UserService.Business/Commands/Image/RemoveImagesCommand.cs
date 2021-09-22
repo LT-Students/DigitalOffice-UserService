@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<RemoveImagesCommand> _logger;
 
-    private async Task<bool> RemoveImages(List<Guid> imagesIds, Guid entityId, List<string> errors)
+    private async Task<bool> RemoveImages(List<Guid> imagesIds, List<string> errors)
     {
       const string errorMessage = "Can't remove images. Please try again later.";
       const string logMessage = "Errors while removing images with ids: {ImagesIds}.";
@@ -126,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      response.Body = await RemoveImages(request.ImagesIds, request.EntityId, response.Errors);
+      response.Body = await RemoveImages(request.ImagesIds, response.Errors);
 
       if (response.Body)
       {
