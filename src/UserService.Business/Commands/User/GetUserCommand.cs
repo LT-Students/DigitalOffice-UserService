@@ -80,9 +80,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         includeOffices && offices == null,
         errors);
 
-      return (departments?.FirstOrDefault() ?? brokerResponse.Departments?.FirstOrDefault(),
-        positions?.FirstOrDefault() ?? brokerResponse.Positions?.FirstOrDefault(),
-        offices?.FirstOrDefault() ?? brokerResponse.Offices?.FirstOrDefault());
+      return (departments?.FirstOrDefault() ?? brokerResponse?.Departments?.FirstOrDefault(),
+        positions?.FirstOrDefault() ?? brokerResponse?.Positions?.FirstOrDefault(),
+        offices?.FirstOrDefault() ?? brokerResponse?.Offices?.FirstOrDefault());
     }
 
     private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(

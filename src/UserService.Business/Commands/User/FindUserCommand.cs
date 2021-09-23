@@ -174,9 +174,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         includeOffices && offices == null,
         errors);
 
-      return (departments ?? brokerResponse.Departments,
-        positions ?? brokerResponse.Positions,
-        offices ?? brokerResponse.Offices);
+      return (departments ?? brokerResponse?.Departments,
+        positions ?? brokerResponse?.Positions,
+        offices ?? brokerResponse?.Offices);
     }
 
     private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
