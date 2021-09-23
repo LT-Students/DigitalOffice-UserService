@@ -1,13 +1,16 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -19,9 +22,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
-    private readonly IRequestClient<IAddImageRequest> _rcImage;
+    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -133,66 +133,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         errors.Add(errorMessage);
       }
     }
-
-    private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
-    {
-      Guid? avatarImageId = null;
-
-      if (avatarRequest == null)
-      {
-        return null;
-      }
-
-      Guid userId = _httpContextAccessor.HttpContext.GetUserId();
-
-      string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
-
-      try
-      {
-        var imageRequest = IAddImageRequest.CreateObj(
-            avatarRequest.Name,
-            avatarRequest.Content,
-            avatarRequest.Extension,
-            userId);
-        var response = _rcImage.GetResponse<IOperationResult<Guid>>(imageRequest).Result;
-
-        if (!response.Message.IsSuccess)
-        {
-          _logger.LogWarning(
-              "Can not add avatar image to user with id {UserId}. Reason: '{Errors}'",
-              userId,
-              string.Join(',', response.Message.Errors));
-
-          errors.Add(errorMessage);
-        }
-        else
-        {
-          avatarImageId = response.Message.Body;
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Can not add avatar image to user with id {UserId}", userId);
-
-        errors.Add(errorMessage);
-      }
-
-      return avatarImageId;
-    }
-
     #endregion
 
     public EditUserCommand(
-      IUserRepository userRepository,
-      IUserCredentialsRepository credentialsRepository,
-      IPatchDbUserMapper mapperUser,
-      IAccessValidator accessValidator,
-      ILogger<EditUserCommand> logger,
-      IRequestClient<IAddImageRequest> rcImage,
-      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
-      IRequestClient<IChangeUserRoleRequest> rcRole,
-      IHttpContextAccessor httpContextAccessor,
-      IBus bus)
+        IUserRepository userRepository,
+        IUserCredentialsRepository credentialsRepository,
+        IPatchDbUserMapper mapperUser,
+        IAccessValidator accessValidator,
+        ILogger<EditUserCommand> logger,
+        IRequestClient<ICreateImagesRequest> rcImage,
+        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+        IRequestClient<IChangeUserRoleRequest> rcRole,
+        IHttpContextAccessor httpContextAccessor,
+        IBus bus)
     {
       _userRepository = userRepository;
       _credentialsRepository = credentialsRepository;
@@ -220,6 +173,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
+      OperationResultResponse<bool> response = new();
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
@@ -231,19 +185,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           && roleOperation == null
           && officeOperation == null)))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
       }
 
       List<string> errors = new List<string>();
 
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase));
-      Guid? imageId = null;
+          o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
+
+      /*Guid? imageId = null;
 
       if (imageOperation != null)
       {
-        imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
-      }
+        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
+          ? Guid.Parse(imageOperation.value?.ToString())
+          : null;
+      }*/
 
       bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
       Guid? newDepartmentId = null;
@@ -294,17 +255,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      var dbUserPatch = _mapperUser.Map(patch, imageId);
-      _userRepository.EditUser(userId, dbUserPatch);
+      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch));
 
-      return new OperationResultResponse<bool>
-      {
-        Status = errors.Any()
-              ? OperationResultStatusType.PartialSuccess
-              : OperationResultStatusType.FullSuccess,
-        Body = true,
-        Errors = errors
-      };
+      response.Status = errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
+
+      response.Errors.AddRange(errors);
+
+      return response;
     }
 
     // TODO fix

@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
@@ -43,11 +44,9 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpGet("find")]
     public FindResultResponse<UserInfo> Find(
       [FromServices] IFindUserCommand command,
-      [FromQuery] int skipCount,
-      [FromQuery] int takeCount,
-      [FromQuery] Guid? departmentId)
+      [FromQuery] FindUsersFilter filter)
     {
-      return command.Execute(skipCount, takeCount, departmentId);
+      return command.Execute(filter);
     }
   }
 }

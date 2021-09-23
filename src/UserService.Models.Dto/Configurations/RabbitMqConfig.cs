@@ -2,7 +2,7 @@
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
@@ -20,14 +20,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string CreateAdminEndpoint { get; set; }
     public string FindParseEntitiesEndpoint { get; set; }
     public string CheckUsersExistenceEndpoint { get; set; }
-
-    // file
-
-    [AutoInjectRequest(typeof(IAddImageRequest))]
-    public string AddImageEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IGetImagesRequest))]
-    public string GetImagesEndpoint { get; set; }
 
     // project
 
@@ -71,9 +63,20 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
     public string GetCompanyEmployeesEndpoint { get; set; }
 
-    //common
+    // common
 
     [AutoInjectRequest(typeof(IDisactivateUserRequest))]
     public string DisactivateUserEndpoint { get; set; }
+
+    // image
+
+    [AutoInjectRequest(typeof(ICreateImagesRequest))]
+    public string CreateImagesEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IGetImagesRequest))]
+    public string GetImagesEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IRemoveImagesRequest))]
+    public string RemoveImagesEndpoint { get; set; }
   }
 }

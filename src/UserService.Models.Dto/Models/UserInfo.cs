@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
@@ -24,5 +25,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public ImageInfo Avatar { get; set; }
         public RoleInfo Role { get; set; }
         public OfficeInfo Office { get; set; }
+        public List<ImageInfo> Images { get; set; }
     }
 }
