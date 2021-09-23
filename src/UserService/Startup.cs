@@ -189,21 +189,21 @@ namespace LT.DigitalOffice.UserService
       services.AddCors(options =>
       {
         options.AddPolicy(
-                  CorsPolicyName,
-                  builder =>
-                  {
-                    builder
-                              //.WithOrigins(
-                              //    "https://*.ltdo.xyz",
-                              //    "http://*.ltdo.xyz",
-                              //    "http://ltdo.xyz",
-                              //    "http://ltdo.xyz:9802",
-                              //    "http://localhost:4200",
-                              //    "http://localhost:4500")
-                              .AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                  });
+          CorsPolicyName,
+          builder =>
+          {
+            builder
+              //.WithOrigins(
+              //    "https://*.ltdo.xyz",
+              //    "http://*.ltdo.xyz",
+              //    "http://ltdo.xyz",
+              //    "http://ltdo.xyz:9802",
+              //    "http://localhost:4200",
+              //    "http://localhost:4500")
+              .AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+          });
       });
 
       string connStr = Environment.GetEnvironmentVariable("ConnectionString");
@@ -253,7 +253,7 @@ namespace LT.DigitalOffice.UserService
       services.Configure<ForwardedHeadersOptions>(options =>
       {
         options.ForwardedHeaders =
-                  ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+          ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
       });
 
       services.AddMemoryCache();
@@ -271,9 +271,9 @@ namespace LT.DigitalOffice.UserService
       services.AddScoped<IValidator<CreateSkillRequest>, CreateSkillRequestValidator>();
 
       string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
-      if (string.IsNullOrEmpty(connStr))
+      if (string.IsNullOrEmpty(redisConnStr))
       {
-        connStr = Configuration.GetConnectionString("Redis");
+        redisConnStr = Configuration.GetConnectionString("Redis");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(

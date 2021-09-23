@@ -62,9 +62,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetDepartmentUsersRequest))]
     public string GetDepartmentUsersEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetPositionsRequest))]
-    public string GetPositionsEndpoint { get; set; }
-
     [AutoInjectRequest(typeof(IEditCompanyEmployeeRequest))]
     public string EditCompanyEmployeeEndpoint { get; set; }
 

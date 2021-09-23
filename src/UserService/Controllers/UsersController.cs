@@ -9,6 +9,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -34,19 +35,19 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpGet("get")]
-    public OperationResultResponse<UserResponse> Get(
+    public async Task<OperationResultResponse<UserResponse>> Get(
       [FromServices] IGetUserCommand command,
       [FromQuery] GetUserFilter filter)
     {
-      return command.Execute(filter);
+      return await command.Execute(filter);
     }
 
     [HttpGet("find")]
-    public FindResultResponse<UserInfo> Find(
+    public async Task<FindResultResponse<UserInfo>> Find(
       [FromServices] IFindUserCommand command,
       [FromQuery] FindUsersFilter filter)
     {
-      return command.Execute(filter);
+      return await command.Execute(filter);
     }
   }
 }

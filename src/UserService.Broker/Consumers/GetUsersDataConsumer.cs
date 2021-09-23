@@ -59,12 +59,15 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       List<UserData> users = GetUserInfo(context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
-        OperationResultWrapper.CreateResponse((_) => users, context));
+        OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
 
-      await _cache.GetDatabase(Cache.Users).StringSetAsync(
-        users.Select(u => u.Id).GetRedisCacheKey(), 
-        JsonConvert.SerializeObject(users), 
-        TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+      if (users != null)
+      {
+        await _cache.GetDatabase(Cache.Users).StringSetAsync(
+          users.Select(u => u.Id).GetRedisCacheHashCode(),
+          JsonConvert.SerializeObject(users),
+          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+      }
     }
   }
 }
