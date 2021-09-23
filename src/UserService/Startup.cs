@@ -52,8 +52,8 @@ namespace LT.DigitalOffice.UserService
     private void UpdateDatabase(IApplicationBuilder app)
     {
       using var serviceScope = app.ApplicationServices
-          .GetRequiredService<IServiceScopeFactory>()
-          .CreateScope();
+        .GetRequiredService<IServiceScopeFactory>()
+        .CreateScope();
 
       using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
 
@@ -63,17 +63,17 @@ namespace LT.DigitalOffice.UserService
     private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
     {
       var builder = new ServiceCollection()
-          .AddLogging()
-          .AddMvc()
-          .AddNewtonsoftJson()
-          .Services.BuildServiceProvider();
+        .AddLogging()
+        .AddMvc()
+        .AddNewtonsoftJson()
+        .Services.BuildServiceProvider();
 
       return builder
-          .GetRequiredService<IOptions<MvcOptions>>()
-          .Value
-          .InputFormatters
-          .OfType<NewtonsoftJsonPatchInputFormatter>()
-          .First();
+        .GetRequiredService<IOptions<MvcOptions>>()
+        .Value
+        .InputFormatters
+        .OfType<NewtonsoftJsonPatchInputFormatter>()
+        .First();
     }
 
     #region configure masstransit
@@ -171,12 +171,12 @@ namespace LT.DigitalOffice.UserService
       Configuration = configuration;
 
       _serviceInfoConfig = Configuration
-          .GetSection(BaseServiceInfoConfig.SectionName)
-          .Get<BaseServiceInfoConfig>();
+        .GetSection(BaseServiceInfoConfig.SectionName)
+        .Get<BaseServiceInfoConfig>();
 
       _rabbitMqConfig = Configuration
-          .GetSection(BaseRabbitMqConfig.SectionName)
-          .Get<RabbitMqConfig>();
+        .GetSection(BaseRabbitMqConfig.SectionName)
+        .Get<RabbitMqConfig>();
 
       Version = "1.4.0.0";
       Description = "UserService is an API that intended to work with users.";
@@ -280,18 +280,18 @@ namespace LT.DigitalOffice.UserService
         x => ConnectionMultiplexer.Connect(redisConnStr));
 
       services
-          .AddControllers(options =>
-          {
-            options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
-          }) // TODO check enum serialization from request without .AddJsonOptions()
-             //this will be used when all validation takes place on the pipeline
-             //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
-          .AddFluentValidation()
-          .AddJsonOptions(options =>
-          {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-          })
-          .AddNewtonsoftJson();
+        .AddControllers(options =>
+        {
+          options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+        }) // TODO check enum serialization from request without .AddJsonOptions()
+            //this will be used when all validation takes place on the pipeline
+            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
+        .AddFluentValidation()
+        .AddJsonOptions(options =>
+        {
+          options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        })
+        .AddNewtonsoftJson();
     }
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -316,11 +316,11 @@ namespace LT.DigitalOffice.UserService
         endpoints.MapHealthChecks($"/{_serviceInfoConfig.Id}/hc", new HealthCheckOptions
         {
           ResultStatusCodes = new Dictionary<HealthStatus, int>
-              {
-                        { HealthStatus.Unhealthy, 200 },
-                        { HealthStatus.Healthy, 200 },
-                        { HealthStatus.Degraded, 200 },
-              },
+          {
+            { HealthStatus.Unhealthy, 200 },
+            { HealthStatus.Healthy, 200 },
+            { HealthStatus.Degraded, 200 },
+          },
           Predicate = check => check.Name != "masstransit-bus",
           ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
         });
