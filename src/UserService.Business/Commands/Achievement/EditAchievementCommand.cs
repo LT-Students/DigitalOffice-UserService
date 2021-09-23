@@ -5,30 +5,31 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement;
 using LT.DigitalOffice.UserService.Validation.Achievement.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
 using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 {
-  public class CreateAchievementCommand : ICreateAchievementCommand
+  public class EditAchievementCommand : IEditAchievementCommand
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
     private readonly IAchievementRepository _repository;
-    private readonly IDbAchievementMapper _mapper;
-    private readonly ICreateAchievementRequestValidator _validator;
+    private readonly IPatchDbAchievementMapper _mapper;
+    private readonly IEditAchievementRequestValidator _validator;
 
-    public CreateAchievementCommand(
+    public EditAchievementCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
       IAchievementRepository repository,
-      IDbAchievementMapper mapper,
-      ICreateAchievementRequestValidator validator)
+      IPatchDbAchievementMapper mapper,
+      IEditAchievementRequestValidator validator)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
@@ -37,13 +38,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       _validator = validator;
     }
 
-    public OperationResultResponse<Guid?> Execute(CreateAchievementRequest request)
+    public OperationResultResponse<bool> Execute(Guid achievementId, JsonPatchDocument<EditAchievementRequest> request)
     {
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
-        return new OperationResultResponse<Guid?>
+        return new OperationResultResponse<bool>
         {
           Status = OperationResultStatusType.Failed,
           Errors = new() { "Not enough rights." }
@@ -54,20 +55,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-        return new OperationResultResponse<Guid?>
+        return new OperationResultResponse<bool>
         {
           Status = OperationResultStatusType.Failed,
           Errors = errors
         };
       }
 
-      OperationResultResponse<Guid?> response = new();
+      OperationResultResponse<bool> response = new();
 
-      response.Body = _repository.Create(_mapper.Map(request));
+      response.Body = _repository.Edit(achievementId, _mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
-      if (response.Body == null)
+      if (!response.Body)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 

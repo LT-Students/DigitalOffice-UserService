@@ -69,9 +69,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
                     ? dbUser.Skills.Select(s => s.Skill.Name)
                     : null,
                 Achievements = filter.IncludeAchievements
-                    ? dbUser.Achievements.Select(
-                        ua =>
-                            _userAchievementInfoMapper.Map(ua, GetImage(images, ua.Achievement?.ImageId)))
+                    ? dbUser.Achievements.Select(ua => _userAchievementInfoMapper.Map(ua))
                     : null,
                 Certificates = filter.IncludeCertificates
                     ? dbUser.Certificates.Select(

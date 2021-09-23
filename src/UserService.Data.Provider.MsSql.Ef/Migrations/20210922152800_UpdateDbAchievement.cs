@@ -15,10 +15,15 @@ namespace LT.DigitalOffice.MessageService.Data.Provider.MsSql.Ef.Migrations
       builder.AddColumn<string>(
         name: nameof(DbAchievement.ImageContent),
         table: DbAchievement.TableName,
-        nullable: true);
+        nullable: false);
 
       builder.AddColumn<string>(
-        name: nameof(DbAchievement.ImageContent),
+        name: nameof(DbAchievement.ImageExtension),
+        table: DbAchievement.TableName,
+        nullable: false);
+
+      builder.AlterColumn<string>(
+        name: nameof(DbAchievement.Description),
         table: DbAchievement.TableName,
         nullable: true);
 
@@ -33,7 +38,7 @@ namespace LT.DigitalOffice.MessageService.Data.Provider.MsSql.Ef.Migrations
         table: DbAchievement.TableName);
 
       builder.DropColumn(
-        name: nameof(DbAchievement.ImageContent),
+        name: nameof(DbAchievement.ImageExtension),
         table: DbAchievement.TableName);
 
       builder.AddColumn<Guid>(

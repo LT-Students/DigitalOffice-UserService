@@ -30,6 +30,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         Id = Guid.NewGuid(),
         ImageContent = request.Image != null ?
           _resizeHelper.Resize(request.Image.Content, request.Image.Extension) : null,
+        ImageExtension = request.Image.Extension,
         Name = request.Name,
         Description = request.Description,
         IsActive = true,

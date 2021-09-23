@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             #region achivment models
 
-            _imageAchievement = new ImageInfo
+/*            _imageAchievement = new ImageInfo
             {
                 Id = Guid.NewGuid(),
                 Content = "Content",
@@ -111,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 ReceivedAt = _dbUserAchievement.ReceivedAt,
                 Image = _imageAchievement,
                 Name = _dbUserAchievement.Achievement.Name
-            };
+            };*/
 
             #endregion
 
@@ -312,10 +312,10 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, _avatarInfo, null, null))
                 .Returns(_userInfo);
 
-            _mocker
+/*            _mocker
                 .Setup<IUserAchievementInfoMapper, UserAchievementInfo>(x =>
-                    x.Map(_dbUserAchievement, It.IsAny<ImageInfo>()))
-                .Returns(_achievementInfo);
+                    x.Map(_dbUserAchievement, It.IsAny<ImageConsist>()))
+                .Returns(_achievementInfo);*/
 
             _mocker
                 .Setup<ICertificateInfoMapper, CertificateInfo>(x =>
