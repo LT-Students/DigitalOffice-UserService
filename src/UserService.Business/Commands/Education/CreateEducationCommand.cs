@@ -39,14 +39,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly ILogger<CreateEducationCommand> _logger;
 
     public CreateEducationCommand(
-    IAccessValidator accessValidator,
-    IHttpContextAccessor httpContextAccessor,
-    IDbUserEducationMapper mapper,
-    IUserRepository userRepository,
-    IEducationRepository educationRepository,
-    ICreateEducationRequestValidator validator,
-    IRequestClient<ICreateImagesRequest> createImagesRequest,
-    ILogger<CreateEducationCommand> logger)
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserEducationMapper mapper,
+      IUserRepository userRepository,
+      IEducationRepository educationRepository,
+      ICreateEducationRequestValidator validator,
+      IRequestClient<ICreateImagesRequest> createImagesRequest,
+      ILogger<CreateEducationCommand> logger)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
@@ -58,46 +58,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<Guid>> Execute(CreateEducationRequest request)
-    {
-      OperationResultResponse<Guid> response = new();
-
-      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-
-        response.Errors.Add("Not enough rights");
-        response.Status = OperationResultStatusType.Failed;
-
-		return response;
-      }
-
-      if (!_validator.ValidateCustom(request, out List<string> errors))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
-		response.Errors.AddRange(errors);
-        response.Status = OperationResultStatusType.Failed;
-
-		return response;
-      }
-
-	List<AddImageRequest> requestImages = request.Images;
-	List<Guid> createdImagesIDs = requestImages is not null && requestImages.Any() ? 
-		CreateImages(request, response.Errors) : new();
-	DbUserEducation dbEducation = _mapper.Map(request, createdImagesIDs);
-
-      _educationRepository.Add(dbEducation);
-
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
-      response.Body = dbEducation.Id;
-      response.Status = response.Errors.Any() ? 
-        OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess; 
-
-      return response;
-    }
-
-    public async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
+    private async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
     {
       List<AddImageRequest> imagesToCreate = request.Images;
       Guid userId = request.UserId;
@@ -114,17 +75,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       {
         images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, userId));
       }
-      
+
       string logMsg = "Can not add education images to user {UserId}. Reason: '{Errors}'";
 
       try
       {
-        IOperationResult<ICreateImagesResponse> responsedMsg = 
+        IOperationResult<ICreateImagesResponse> responsedMsg =
           (await _createImagesRequest.GetResponse<IOperationResult<ICreateImagesResponse>>(
-          ICreateImagesRequest.CreateObj(images, ImageSource.User)
-        )).Message;
+            ICreateImagesRequest.CreateObj(images, ImageSource.User))).Message;
 
-        if(responsedMsg.IsSuccess)
+        if (responsedMsg.IsSuccess)
         {
           return responsedMsg.Body.ImagesIds;
         }
@@ -138,6 +98,46 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       errors.Add($"Can not add education images to user with id {userId}");
       return null;
+    }
+
+    public async Task<OperationResultResponse<Guid>> Execute(CreateEducationRequest request)
+    {
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+
+      OperationResultResponse<Guid> response = new();
+
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers) && senderId != request.UserId)
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        response.Errors.Add("Not enough rights");
+        response.Status = OperationResultStatusType.Failed;
+      }
+
+      if (_validator.ValidateCustom(request, out List<string> errors))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.AddRange(errors);
+
+        return response;
+      }
+
+      List<AddImageRequest> requestImages = request.Images;
+      List<Guid> createdImagesIDs = requestImages != null && requestImages.Any() ? 
+        await CreateImages(request, response.Errors) : new();
+
+      DbUserEducation dbEducation = _mapper.Map(request, createdImagesIDs);
+
+      _educationRepository.Add(dbEducation);
+
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+      response.Body = dbEducation.Id;
+      response.Status = response.Errors.Any() ? 
+        OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess; 
+
+      return response;
     }
   }
 }

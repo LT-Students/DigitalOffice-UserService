@@ -45,6 +45,34 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _logger = logger;
     }
 
+    private async Task<bool> RemoveImages(ICollection<DbUserCertificateImage> imagesToRemove, ICollection<string> errors)
+    {
+      string errorMsg = "Can not remove certificate images. Reason: {errors}";
+
+      try
+      {
+        Response<IOperationResult<bool>> response = await
+         _removeImagesRequest.GetResponse<IOperationResult<bool>>(
+           IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
+
+        IOperationResult<bool> responsedMsg = response.Message;
+
+        if (responsedMsg.IsSuccess)
+        {
+          return true;
+        }
+
+        _logger.LogWarning(errorMsg, string.Join(',', responsedMsg.Errors));
+      }
+      catch (Exception e)
+      {
+        _logger.LogError(e, errorMsg);
+      }
+
+      errors.Add("Cannot remove certificates images");
+      return false;
+    }
+
     public async Task<OperationResultResponse<bool>> Execute(Guid certificateId)
     {
       OperationResultResponse<bool> result = new();
@@ -78,34 +106,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
 
       return result;
-    }
-
-    private async Task<bool> RemoveImages(ICollection<DbUserCertificateImage> imagesToRemove, ICollection<string> errors)
-    {
-      string errorMsg = "Can not remove certificate images. Reason: {errors}";
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await
-         _removeImagesRequest.GetResponse<IOperationResult<bool>>(
-           IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
-
-        IOperationResult<bool> responsedMsg = response.Message;
-
-        if (responsedMsg.IsSuccess)
-        {
-          return true;
-        }
-
-        _logger.LogWarning(errorMsg, string.Join(',', responsedMsg.Errors));
-      }
-      catch(Exception e)
-      {
-        _logger.LogError(e, errorMsg);
-      }
-
-      errors.Add("Cannot remove certificates images");
-      return false;
     }
   }
 }

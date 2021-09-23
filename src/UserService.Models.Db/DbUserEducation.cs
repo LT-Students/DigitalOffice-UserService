@@ -21,8 +21,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }
-    public DbUser User { get; set; }
 
+    public DbUser User { get; set; }
     public ICollection<DbUserEducationImage> Images { get; set; }
 
     public DbUserEducation()

@@ -46,6 +46,34 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _removeImagesRequest = removeImagesRequest;
     }
 
+    private async Task<bool> RemoveImages(ICollection<DbUserEducationImage> imagesToRemove, List<string> errors)
+    {
+      string errorMsg = "Can not remove education images. Reason: {errors}";
+
+      try
+      {
+        Response<IOperationResult<bool>> response = await
+         _removeImagesRequest.GetResponse<IOperationResult<bool>>(
+           IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
+
+        IOperationResult<bool> responsedMsg = response.Message;
+
+        if (responsedMsg.IsSuccess)
+        {
+          return responsedMsg.Body;
+        }
+
+        _logger.LogWarning(errorMsg, string.Join(',', responsedMsg.Errors));
+      }
+      catch (Exception e)
+      {
+        _logger.LogError(e, errorMsg);
+      }
+
+      errors.Add("Cannot remove education images");
+      return false;
+    }
+
     public async Task<OperationResultResponse<bool>> Execute(Guid educationId)
     {
       OperationResultResponse<bool> result = new();
@@ -79,34 +107,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
 
       return result;
-    }
-
-    private async Task<bool> RemoveImages(ICollection<DbUserEducationImage> imagesToRemove, List<string> errors)
-    {
-      string errorMsg = "Can not remove education images. Reason: {errors}";
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await
-         _removeImagesRequest.GetResponse<IOperationResult<bool>>(
-           IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
-
-        IOperationResult<bool> responsedMsg = response.Message;
-
-        if (responsedMsg.IsSuccess)
-        {
-          return true;
-        }
-
-        _logger.LogWarning(errorMsg, string.Join(',', responsedMsg.Errors));
-      }
-      catch (Exception e)
-      {
-        _logger.LogError(e, errorMsg);
-      }
-
-      errors.Add("Cannot remove education images");
-      return false;
     }
   }
 }

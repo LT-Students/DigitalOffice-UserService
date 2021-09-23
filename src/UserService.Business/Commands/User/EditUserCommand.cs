@@ -45,8 +45,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-      string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
-      string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
       string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
       const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
       const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";

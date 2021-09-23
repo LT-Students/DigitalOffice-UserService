@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,20 +17,24 @@ namespace LT.DigitalOffice.UserService.Data
   {
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<EducationRepository> _logger;
 
     public EducationRepository(
-    IDataProvider provider,
-    IHttpContextAccessor httpContextAccessor)
+      IDataProvider provider,
+      IHttpContextAccessor httpContextAccessor,
+      ILogger<EducationRepository> logger)
     {
       _provider = provider;
       _httpContextAccessor = httpContextAccessor;
+      _logger = logger;
     }
 
     public void Add(DbUserEducation education)
     {
       if (education == null)
       {
-        throw new ArgumentNullException(nameof(education));
+        _logger.LogWarning(new ArgumentNullException(nameof(education)).Message);
+        return;
       }
 
       ICollection<DbUserEducationImage> userEducationImages = education.Images;
@@ -51,7 +56,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (education == null)
       {
-        throw new NotFoundException($"User education with ID '{educationId}' was not found.");
+        _logger.LogWarning($"User education with ID '{educationId}' was not found.");
+        return null;
       }
 
       return education;
@@ -61,12 +67,14 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (education == null)
       {
-        throw new ArgumentNullException(nameof(education));
+        _logger.LogWarning(new ArgumentNullException(nameof(education)).Message);
+        return false;
       }
 
       if (request == null)
       {
-        throw new ArgumentNullException(nameof(request));
+        _logger.LogWarning(new ArgumentNullException(nameof(request)).Message);
+        return false;
       }
 
       request.ApplyTo(education);
@@ -81,7 +89,8 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (education == null)
       {
-        throw new ArgumentNullException(nameof(education));
+        _logger.LogWarning(new ArgumentNullException(nameof(education)).Message);
+        return false;
       }
 
       _provider.UserEducationImages.RemoveRange(education.Images);

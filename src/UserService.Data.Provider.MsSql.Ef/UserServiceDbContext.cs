@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUserCertificateImage> UserCertificateImages { get; set; }
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
     public DbSet<DbUserEducation> UserEducations { get; set; }
-    public DbSet<DbUserEducationImages> UserEducationImages { get; set; }
+    public DbSet<DbUserEducationImage> UserEducationImages { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbEntityImage> EntitiesImages { get; set; }
 

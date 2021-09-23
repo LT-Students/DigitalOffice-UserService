@@ -38,12 +38,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     private async Task<List<Guid>> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
       string logMessage = "Can not add certificate image for user {UserId}. Reason: {Errors}";
-      List<CreateImageData> images = new();
-
-      foreach(AddImageRequest imageData in request.Images)
-      {
-        images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, userId));
-      }
+      List<CreateImageData> images = request.Images
+        .Select(i => new CreateImageData(i.Name, i.Content, i.Extension, userId))
+        .ToList();
 
       try
       {
@@ -51,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
           (await _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
             ICreateImagesRequest.CreateObj(images, ImageSource.User))).Message;
 
-        if(responsedMsg.IsSuccess)
+        if (responsedMsg.IsSuccess)
         {
           return responsedMsg.Body.ImagesIds;
         }
@@ -69,13 +66,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     }
 
     public CreateCertificateCommand(
-    IAccessValidator accessValidator,
-    IHttpContextAccessor httpContextAccessor,
-    IDbUserCertificateMapper mapper,
-    IUserRepository userRepository,
-    ICertificateRepository certificateRepository,
-    IRequestClient<ICreateImagesRequest> rcAddIImage,
-    ILogger<CreateCertificateCommand> logger)
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserCertificateMapper mapper,
+      IUserRepository userRepository,
+      ICertificateRepository certificateRepository,
+      IRequestClient<ICreateImagesRequest> rcAddIImage,
+      ILogger<CreateCertificateCommand> logger)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
@@ -102,8 +99,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       }
 
       List<AddImageRequest> requestImages = request.Images;
-      List<Guid> createdImagesIds = requestImages is not null && requestImages.Any()? 
+      List<Guid> createdImagesIds = requestImages != null && requestImages.Any() ? 
         await CreateImages(request, senderId, response.Errors) : new();
+
       DbUserCertificate dbUserCertificate = _mapper.Map(request, createdImagesIds);
 
       _certificateRepository.Add(dbUserCertificate);

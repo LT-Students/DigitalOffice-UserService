@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,20 +17,24 @@ namespace LT.DigitalOffice.UserService.Data
   {
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<CertificateRepository> _logger;
 
     public CertificateRepository(
       IDataProvider provider,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      ILogger<CertificateRepository> logger)
     {
       _provider = provider;
       _httpContextAccessor = httpContextAccessor;
+      _logger = logger;
     }
 
     public void Add(DbUserCertificate certificate)
     {
       if (certificate == null)
       {
-        throw new ArgumentNullException(nameof(certificate));
+        _logger.LogWarning(new ArgumentNullException(nameof(certificate)).Message);
+        return;
       }
 
       ICollection<DbUserCertificateImage> images = certificate.Images;
@@ -51,7 +56,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (certificate == null)
       {
-        throw new NotFoundException($"User certificate with ID '{certificateId}' was not found.");
+        _logger.LogWarning($"User certificate with ID '{certificateId}' was not found.");
+        return null;
       }
 
       return certificate;
@@ -61,12 +67,14 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (certificate == null)
       {
-        throw new ArgumentNullException(nameof(certificate));
+        _logger.LogWarning(new ArgumentNullException(nameof(certificate)).Message);
+        return false;
       }
 
       if (request == null)
       {
-        throw new ArgumentNullException(nameof(request));
+        _logger.LogWarning(new ArgumentNullException(nameof(request)).Message);
+        return false;
       }
 
       request.ApplyTo(certificate);
@@ -81,7 +89,8 @@ namespace LT.DigitalOffice.UserService.Data
     {
       if (certificate == null)
       {
-        throw new ArgumentNullException(nameof(certificate));
+        _logger.LogWarning(new ArgumentNullException(nameof(certificate)).Message);
+        return false;
       }
 
       _provider.UserCertificateImages.RemoveRange(certificate.Images);
