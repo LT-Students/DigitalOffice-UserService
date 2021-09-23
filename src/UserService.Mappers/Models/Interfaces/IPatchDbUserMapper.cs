@@ -10,7 +10,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
     public interface IPatchDbUserMapper
     {
         JsonPatchDocument<DbUser> Map(
-            JsonPatchDocument<EditUserRequest> request,
-            Guid? imageId);
+            JsonPatchDocument<EditUserRequest> request);
     }
 }

@@ -178,7 +178,7 @@ namespace LT.DigitalOffice.UserService
           .GetSection(BaseRabbitMqConfig.SectionName)
           .Get<RabbitMqConfig>();
 
-      Version = "1.3.3";
+      Version = "1.4.0.0";
       Description = "UserService is an API that intended to work with users.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";

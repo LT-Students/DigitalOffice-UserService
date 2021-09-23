@@ -46,5 +46,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 
     [FromQuery(Name = "includeprojects")]
     public bool IncludeProjects { get; set; } = false;
+
+    [FromQuery(Name = "includeuserimages")]
+    public bool IncludeUserImages { get; set; } = false;
   }
 }

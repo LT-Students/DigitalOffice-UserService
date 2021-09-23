@@ -12,8 +12,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     public class PatchDbUserMapper : IPatchDbUserMapper
     {
         public JsonPatchDocument<DbUser> Map(
-            JsonPatchDocument<EditUserRequest> request,
-            Guid? imageId)
+            JsonPatchDocument<EditUserRequest> request)
         {
             if (request == null)
             {
@@ -43,11 +42,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 if (item.path.EndsWith(nameof(EditUserRequest.Gender), StringComparison.OrdinalIgnoreCase))
                 {
                     result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserGender), item.value.ToString())));
-                    continue;
-                }
-                if (item.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase))
-                {
-                    result.Operations.Add(new Operation<DbUser>(item.op, $"/{nameof(DbUser.AvatarFileId)}", item.from, imageId));
                     continue;
                 }
                 if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))

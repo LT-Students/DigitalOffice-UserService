@@ -5,12 +5,14 @@ using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models.Company;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
-using LT.DigitalOffice.Models.Broker.Responses.File;
+using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
@@ -39,6 +41,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   {
     private readonly ILogger<GetUserCommand> _logger;
     private readonly IUserRepository _repository;
+    private readonly IImageRepository _imageRepository;
     private readonly IUserResponseMapper _mapper;
     private readonly IOfficeInfoMapper _officeMapper;
     private readonly IDepartmentInfoMapper _departmentMapper;
@@ -47,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IImageInfoMapper _imageMapper;
     private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
-    private readonly IRequestClient<IGetImagesRequest> _rcImages;
+    private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IConnectionMultiplexer _cache;
 
@@ -267,7 +270,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private List<ImageInfo> GetImages(List<Guid> imageIds, List<string> errors)
     {
-      if (imageIds == null || imageIds.Count == 0)
+      if (imageIds == null || !imageIds.Any())
       {
         return new();
       }
@@ -277,12 +280,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        IOperationResult<IGetImagesResponse> response = _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds)).Result.Message;
+        IOperationResult<IGetImagesResponse> response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+          IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
 
         if (response.IsSuccess)
         {
-          return response.Body.Images.Select(_imageMapper.Map).ToList();
+          return response.Body.ImagesData.Select(_imageMapper.Map).ToList();
         }
         else
         {
@@ -302,7 +305,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         errors.Add(errorMessage);
       }
 
-      return new();
+      return null;
     }
 
     #endregion
@@ -313,6 +316,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public GetUserCommand(
       ILogger<GetUserCommand> logger,
       IUserRepository repository,
+      IImageRepository imageRepository,
       IUserResponseMapper mapper,
       IRoleInfoMapper roleMapper,
       IDepartmentInfoMapper departmentMapper,
@@ -321,12 +325,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IImageInfoMapper imageMapper,
       IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
       IRequestClient<IGetProjectsRequest> rcGetProjects,
-      IRequestClient<IGetImagesRequest> rcImages,
+      IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IConnectionMultiplexer cache)
     {
       _logger = logger;
       _repository = repository;
+      _imageRepository = imageRepository;
       _mapper = mapper;
       _roleMapper = roleMapper;
       _departmentMapper = departmentMapper;
@@ -335,7 +340,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _imageMapper = imageMapper;
       _rcGetCompanyEmployees = rcGetCompanyEmployees;
       _rcGetProjects = rcGetProjects;
-      _rcImages = rcImages;
+      _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _cache = cache;
     }
@@ -360,13 +365,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       List<Guid> images = new();
+      List<Guid> userImagesIds = new();
+      List<ImageInfo> imagesResult = null;
+
       if (filter.IncludeImages)
       {
-        if (dbUser.AvatarFileId.HasValue)
-        {
-          images.Add(dbUser.AvatarFileId.Value);
-        }
-
         if (filter.IncludeCertificates)
         {
           foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
@@ -387,6 +390,21 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       (DepartmentData department, PositionData position, OfficeData office) employeeInfo =
         await GetCompanyEmployee(dbUser.Id, filter.IncludeDepartment, filter.IncludePosition, filter.IncludeOffice, response.Errors);
 
+      if (filter.IncludeUserImages)
+      {
+        userImagesIds.AddRange(_imageRepository.GetImagesIds(dbUser.Id));
+        images.AddRange(userImagesIds);
+      }
+
+      if (dbUser.AvatarFileId.HasValue)
+      {
+        images.Add(dbUser.AvatarFileId.Value);
+      }
+
+      imagesResult = filter.IncludeImages || filter.IncludeUserImages
+        ? GetImages(images, response.Errors)
+        : null;
+
       response.Body = _mapper.Map(
         dbUser,
         _departmentMapper.Map(employeeInfo.department),
@@ -394,7 +412,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _officeMapper.Map(employeeInfo.office),
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
         filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
-        GetImages(images, response.Errors),
+        imagesResult,
+        dbUser.AvatarFileId.HasValue ? imagesResult?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
+        userImagesIds,
         filter);
 
       response.Status = response.Errors.Any()
