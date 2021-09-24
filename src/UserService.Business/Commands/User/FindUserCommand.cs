@@ -259,7 +259,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = await _rcGetCompanyEmployees
+        Response<IOperationResult<IGetCompanyEmployeesResponse>> response = await _rcGetCompanyEmployees
           .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
             IGetCompanyEmployeesRequest.CreateObj(
             usersIds,

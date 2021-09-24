@@ -165,7 +165,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = await _rcGetCompanyEmployees
+        Response<IOperationResult<IGetCompanyEmployeesResponse>> response = await _rcGetCompanyEmployees
           .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
             IGetCompanyEmployeesRequest.CreateObj(
             usersIds,
@@ -227,14 +227,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
+        IOperationResult<IGetProjectsResponse> response = _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
           IGetProjectsRequest.CreateObj(userId: userId)).Result.Message;
 
         if (response.IsSuccess)
         {
           var projects = new List<ProjectInfo>();
 
-          foreach (var project in response.Body.Projects)
+          foreach (ProjectData project in response.Body.Projects)
           {
             projects.Add(new ProjectInfo
             {
