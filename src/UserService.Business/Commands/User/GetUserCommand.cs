@@ -68,10 +68,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return default;
       }
 
-      List<DepartmentData> departments;
-      List<PositionData> positions;
-      List<OfficeData> offices;
-      (departments, positions, offices) = await GetCompanyEmployessFromCache(userId, includeDepartments, includePositions, includeOffices);
+      (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) =
+        await GetCompanyEmployessFromCache(userId, includeDepartments, includePositions, includeOffices);
 
       IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThrowBroker(
         new List<Guid> { userId },
