@@ -215,8 +215,8 @@ namespace LT.DigitalOffice.UserService
       services.AddHttpContextAccessor();
 
       services.AddHealthChecks()
-          .AddRabbitMqCheck()
-          .AddSqlServer(connStr);
+        .AddRabbitMqCheck()
+        .AddSqlServer(connStr);
 
       services.AddDbContext<UserServiceDbContext>(options =>
       {
