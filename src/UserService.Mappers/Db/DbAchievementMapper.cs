@@ -25,6 +25,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       {
         return null;
       }
+
       return new DbAchievement
       {
         Id = Guid.NewGuid(),

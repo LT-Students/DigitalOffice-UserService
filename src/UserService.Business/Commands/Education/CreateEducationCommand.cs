@@ -25,11 +25,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly ICreateEducationRequestValidator _validator;
 
     public CreateEducationCommand(
-        IAccessValidator accessValidator,
-        IHttpContextAccessor httpContextAccessor,
-        IDbUserEducationMapper mapper,
-        IEducationRepository educationRepository,
-        ICreateEducationRequestValidator validator)
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserEducationMapper mapper,
+      IEducationRepository educationRepository,
+      ICreateEducationRequestValidator validator)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;

@@ -41,6 +41,11 @@ namespace LT.DigitalOffice.MessageService.Data.Provider.MsSql.Ef.Migrations
         name: nameof(DbAchievement.ImageExtension),
         table: DbAchievement.TableName);
 
+      builder.AlterColumn<Guid>(
+        name: nameof(DbAchievement.Description),
+        table: DbAchievement.TableName,
+        nullable: true);
+
       builder.AddColumn<Guid>(
         name: "ImageId",
         table: DbAchievement.TableName);

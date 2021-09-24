@@ -65,6 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 
       response.Body = _repository.Create(_mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
+
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       if (response.Body == null)
