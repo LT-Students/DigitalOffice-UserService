@@ -141,7 +141,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => !NameRegex.IsMatch(x.value.ToString()), "Middle name must not contain numbers" },
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Middle name is empty" },
                     { x => x.value.ToString().Length < 32, "Middle name is too long" }
                 });
 
@@ -348,18 +347,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 new()
                 {
                     { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format" }
-                });
-
-            #endregion
-
-            #region About
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.About),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new()
-                {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "About must not be empty." },
                 });
 
             #endregion
