@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces
 {
-    [AutoInject]
-    public interface ICreateCredentialsCommand
-    {
-        Task<OperationResultResponse<CredentialsResponse>> Execute(CreateCredentialsRequest request);
-    }
+  [AutoInject]
+  public interface ICreateCredentialsCommand
+  {
+    Task<OperationResultResponse<CredentialsResponse>> Execute(CreateCredentialsRequest request);
+  }
 }

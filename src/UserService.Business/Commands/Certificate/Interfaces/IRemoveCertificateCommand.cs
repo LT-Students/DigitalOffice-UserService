@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces
 {
-    [AutoInject]
-    public interface IRemoveCertificateCommand
-    {
-        Task<OperationResultResponse<bool>> Execute(Guid certificateId);
-    }
+  [AutoInject]
+  public interface IRemoveCertificateCommand
+  {
+    Task<OperationResultResponse<bool>> Execute(Guid certificateId);
+  }
 }

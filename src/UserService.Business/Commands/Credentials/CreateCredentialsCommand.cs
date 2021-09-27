@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
@@ -133,9 +132,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           List<string> errors = tokenResponse.Message.Errors;
 
           _logger.LogWarning(
-              "Can not get token for pending user '{UserId}' reason:\n{Errors}",
-              request.UserId,
-              string.Join('\n', errors));
+            "Can not get token for pending user '{UserId}' reason:\n{Errors}",
+            request.UserId,
+            string.Join('\n', errors));
 
           _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
 

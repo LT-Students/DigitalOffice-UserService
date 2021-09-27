@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
   [AutoInject]
   public interface ICreateEducationCommand
   {
-      Task<OperationResultResponse<Guid>> Execute(CreateEducationRequest request);
+    Task<OperationResultResponse<Guid>> Execute(CreateEducationRequest request);
   }
 }
