@@ -57,9 +57,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
         IOperationResult<bool> responsedMsg = response.Message;
 
-        if (responsedMsg.IsSuccess)
+        if (responsedMsg.IsSuccess && responsedMsg.Body)
         {
-          return true;
+          return responsedMsg.Body;
         }
 
         _logger.LogWarning(errorMsg, string.Join(',', responsedMsg.Errors));
@@ -82,9 +82,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       DbUser sender = _userRepository.Get(senderId);
       DbUserCertificate userCertificate = _certificateRepository.Get(certificateId);
 
-      if (!(sender.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-            && senderId != userCertificate.UserId)
+      if (senderId != userCertificate.UserId && !(sender.IsAdmin ||
+            _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
@@ -103,7 +102,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       
       result.Body = _certificateRepository.Remove(userCertificate);
       result.Status = resultErrors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
 
       return result;
     }

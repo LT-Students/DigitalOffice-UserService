@@ -37,8 +37,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     private async Task<List<Guid>> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
+      List<AddImageRequest> requestedImages = request.Images;
+      if (requestedImages == null || !requestedImages.Any())
+      {
+        return new();
+      }
+
       string logMessage = "Can not add certificate image for user {UserId}. Reason: {Errors}";
-      List<CreateImageData> images = request.Images
+
+      List<CreateImageData> images = requestedImages
         .Select(i => new CreateImageData(i.Name, i.Content, i.Extension, userId))
         .ToList();
 
@@ -98,10 +105,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         return response;
       }
 
-      List<AddImageRequest> requestImages = request.Images;
-      List<Guid> createdImagesIds = requestImages != null && requestImages.Any() ? 
-        await CreateImages(request, senderId, response.Errors) : new();
-
+      List<Guid> createdImagesIds = await CreateImages(request, senderId, response.Errors);
       DbUserCertificate dbUserCertificate = _mapper.Map(request, createdImagesIds);
 
       _certificateRepository.Add(dbUserCertificate);
@@ -109,7 +113,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       response.Body = dbUserCertificate.Id;
       response.Status = response.Errors.Any() ?
         OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       return response;
     }
