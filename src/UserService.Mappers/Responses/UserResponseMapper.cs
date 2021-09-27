@@ -76,8 +76,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           User = _userInfoMapper.Map(dbUser, department, position, office, role, avatar),
           Projects = projects,
           Skills = filter.IncludeSkills
-              ? dbUser.Skills.Select(s => s.Skill.Name)
-              : null,
+            ? dbUser.Skills.Select(s => s.Skill.Name)
+            : null,
           Achievements = filter.IncludeAchievements
               ? dbUser.Achievements.Select(ua => _userAchievementInfoMapper.Map(ua))
               : null,
