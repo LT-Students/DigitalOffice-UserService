@@ -73,36 +73,32 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
       return new UserResponse
       {
-        User = filter.IncludeUserImages
-          ? _userInfoMapper.Map(dbUser, department, position, office, role, avatar, GetImages(images, userImagesIds))
-          : _userInfoMapper.Map(dbUser, department, position, office, role, avatar),
-        Projects = projects,
-        Skills = filter.IncludeSkills
-          ? dbUser.Skills.Select(s => s.Skill.Name)
-          : null,
-        Achievements = filter.IncludeAchievements
-          ? dbUser.Achievements.Select(
-            ua =>
-              _userAchievementInfoMapper.Map(ua, GetImage(images, ua.Achievement?.ImageId)))
-          : null,
-        Certificates = filter.IncludeCertificates
-          ? dbUser.Certificates.Select(
-            c =>
-              _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
-          : null,
-        Communications = filter.IncludeCommunications
-          ? dbUser.Communications.Select(
-            c => new CommunicationInfo
-            {
-              Id = c.Id,
-              Type = (CommunicationType)c.Type,
-              Value = c.Value
-            })
-          : null,
-        Educations = filter.IncludeEducations
-          ? dbUser.Educations.Select(
-            e => _educationInfoMapper.Map(e))
-          : null
+          User = _userInfoMapper.Map(dbUser, department, position, office, role, avatar),
+          Projects = projects,
+          Skills = filter.IncludeSkills
+            ? dbUser.Skills.Select(s => s.Skill.Name)
+            : null,
+          Achievements = filter.IncludeAchievements
+              ? dbUser.Achievements.Select(ua => _userAchievementInfoMapper.Map(ua))
+              : null,
+          Certificates = filter.IncludeCertificates
+              ? dbUser.Certificates.Select(
+                  c =>
+                      _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
+              : null,
+          Communications = filter.IncludeCommunications
+              ? dbUser.Communications.Select(
+                  c => new CommunicationInfo
+                  {
+                      Id = c.Id,
+                      Type = (CommunicationType)c.Type,
+                      Value = c.Value
+                  })
+              : null,
+          Educations = filter.IncludeEducations
+              ? dbUser.Educations.Select(
+                  e => _educationInfoMapper.Map(e))
+              : null
       };
     }
   }

@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public Guid AchievementId { get; set; }
         public string Name { get; set; }
         public DateTime ReceivedAt { get; set; }
-        public ImageInfo Image { get; set; }
+        public ImageConsist Image { get; set; }
     }
 }
