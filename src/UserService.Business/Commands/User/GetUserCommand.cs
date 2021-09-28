@@ -379,14 +379,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             images.Add(dbUserCertificate.ImageId);
           }
         }
-
-        if (filter.IncludeAchievements)
-        {
-          foreach (DbUserAchievement dbUserAchievement in dbUser.Achievements)
-          {
-            images.Add(dbUserAchievement.Achievement.ImageId);
-          }
-        }
       }
 
       (DepartmentData department, PositionData position, OfficeData office) employeeInfo =

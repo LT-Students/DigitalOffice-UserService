@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     {
         [HttpPost("create")]
         public OperationResultResponse<Guid> Create(
-            [FromServices] ICreateSkillCommand command, 
+            [FromServices] ICreateSkillCommand command,
             [FromBody] CreateSkillRequest request)
         {
             return command.Execute(request);
