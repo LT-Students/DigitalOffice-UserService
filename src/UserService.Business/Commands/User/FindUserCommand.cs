@@ -122,7 +122,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
       string errorMessage =
-          $"Can not get department users with department id {departmentId}. Please try again later.";
+        $"Can not get department users with department id {departmentId}. Please try again later.";
 
       try
       {
@@ -136,9 +136,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         else
         {
           _logger.LogWarning(
-              "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
-              departmentId,
-              string.Join('\n', response.Message.Errors));
+            "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
+            departmentId,
+            string.Join('\n', response.Message.Errors));
         }
       }
       catch (Exception exc)
@@ -151,11 +151,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployess(
-        List<Guid> usersIds,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices,
-        List<string> errors)
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
     {
       if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
       {
@@ -178,10 +178,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
-        List<Guid> usersIds,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices)
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices)
     {
       if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
       {
@@ -244,11 +244,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
-        List<Guid> usersIds,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices,
-        List<string> errors)
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
     {
       if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
       {
