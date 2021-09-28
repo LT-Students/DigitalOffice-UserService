@@ -4,64 +4,24 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.Validators;
+using LT.DigitalOffice.Kernel.Validators;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using Microsoft.AspNetCore.JsonPatch;
+using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.JsonPatch.Operations;
-using Newtonsoft.Json;
 
 namespace LT.DigitalOffice.UserService.Validation.User
 {
-    public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
+    public class EditUserRequestValidator : BaseEditRequestValidator<EditUserRequest>, IEditUserRequestValidator
     {
         private static Regex NameRegex = new(@"\d");
         private readonly IImageRepository _imageRepository;
 
         private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
         {
-            #region local functions
-
-            void AddСorrectPaths(List<string> paths)
-            {
-                if (paths.FirstOrDefault(p => p.EndsWith(requestedOperation.path[1..], StringComparison.OrdinalIgnoreCase)) == null)
-                {
-                    context.AddFailure(requestedOperation.path, $"This path {requestedOperation.path} is not available");
-                }
-            }
-
-            void AddСorrectOperations(
-                string propertyName,
-                List<OperationType> types)
-            {
-                if (requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
-                    && !types.Contains(requestedOperation.OperationType))
-                {
-                    context.AddFailure(propertyName, $"This operation {requestedOperation.OperationType} is prohibited for {propertyName}");
-                }
-            }
-
-            void AddFailureForPropertyIf(
-                string propertyName,
-                Func<OperationType, bool> type,
-                Dictionary<Func<Operation<EditUserRequest>, bool>, string> predicates)
-            {
-                if (!requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
-                    || !type(requestedOperation.OperationType))
-                {
-                    return;
-                }
-
-                foreach (var validateDelegate in predicates)
-                {
-                    if (!validateDelegate.Key(requestedOperation))
-                    {
-                        context.AddFailure(propertyName, validateDelegate.Value);
-                    }
-                }
-            }
-
-            #endregion
+            Context = context;
+            RequestedOperation = requestedOperation;
 
             #region paths
 
@@ -291,9 +251,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
       #endregion
 
-      #region IsActive
+            #region IsActive
 
-      AddFailureForPropertyIf(
+            AddFailureForPropertyIf(
                 nameof(EditUserRequest.IsActive),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
@@ -357,7 +317,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             _imageRepository = imageRepository;
 
             RuleForEach(x => x.Operations)
-               .Custom(HandleInternalPropertyValidation);
+              .Custom(HandleInternalPropertyValidation);
         }
     }
 }
