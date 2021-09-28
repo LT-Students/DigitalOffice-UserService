@@ -165,7 +165,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) = 
         await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
 
-      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThrowBroker(
+      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
         usersIds,
         includeDepartments && departments == null,
         includePositions && positions == null,
@@ -243,7 +243,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return (departments, positions, offices);
     }
 
-    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThrowBroker(
+    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
         List<Guid> usersIds,
         bool includeDepartments,
         bool includePositions,

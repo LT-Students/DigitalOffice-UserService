@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       if (users != null)
       {
         await _cache.GetDatabase(Cache.Users).StringSetAsync(
-          users.Select(u => u.Id).GetRedisCacheHashCode(),
+          context.Message.UserIds.GetRedisCacheHashCode(),
           JsonConvert.SerializeObject(users),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }

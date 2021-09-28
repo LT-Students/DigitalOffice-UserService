@@ -48,6 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPositionInfoMapper _positionMapper;
     private readonly IRoleInfoMapper _roleMapper;
     private readonly IImageInfoMapper _imageMapper;
+    private readonly IProjectInfoMapper _projectMapper;
     private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
@@ -71,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) =
         await GetCompanyEmployessFromCache(userId, includeDepartments, includePositions, includeOffices);
 
-      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThrowBroker(
+      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
         new List<Guid> { userId },
         includeDepartments && departments == null,
         includePositions && positions == null,
@@ -84,10 +85,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
-        Guid userId,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices)
+      Guid userId,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices)
     {
       if (!includeDepartments && !includePositions && !includeOffices)
       {
@@ -149,12 +150,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return (departments, positions, offices);
     }
 
-    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThrowBroker(
-        List<Guid> usersIds,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices,
-        List<string> errors)
+    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
     {
       if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
       {
@@ -221,37 +222,38 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return new();
     }
 
-    private List<ProjectInfo> GetProjects(Guid userId, List<string> errors)
+    private async Task<List<ProjectData>> GetProjects(Guid userId, List<string> errors)
+    {
+      RedisValue projectsFromCache = await _cache.GetDatabase(Cache.Projects).StringGetAsync(userId.GetRedisCacheHashCode().ToString());
+
+      if (projectsFromCache.HasValue)
+      {
+        (List<ProjectData> projects, int _) = JsonConvert.DeserializeObject<(List<ProjectData>, int)>(projectsFromCache);
+
+        return projects;
+      }
+
+      return await GetProjectsThroughBroker(userId, errors);
+    }
+
+    private async Task<List<ProjectData>> GetProjectsThroughBroker(Guid userId, List<string> errors)
     {
       string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
 
       try
       {
-        IOperationResult<IGetProjectsResponse> response = _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
-          IGetProjectsRequest.CreateObj(userId: userId)).Result.Message;
+        Response<IOperationResult<IGetProjectsResponse>> response = await _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
+          IGetProjectsRequest.CreateObj(userId: userId));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          var projects = new List<ProjectInfo>();
-
-          foreach (ProjectData project in response.Body.Projects)
-          {
-            projects.Add(new ProjectInfo
-            {
-              Id = project.Id,
-              Name = project.Name,
-              ShortName = project.ShortName,
-              Status = project.Status,
-              ShortDescription = project.ShortDescription
-            });
-          }
-          return projects;
+          return response.Message.Body.Projects;
         }
         else
         {
           _logger.LogWarning(
             "Errors while getting projects list:\n{Errors}",
-            string.Join('\n', response.Errors));
+            string.Join('\n', response.Message.Errors));
 
           errors.Add(errorMessage);
         }
@@ -321,6 +323,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPositionInfoMapper positionMapper,
       IOfficeInfoMapper officeMapper,
       IImageInfoMapper imageMapper,
+      IProjectInfoMapper projectMapper,
       IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
       IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetImagesRequest> rcGetImages,
@@ -336,6 +339,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _positionMapper = positionMapper;
       _officeMapper = officeMapper;
       _imageMapper = imageMapper;
+      _projectMapper = projectMapper;
       _rcGetCompanyEmployees = rcGetCompanyEmployees;
       _rcGetProjects = rcGetProjects;
       _rcGetImages = rcGetImages;
@@ -409,7 +413,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _positionMapper.Map(employeeInfo.position),
         _officeMapper.Map(employeeInfo.office),
         filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
-        filter.IncludeProjects ? GetProjects(dbUser.Id, response.Errors) : null,
+        filter.IncludeProjects ? (await GetProjects(dbUser.Id, response.Errors)).Select(_projectMapper.Map).ToList() : null,
         imagesResult,
         dbUser.AvatarFileId.HasValue ? imagesResult?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
         userImagesIds,
