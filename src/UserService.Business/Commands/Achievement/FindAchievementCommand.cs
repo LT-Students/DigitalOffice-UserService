@@ -19,13 +19,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAchievementRepository _repository;
     private readonly IAchievementInfoMapper _mapper;
-    private readonly IBaseFindRequestValidator _baseFindValidator;
+    private readonly IBaseFindFilterValidator _baseFindValidator;
 
     public FindAchievementCommand(
       IHttpContextAccessor httpContextAccessor,
       IAchievementRepository repository,
       IAchievementInfoMapper mapper,
-      IBaseFindRequestValidator baseFindValidator)
+      IBaseFindFilterValidator baseFindValidator)
     {
       _httpContextAccessor = httpContextAccessor;
       _repository = repository;
