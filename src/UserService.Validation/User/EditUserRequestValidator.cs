@@ -47,12 +47,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
                 });
 
             AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace });
@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
             #endregion
 
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             AddFailureForPropertyIf(
                 nameof(EditUserRequest.MiddleName),
-                x => x == OperationType.Replace || x == OperationType.Add,
+                x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => !NameRegex.IsMatch(x.value.ToString()), "Middle name must not contain numbers" },
@@ -110,7 +110,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             AddFailureForPropertyIf(
                 nameof(EditUserRequest.City),
-                x => x == OperationType.Replace || x == OperationType.Add,
+                x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => !string.IsNullOrEmpty(x.value.ToString()), "City name is empty" },
