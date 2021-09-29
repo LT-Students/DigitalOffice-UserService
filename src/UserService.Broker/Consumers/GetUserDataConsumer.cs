@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public async Task Consume(ConsumeContext<IGetUserDataRequest> context)
     {
-      var response = OperationResultWrapper.CreateResponse(GetUserData, context.Message);
+      object response = OperationResultWrapper.CreateResponse(GetUserData, context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUserDataResponse>>(response);
     }

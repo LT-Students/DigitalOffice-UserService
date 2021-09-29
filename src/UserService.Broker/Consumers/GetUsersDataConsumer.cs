@@ -5,6 +5,7 @@ using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
@@ -29,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private List<UserData> GetUserInfo(IGetUsersDataRequest request)
     {
-      var dbUsers = _repository.Get(request.UserIds);
+      List<DbUser> dbUsers = _repository.Get(request.UserIds);
 
       return dbUsers
         .Select(dbUser => new UserData(

@@ -121,9 +121,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
-      string errorMessage =
-        $"Can not get department users with department id {departmentId}. Please try again later.";
-
       try
       {
         var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
@@ -146,7 +143,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _logger.LogError(exc, "Can not get department users with department id {DepartmentId}", departmentId);
       }
 
-      errors.Add(errorMessage);
+      errors.Add($"Can not get department users with department id {departmentId}. Please try again later.");
       return null;
     }
 
