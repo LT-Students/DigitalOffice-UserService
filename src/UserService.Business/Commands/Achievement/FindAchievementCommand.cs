@@ -54,14 +54,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       response.TotalCount = totalCount;
       response.Status = OperationResultStatusType.FullSuccess;
 
-      if (response.Body == null)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-        response.Errors = new() { "Achievement was not found." };
-        response.Status = OperationResultStatusType.Failed;
-      }
-
       return response;
     }
   }

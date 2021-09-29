@@ -14,12 +14,12 @@ namespace LT.DigitalOffice.UserService.Validation.Achievement
     public CreateAchievementRequestValidator()
     {
       RuleFor(x => x.Name)
-        .NotEmpty()
+        .NotEmpty().WithMessage("Name of Achievement not must be empty")
         .MaximumLength(100)
         .WithMessage("Name of Achievement is too long");
 
       RuleFor(x => x.Description)
-        .NotEmpty()
+        .NotEmpty().WithMessage("Description of Achievement not must be empty")
         .MaximumLength(1000)
         .WithMessage("Description of Achievement is too long");
 
