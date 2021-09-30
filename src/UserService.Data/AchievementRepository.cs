@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       totalCount = dbNewsList.Count();
 
-      return dbNewsList.Skip(filter.skipCount).Take(filter.takeCount).ToList();
+      return dbNewsList.Skip(filter.SkipCount).Take(filter.TakeCount).ToList();
     }
 
     public DbAchievement Get(Guid achievementId)

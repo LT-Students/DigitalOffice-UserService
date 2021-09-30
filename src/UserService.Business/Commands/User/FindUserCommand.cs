@@ -1,11 +1,14 @@
-﻿using System;
+using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
@@ -21,7 +24,10 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -41,6 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IConnectionMultiplexer _cache;
 
     private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
     {
@@ -114,9 +121,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
-      string errorMessage =
-          $"Can not get department users with department id {departmentId}. Please try again later.";
-
       try
       {
         var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
@@ -129,9 +133,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         else
         {
           _logger.LogWarning(
-              "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
-              departmentId,
-              string.Join('\n', response.Message.Errors));
+            "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
+            departmentId,
+            string.Join('\n', response.Message.Errors));
         }
       }
       catch (Exception exc)
@@ -139,35 +143,126 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _logger.LogError(exc, "Can not get department users with department id {DepartmentId}", departmentId);
       }
 
-      errors.Add(errorMessage);
+      errors.Add($"Can not get department users with department id {departmentId}. Please try again later.");
       return null;
     }
 
-    private IGetCompanyEmployeesResponse GetCompanyEmployess(
-        List<Guid> usersIds,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices,
-        List<string> errors)
+    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployess(
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
+      {
+        return default;
+      }
+
+      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) = 
+        await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
+
+      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
+        usersIds,
+        includeDepartments && departments == null,
+        includePositions && positions == null,
+        includeOffices && offices == null,
+        errors);
+
+      return (departments ?? brokerResponse?.Departments,
+        positions ?? brokerResponse?.Positions,
+        offices ?? brokerResponse?.Offices);
+    }
+
+    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices)
+    {
+      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
+      {
+        return default;
+      }
+
+      List<DepartmentData> departments = null;
+      List<PositionData> positions = null;
+      List<OfficeData> offices = null;
+
+      Task<RedisValue> departmentsFromCacheTask = null;
+      Task<RedisValue> positionsFromCacheTask = null;
+      Task<RedisValue> officesFromCacheTask = null;
+
+      string key = usersIds.GetRedisCacheHashCode();
+
+      if (includeDepartments)
+      {
+        departmentsFromCacheTask = _cache.GetDatabase(Cache.Departments).StringGetAsync(key);
+      }
+
+      if (includePositions)
+      {
+        positionsFromCacheTask = _cache.GetDatabase(Cache.Positions).StringGetAsync(key);
+      }
+
+      if (includeOffices)
+      {
+        officesFromCacheTask = _cache.GetDatabase(Cache.Offices).StringGetAsync(key);
+      }
+
+      if (departmentsFromCacheTask != null)
+      {
+        RedisValue departmentsFromCache = await departmentsFromCacheTask;
+        if (departmentsFromCache.HasValue)
+        {
+          departments = JsonConvert.DeserializeObject<List<DepartmentData>>(departmentsFromCache);
+        }
+      }
+
+      if (positionsFromCacheTask != null)
+      {
+        RedisValue positionsFromCache = await positionsFromCacheTask;
+        if (positionsFromCache.HasValue)
+        {
+          positions = JsonConvert.DeserializeObject<List<PositionData>>(positionsFromCache);
+        }
+      }
+      
+      if (officesFromCacheTask != null)
+      {
+        RedisValue officesFromCache = await officesFromCacheTask;
+        if (officesFromCache.HasValue)
+        {
+          offices = JsonConvert.DeserializeObject<List<OfficeData>>(officesFromCache);
+        }
+      }
+
+      return (departments, positions, offices);
+    }
+
+    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
+      List<Guid> usersIds,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
     {
       if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
       {
         return null;
       }
 
-      const string errorMessage = "Can not get user's departments and positions. Please try again later.";
+      const string errorMessage = "Can not get company employees info. Please try again later.";
 
       try
       {
-        var request = IGetCompanyEmployeesRequest.CreateObj(
-          usersIds,
-          includeDepartments,
-          includePositions,
-          includeOffices);
-
-        var response = _rcGetCompanyEmployees
-          .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(request)
-          .Result;
+        Response<IOperationResult<IGetCompanyEmployeesResponse>> response = await _rcGetCompanyEmployees
+          .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
+            IGetCompanyEmployeesRequest.CreateObj(
+            usersIds,
+            includeDepartments,
+            includePositions,
+            includeOffices));
 
         if (response.Message.IsSuccess)
         {
@@ -175,7 +270,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
         else
         {
-          _logger.LogWarning("Errors while getting users departments and positions. Reason: {Errors}",
+          _logger.LogWarning("Errors while getting company employees info. Reason: {Errors}",
               string.Join('\n', response.Message.Errors));
         }
       }
@@ -190,19 +285,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     public FindUserCommand(
-        IUserRepository repository,
-        IUserInfoMapper mapper,
-        IImageInfoMapper imageInfoMapper,
-        IOfficeInfoMapper officeInfoMapper,
-        IRoleInfoMapper roleInfoMapper,
-        IDepartmentInfoMapper departmentInfoMapper,
-        IPositionInfoMapper positionInfoMapper,
-        ILogger<FindUserCommand> logger,
-        IRequestClient<IGetDepartmentUsersRequest> rcGetDepartmentUser,
-        IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
-        IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-        IRequestClient<IGetImagesRequest> rcGetImages,
-        IHttpContextAccessor httpContextAccessor)
+      IUserRepository repository,
+      IUserInfoMapper mapper,
+      IImageInfoMapper imageInfoMapper,
+      IOfficeInfoMapper officeInfoMapper,
+      IRoleInfoMapper roleInfoMapper,
+      IDepartmentInfoMapper departmentInfoMapper,
+      IPositionInfoMapper positionInfoMapper,
+      ILogger<FindUserCommand> logger,
+      IRequestClient<IGetDepartmentUsersRequest> rcGetDepartmentUser,
+      IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
+      IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
+      IRequestClient<IGetImagesRequest> rcGetImages,
+      IHttpContextAccessor httpContextAccessor,
+      IConnectionMultiplexer cache)
     {
       _logger = logger;
       _mapper = mapper;
@@ -217,10 +313,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetImages = rcGetImages;
       _httpContextAccessor = httpContextAccessor;
+      _cache = cache;
     }
 
     /// <inheritdoc/>
-    public FindResultResponse<UserInfo> Execute(FindUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter)
     {
       List<DbUser> dbUsers = null;
 
@@ -260,8 +357,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
-      IGetCompanyEmployeesResponse getCompanyEmployeesResponse =
-        GetCompanyEmployess(
+      (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) companyEmployeesData =
+        await GetCompanyEmployess(
           usersIds,
           filter.IncludeDepartment,
           filter.IncludePosition,
@@ -278,11 +375,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           _mapper.Map(
             dbUser,
             filter.IncludeDepartment ? _departmentInfoMapper.Map(
-              getCompanyEmployeesResponse?.Departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              companyEmployeesData.departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludePosition ? _positionInfoMapper.Map(
-              getCompanyEmployeesResponse?.Positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              companyEmployeesData.positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeOffice ? _officeInfoMapper.Map(
-              getCompanyEmployeesResponse?.Offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
               roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
             filter.IncludeAvatar ? _imageInfoMapper.Map(

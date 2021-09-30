@@ -1,8 +1,8 @@
-﻿using LT.DigitalOffice.Kernel.Validators.Models;
+﻿using LT.DigitalOffice.Kernel.Requests;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement.Filters
 {
-  public record FindAchievementFilter : BaseFindRequest
+  public record FindAchievementFilter : BaseFindFilter
   {
   }
 }

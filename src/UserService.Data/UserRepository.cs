@@ -134,6 +134,11 @@ namespace LT.DigitalOffice.UserService.Data
 
     public List<DbUser> Get(IEnumerable<Guid> userIds)
     {
+      if (userIds == null)
+      {
+        return null;
+      }
+
       return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
     }
 

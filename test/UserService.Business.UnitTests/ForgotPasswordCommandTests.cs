@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private DbUser _dbUser;
         private IMemoryCache _memoryCache;
         private IForgotPasswordCommand  _command;
-        private IOptions<CacheConfig> _cacheOptions;
+        private IOptions<MemoryCacheConfig> _cacheOptions;
         private CreateUserRequest _createUserRequest;
         private DbUserCommunication _dbCommunication;
         private OperationResultResponse<bool> _expectedOperationResultResponse;
@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _cacheOptions = Options.Create(new CacheConfig
+            _cacheOptions = Options.Create(new MemoryCacheConfig
             {
                 CacheLiveInMinutes = 5
             });
