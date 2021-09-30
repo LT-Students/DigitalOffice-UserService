@@ -72,9 +72,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers" },
-          { x => !string.IsNullOrEmpty(x.value.ToString()), "First name is empty" },
-          { x => x.value.ToString().Length < 32, "First name is too long" }
+          { x => !string.IsNullOrEmpty(x.value?.ToString()), "First name must not be empty." },
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (!NameRegex.IsMatch(x.value.ToString())), "First name must not contain numbers"
+          },
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (x.value.ToString().Length < 32), "First name is too long"
+          },
         });
 
       #endregion
@@ -86,9 +92,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers" },
-          { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name is empty" },
-          { x => x.value.ToString().Length < 100, "Last name is too long" }
+          { x => !string.IsNullOrEmpty(x.value.ToString()), "Last name must not be empty" },
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (!NameRegex.IsMatch(x.value.ToString())), "Last name must not contain numbers"
+          },
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (x.value.ToString().Length < 32), "Last name is too long"
+          },
         });
 
       #endregion
@@ -100,10 +112,15 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (x.value.ToString().Length < 32), "Middle name is too long" },
-          { x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (!NameRegex.IsMatch(x.value.ToString())), "Middle name must not contain numbers" },
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (x.value.ToString().Length < 32), "Middle name is too long"
+          },
+
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            (!NameRegex.IsMatch(x.value.ToString())), "Middle name must not contain numbers"
+          },
         });
 
       #endregion
