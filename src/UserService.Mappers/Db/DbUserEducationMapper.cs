@@ -5,6 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
@@ -17,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIdsForCreate)
+    public DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIds)
     {
       if (request == null)
       {
@@ -25,16 +26,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       }
 
       Guid Id = Guid.NewGuid();
-      List<DbUserEducationImage> images = new();
-
-      foreach (Guid createdImageId in imagesIdsForCreate)
-      {
-        images.Add(new DbUserEducationImage()
-        {
-          ImageId = createdImageId,
-          UserEducationId = Id
-        });
-      }
 
       return new DbUserEducation
       {
@@ -48,7 +39,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         IsActive = true,
         CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
         CreatedAtUtc = DateTime.UtcNow,
-        Images = images
+        Images = imagesIds?.Select(imageId => new DbUserEducationImage()
+        {
+          ImageId = imageId,
+          UserEducationId = Id
+        }).ToList()
       };
     }
   }

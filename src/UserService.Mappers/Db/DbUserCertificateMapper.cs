@@ -5,6 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
@@ -25,22 +26,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       }
 
       Guid Id = Guid.NewGuid();
-      List<DbUserCertificateImage> images = new();
-
-      foreach (Guid imageId in imagesIds)
-      {
-        images.Add(new DbUserCertificateImage()
-        {
-          ImageId = imageId,
-          UserCertificateId = Id
-        });
-      }
 
       return new DbUserCertificate
       {
         Id = Id,
         UserId = request.UserId,
-        Images = images,
+        Images = imagesIds?.Select(imageId => new DbUserCertificateImage()
+        {
+          ImageId = imageId,
+          UserCertificateId = Id
+        }).ToList(),
         Name = request.Name,
         SchoolName = request.SchoolName,
         EducationType = (int)request.EducationType,

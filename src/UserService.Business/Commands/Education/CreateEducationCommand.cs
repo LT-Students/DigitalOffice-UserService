@@ -60,20 +60,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
     private async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
     {
-      List<AddImageRequest> imagesToCreate = request.Images;
-      Guid userId = request.UserId;
-
-      if (imagesToCreate.Contains(null))
+      if (request.Images.Contains(null))
       {
-        errors.Add($"Bad request to create education images for user {userId}");
+        errors.Add($"Bad request to create education images for user {request.UserId}");
         return null;
       }
 
       List<CreateImageData> images = new();
 
-      foreach (AddImageRequest imageData in imagesToCreate)
+      foreach (AddImageRequest imageData in request.Images)
       {
-        images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, userId));
+        images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, request.UserId));
       }
 
       string logMsg = "Can not add education images to user {UserId}. Reason: '{Errors}'";
@@ -89,14 +86,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
           return responsedMsg.Body.ImagesIds;
         }
 
-        _logger.LogWarning(logMsg, userId, string.Join(',', responsedMsg.Errors));
+        _logger.LogWarning(logMsg, request.UserId, string.Join(',', responsedMsg.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMsg, userId, exc.Message);
+        _logger.LogError(exc, logMsg, request.UserId, exc.Message);
       }
 
-      errors.Add($"Can not add education images to user with id {userId}");
+      errors.Add($"Can not add education images to user with id {request.UserId}");
       return null;
     }
 
@@ -126,7 +123,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       List<AddImageRequest> requestImages = request.Images;
       List<Guid> createdImagesIDs = requestImages != null && requestImages.Any() ? 
-        await CreateImages(request, response.Errors) : new();
+        await CreateImages(request, response.Errors) : null;
 
       DbUserEducation dbEducation = _mapper.Map(request, createdImagesIDs);
 

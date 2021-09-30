@@ -99,8 +99,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
       try
       {
-        Response<IOperationResult<IGetTokenResponse>> tokenResponse = await _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
-                        IGetTokenRequest.CreateObj(request.UserId));
+        Response<IOperationResult<IGetTokenResponse>> tokenResponse = 
+          await _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
+          IGetTokenRequest.CreateObj(request.UserId));
 
         IGetTokenResponse responsedBody = tokenResponse.Message.Body;
 

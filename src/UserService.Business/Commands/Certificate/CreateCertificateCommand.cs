@@ -12,7 +12,6 @@ using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -37,15 +36,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     private async Task<List<Guid>> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
-      List<AddImageRequest> requestedImages = request.Images;
-      if (requestedImages == null || !requestedImages.Any())
+      if (request.Images == null || !request.Images.Any())
       {
-        return new();
+        return null;
       }
 
       string logMessage = "Can not add certificate image for user {UserId}. Reason: {Errors}";
 
-      List<CreateImageData> images = requestedImages
+      List<CreateImageData> images = request.Images
         .Select(i => new CreateImageData(i.Name, i.Content, i.Extension, userId))
         .ToList();
 
@@ -111,8 +109,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _certificateRepository.Add(dbUserCertificate);
 
       response.Body = dbUserCertificate.Id;
-      response.Status = response.Errors.Any() ?
-        OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
+      response.Status = response.Errors.Any() 
+        ? OperationResultStatusType.PartialSuccess 
+        : OperationResultStatusType.FullSuccess;
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       return response;

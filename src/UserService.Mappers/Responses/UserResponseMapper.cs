@@ -83,8 +83,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
               : null,
           Certificates = filter.IncludeCertificates
               ? dbUser.Certificates.Select(
-                  c =>
-					_certificateInfoMapper.Map(c, c.Images.Select(i => GetImage(images, i.ImageId)).ToList()))
+                  c => _certificateInfoMapper.Map(c, c.Images.Select(i => GetImage(images, i.ImageId)).ToList()))
               : null,
           Communications = filter.IncludeCommunications
               ? dbUser.Communications.Select(

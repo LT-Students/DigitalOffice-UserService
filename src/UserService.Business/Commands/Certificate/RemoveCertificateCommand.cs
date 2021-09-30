@@ -82,8 +82,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       DbUser sender = _userRepository.Get(senderId);
       DbUserCertificate userCertificate = _certificateRepository.Get(certificateId);
 
-      if (senderId != userCertificate.UserId && !(sender.IsAdmin ||
-            _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
+      if (senderId != userCertificate.UserId && !_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
