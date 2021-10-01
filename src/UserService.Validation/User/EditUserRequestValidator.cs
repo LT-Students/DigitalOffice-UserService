@@ -158,7 +158,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
           { x => !string.IsNullOrEmpty(x.value?.ToString()), "Rate must not be empty." },
           { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format."},
           { x => double.TryParse(x.value?.ToString(), out double rate) ?
-              (rate > 0 && rate <=1) : false,
+              (rate > 0 && rate <= 1) : false,
             "The rate must be between 0 and 1."
           },
         }, CascadeMode.Stop);
