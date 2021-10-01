@@ -73,8 +73,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "First name must not be empty." },
-          { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers" },
-          { x => x.value.ToString().Trim().Length < 32, "First name is too long" },
+          { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers." },
+          { x => x.value.ToString().Trim().Length < 32, "First name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -87,8 +87,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Last name must not be empty." },
-          { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers" },
-          { x => x.value.ToString().Trim().Length < 32, "Last name is too long" },
+          { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers." },
+          { x => x.value.ToString().Trim().Length < 32, "Last name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -102,11 +102,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (x.value.ToString().Trim().Length < 32), "Middle name is too long"
+            (x.value.ToString().Trim().Length < 32), "Middle name is too long."
           },
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (!NameRegex.IsMatch(x.value.ToString())), "Middle name must not contain numbers"
+            (!NameRegex.IsMatch(x.value.ToString())), "Middle name must not contain numbers."
           },
         });
 
@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => string.IsNullOrEmpty(x.value?.ToString())? true : (x.value.ToString().Trim().Length < 32), "City name is too long" },
+          { x => string.IsNullOrEmpty(x.value?.ToString())? true : (x.value.ToString().Trim().Length < 32), "City name is too long." },
         });
 
       #endregion
@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => Enum.TryParse(typeof(UserGender), x.value?.ToString(), out _), "Incorrect user gender"},
+          { x => Enum.TryParse(typeof(UserGender), x.value?.ToString(), out _), "Incorrect user gender."},
         });
 
       #endregion
@@ -143,7 +143,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status"}
+          { x => Enum.TryParse(typeof(UserStatus), x.value?.ToString(), out _), "Incorrect user status."}
         });
 
       #endregion
@@ -156,29 +156,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString()), "Rate must not be empty." },
-          { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format"},
-          { x =>
-            {
-              if (double.TryParse(x.value?.ToString(), out double rate))
-              {
-                return rate > 0;
-              }
-
-              return false;
-            },
-            "Rate must be greater than 0"
-          },
-          { x =>
-            {
-              if (double.TryParse(x.value?.ToString(), out double rate))
-              {
-                return rate <= 1;
-              }
-
-              return false;
-            },
-            "Rate must be less than 1"
-          }
+          { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format."},
+          { x => double.TryParse(x.value?.ToString(), out double rate) ? (rate > 0 && rate <=1) : false, "The rate must be between 0 and 1." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -193,7 +172,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
               DateTime.TryParse(x.value.ToString(), out DateTime result),
-            "Date of birth has incorrect format"
+            "Date of birth has incorrect format."
           },
         });
 
@@ -209,7 +188,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
               DateTime.TryParse(x.value.ToString(), out DateTime result),
-            "Start working at has incorrect format"
+            "Start working at has incorrect format."
           },
         });
 
@@ -239,7 +218,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format" }
+          { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format." }
         });
 
       #endregion
@@ -251,7 +230,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value?.ToString(), out Guid result), "Department id has incorrect format" }
+          { x => Guid.TryParse(x.value?.ToString(), out Guid result), "Department id has incorrect format." }
         });
 
       #endregion
@@ -263,7 +242,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Position id has incorrect format" }
+          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Position id has incorrect format." }
         });
 
       #endregion
@@ -275,7 +254,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Role id has incorrect format" }
+          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Role id has incorrect format." }
         });
 
       #endregion
@@ -287,7 +266,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format" }
+          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
         });
 
       #endregion
