@@ -4,6 +4,8 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 {
     public class DbUserMapper : IDbUserMapper
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public DbUserMapper(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
         public DbUser Map(CreateUserRequest request, Guid? avatarImageId)
         {
             if (request == null)
@@ -24,17 +33,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             DbUser dbUser = new()
             {
                 Id = userId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                MiddleName = request.MiddleName,
+                FirstName = request.FirstName.Trim(),
+                LastName = request.LastName.Trim(),
+                MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Gender = (int)request.Gender,
-                City = request.City,
+                City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
                 AvatarFileId = avatarImageId,
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
                 IsActive = false,
                 Rate = request.Rate,
-                CreatedAt = DateTime.UtcNow,
+                StartWorkingAt = request.StartWorkingAt,
+                DateOfBirth = request.DateOfBirth,
+                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+                CreatedAtUtc = DateTime.UtcNow,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
@@ -43,32 +55,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                     UserId = userId
                 }).ToList()
             };
-
-            if (request.StartWorkingAt != null)
-            {
-                if (DateTime.TryParse(request.StartWorkingAt, out DateTime startWorkingAt))
-                {
-                    dbUser.StartWorkingAt = startWorkingAt;
-                }
-                else {
-                    throw new BadRequestException(
-                        $"You must specify '{nameof(CreateUserRequest.StartWorkingAt)}' in format 'YYYY-MM-DD'");
-                }
-
-            }
-
-            if (request.DateOfBirth != null)
-            {
-                if (DateTime.TryParse(request.DateOfBirth, out DateTime dayOfBirth))
-                {
-                    dbUser.DateOfBirth = dayOfBirth;
-                }
-                else
-                {
-                    throw new BadRequestException(
-                        $"You must specify '{nameof(CreateUserRequest.DateOfBirth)}' in format 'YYYY-MM-DD'");
-                }
-            }
 
             return dbUser;
         }
@@ -87,13 +73,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Id = userId,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                MiddleName = request.MiddleName,
+                MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Status = (int)UserStatus.WorkFromOffice,
                 AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = true,
-                CreatedAt = DateTime.UtcNow,
                 Rate = 1,
+                CreatedBy = userId,
+                CreatedAtUtc = DateTime.UtcNow,
                 Communications = new List<DbUserCommunication> {
                     new DbUserCommunication
                     {

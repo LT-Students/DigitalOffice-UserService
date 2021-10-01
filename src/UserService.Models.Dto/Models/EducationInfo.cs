@@ -1,5 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using System;
+﻿using System;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {

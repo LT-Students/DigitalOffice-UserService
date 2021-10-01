@@ -10,9 +10,15 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public const string TableName = "Achievements";
 
         public Guid Id { get; set; }
-        public Guid ImageId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public bool IsActive { get; set; }
+        public string ImageContent { get; set; }
+        public string ImageExtension { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
         public ICollection<DbUserAchievement> UserAchievements { get; set; }
 
         public DbAchievement()
@@ -30,10 +36,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
             builder
                 .HasKey(a => a.Id);
-
-            builder
-                .Property(a => a.ImageId)
-                .IsRequired();
 
             builder
                 .Property(a => a.Name)

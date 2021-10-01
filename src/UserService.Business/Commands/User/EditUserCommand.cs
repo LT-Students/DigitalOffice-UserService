@@ -1,14 +1,17 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
+using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Responses.File;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -19,328 +22,283 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace LT.DigitalOffice.UserService.Business
+namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
-    /// <inheritdoc/>
-    public class EditUserCommand : IEditUserCommand
+  /// <inheritdoc/>
+  public class EditUserCommand : IEditUserCommand
+  {
+    private readonly IUserRepository _userRepository;
+    private readonly IUserCredentialsRepository _credentialsRepository;
+    private readonly IPatchDbUserMapper _mapperUser;
+    private readonly IAccessValidator _accessValidator;
+    private readonly ILogger<EditUserCommand> _logger;
+    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
+    private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
+    private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IBus _bus;
+
+    #region private method
+
+    private void EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IPatchDbUserMapper _mapperUser;
-        private readonly IAccessValidator _accessValidator;
-        private readonly ILogger<EditUserCommand> _logger;
-        private readonly IRequestClient<IAddImageRequest> _rcImage;
-        private readonly IRequestClient<IChangeUserDepartmentRequest> _rcDepartment;
-        private readonly IRequestClient<IChangeUserPositionRequest> _rcPosition;
-        private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
-        private readonly IRequestClient<IChangeUserOfficeRequest> _rcOffice;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+      string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
+      string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
+      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
+      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
+      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
+      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
-        #region private method
+      try
+      {
+        IOperationResult<(bool department, bool position, bool office)> response =
+          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+          IEditCompanyEmployeeRequest.CreateObj(
+            userId,
+            _httpContextAccessor.HttpContext.GetUserId(),
+            removeUserFromDepartment: removeDepartment,
+            departmentId: departmentId,
+            positionId: positionId,
+            officeId: officeId)).Result.Message;
 
-        private bool ChangeUserDepartment(Guid departmentId, Guid userId, List<string> errors)
+        if (!response.IsSuccess)
         {
-            string errorMessage = $"Сan't assign user {userId} to the department {departmentId}. Please try again later.";
-            string logMessage = "Сan't assign user {userId} to the department {departmentId}.";
+          _logger.LogWarning(logMessage, userId);
 
-            try
-            {
-                Response<IOperationResult<bool>> response = _rcDepartment.GetResponse<IOperationResult<bool>>(
-                    IChangeUserDepartmentRequest.CreateObj(userId, departmentId)).Result;
+          errors.Add(departmentErrorMessage);
+          errors.Add(positionErrorMessage);
+          errors.Add(officeErrorMessage);
 
-                if (response.Message.IsSuccess && response.Message.Body)
-                {
-                    return true;
-                }
-
-                _logger.LogWarning(logMessage, userId, departmentId);
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc, logMessage, userId, departmentId);
-            }
-
-            errors.Add(errorMessage);
-
-            return false;
+          return;
         }
 
-        private bool ChangeUserPosition(Guid positionId, Guid userId, List<string> errors)
+        if (!response.Body.department)
         {
-            string errorMessage = $"Сan't assign position {positionId} to the user {userId}. Please try again later.";
-            string logMessage = "Сan't assign position {positionId} to the user {userId}";
+          _logger.LogWarning(departmentLogMessage, userId, departmentId);
 
-            try
-            {
-                Response<IOperationResult<bool>> response = _rcPosition.GetResponse<IOperationResult<bool>>(
-                    IChangeUserPositionRequest.CreateObj(userId, positionId)).Result;
-
-                if (response.Message.IsSuccess && response.Message.Body)
-                {
-                    return true;
-                }
-
-                _logger.LogWarning(logMessage, positionId, userId);
-            }
-            catch (Exception exc)
-            {
-                _logger.LogWarning(exc, logMessage, positionId, userId);
-            }
-
-            errors.Add(errorMessage);
-
-            return false;
+          errors.Add(departmentErrorMessage);
         }
 
-        private bool ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+        if (!response.Body.position)
         {
-            string errorMessage = $"Сan't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign role '{roleId}' to the user '{userId}'.";
+          _logger.LogWarning(positionLogMessage, userId, positionId);
 
-            try
-            {
-                Response<IOperationResult<bool>> response = _rcRole.GetResponse<IOperationResult<bool>>(
-                    IChangeUserRoleRequest.CreateObj(
-                        roleId,
-                        userId,
-                        _httpContextAccessor.HttpContext.GetUserId())).Result;
-
-                if (response.Message.IsSuccess && response.Message.Body)
-                {
-                    return true;
-                }
-
-                _logger.LogWarning(logMessage + " Errors: {errors}", roleId, userId, string.Join("\n", response.Message.Errors));
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc, logMessage, roleId, userId);
-            }
-
-            errors.Add(errorMessage);
-
-            return false;
+          errors.Add(positionErrorMessage);
         }
 
-        private bool ChangeUserOffice(Guid officeId, Guid userId, List<string> errors)
+        if (!response.Body.office)
         {
-            string errorMessage = $"Сan't assign office '{officeId}' to the user '{userId}'. Please try again later.";
-            string logMessage = "Сan't assign office '{officeId}' to the user '{userId}'.";
+          _logger.LogWarning(officeLogMessage, userId, officeId);
 
-            try
-            {
-                Response<IOperationResult<bool>> response = _rcOffice.GetResponse<IOperationResult<bool>>(
-                    IChangeUserOfficeRequest.CreateObj(
-                        officeId,
-                        userId,
-                        _httpContextAccessor.HttpContext.GetUserId())).Result;
-                if (response.Message.IsSuccess && response.Message.Body)
-                {
-                    return true;                    
-                }
-
-                _logger.LogWarning(logMessage + " Errors: {errors}", officeId, userId, string.Join("\n", response.Message.Errors));
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc, logMessage, officeId, userId);
-            }
-
-            errors.Add(errorMessage);
-
-            return false;
+          errors.Add(officeErrorMessage);
         }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, logMessage, userId);
 
-        private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
-        {
-            Guid? avatarImageId = null;
-
-            if (avatarRequest == null)
-            {
-                return avatarImageId;
-            }
-
-            Guid userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            string errorMessage = $"Can not add avatar image to user with id {userId}. Please try again later.";
-
-            try
-            {
-                var imageRequest = IAddImageRequest.CreateObj(
-                    avatarRequest.Name,
-                    avatarRequest.Content,
-                    avatarRequest.Extension,
-                    userId);
-                var response = _rcImage.GetResponse<IOperationResult<IAddImageResponse>>(imageRequest, timeout: TimeSpan.FromSeconds(2)).Result;
-
-                if (!response.Message.IsSuccess)
-                {
-                    _logger.LogWarning(
-                        "Can not add avatar image to user with id {userId}." + $"Reason: '{string.Join(',', response.Message.Errors)}'", userId);
-
-                    errors.Add(errorMessage);
-                }
-                else
-                {
-                    avatarImageId = response.Message.Body.Id;
-                }
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc, "Can not add avatar image to user with id {userId}.", userId);
-
-                errors.Add(errorMessage);
-            }
-
-            return avatarImageId;
-        }
-
-        #endregion
-
-        public EditUserCommand(
-            ILogger<EditUserCommand> logger,
-            IRequestClient<IAddImageRequest> rcImage,
-            IHttpContextAccessor httpContextAccessor,
-            IUserRepository userRepository,
-            IPatchDbUserMapper mapperUser,
-            IAccessValidator accessValidator,
-            IRequestClient<IChangeUserDepartmentRequest> rcDepartment,
-            IRequestClient<IChangeUserPositionRequest> rcPosition,
-            IRequestClient<IChangeUserRoleRequest> rcRole,
-            IRequestClient<IChangeUserOfficeRequest> rcOffice)
-        {
-            _logger = logger;
-            _rcImage = rcImage;
-            _httpContextAccessor = httpContextAccessor;
-            _userRepository = userRepository;
-            _mapperUser = mapperUser;
-            _accessValidator = accessValidator;
-            _rcDepartment = rcDepartment;
-            _rcPosition = rcPosition;
-            _rcRole = rcRole;
-            _rcOffice = rcOffice;
-        }
-
-        /// <inheritdoc/>
-        public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
-        {
-            var status = OperationResultStatusType.FullSuccess;
-
-            Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)); ;
-            Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
-            Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
-            Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
-
-            if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
-                _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-                (userId == _httpContextAccessor.HttpContext.GetUserId() 
-                && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
-                && positionOperation == null
-                && departmentOperation == null
-                && roleOperation == null
-                && officeOperation == null)))
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
-
-            List<string> errors = new List<string>();
-
-            Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-                o => o.path.EndsWith(nameof(EditUserRequest.AvatarImage), StringComparison.OrdinalIgnoreCase));
-            Guid? imageId = null;
-
-            if (imageOperation != null)
-            {
-                imageId = GetAvatarImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
-                if (imageId == null)
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
-            }
-
-            if (positionOperation != null)
-            {
-                if (!ChangeUserPosition(Guid.Parse(positionOperation.value.ToString()), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
-            }
-
-            if (departmentOperation != null)
-            {
-                if (!ChangeUserDepartment(Guid.Parse(departmentOperation.value.ToString()), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
-            }
-
-            if (roleOperation != null)
-            {
-                if (!ChangeUserRole(Guid.Parse(roleOperation.value.ToString()), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
-            }
-
-            if (officeOperation != null)
-            {
-                if (!ChangeUserOffice(Guid.Parse(officeOperation.value.ToString()), userId, errors))
-                {
-                    status = OperationResultStatusType.PartialSuccess;
-                }
-            }
-
-            var dbUserPatch = _mapperUser.Map(patch, imageId);
-            _userRepository.EditUser(userId, dbUserPatch);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = status,
-                Body = true,
-                Errors = errors
-            };
-        }
-
-        // TODO fix
-        //private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
-        //{
-        //    if (request.Skills == null)
-        //    {
-        //        return;
-        //    }
-
-        //    foreach (var skillName in request.Skills)
-        //    {
-        //        var dbSkill = _userRepository.FindSkillByName(skillName);
-
-        //        if (dbSkill != null)
-        //        {
-        //            dbUser.Skills.Add(
-        //                new DbUserSkill
-        //                {
-        //                    Id = Guid.NewGuid(),
-        //                    UserId = dbUser.Id,
-        //                    SkillId = dbSkill.Id
-        //                });
-        //        }
-        //        else
-        //        {
-        //            dbUser.Skills.Add(
-        //                new DbUserSkill
-        //                {
-        //                    Id = Guid.NewGuid(),
-        //                    UserId = dbUser.Id,
-        //                    SkillId = _userRepository.CreateSkill(skillName)
-        //                });
-        //        }
-        //    }
-        //}
+        errors.Add(departmentErrorMessage);
+        errors.Add(positionErrorMessage);
+        errors.Add(officeErrorMessage);
+      }
     }
+
+    private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+    {
+      string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
+      const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
+
+      try
+      {
+        Response<IOperationResult<bool>> response = _rcRole.GetResponse<IOperationResult<bool>>(
+            IChangeUserRoleRequest.CreateObj(
+                roleId,
+                userId,
+                _httpContextAccessor.HttpContext.GetUserId())).Result;
+
+        if (!response.Message.IsSuccess || !response.Message.Body)
+        {
+          const string warningMessage = logMessage + "Errors: {Errors}";
+          _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
+
+          errors.Add(errorMessage);
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, logMessage, roleId, userId);
+
+        errors.Add(errorMessage);
+      }
+    }
+    #endregion
+
+    public EditUserCommand(
+        IUserRepository userRepository,
+        IUserCredentialsRepository credentialsRepository,
+        IPatchDbUserMapper mapperUser,
+        IAccessValidator accessValidator,
+        ILogger<EditUserCommand> logger,
+        IRequestClient<ICreateImagesRequest> rcImage,
+        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+        IRequestClient<IChangeUserRoleRequest> rcRole,
+        IHttpContextAccessor httpContextAccessor,
+        IBus bus)
+    {
+      _userRepository = userRepository;
+      _credentialsRepository = credentialsRepository;
+      _mapperUser = mapperUser;
+      _accessValidator = accessValidator;
+      _logger = logger;
+      _rcImage = rcImage;
+      _rcEditCompanyEmployee = rcEditCompanyEmployee;
+      _rcRole = rcRole;
+      _httpContextAccessor = httpContextAccessor;
+      _bus = bus;
+    }
+
+    /// <inheritdoc/>
+    public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
+    {
+      Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
+      Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
+      Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
+      Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
+      Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
+
+      OperationResultResponse<bool> response = new();
+      Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+
+      if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
+          _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
+          (userId == requestSenderId
+          && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
+          && positionOperation == null
+          && departmentOperation == null
+          && roleOperation == null
+          && officeOperation == null)))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+        response.Status = OperationResultStatusType.Failed;
+        response.Errors.Add("Not enough rights.");
+
+        return response;
+      }
+
+      List<string> errors = new List<string>();
+
+      Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
+          o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
+
+      /*Guid? imageId = null;
+
+      if (imageOperation != null)
+      {
+        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
+          ? Guid.Parse(imageOperation.value?.ToString())
+          : null;
+      }*/
+
+      bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
+      Guid? newDepartmentId = null;
+      Guid? newPositionId = null;
+      Guid? newOfficeId = null;
+
+      if (departmentOperation != null && departmentOperation.value != null)
+      {
+        newDepartmentId = Guid.Parse(departmentOperation?.value.ToString());
+      }
+
+      if (positionOperation != null)
+      {
+        newPositionId = Guid.Parse(positionOperation?.value.ToString());
+      }
+
+      if (officeOperation != null)
+      {
+        newOfficeId = Guid.Parse(officeOperation?.value.ToString());
+      }
+
+      EditCompanyEmployee(
+        removeUserFromDepartmen,
+        newDepartmentId,
+        newPositionId,
+        newOfficeId,
+        userId,
+        errors);
+
+      if (roleOperation != null)
+      {
+        ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
+      }
+
+      if (isActiveOperation != null)
+      {
+        bool newValue = bool.Parse(isActiveOperation.value.ToString());
+
+        _credentialsRepository.SwitchActiveStatus(
+            userId,
+            newValue);
+
+        if (!newValue)
+        {
+          _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
+              userId,
+              requestSenderId));
+        }
+      }
+
+      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch));
+
+      response.Status = errors.Any()
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
+
+      response.Errors.AddRange(errors);
+
+      return response;
+    }
+
+    // TODO fix
+    //private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
+    //{
+    //    if (request.Skills == null)
+    //    {
+    //        return;
+    //    }
+
+    //    foreach (var skillName in request.Skills)
+    //    {
+    //        var dbSkill = _userRepository.FindSkillByName(skillName);
+
+    //        if (dbSkill != null)
+    //        {
+    //            dbUser.Skills.Add(
+    //                new DbUserSkill
+    //                {
+    //                    Id = Guid.NewGuid(),
+    //                    UserId = dbUser.Id,
+    //                    SkillId = dbSkill.Id
+    //                });
+    //        }
+    //        else
+    //        {
+    //            dbUser.Skills.Add(
+    //                new DbUserSkill
+    //                {
+    //                    Id = Guid.NewGuid(),
+    //                    UserId = dbUser.Id,
+    //                    SkillId = _userRepository.CreateSkill(skillName)
+    //                });
+    //        }
+    //    }
+    //}
+  }
 }

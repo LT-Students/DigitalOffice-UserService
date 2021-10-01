@@ -11,7 +11,7 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
-using LT.DigitalOffice.UserService.Validation.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Email.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         private readonly ILogger<ForgotPasswordCommand> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
-        private readonly IOptions<CacheConfig> _cacheOptions;
+        private readonly IOptions<MemoryCacheConfig> _cacheOptions;
         private readonly IEmailValidator _validator;
         private readonly IUserRepository _repository;
         private readonly IMemoryCache _cache;
@@ -57,7 +57,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
             //TODO: fix add specific template language
             string templateLanguage = "en";
-            Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
             EmailTemplateType templateType = EmailTemplateType.Warning;
             try
             {
@@ -66,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
                     userId: dbUser.Id.ToString(),
                     secret: secret.ToString());
 
-                var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email, templateLanguage, templateType, templateValues);
+                var emailRequest = ISendEmailRequest.CreateObj(null, dbUser.Id, email, templateLanguage, templateType, templateValues);
 
                 IOperationResult<bool> response = _rcSendEmail
                     .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
@@ -76,7 +75,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
                 if (!response.IsSuccess)
                 {
                     _logger.LogWarning(
-                        $"Errors while sending email to '{email}':{Environment.NewLine}{string.Join('\n', response.Errors)}.");
+                        "Errors while sending email to '{Email}':\n{Errors}",
+                        email,
+                        string.Join('\n', response.Errors));
 
                     errors.Add(errorMessage);
 
@@ -87,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, errorMessage);
+                _logger.LogError(exc, "Can not send email to '{Email}'", email);
 
                 errors.Add(errorMessage);
 
@@ -98,7 +99,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         public ForgotPasswordCommand(
             ILogger<ForgotPasswordCommand> logger,
             IRequestClient<ISendEmailRequest> rcSendEmail,
-            IOptions<CacheConfig> cacheOptions,
+            IOptions<MemoryCacheConfig> cacheOptions,
             IHttpContextAccessor httpContextAccessor,
             IEmailValidator validator,
             IUserRepository repository,

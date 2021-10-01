@@ -1,6 +1,9 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
@@ -14,6 +17,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// <summary>
         /// Returns the list of user models using pagination and filter by full name.
         /// </summary>
-        UsersResponse Execute(int skipCount, int takeCount, Guid? departmentId);
+        Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter);
     }
 }

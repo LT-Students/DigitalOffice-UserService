@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
     [AutoInject]
     public interface ICreateEducationCommand
     {
-        OperationResultResponse<Guid> Execute(CreateEducationRequest request);
+        OperationResultResponse<Guid?> Execute(CreateEducationRequest request);
     }
 }

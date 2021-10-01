@@ -12,6 +12,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
         public Guid UserId { get; set; }
         public int Type { get; set; }
         public string Value { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? ModifiedAtUtc { get; set; }
         public DbUser User { get; set; }
     }
 
@@ -23,12 +27,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
                 .ToTable(DbUserCommunication.TableName);
 
             builder
-                .HasKey(conn =>  conn.Id);
+                .HasKey(uc => uc.Id);
 
             builder
-                .HasOne(conn => conn.User)
-                .WithMany(u => u.Communications)
-                .HasForeignKey(conn => conn.UserId);
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.Communications);
         }
     }
 }

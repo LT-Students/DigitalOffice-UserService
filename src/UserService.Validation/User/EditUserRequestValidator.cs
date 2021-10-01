@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.Validators;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
@@ -15,6 +16,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
     public class EditUserRequestValidator : AbstractValidator<JsonPatchDocument<EditUserRequest>>
     {
         private static Regex NameRegex = new(@"\d");
+        private readonly IImageRepository _imageRepository;
 
         private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
         {
@@ -76,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
                     nameof(EditUserRequest.DateOfBirth),
                     nameof(EditUserRequest.StartWorkingAt),
                     nameof(EditUserRequest.About),
-                    nameof(EditUserRequest.AvatarImage),
+                    nameof(EditUserRequest.AvatarFileId),
                     nameof(EditUserRequest.IsActive),
                     nameof(EditUserRequest.DepartmentId),
                     nameof(EditUserRequest.RoleId),
@@ -91,9 +93,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
             AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
-            AddСorrectOperations(nameof(EditUserRequest.AvatarImage), new List<OperationType> { OperationType.Replace, OperationType.Add, OperationType.Remove });
+            AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
+            AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
             AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
@@ -170,30 +172,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
-            #region DateOfBirth
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.DateOfBirth),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Date of birth has incorrect format" }
-                });
-
-            #endregion
-
-            #region StartWorkingAt
-
-            AddFailureForPropertyIf(
-                nameof(EditUserRequest.StartWorkingAt),
-                x => x == OperationType.Replace || x == OperationType.Add,
-                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-                {
-                    { x => DateTime.TryParse(x.value.ToString(), out DateTime result), "Start working at has incorrect format" }
-                });
-
-            #endregion
-
             #region Status
 
             AddFailureForPropertyIf(
@@ -240,10 +218,52 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
             #endregion
 
-            #region AvatarImage
+            #region DateOfBirth
 
             AddFailureForPropertyIf(
-                nameof(EditUserRequest.AvatarImage),
+                nameof(EditUserRequest.DateOfBirth),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                    { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Date of birth has incorrect format"
+                    }
+                });
+
+            #endregion
+
+            #region StartWorkingAt
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.StartWorkingAt),
+                x => x == OperationType.Replace,
+                new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+                {
+                     { x =>
+                        {
+                            if(!string.IsNullOrEmpty(x.value?.ToString()))
+                            {
+                                return DateTime.TryParse(x.value.ToString(), out DateTime result);
+                            }
+                            return true;
+                        },
+                        "Start working at has incorrect format"
+                     }
+                });
+
+            #endregion
+
+            #region AvatarId
+
+            AddFailureForPropertyIf(
+                nameof(EditUserRequest.AvatarFileId),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
@@ -251,29 +271,36 @@ namespace LT.DigitalOffice.UserService.Validation.User
                         {
                             try
                             {
-                                _ = JsonConvert.DeserializeObject<AddImageRequest>(x.value?.ToString());
-                                return true;
+                                Guid? avatarId = !string.IsNullOrEmpty(x.value?.ToString())
+                                    ? Guid.Parse(x.value?.ToString())
+                                    : null;
+
+                                if (!avatarId.HasValue || _imageRepository.Get(new List<Guid> {avatarId.Value}).Any())
+                                {
+                                    return true;
+                                }
                             }
                             catch
                             {
-                                return false;
                             }
+
+                            return false;
                         },
-                        "Incorrect Image format"
+                        "Incorrect ImageId."
                     }
             });
 
-            #endregion
+      #endregion
 
-            #region IsActive
+      #region IsActive
 
-            AddFailureForPropertyIf(
+      AddFailureForPropertyIf(
                 nameof(EditUserRequest.IsActive),
                 x => x == OperationType.Replace,
                 new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
                 {
                     { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format" }
-            });
+                });
 
             #endregion
 
@@ -338,8 +365,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
             #endregion
         }
 
-        public EditUserRequestValidator()
+        public EditUserRequestValidator(IImageRepository imageRepository)
         {
+            _imageRepository = imageRepository;
+
             RuleForEach(x => x.Operations)
                .Custom(HandleInternalPropertyValidation);
         }

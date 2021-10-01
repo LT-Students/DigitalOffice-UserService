@@ -1,67 +1,76 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces.Education;
+using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
-    public class CreateEducationCommand : ICreateEducationCommand
+  public class CreateEducationCommand : ICreateEducationCommand
+  {
+    private readonly IAccessValidator _accessValidator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDbUserEducationMapper _mapper;
+    private readonly IEducationRepository _educationRepository;
+    private readonly ICreateEducationRequestValidator _validator;
+
+    public CreateEducationCommand(
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserEducationMapper mapper,
+      IEducationRepository educationRepository,
+      ICreateEducationRequestValidator validator)
     {
-        private readonly IAccessValidator _accessValidator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IDbUserEducationMapper _mapper;
-        private readonly IUserRepository _userRepository;
-        private readonly IEducationRepository _educationRepository;
-        private readonly ICreateEducationRequestValidator _validator;
-
-        public CreateEducationCommand(
-            IAccessValidator accessValidator,
-            IHttpContextAccessor httpContextAccessor,
-            IDbUserEducationMapper mapper,
-            IUserRepository userRepository,
-            IEducationRepository educationRepository,
-            ICreateEducationRequestValidator validator)
-        {
-            _accessValidator = accessValidator;
-            _httpContextAccessor = httpContextAccessor;
-            _mapper = mapper;
-            _userRepository = userRepository;
-            _educationRepository = educationRepository;
-            _validator = validator;
-        }
-
-        public OperationResultResponse<Guid> Execute(CreateEducationRequest request)
-        {
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _userRepository.Get(senderId);
-            if (!(dbUser.IsAdmin ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != request.UserId)
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
-
-            _validator.ValidateAndThrowCustom(request);
-
-            var dbEducation = _mapper.Map(request);
-
-            _educationRepository.Add(dbEducation);
-
-            return new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = dbEducation.Id
-            };
-        }
+      _accessValidator = accessValidator;
+      _httpContextAccessor = httpContextAccessor;
+      _mapper = mapper;
+      _educationRepository = educationRepository;
+      _validator = validator;
     }
+
+    public OperationResultResponse<Guid?> Execute(CreateEducationRequest request)
+    {
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+        return new OperationResultResponse<Guid?>
+        {
+          Status = OperationResultStatusType.Failed,
+          Errors = new() { "Not enough rights." }
+        };
+      }
+
+      if (!_validator.ValidateCustom(request, out List<string> errors))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        return new OperationResultResponse<Guid?>
+        {
+          Status = OperationResultStatusType.Failed,
+          Errors = errors
+        };
+      }
+
+      DbUserEducation dbEducation = _mapper.Map(request);
+
+      _educationRepository.Add(dbEducation);
+
+      return new OperationResultResponse<Guid?>
+      {
+        Status = OperationResultStatusType.FullSuccess,
+        Body = dbEducation.Id
+      };
+    }
+  }
 }

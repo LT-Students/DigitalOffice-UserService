@@ -2,7 +2,7 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
-using LT.DigitalOffice.UserService.Validation.User.Education;
+using LT.DigitalOffice.UserService.Validation.Education;
 using Moq;
 using NUnit.Framework;
 using System;
