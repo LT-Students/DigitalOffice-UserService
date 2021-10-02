@@ -36,13 +36,6 @@ namespace LT.DigitalOffice.UserService.Data
         _logger.LogWarning(new ArgumentNullException(nameof(education)).Message);
         return;
       }
-
-      ICollection<DbUserEducationImage> userEducationImages = education.Images;
-
-      if (userEducationImages.Any())
-      {
-        _provider.UserEducationImages.AddRange(userEducationImages);
-      }
       
       _provider.UserEducations.Add(education);
       _provider.Save();
@@ -51,13 +44,11 @@ namespace LT.DigitalOffice.UserService.Data
     public DbUserEducation Get(Guid educationId)
     {
       DbUserEducation education = _provider.UserEducations
-        .Include(e => e.Images)
         .FirstOrDefault(e => e.Id == educationId);
 
       if (education == null)
       {
         _logger.LogWarning($"User education with ID '{educationId}' was not found.");
-        return null;
       }
 
       return education;
@@ -93,7 +84,6 @@ namespace LT.DigitalOffice.UserService.Data
         return false;
       }
 
-      _provider.UserEducationImages.RemoveRange(education.Images);
       _provider.UserEducations.Remove(education);
       _provider.Save();
 

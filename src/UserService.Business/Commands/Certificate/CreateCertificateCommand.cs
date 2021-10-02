@@ -26,17 +26,38 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
   public class CreateCertificateCommand : ICreateCertificateCommand
   {
-    private IAccessValidator _accessValidator;
-    private IHttpContextAccessor _httpContextAccessor;
-    private IUserRepository _userRepository;
-    private ICertificateRepository _certificateRepository;
-    private IDbUserCertificateMapper _mapper;
+    private readonly IAccessValidator _accessValidator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IImageRepository _imageRepository;
+    private readonly ICertificateRepository _certificateRepository;
+    private readonly IDbUserCertificateMapper _mapper;
+    private readonly IDbEntityImageMapper _entityImageMapper;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly ILogger<CreateCertificateCommand> _logger;
 
+    public CreateCertificateCommand(
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserCertificateMapper mapper,
+      IDbEntityImageMapper entityImageMapper,
+      IImageRepository imageRepository,
+      ICertificateRepository certificateRepository,
+      IRequestClient<ICreateImagesRequest> rcAddIImage,
+      ILogger<CreateCertificateCommand> logger)
+    {
+      _accessValidator = accessValidator;
+      _httpContextAccessor = httpContextAccessor;
+      _mapper = mapper;
+      _entityImageMapper = entityImageMapper;
+      _imageRepository = imageRepository;
+      _certificateRepository = certificateRepository;
+      _rcImage = rcAddIImage;
+      _logger = logger;
+    }
+
     private async Task<List<Guid>> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
-      if (request.Images == null || !request.Images.Any())
+      if (request.Images == null || !request.Images.Any() || request.Images.Contains(null))
       {
         return null;
       }
@@ -68,25 +89,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       errors.Add($"Can not add certificate image for user {userId}. Please try again later.");
 
       return null;
-    }
-
-    public CreateCertificateCommand(
-      IAccessValidator accessValidator,
-      IHttpContextAccessor httpContextAccessor,
-      IDbUserCertificateMapper mapper,
-      IUserRepository userRepository,
-      ICertificateRepository certificateRepository,
-      IRequestClient<ICreateImagesRequest> rcAddIImage,
-      ILogger<CreateCertificateCommand> logger)
-    {
-      _accessValidator = accessValidator;
-      _httpContextAccessor = httpContextAccessor;
-      _mapper = mapper;
-      _userRepository = userRepository;
-      _certificateRepository = certificateRepository;
-      _rcImage = rcAddIImage;
-      _logger = logger;
-    }
+    }    
 
     public async Task<OperationResultResponse<Guid>> Execute(CreateCertificateRequest request)
     {
@@ -104,9 +107,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       }
 
       List<Guid> createdImagesIds = await CreateImages(request, senderId, response.Errors);
-      DbUserCertificate dbUserCertificate = _mapper.Map(request, createdImagesIds);
+      DbUserCertificate dbUserCertificate = _mapper.Map(request);
 
       _certificateRepository.Add(dbUserCertificate);
+
+      if (createdImagesIds != null)
+      {
+        _imageRepository.Create(_entityImageMapper.Map(createdImagesIds, dbUserCertificate.Id));
+      }
 
       response.Body = dbUserCertificate.Id;
       response.Status = response.Errors.Any() 

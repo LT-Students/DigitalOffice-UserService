@@ -18,18 +18,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIds)
+    public DbUserEducation Map(CreateEducationRequest request)
     {
       if (request == null)
       {
         return null;
       }
 
-      Guid Id = Guid.NewGuid();
-
       return new DbUserEducation
       {
-        Id = Id,
+        Id = Guid.NewGuid(),
         UserId = request.UserId,
         UniversityName = request.UniversityName,
         QualificationName = request.QualificationName,
@@ -39,11 +37,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         IsActive = true,
         CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
         CreatedAtUtc = DateTime.UtcNow,
-        Images = imagesIds?.Select(imageId => new DbUserEducationImage()
-        {
-          ImageId = imageId,
-          UserEducationId = Id
-        }).ToList()
       };
     }
   }

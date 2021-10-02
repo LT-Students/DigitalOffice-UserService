@@ -32,7 +32,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IDbUserEducationMapper _mapper;
-    private readonly IUserRepository _userRepository;
+    private readonly IDbEntityImageMapper _entityImageMapper;
+    private readonly IImageRepository _imageRepository;
     private readonly IEducationRepository _educationRepository;
     private readonly ICreateEducationRequestValidator _validator;
     private readonly IRequestClient<ICreateImagesRequest> _createImagesRequest;
@@ -42,7 +43,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IDbUserEducationMapper mapper,
-      IUserRepository userRepository,
+      IDbEntityImageMapper entityImageMapper,
+      IImageRepository userRepository,
       IEducationRepository educationRepository,
       ICreateEducationRequestValidator validator,
       IRequestClient<ICreateImagesRequest> createImagesRequest,
@@ -51,7 +53,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _mapper = mapper;
-      _userRepository = userRepository;
+      _entityImageMapper = entityImageMapper;
+      _imageRepository = userRepository;
       _educationRepository = educationRepository;
       _validator = validator;
       _createImagesRequest = createImagesRequest;
@@ -60,17 +63,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
     private async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
     {
-      if (request.Images.Contains(null))
+      if (request == null || !request.Images.Any() || request.Images.Contains(null))
       {
         errors.Add($"Bad request to create education images for user {request.UserId}");
         return null;
-      }
-
-      List<CreateImageData> images = new();
-
-      foreach (AddImageRequest imageData in request.Images)
-      {
-        images.Add(new CreateImageData(imageData.Name, imageData.Content, imageData.Extension, request.UserId));
       }
 
       string logMsg = "Can not add education images to user {UserId}. Reason: '{Errors}'";
@@ -79,7 +75,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       {
         IOperationResult<ICreateImagesResponse> responsedMsg =
           (await _createImagesRequest.GetResponse<IOperationResult<ICreateImagesResponse>>(
-            ICreateImagesRequest.CreateObj(images, ImageSource.User))).Message;
+            ICreateImagesRequest.CreateObj(request.Images.Select(
+              i => new CreateImageData(i.Name, i.Content, i.Extension, request.UserId)).ToList(), 
+            ImageSource.User))).Message;
 
         if (responsedMsg.IsSuccess)
         {
@@ -111,7 +109,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         response.Status = OperationResultStatusType.Failed;
       }
 
-      if (_validator.ValidateCustom(request, out List<string> errors))
+      if (!_validator.ValidateCustom(request, out List<string> errors))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
@@ -122,12 +120,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       }
 
       List<AddImageRequest> requestImages = request.Images;
-      List<Guid> createdImagesIDs = requestImages != null && requestImages.Any() ? 
-        await CreateImages(request, response.Errors) : null;
-
-      DbUserEducation dbEducation = _mapper.Map(request, createdImagesIDs);
+      List<Guid> createdImagesIDs = await CreateImages(request, response.Errors);
+      DbUserEducation dbEducation = _mapper.Map(request);
 
       _educationRepository.Add(dbEducation);
+
+      if (createdImagesIDs != null)
+      {
+        _imageRepository.Create(_entityImageMapper.Map(createdImagesIDs, dbEducation.Id));
+      }
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
       response.Body = dbEducation.Id;

@@ -25,6 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly IEducationRepository _educationRepository;
     private readonly IRequestClient<IRemoveImagesRequest> _removeImagesRequest;
     private readonly ILogger<RemoveEducationCommand> _logger;
@@ -33,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IUserRepository userRepository,
+      IImageRepository imageRepository,
       IEducationRepository educationRepository,
       IRequestClient<IRemoveImagesRequest> removeImagesRequest,
       ILogger<RemoveEducationCommand> logger)
@@ -40,12 +42,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
+      _imageRepository = imageRepository;
       _educationRepository = educationRepository;
       _logger = logger;
       _removeImagesRequest = removeImagesRequest;
     }
 
-    private async Task<bool> RemoveImages(ICollection<DbUserEducationImage> imagesToRemove, List<string> errors)
+    private async Task<bool> RemoveImages(List<Guid> imagesToRemove, List<string> errors)
     {
       string errorMsg = "Can not remove education images. Reason: {errors}";
 
@@ -53,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       {
         Response<IOperationResult<bool>> response = await
           _removeImagesRequest.GetResponse<IOperationResult<bool>>(
-          IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
+          IRemoveImagesRequest.CreateObj(imagesToRemove, ImageSource.User));
 
         IOperationResult<bool> responsedMsg = response.Message;
 
@@ -93,11 +96,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         return result;
       }
 
-      ICollection<DbUserEducationImage> imagesToRemove = userEducation.Images;
-
-      if (imagesToRemove.Any())
+      List<Guid> userEducationImagesIds = _imageRepository.GetImagesIds(userEducation.Id);
+      if (userEducationImagesIds.Any())
       {
-        await RemoveImages(imagesToRemove, resultErrors);
+        await RemoveImages(userEducationImagesIds, resultErrors);
+        _imageRepository.Remove(userEducationImagesIds);
       }
 
       result.Body = _educationRepository.Remove(userEducation);

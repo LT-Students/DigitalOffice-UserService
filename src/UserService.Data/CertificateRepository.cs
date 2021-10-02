@@ -37,13 +37,6 @@ namespace LT.DigitalOffice.UserService.Data
         return;
       }
 
-      ICollection<DbUserCertificateImage> images = certificate.Images;
-
-      if (images.Any())
-      {
-        _provider.UserCertificateImages.AddRange(images);
-      }
-
       _provider.UserCertificates.Add(certificate);
       _provider.Save();
     }
@@ -51,13 +44,11 @@ namespace LT.DigitalOffice.UserService.Data
     public DbUserCertificate Get(Guid certificateId)
     {
       DbUserCertificate certificate = _provider.UserCertificates
-        .Include(c => c.Images)
         .FirstOrDefault(x => x.Id == certificateId);
 
       if (certificate == null)
       {
         _logger.LogWarning($"User certificate with ID '{certificateId}' was not found.");
-        return null;
       }
 
       return certificate;
@@ -93,7 +84,6 @@ namespace LT.DigitalOffice.UserService.Data
         return false;
       }
 
-      _provider.UserCertificateImages.RemoveRange(certificate.Images);
       _provider.UserCertificates.Remove(certificate);
       _provider.Save();
 

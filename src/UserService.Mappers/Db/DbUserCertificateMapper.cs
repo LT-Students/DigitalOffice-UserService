@@ -18,24 +18,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbUserCertificate Map(CreateCertificateRequest request, List<Guid> imagesIds)
+    public DbUserCertificate Map(CreateCertificateRequest request)
     {
       if (request == null)
       {
         return null;
       }
 
-      Guid Id = Guid.NewGuid();
-
       return new DbUserCertificate
       {
-        Id = Id,
+        Id = Guid.NewGuid(),
         UserId = request.UserId,
-        Images = imagesIds?.Select(imageId => new DbUserCertificateImage()
-        {
-          ImageId = imageId,
-          UserCertificateId = Id
-        }).ToList(),
         Name = request.Name,
         SchoolName = request.SchoolName,
         EducationType = (int)request.EducationType,

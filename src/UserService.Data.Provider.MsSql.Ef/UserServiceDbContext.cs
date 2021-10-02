@@ -19,10 +19,8 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUserSkill> UserSkills { get; set; }
     public DbSet<DbUserAchievement> UserAchievements { get; set; }
     public DbSet<DbUserCertificate> UserCertificates { get; set; }
-    public DbSet<DbUserCertificateImage> UserCertificateImages { get; set; }
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
     public DbSet<DbUserEducation> UserEducations { get; set; }
-    public DbSet<DbUserEducationImage> UserEducationImages { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbEntityImage> EntitiesImages { get; set; }
 

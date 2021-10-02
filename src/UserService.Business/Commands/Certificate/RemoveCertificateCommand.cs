@@ -25,6 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly ICertificateRepository _certificateRepository;
     private readonly IRequestClient<IRemoveImagesRequest> _removeImagesRequest;
     private readonly ILogger<RemoveCertificateCommand> _logger;
@@ -33,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IUserRepository userRepository,
+      IImageRepository imageRepository,
       ICertificateRepository certificateRepository,
       IRequestClient<IRemoveImagesRequest> removeImagesRequest,
       ILogger<RemoveCertificateCommand> logger)
@@ -40,12 +42,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
+      _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;
       _removeImagesRequest = removeImagesRequest;
       _logger = logger;
     }
 
-    private async Task<bool> RemoveImages(ICollection<DbUserCertificateImage> imagesToRemove, ICollection<string> errors)
+    private async Task<bool> RemoveImages(List<Guid> imagesIdsToRemove, ICollection<string> errors)
     {
       string errorMsg = "Can not remove certificate images. Reason: {errors}";
 
@@ -53,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       {
         Response<IOperationResult<bool>> response = await
          _removeImagesRequest.GetResponse<IOperationResult<bool>>(
-           IRemoveImagesRequest.CreateObj(imagesToRemove.Select(i => i.ImageId).ToList(), ImageSource.User));
+           IRemoveImagesRequest.CreateObj(imagesIdsToRemove, ImageSource.User));
 
         IOperationResult<bool> responsedMsg = response.Message;
 
@@ -92,13 +95,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         return result;
       }
 
-      ICollection<DbUserCertificateImage> imagesToRemove = userCertificate.Images;
+      List<Guid> imagesIdsToRemove = _imageRepository.GetImagesIds(userCertificate.Id);
 
-      if (imagesToRemove.Any())
+      if (imagesIdsToRemove.Any())
       {
-        await RemoveImages(imagesToRemove, resultErrors);
+        await RemoveImages(imagesIdsToRemove, resultErrors);
+        _imageRepository.Remove(imagesIdsToRemove);
       }
-      
+
       result.Body = _certificateRepository.Remove(userCertificate);
       result.Status = resultErrors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
 

@@ -23,12 +23,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DateTime? ModifiedAtUtc { get; set; }
 
     public DbUser User { get; set; }
-    public ICollection<DbUserEducationImage> Images { get; set; }
-
-    public DbUserEducation()
-    {
-      Images = new List<DbUserEducationImage>();
-    }
   }
 
   public class DbUserEducationConfiguration : IEntityTypeConfiguration<DbUserEducation>
@@ -54,10 +48,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasOne(e => e.User)
         .WithMany(u => u.Educations);
-
-      builder
-        .HasMany(ue => ue.Images)
-        .WithOne(uei => uei.UserEducation);
     }
   }
 }

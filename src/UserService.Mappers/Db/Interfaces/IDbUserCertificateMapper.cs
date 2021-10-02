@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
   [AutoInject]
     public interface IDbUserCertificateMapper
     {
-        DbUserCertificate Map(CreateCertificateRequest request, List<Guid> imagesIds);
+        DbUserCertificate Map(CreateCertificateRequest request);
     }
 }

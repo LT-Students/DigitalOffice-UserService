@@ -370,14 +370,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<Guid> userImagesIds = new();
       List<ImageInfo> imagesResult = null;
 
-      if (filter.IncludeImages)
+      if (filter.IncludeImages && filter.IncludeCertificates)
       {
-        if (filter.IncludeCertificates)
+        foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
         {
-          foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
-          {
-            images.AddRange(dbUserCertificate.Images.Select(i => i.ImageId));
-          }
+          images.AddRange(_imageRepository.GetImagesIds(dbUserCertificate.Id));
         }
       }
 

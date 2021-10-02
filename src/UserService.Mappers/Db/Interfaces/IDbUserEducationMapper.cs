@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
     [AutoInject]
     public interface IDbUserEducationMapper
     {
-        DbUserEducation Map(CreateEducationRequest request, List<Guid> imagesIdsForCreate);
+        DbUserEducation Map(CreateEducationRequest request);
     }
 }

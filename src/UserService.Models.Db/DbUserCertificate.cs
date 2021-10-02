@@ -20,13 +20,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }
-    public ICollection<DbUserCertificateImage> Images { get; set; }
     public DbUser User { get; set; }
-
-    public DbUserCertificate()
-    {
-      Images = new List<DbUserCertificateImage>();
-    }
   }
 
   public class DbUserCertificateConfiguration : IEntityTypeConfiguration<DbUserCertificate>
@@ -42,10 +36,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasOne(pm => pm.User)
         .WithMany(p => p.Certificates);
-
-      builder
-        .HasMany(uc => uc.Images)
-        .WithOne(uci => uci.UserCertificate);
     }
   }
 }
