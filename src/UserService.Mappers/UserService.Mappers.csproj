@@ -7,6 +7,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />
     <ProjectReference Include="..\UserService.Models.Dto\UserService.Models.Dto.csproj" />
   </ItemGroup>

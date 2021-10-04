@@ -11,57 +11,57 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Certificate
 {
     public class CreateCertificateRequestValidatorTests
     {
-        private CreateCertificateRequestValidator _validator;
+        //private CreateCertificateRequestValidator _validator;
 
-        private Mock<IUserRepository> _repository;
-        private Guid _existUser = Guid.NewGuid();
+        //private Mock<IUserRepository> _repository;
+        //private Guid _existUser = Guid.NewGuid();
 
-        [SetUp]
-        public void SetUp()
-        {
-            _repository = new Mock<IUserRepository>();
-            _repository
-                .Setup(x => x.Get(_existUser))
-                .Returns(new DbUser());
+        //[SetUp]
+        //public void SetUp()
+        //{
+        //    _repository = new Mock<IUserRepository>();
+        //    _repository
+        //        .Setup(x => x.Get(_existUser))
+        //        .Returns(new DbUser());
 
-            _validator = new(_repository.Object);
-        }
+        //    _validator = new(_repository.Object);
+        //}
 
-        [Test]
-        public void ShouldNotThrowAnyException()
-        {
-            var correctRequest = new CreateCertificateRequest
-            {
-                Name = "Name",
-                SchoolName = "SchoolNmae",
-                EducationType = Models.Dto.Enums.EducationType.Online,
-                ReceivedAt = DateTime.UtcNow,
-                Image = new Models.Dto.Requests.User.AddImageRequest(),
-                UserId = _existUser
-            };
+        //[Test]
+        //public void ShouldNotThrowAnyException()
+        //{
+        //    var correctRequest = new CreateCertificateRequest
+        //    {
+        //        Name = "Name",
+        //        SchoolName = "SchoolNmae",
+        //        EducationType = Models.Dto.Enums.EducationType.Online,
+        //        ReceivedAt = DateTime.UtcNow,
+        //        Image = new Models.Dto.Requests.User.AddImageRequest(),
+        //        UserId = _existUser
+        //    };
 
-            _validator.TestValidate(correctRequest).ShouldNotHaveAnyValidationErrors();
-        }
+        //    _validator.TestValidate(correctRequest).ShouldNotHaveAnyValidationErrors();
+        //}
 
-        [Test]
-        public void ShouldThrowExceptionWhenNameIsNotCorrect()
-        {
-            var incorrectRequest = new CreateCertificateRequest
-            {
-                Name = "",
-                SchoolName = "",
-                EducationType = (Models.Dto.Enums.EducationType) 5,
-                ReceivedAt = DateTime.UtcNow,
-                Image = null,
-                UserId = Guid.NewGuid()
-            };
+        //[Test]
+        //public void ShouldThrowExceptionWhenNameIsNotCorrect()
+        //{
+        //    var incorrectRequest = new CreateCertificateRequest
+        //    {
+        //        Name = "",
+        //        SchoolName = "",
+        //        EducationType = (Models.Dto.Enums.EducationType) 5,
+        //        ReceivedAt = DateTime.UtcNow,
+        //        Image = null,
+        //        UserId = Guid.NewGuid()
+        //    };
 
-            _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.Name);
-            _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.SchoolName);
-            _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.EducationType);
-            _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.UserId);
-            _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.Image);
-        }
+        //    _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.Name);
+        //    _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.SchoolName);
+        //    _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.EducationType);
+        //    _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.UserId);
+        //    _validator.TestValidate(incorrectRequest).ShouldHaveValidationErrorFor(x => x.Image);
+        //}
 
     }
 }

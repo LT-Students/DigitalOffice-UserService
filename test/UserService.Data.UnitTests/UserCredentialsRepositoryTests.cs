@@ -124,31 +124,31 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             Assert.AreEqual(_dbUserCredentials, _repository.Get(filter));
         }*/
 
-        [Test]
-        public void ShouldThrowExceptionWhenfiltrIsEmpty()
-        {
-            var filter = new GetCredentialsFilter(); ;
+        //[Test]
+        //public void ShouldThrowExceptionWhenfiltrIsEmpty()
+        //{
+        //    var filter = new GetCredentialsFilter(); ;
 
-            Assert.Throws<BadRequestException>(() => _repository.Get(filter));
-        }
-        #endregion
+        //    Assert.Throws<BadRequestException>(() => _repository.Get(filter));
+        //}
+        //#endregion
 
-        #region Edit
-        [Test]
-        public void ShouldThrowExceptionWhenDbUserCredentialsIsNull()
-        {
-            DbUserCredentials userCeredentials = null;
+        //#region Edit
+        //[Test]
+        //public void ShouldThrowExceptionWhenDbUserCredentialsIsNull()
+        //{
+        //    DbUserCredentials userCeredentials = null;
 
-            Assert.Throws<ArgumentNullException>(() => _repository.Edit(userCeredentials));
-        }
+        //    Assert.Throws<ArgumentNullException>(() => _repository.Edit(userCeredentials));
+        //}
 
-        [Test]
-        public void ShouldThrowExceptionWhenUserIdIsNotFound()
-        {
-            DbUserCredentials userCeredentials = new() { UserId = Guid.NewGuid()};
+        //[Test]
+        //public void ShouldThrowExceptionWhenUserIdIsNotFound()
+        //{
+        //    DbUserCredentials userCeredentials = new() { UserId = Guid.NewGuid()};
 
-            Assert.Throws<NotFoundException>(() => _repository.Edit(userCeredentials));
-        }
+        //    Assert.Throws<NotFoundException>(() => _repository.Edit(userCeredentials));
+        //}
         #endregion
 
     }

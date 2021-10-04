@@ -6,6 +6,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
 {
@@ -22,11 +23,11 @@ namespace LT.DigitalOffice.UserService.Controllers
         }
 
         [HttpPost("create")]
-        public OperationResultResponse<CredentialsResponse> CreateCredentials(
+        public async Task<OperationResultResponse<CredentialsResponse>> CreateCredentials(
             [FromServices] ICreateCredentialsCommand command,
             [FromBody] CreateCredentialsRequest request)
         {
-            return command.Execute(request);
+            return await command.Execute(request);
         }
     }
 }

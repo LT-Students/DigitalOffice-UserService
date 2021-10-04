@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -18,6 +19,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
     private readonly IUserAchievementInfoMapper _userAchievementInfoMapper;
     private readonly ICertificateInfoMapper _certificateInfoMapper;
     private readonly IEducationInfoMapper _educationInfoMapper;
+    private readonly IImageRepository _imageRepo;
 
     private ImageInfo GetImage(List<ImageInfo> images, Guid? imageId)
     {
@@ -46,12 +48,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         IUserInfoMapper userInfoMapper,
         IUserAchievementInfoMapper userAchievementInfoMapper,
         ICertificateInfoMapper certificateInfoMapper,
-        IEducationInfoMapper educationInfoMapper)
+        IEducationInfoMapper educationInfoMapper,
+        IImageRepository imageRepo)
     {
       _userInfoMapper = userInfoMapper;
       _userAchievementInfoMapper = userAchievementInfoMapper;
       _certificateInfoMapper = certificateInfoMapper;
       _educationInfoMapper = educationInfoMapper;
+      _imageRepo = imageRepo;
     }
 
     public UserResponse Map(
@@ -83,8 +87,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
               : null,
           Certificates = filter.IncludeCertificates
               ? dbUser.Certificates.Select(
-                  c =>
-                      _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
+                  c =>  _certificateInfoMapper.Map(c, _imageRepo.GetImagesIds(c.Id).Select(id => GetImage(images, id)).ToList()))
               : null,
           Communications = filter.IncludeCommunications
               ? dbUser.Communications.Select(

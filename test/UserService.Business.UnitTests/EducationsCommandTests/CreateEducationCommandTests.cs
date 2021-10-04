@@ -24,119 +24,119 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 {
     class CreateEducationCommandTests
     {
-        private ICreateEducationCommand _command;
-        private AutoMocker _mocker;
+        //private ICreateEducationCommand _command;
+        //private AutoMocker _mocker;
 
-        private CreateEducationRequest _request;
-        private DbUserEducation _dbEducation;
-        private DbUser _dbUser;
+        //private CreateEducationRequest _request;
+        //private DbUserEducation _dbEducation;
+        //private DbUser _dbUser;
 
-        [SetUp]
-        public void SetUp()
-        {
-            _mocker = new AutoMocker();
-            _command = _mocker.CreateInstance<CreateEducationCommand>();
+        //[SetUp]
+        //public void SetUp()
+        //{
+        //    _mocker = new AutoMocker();
+        //    _command = _mocker.CreateInstance<CreateEducationCommand>();
 
-            _request = new CreateEducationRequest
-            {
-                UserId = Guid.NewGuid(),
-                UniversityName = "name",
-                QualificationName = "name",
-                AdmissionAt = DateTime.UtcNow,
-                IssueAt = DateTime.UtcNow,
-                FormEducation = FormEducation.FullTime
-            };
+        //    _request = new CreateEducationRequest
+        //    {
+        //        UserId = Guid.NewGuid(),
+        //        UniversityName = "name",
+        //        QualificationName = "name",
+        //        AdmissionAt = DateTime.UtcNow,
+        //        IssueAt = DateTime.UtcNow,
+        //        FormEducation = FormEducation.FullTime
+        //    };
 
-            _dbEducation = new DbUserEducation
-            {
-                Id = Guid.NewGuid(),
-                UserId = _request.UserId,
-                UniversityName = _request.UniversityName,
-                QualificationName = _request.QualificationName,
-                AdmissionAt = _request.AdmissionAt,
-                IssueAt = _request.IssueAt,
-                FormEducation = (int)_request.FormEducation
-            };
+        //    _dbEducation = new DbUserEducation
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        UserId = _request.UserId,
+        //        UniversityName = _request.UniversityName,
+        //        QualificationName = _request.QualificationName,
+        //        AdmissionAt = _request.AdmissionAt,
+        //        IssueAt = _request.IssueAt,
+        //        FormEducation = (int)_request.FormEducation
+        //    };
 
-            _dbUser = new DbUser
-            {
-                Id = Guid.NewGuid(),
-                IsAdmin = true
-            };
+        //    _dbUser = new DbUser
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        IsAdmin = true
+        //    };
 
-            IDictionary<object, object> _items = new Dictionary<object, object>();
-            _items.Add("UserId", _dbUser.Id);
+        //    IDictionary<object, object> _items = new Dictionary<object, object>();
+        //    _items.Add("UserId", _dbUser.Id);
 
-            _mocker
-                .Setup<IHttpContextAccessor, IDictionary<object, object>>(x => x.HttpContext.Items)
-                .Returns(_items);
+        //    _mocker
+        //        .Setup<IHttpContextAccessor, IDictionary<object, object>>(x => x.HttpContext.Items)
+        //        .Returns(_items);
 
-            _mocker
-                .Setup<IDbUserEducationMapper, DbUserEducation>(x => x.Map(_request))
-                .Returns(_dbEducation);
+        //    //_mocker
+        //    //    .Setup<IDbUserEducationMapper, DbUserEducation>(x => x.Map(_request))
+        //    //    .Returns(_dbEducation);
 
-            _mocker
-                .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(true);
+        //    _mocker
+        //        .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
+        //        .Returns(true);
 
-            _mocker
-                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
-                .Returns(_dbUser);
-        }
+        //    _mocker
+        //        .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+        //        .Returns(_dbUser);
+        //}
 
-        [Test]
-        public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
-        {
-            _mocker
-                .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
-                .Returns(false);
+        //[Test]
+        //public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
+        //{
+        //    _mocker
+        //        .Setup<IAccessValidator, bool>(x => x.HasRights(Rights.AddEditRemoveUsers))
+        //        .Returns(false);
 
-            _mocker
-                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
-                .Returns(new DbUser { IsAdmin = false });
+        //    _mocker
+        //        .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+        //        .Returns(new DbUser { IsAdmin = false });
 
-            Assert.Throws<ForbiddenException>(() => _command.Execute(_request));
-            _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
-            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-        }
+        //    Assert.Throws<ForbiddenException>(() => _command.Execute(_request));
+        //    _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
+        //    _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+        //}
 
-        [Test]
-        public void ShouldThrowValidationExceptionWhenValidationInFailed()
-        {
-            _mocker
-                .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-                .Returns(false);
+        //[Test]
+        //public void ShouldThrowValidationExceptionWhenValidationInFailed()
+        //{
+        //    _mocker
+        //        .Setup<ICreateEducationRequestValidator, bool>(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
+        //        .Returns(false);
 
-            Assert.Throws<ValidationException>(() => _command.Execute(_request));
-            _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
-            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-        }
+        //    Assert.Throws<ValidationException>(() => _command.Execute(_request));
+        //    _mocker.Verify<IEducationRepository>(x => x.Add(It.IsAny<DbUserEducation>()), Times.Never);
+        //    _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+        //}
 
-        [Test]
-        public void ShouldThrowExceptionWhenRepositoryThrow()
-        {
-            _mocker
-                .Setup<IUserRepository>(x => x.Get(It.IsAny<Guid>()))
-                .Throws(new Exception());
+        //[Test]
+        //public void ShouldThrowExceptionWhenRepositoryThrow()
+        //{
+        //    _mocker
+        //        .Setup<IUserRepository>(x => x.Get(It.IsAny<Guid>()))
+        //        .Throws(new Exception());
 
-            Assert.Throws<Exception>(() => _command.Execute(_request));
-            _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Never);
-            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-        }
+        //    Assert.Throws<Exception>(() => _command.Execute(_request));
+        //    _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Never);
+        //    _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+        //}
 
-        [Test]
-        public void ShouldAddEducationSuccesfull()
-        {
-            var expectedResponse = new OperationResultResponse<Guid>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = _dbEducation.Id
-            };
+        //[Test]
+        //public void ShouldAddEducationSuccesfull()
+        //{
+        //    var expectedResponse = new OperationResultResponse<Guid>
+        //    {
+        //        Status = OperationResultStatusType.FullSuccess,
+        //        Body = _dbEducation.Id
+        //    };
 
-            SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
-            _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Once);
-            _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
-        }
+        //    SerializerAssert.AreEqual(expectedResponse, _command.Execute(_request));
+        //    _mocker.Verify<IEducationRepository>(x => x.Add(_dbEducation), Times.Once);
+        //    _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
+        //}
     }
 }
 */
