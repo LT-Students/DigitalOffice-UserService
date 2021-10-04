@@ -72,25 +72,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         _logger.LogError(e, errorMsg);
       }
 
-      errors.Add("Cannot remove education images");
+      errors.Add("Cannot remove education images.");
       return false;
     }
 
     public async Task<OperationResultResponse<bool>> Execute(Guid educationId)
     {
       OperationResultResponse<bool> result = new();
-      List<string> resultErrors = result.Errors;
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
       DbUser sender = _userRepository.Get(senderId);
       DbUserEducation userEducation = _educationRepository.Get(educationId);
 
-      if (!(sender.IsAdmin || _accessValidator.HasRights(Rights.AddEditRemoveUsers)) 
-        && senderId != userEducation.UserId)
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers) && senderId != userEducation.UserId)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
-        resultErrors.Add("Not enough rights");
+        result.Errors.Add("Not enough rights.");
         result.Status = OperationResultStatusType.Failed;
 
         return result;
@@ -99,13 +97,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       List<Guid> userEducationImagesIds = _imageRepository.GetImagesIds(userEducation.Id);
       if (userEducationImagesIds.Any())
       {
-        await RemoveImages(userEducationImagesIds, resultErrors);
+        await RemoveImages(userEducationImagesIds, result.Errors);
         _imageRepository.Remove(userEducationImagesIds);
       }
 
       result.Body = _educationRepository.Remove(userEducation);
-      result.Status = resultErrors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+      result.Status = result.Errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
 
       return result;
     }

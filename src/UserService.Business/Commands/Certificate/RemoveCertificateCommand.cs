@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
         IOperationResult<bool> responsedMsg = response.Message;
 
-        if (responsedMsg.IsSuccess && responsedMsg.Body)
+        if (responsedMsg.IsSuccess)
         {
           return responsedMsg.Body;
         }
@@ -72,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         _logger.LogError(e, errorMsg);
       }
 
-      errors.Add("Cannot remove certificates images");
+      errors.Add("Cannot remove certificates images.");
       return false;
     }
 
@@ -82,14 +82,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       List<string> resultErrors = result.Errors;
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser sender = _userRepository.Get(senderId);
       DbUserCertificate userCertificate = _certificateRepository.Get(certificateId);
+      if (userCertificate == null)
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        resultErrors.Add("Certificate was not found.");
+        result.Status = OperationResultStatusType.Failed;
+
+        return result;
+      }
 
       if (senderId != userCertificate.UserId && !_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
-        resultErrors.Add("Not enough rights");
+        resultErrors.Add("Not enough rights.");
         result.Status = OperationResultStatusType.Failed;
 
         return result;
@@ -100,6 +108,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       if (imagesIdsToRemove.Any())
       {
         await RemoveImages(imagesIdsToRemove, resultErrors);
+        // TODO: make image cleaner
         _imageRepository.Remove(imagesIdsToRemove);
       }
 

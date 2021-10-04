@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
@@ -52,6 +53,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
     public async Task<OperationResultResponse<CredentialsResponse>> Execute(CreateCredentialsRequest request)
     {
+      if (request == null)
+      {
+        throw new BadRequestException();
+      }
+
       _validator.ValidateAndThrowCustom(request);
 
       OperationResultResponse<CredentialsResponse> response = new();
@@ -127,6 +133,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
             AccessTokenExpiresIn = responsedBody.AccessTokenExpiresIn,
             RefreshTokenExpiresIn = responsedBody.RefreshTokenExpiresIn
           };
+
+          return response;
         }
         else
         {
@@ -148,7 +156,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         _logger.LogError(exc, "Something went wrong while we were creating the user credentials");
       }
 
-      return response;
+      throw new BadRequestException("Something is wrong, please try again later");
     }
   }
 }

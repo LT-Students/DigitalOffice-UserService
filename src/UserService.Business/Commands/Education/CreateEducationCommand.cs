@@ -63,9 +63,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
     private async Task<List<Guid>> CreateImages(CreateEducationRequest request, List<string> errors)
     {
-      if (request == null || !request.Images.Any() || request.Images.Contains(null))
+      if (request == null || !request.Images.Any())
       {
-        errors.Add($"Bad request to create education images for user {request.UserId}");
+        errors.Add("Bad request to create education images.");
         return null;
       }
 
@@ -91,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         _logger.LogError(exc, logMsg, request.UserId, exc.Message);
       }
 
-      errors.Add($"Can not add education images to user with id {request.UserId}");
+      errors.Add("Can not add education images.");
       return null;
     }
 
@@ -119,7 +119,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         return response;
       }
 
-      List<AddImageRequest> requestImages = request.Images;
       List<Guid> createdImagesIDs = await CreateImages(request, response.Errors);
       DbUserEducation dbEducation = _mapper.Map(request);
 

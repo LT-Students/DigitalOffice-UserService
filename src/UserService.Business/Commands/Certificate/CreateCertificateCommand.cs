@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     private async Task<List<Guid>> CreateImages(CreateCertificateRequest request, Guid userId, List<string> errors)
     {
-      if (request.Images == null || !request.Images.Any() || request.Images.Contains(null))
+      if (request.Images == null || !request.Images.Any())
       {
         return null;
       }
@@ -86,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
         _logger.LogError(exc, logMessage, userId, exc.Message);
       }
 
-      errors.Add($"Can not add certificate image for user {userId}. Please try again later.");
+      errors.Add($"Can not add certificate image. Please try again later.");
 
       return null;
     }    
