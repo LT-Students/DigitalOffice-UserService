@@ -147,6 +147,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
+      _logger.LogInformation("CompanyEmployees were taken from the cache.");
+
       return (departments, positions, offices);
     }
 
@@ -176,6 +178,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (response.Message.IsSuccess)
         {
+          _logger.LogInformation("CompanyEmployees were taken from the service.");
+
           return response.Message.Body;
         }
         else
