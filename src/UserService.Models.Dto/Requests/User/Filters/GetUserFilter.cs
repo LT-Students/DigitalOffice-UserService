@@ -49,5 +49,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 
     [FromQuery(Name = "includeuserimages")]
     public bool IncludeUserImages { get; set; } = false;
+
+    [FromQuery(Name = "locale")]
+    public string Locale { get; set; }
   }
 }

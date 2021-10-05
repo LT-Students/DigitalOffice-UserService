@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
+    private List<RoleData> GetRoles(List<Guid> userIds, string locale, List<string> errors)
     {
       if (userIds == null || !userIds.Any())
       {
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         var response = _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(userIds)).Result.Message;
+          IGetUserRolesRequest.CreateObj(userIds, locale)).Result.Message;
 
         if (response.IsSuccess)
         {
@@ -106,8 +106,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         const string warningMessage = logMessage + "Reason: {Errors}";
         _logger.LogWarning(warningMessage,
-            string.Join(", ", userIds),
-            string.Join("\n", response.Errors));
+          string.Join(", ", userIds),
+          string.Join("\n", response.Errors));
       }
       catch (Exception exc)
       {
@@ -159,7 +159,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return default;
       }
 
-      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) = 
+      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) =
         await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
 
       IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
@@ -227,7 +227,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           positions = JsonConvert.DeserializeObject<List<PositionData>>(positionsFromCache);
         }
       }
-      
+
       if (officesFromCacheTask != null)
       {
         RedisValue officesFromCache = await officesFromCacheTask;
@@ -365,7 +365,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           filter.IncludeOffice,
           response.Errors);
 
-      List<RoleData> roles = filter.IncludeRole ? GetRoles(usersIds, response.Errors) : null;
+      List<RoleData> roles = filter.IncludeRole ? GetRoles(usersIds, filter.Locale, response.Errors) : null;
 
       List<ImageData> images = filter.IncludeAvatar ? GetImages(dbUsers.Where(x =>
         x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors) : null;
@@ -381,7 +381,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             filter.IncludeOffice ? _officeInfoMapper.Map(
               companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
-              roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
+              roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeAvatar ? _imageInfoMapper.Map(
               images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
 
