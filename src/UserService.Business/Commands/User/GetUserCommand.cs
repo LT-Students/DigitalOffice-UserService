@@ -147,7 +147,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      _logger.LogInformation("CompanyEmployees were taken from the cache.");
+      _logger.LogInformation($"CompanyEmployee was taken from the cache. Employee id: {userId}");
 
       return (departments, positions, offices);
     }
@@ -178,7 +178,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (response.Message.IsSuccess)
         {
-          _logger.LogInformation("CompanyEmployees were taken from the service.");
+          _logger.LogInformation($"CompanyEmployee was taken from the service. Employee id: {usersIds[0]}");
 
           return response.Message.Body;
         }

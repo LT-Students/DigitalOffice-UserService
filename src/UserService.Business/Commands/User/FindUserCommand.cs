@@ -159,7 +159,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return default;
       }
 
-      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) = 
+      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) =
         await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
 
       IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
@@ -227,7 +227,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           positions = JsonConvert.DeserializeObject<List<PositionData>>(positionsFromCache);
         }
       }
-      
+
       if (officesFromCacheTask != null)
       {
         RedisValue officesFromCache = await officesFromCacheTask;
@@ -237,7 +237,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      _logger.LogInformation("CompanyEmployees were taken from the cache.");
+      _logger.LogInformation("CompanyEmployees were taken from the cache. Employees ids: {usersIds}", string.Join(", ", usersIds));
 
       return (departments, positions, offices);
     }
@@ -268,7 +268,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (response.Message.IsSuccess)
         {
-          _logger.LogInformation("CompanyEmployees were taken from the service.");
+          _logger.LogInformation("CompanyEmployees were taken from the service. Employees ids: {usersIds}", string.Join(", ", usersIds));
 
           return response.Message.Body;
         }
