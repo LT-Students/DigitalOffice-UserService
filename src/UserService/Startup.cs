@@ -371,8 +371,5 @@ namespace LT.DigitalOffice.UserService
     }
 
     #endregion
-
-
-
   }
 }
