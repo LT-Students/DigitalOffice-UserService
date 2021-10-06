@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Serilog;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -80,7 +81,7 @@ namespace LT.DigitalOffice.UserService
     {
       string password = "Password";
 
-      int index = line.IndexOf(password, 0);
+      int index = line.IndexOf(password, 0, StringComparison.OrdinalIgnoreCase);
 
       if (index != -1)
       {
@@ -88,7 +89,7 @@ namespace LT.DigitalOffice.UserService
 
         for (int i = 0; i < words.Length; i++)
         {
-          if (password.Equals(words[i]))
+          if (string.Equals(password, words[i], StringComparison.OrdinalIgnoreCase))
           {
             line = line.Replace(words[i + 1], "****");
             break;
@@ -209,14 +210,6 @@ namespace LT.DigitalOffice.UserService
 
     public void ConfigureServices(IServiceCollection services)
     {
-      using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-      {
-        builder.SetMinimumLevel(LogLevel.Information);
-        builder.AddConsole();
-        builder.AddEventSourceLogger();
-      });
-      ILogger logger = loggerFactory.CreateLogger("Startup");
-
       services.AddCors(options =>
       {
         options.AddPolicy(
@@ -242,11 +235,11 @@ namespace LT.DigitalOffice.UserService
       {
         connStr = Configuration.GetConnectionString("SQLConnectionString");
 
-        logger.LogInformation(message: $"SQL connection string from appsettings.json was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from appsettings.json was used. Value '{HidePassord(connStr)}'.");
       }
       else
       {
-        logger.LogInformation(message: $"SQL connection string from environment was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from environment was used. Value '{HidePassord(connStr)}'.");
       }
 
       services.AddHttpContextAccessor();
@@ -312,11 +305,11 @@ namespace LT.DigitalOffice.UserService
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
 
-        logger.LogInformation(message: $"Redis connection string from appsettings.json was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from appsettings.json was used. Value '{HidePassord(redisConnStr)}'");
       }
       else
       {
-        logger.LogInformation(message: $"Redis connection string from environment was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from environment was used. Value '{HidePassord(redisConnStr)}'");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
