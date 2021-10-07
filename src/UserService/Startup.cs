@@ -36,6 +36,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Serilog;
+using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -85,7 +86,7 @@ namespace LT.DigitalOffice.UserService
 
       if (index != -1)
       {
-        string[] words = line.Split(';', '=');
+        string[] words = Regex.Split(line, @"[=,; ]");
 
         for (int i = 0; i < words.Length; i++)
         {
