@@ -1,6 +1,6 @@
 ﻿namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
-    public record CacheConfig
+    public record MemoryCacheConfig
     {
         public const string SectionName = "MemoryCache";
 

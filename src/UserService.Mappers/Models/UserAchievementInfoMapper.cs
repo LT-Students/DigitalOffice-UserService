@@ -9,8 +9,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     public class UserAchievementInfoMapper : IUserAchievementInfoMapper
     {
         public UserAchievementInfo Map(
-            DbUserAchievement dbUserAchievement,
-            ImageInfo image)
+            DbUserAchievement dbUserAchievement)
         {
             if (dbUserAchievement == null)
             {
@@ -23,7 +22,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
                 AchievementId = dbUserAchievement.AchievementId,
                 ReceivedAt = dbUserAchievement.ReceivedAt,
                 Name = dbUserAchievement.Achievement.Name,
-                Image = image
+                Image = new ImageConsist
+                {
+                  Content = dbUserAchievement.Achievement.ImageContent,
+                  Extension = dbUserAchievement.Achievement.ImageExtension
+                }
             };
         }
     }

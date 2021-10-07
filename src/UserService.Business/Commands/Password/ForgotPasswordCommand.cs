@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         private readonly ILogger<ForgotPasswordCommand> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
-        private readonly IOptions<CacheConfig> _cacheOptions;
+        private readonly IOptions<MemoryCacheConfig> _cacheOptions;
         private readonly IEmailValidator _validator;
         private readonly IUserRepository _repository;
         private readonly IMemoryCache _cache;
@@ -99,7 +99,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         public ForgotPasswordCommand(
             ILogger<ForgotPasswordCommand> logger,
             IRequestClient<ISendEmailRequest> rcSendEmail,
-            IOptions<CacheConfig> cacheOptions,
+            IOptions<MemoryCacheConfig> cacheOptions,
             IHttpContextAccessor httpContextAccessor,
             IEmailValidator validator,
             IUserRepository repository,
