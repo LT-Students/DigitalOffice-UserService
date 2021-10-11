@@ -49,8 +49,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
       };
 
       _mocker
-        .Setup<IAccessValidator, bool>(x => x.IsAdmin(null))
-        .Returns(true);
+        .Setup<IAccessValidator, Task<bool>>(x => x.IsAdminAsync(null))
+        .Returns(Task.FromResult(true));
 
       IDictionary<object, object> _items = new Dictionary<object, object>();
       _items.Add("UserId", _dbUser.Id);
@@ -62,10 +62,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
       _mocker
         .Setup<IEducationRepository, Task<bool>>(x => x.RemoveAsync(_dbUserEducation))
         .Returns(Task.FromResult(true));
-
-      _mocker
-        .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
-        .Returns(_dbUser);
 
       _mocker
         .Setup<IEducationRepository, DbUserEducation>(x => x.Get(_educationId))
@@ -122,7 +118,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
 
       SerializerAssert.AreEqual(expectedResponse, await _command.ExecuteAsync(_educationId));
       _mocker.Verify<IEducationRepository, Task<bool>>(x => x.RemoveAsync(_dbUserEducation), Times.Once);
-      _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
       _mocker.Verify<IEducationRepository>(x => x.Get(_educationId), Times.Once);
     }
   }
