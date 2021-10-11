@@ -2,18 +2,19 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
     [AutoInject]
     public interface ICertificateRepository
     {
-        void Add(DbUserCertificate certificate);
+        Task AddAsync(DbUserCertificate certificate);
 
         DbUserCertificate Get(Guid certificateId);
 
-        bool Edit(DbUserCertificate certificateId, JsonPatchDocument<DbUserCertificate> request);
+        Task<bool> EditAsync(DbUserCertificate certificateId, JsonPatchDocument<DbUserCertificate> request);
 
-        bool Remove(DbUserCertificate certificate);
+        Task<bool> RemoveAsync(DbUserCertificate certificate);
     }
 }

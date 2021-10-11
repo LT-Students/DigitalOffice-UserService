@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
     }
-    public async Task<OperationResultResponse<bool>> Execute(
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
       JsonPatchDocument<EditCommunicationRequest> request)
     {
@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       return new OperationResultResponse<bool>
       {
         Status = OperationResultStatusType.FullSuccess,
-        Body = await _repository.Edit(communicationId, _mapper.Map(request)),
+        Body = await _repository.EditAsync(communicationId, _mapper.Map(request)),
         Errors = new()
       };
     }

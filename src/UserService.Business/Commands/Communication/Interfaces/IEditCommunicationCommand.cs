@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication.Interface
     [AutoInject]
     public interface IEditCommunicationCommand
     {
-        Task<OperationResultResponse<bool>> Execute(Guid communicationId, JsonPatchDocument<EditCommunicationRequest> request);
+        Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId, JsonPatchDocument<EditCommunicationRequest> request);
     }
 }

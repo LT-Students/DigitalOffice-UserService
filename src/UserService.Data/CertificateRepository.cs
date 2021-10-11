@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -23,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public void Add(DbUserCertificate certificate)
+        public async Task AddAsync(DbUserCertificate certificate)
         {
             if (certificate == null)
             {
@@ -31,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             _provider.UserCertificates.Add(certificate);
-            _provider.SaveAsync();
+            await _provider.SaveAsync();
         }
 
         public DbUserCertificate Get(Guid certificateId)
@@ -46,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Data
             return certificate;
         }
 
-        public bool Edit(DbUserCertificate certificate, JsonPatchDocument<DbUserCertificate> request)
+        public async Task<bool> EditAsync(DbUserCertificate certificate, JsonPatchDocument<DbUserCertificate> request)
         {
             if (certificate == null)
             {
@@ -61,12 +62,12 @@ namespace LT.DigitalOffice.UserService.Data
             request.ApplyTo(certificate);
             certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
             certificate.ModifiedAtUtc = DateTime.UtcNow;
-            _provider.SaveAsync();
+            await _provider.SaveAsync();
 
             return true;
         }
 
-        public bool Remove(DbUserCertificate certificate)
+        public async Task<bool> RemoveAsync(DbUserCertificate certificate)
         {
             if (certificate == null)
             {
@@ -76,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Data
             certificate.IsActive = false;
             certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
             certificate.ModifiedAtUtc = DateTime.UtcNow;
-            _provider.SaveAsync();
+            await _provider.SaveAsync();
 
             return true;
         }

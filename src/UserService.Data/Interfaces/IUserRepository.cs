@@ -28,14 +28,14 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     DbPendingUser GetPendingUser(Guid userId);
 
-    Task DeletePendingUser(Guid userId);
+    Task DeletePendingUserAsync(Guid userId);
 
     /// <summary>
     /// Adds new dbUser to the database. Returns whether it was successful to add.
     /// </summary>
-    Task<Guid> Create(DbUser dbUser);
+    Task<Guid> CreateAsync(DbUser dbUser);
 
-    Task CreatePending(DbPendingUser dbPendingUser);
+    Task CreatePendingAsync(DbPendingUser dbPendingUser);
 
     /// <summary>
     /// Edit existing dbUser. Returns whether it was successful to edit.
@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// <param name="id"></param>
     /// <param name="userPatch"></param>
     /// <returns>Whether it was successful to edit.</returns>
-    Task<bool> EditUser(Guid id, JsonPatchDocument<DbUser> userPatch);
+    Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
 
     /// <summary>
     /// Return DbSkill if it exist in database, else return null.
@@ -56,12 +56,12 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     /// </summary>
     /// <param name="name">Skill name.</param>
     /// <returns> Guid of created DbSkill.</returns>
-    Task<Guid> CreateSkill(string name);
+    Task<Guid> CreateSkillAsync(string name);
 
     /// <summary>
     /// Disable user.
     /// </summary>
-    Task<bool> SwitchActiveStatus(Guid userId, bool status);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
 
     bool IsUserExist(Guid userId);
 
@@ -69,6 +69,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     List<DbUser> Search(string text);
 
-    Task<bool> RemoveAvatar(Guid userId);
+    Task<bool> RemoveAvatarAsync(Guid userId);
   }
 }

@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication.Interface
   [AutoInject]
   public interface ICreateCommunicationCommand
   {
-    Task<OperationResultResponse<Guid>> Execute(CreateCommunicationRequest request);
+    Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCommunicationRequest request);
   }
 }

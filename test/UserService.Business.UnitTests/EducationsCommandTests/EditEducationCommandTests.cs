@@ -151,7 +151,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 .Returns(true);
 
             _mocker
-                .Setup<IEducationRepository, Task<bool>>(x => x.Edit(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()))
+                .Setup<IEducationRepository, Task<bool>>(x => x.EditAsync(It.IsAny<DbUserEducation>(), It.IsAny<JsonPatchDocument<DbUserEducation>>()))
                 .Returns(Task.FromResult(true));
 
             _mocker
@@ -226,8 +226,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
                 Body = true
             };
 
-            SerializerAssert.AreEqual(expectedResponse, await _command.Execute(_educationId, _request));
-            _mocker.Verify<IEducationRepository, Task<bool>>(x => x.Edit(_dbUserEducation, _dbRequest),
+            SerializerAssert.AreEqual(expectedResponse, await _command.ExecuteAsync(_educationId, _request));
+            _mocker.Verify<IEducationRepository, Task<bool>>(x => x.EditAsync(_dbUserEducation, _dbRequest),
                 Times.Once);
             _mocker.Verify<IEducationRepository, DbUserEducation>(x => x.Get(_educationId),
                 Times.Once);

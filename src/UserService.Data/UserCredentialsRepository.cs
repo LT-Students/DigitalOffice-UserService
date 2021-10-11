@@ -78,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials;
     }
 
-    public async Task<bool> Edit(DbUserCredentials userCredentials)
+    public async Task<bool> EditAsync(DbUserCredentials userCredentials)
     {
       if (userCredentials == null)
       {
@@ -110,7 +110,7 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<Guid> Create(DbUserCredentials dbUserCredentials)
+    public async Task<Guid> CreateAsync(DbUserCredentials dbUserCredentials)
     {
       if (dbUserCredentials == null)
       {
@@ -123,7 +123,7 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials.Id;
     }
 
-    public async Task SwitchActiveStatus(Guid userId, bool isActiveStatus)
+    public async Task SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
     {
       DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
 

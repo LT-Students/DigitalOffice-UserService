@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       _validator = validator;
     }
 
-    public async Task<OperationResultResponse<Guid?>> Execute(CreateAchievementRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateAchievementRequest request)
     {
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 
       OperationResultResponse<Guid?> response = new();
 
-      response.Body = await _repository.Create(_mapper.Map(request));
+      response.Body = await _repository.CreateAsync(_mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;

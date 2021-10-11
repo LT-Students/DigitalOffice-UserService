@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication.Interface
     [AutoInject]
     public interface IRemoveCommunicationCommand
     {
-        Task<OperationResultResponse<bool>> Execute(Guid communicationId);
+        Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId);
     }
 }

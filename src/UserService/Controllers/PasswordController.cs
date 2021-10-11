@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IChangePasswordCommand command,
       [FromBody] ChangePasswordRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpGet("generate")]

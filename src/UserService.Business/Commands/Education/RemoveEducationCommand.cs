@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _educationRepository = educationRepository;
     }
 
-    public async Task<OperationResultResponse<bool>> Execute(Guid educationId)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid educationId)
     {
       var senderId = _httpContextAccessor.HttpContext.GetUserId();
       var dbUser = _userRepository.Get(senderId);
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
         throw new ForbiddenException("Not enough rights.");
       }
 
-      bool result = await _educationRepository.Remove(userEducation);
+      bool result = await _educationRepository.RemoveAsync(userEducation);
 
       return new OperationResultResponse<bool>
       {

@@ -11,9 +11,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IAchievementRepository
   {
-    Task<Guid> Create(DbAchievement dbAchievement);
+    Task<Guid> CreateAsync(DbAchievement dbAchievement);
 
-    Task<bool> Edit(Guid achievementId, JsonPatchDocument<DbAchievement> request);
+    Task<bool> EditAsync(Guid achievementId, JsonPatchDocument<DbAchievement> request);
 
     DbAchievement Get(Guid achievementId);
 

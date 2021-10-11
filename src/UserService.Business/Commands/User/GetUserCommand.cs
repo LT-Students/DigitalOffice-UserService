@@ -347,7 +347,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultResponse<UserResponse>> Execute(GetUserFilter filter)
+    public async Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter)
     {
       if (filter == null ||
         (filter.UserId == null &&

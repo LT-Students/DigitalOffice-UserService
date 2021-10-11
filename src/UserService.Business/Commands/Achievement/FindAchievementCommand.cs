@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       _baseFindValidator = baseFindValidator;
     }
 
-    public FindResultResponse<AchievementInfo> Execute(FindAchievementFilter filter)
+    public FindResultResponse<AchievementInfo> ExecuteAsync(FindAchievementFilter filter)
     {
       FindResultResponse<AchievementInfo> response = new();
 

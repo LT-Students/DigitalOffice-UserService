@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<Guid> Create(DbAchievement dbAchievement)
+    public async Task<Guid> CreateAsync(DbAchievement dbAchievement)
     {
       _provider.Achievements.Add(dbAchievement);
       await _provider.SaveAsync();
@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Data
       return dbAchievement.Id;
     }
 
-    public async Task<bool> Edit(Guid achievementId, JsonPatchDocument<DbAchievement> request)
+    public async Task<bool> EditAsync(Guid achievementId, JsonPatchDocument<DbAchievement> request)
     {
       DbAchievement dbAchievement = _provider.Achievements.FirstOrDefault(x => x.Id == achievementId);
 

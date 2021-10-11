@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<List<Guid>> Create(List<DbEntityImage> dbEntityImages)
+    public async Task<List<Guid>> CreateAsync(List<DbEntityImage> dbEntityImages)
     {
       if (dbEntityImages == null || !dbEntityImages.Any() || dbEntityImages.Contains(null))
       {
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.EntitiesImages.Where(x => imagesIds.Contains(x.ImageId)).ToList();
     }
 
-    public async Task<bool> Remove(List<Guid> imagesIds)
+    public async Task<bool> RemoveAsync(List<Guid> imagesIds)
     {
       if (imagesIds == null || !imagesIds.Any())
       {

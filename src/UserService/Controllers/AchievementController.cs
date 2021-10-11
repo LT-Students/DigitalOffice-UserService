@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateAchievementCommand command,
       [FromBody] CreateAchievementRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] Guid achievementId,
       [FromBody] JsonPatchDocument<EditAchievementRequest> request)
     {
-      return await command.Execute(achievementId, request);
+      return await command.ExecuteAsync(achievementId, request);
     }
 
     [HttpGet("find")]
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IFindAchievementCommand command,
       [FromQuery] FindAchievementFilter filter)
     {
-      return command.Execute(filter);
+      return command.ExecuteAsync(filter);
     }
 
     [HttpGet("get")]
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IGetAchievementCommand command,
       [FromQuery] Guid achievementId)
     {
-      return command.Execute(achievementId);
+      return command.ExecuteAsync(achievementId);
     }
   }
 }

@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<Guid> Add(DbSkill skill)
+    public async Task<Guid> AddAsync(DbSkill skill)
     {
       if (skill == null)
       {

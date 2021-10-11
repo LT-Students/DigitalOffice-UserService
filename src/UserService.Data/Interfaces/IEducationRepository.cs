@@ -9,12 +9,12 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     [AutoInject]
     public interface IEducationRepository
     {
-        Task Add(DbUserEducation education);
+        Task AddAsync(DbUserEducation education);
 
         DbUserEducation Get(Guid educationId);
 
-        Task<bool> Edit(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
+        Task<bool> EditAsync(DbUserEducation educationId, JsonPatchDocument<DbUserEducation> request);
 
-        Task<bool> Remove(DbUserEducation education);
+        Task<bool> RemoveAsync(DbUserEducation education);
     }
 }

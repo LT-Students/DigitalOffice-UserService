@@ -11,11 +11,11 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     {
         DbUserCommunication Get(Guid communicationId);
 
-        Task<Guid> Add(DbUserCommunication userCommunication);
+        Task<Guid> AddAsync(DbUserCommunication userCommunication);
 
-        Task<bool> Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
+        Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
 
-        Task<bool> Remove(DbUserCommunication communication);
+        Task<bool> RemoveAsync(DbUserCommunication communication);
 
         bool IsCommunicationValueExist(string value);
     }

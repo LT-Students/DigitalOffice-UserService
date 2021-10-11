@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces
   [AutoInject]
   public interface IGetAchievementCommand
   {
-    OperationResultResponse<AchievementResponse> Execute(Guid achievementId);
+    OperationResultResponse<AchievementResponse> ExecuteAsync(Guid achievementId);
   }
 }

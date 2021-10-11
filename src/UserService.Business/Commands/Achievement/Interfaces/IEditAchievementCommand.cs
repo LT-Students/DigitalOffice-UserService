@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces
   [AutoInject]
   public interface IEditAchievementCommand
   {
-    Task<OperationResultResponse<bool>> Execute(Guid achievementId, JsonPatchDocument<EditAchievementRequest> request);
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid achievementId, JsonPatchDocument<EditAchievementRequest> request);
   }
 }

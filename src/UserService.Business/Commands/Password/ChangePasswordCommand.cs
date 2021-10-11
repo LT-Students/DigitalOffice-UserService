@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             _repository = repository;
         }
 
-        public async Task<OperationResultResponse<bool>> Execute(ChangePasswordRequest request)
+        public async Task<OperationResultResponse<bool>> ExecuteAsync(ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.Login) || string.IsNullOrEmpty(request.NewPassword))
             {
@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
             return new OperationResultResponse<bool>
             {
                 Status = OperationResultStatusType.FullSuccess,
-                Body = await _repository.Edit(dbUserCredentials)
+                Body = await _repository.EditAsync(dbUserCredentials)
             };
         }
     }

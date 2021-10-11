@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
             DbUser admin = _mapper.Map(request);
-            _userRepository.Create(admin);
+            _userRepository.CreateAsync(admin);
 
             DbUserCredentials adminCredentials = new()
             {
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password),
                 IsActive = true
             };
-            _credentialsRepository.Create(adminCredentials);
+            _credentialsRepository.CreateAsync(adminCredentials);
 
             return true;
         }

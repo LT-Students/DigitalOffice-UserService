@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _communicationRepository = communicationRepository;
     }
 
-    public async Task<OperationResultResponse<bool>> Execute(Guid communicationId)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId)
     {
       var senderId = _httpContextAccessor.HttpContext.GetUserId();
       var sender = _userRepository.Get(senderId);
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
         throw new ForbiddenException("Not enough rights.");
       }
 
-      bool result = await _communicationRepository.Remove(userCommunication);
+      bool result = await _communicationRepository.RemoveAsync(userCommunication);
 
       return new OperationResultResponse<bool>
       {

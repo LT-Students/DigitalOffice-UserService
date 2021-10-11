@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateEducationCommand command,
       [FromBody] CreateEducationRequest request)
     {
-      return command.Execute(request);
+      return command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] Guid educationId,
       [FromBody] JsonPatchDocument<EditEducationRequest> request)
     {
-      return await command.Execute(educationId, request);
+      return await command.ExecuteAsync(educationId, request);
     }
 
     [HttpDelete("remove")]
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IRemoveEducationCommand command,
       [FromQuery] Guid educationId)
     {
-      return await command.Execute(educationId);
+      return await command.ExecuteAsync(educationId);
     }
   }
 }

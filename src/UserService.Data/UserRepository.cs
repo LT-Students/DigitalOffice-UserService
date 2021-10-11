@@ -80,7 +80,7 @@ namespace LT.DigitalOffice.UserService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<Guid> Create(DbUser dbUser)
+    public async Task<Guid> CreateAsync(DbUser dbUser)
     {
       if (dbUser == null)
       {
@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUser.Id;
     }
 
-    public async Task CreatePending(DbPendingUser dbPendingUser)
+    public async Task CreatePendingAsync(DbPendingUser dbPendingUser)
     {
       if (dbPendingUser == null)
       {
@@ -150,7 +150,7 @@ namespace LT.DigitalOffice.UserService.Data
           .Select(u => u.Id).ToList();
     }
 
-    public async Task<bool> EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
+    public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> userPatch)
     {
       if (userPatch == null)
       {
@@ -173,7 +173,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Skills.FirstOrDefault(s => s.Name == name);
     }
 
-    public async Task<Guid> CreateSkill(string name)
+    public async Task<Guid> CreateSkillAsync(string name)
     {
       if (string.IsNullOrEmpty(name))
       {
@@ -200,7 +200,7 @@ namespace LT.DigitalOffice.UserService.Data
     }
 
     /// <inheritdoc />
-    public async Task<bool> SwitchActiveStatus(Guid userId, bool status)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
     {
       DbUser dbUser = _provider.Users.FirstOrDefault(u => u.Id == userId);
       if (dbUser == null)
@@ -245,7 +245,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
     }
 
-    public async Task DeletePendingUser(Guid userId)
+    public async Task DeletePendingUserAsync(Guid userId)
     {
       DbPendingUser dbPendingUser = _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
 
@@ -268,7 +268,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
     }
 
-    public async Task<bool> RemoveAvatar(Guid userId)
+    public async Task<bool> RemoveAvatarAsync(Guid userId)
     {
       DbUser dbUser = Get(userId);
 

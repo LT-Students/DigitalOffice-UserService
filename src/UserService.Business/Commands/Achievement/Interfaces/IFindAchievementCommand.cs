@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces
   [AutoInject]
   public interface IFindAchievementCommand
   {
-    FindResultResponse<AchievementInfo> Execute(FindAchievementFilter filter);
+    FindResultResponse<AchievementInfo> ExecuteAsync(FindAchievementFilter filter);
   }
 }

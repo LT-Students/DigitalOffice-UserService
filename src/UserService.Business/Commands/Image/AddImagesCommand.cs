@@ -114,7 +114,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request)
+    public async Task<OperationResultResponse<List<Guid>>> ExecuteAsync(AddImagesRequest request)
     {
       OperationResultResponse<List<Guid>> response = new();
 
@@ -145,7 +145,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       {
         List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
 
-        await _imageRepository.Create(dbEntityImages);
+        await _imageRepository.CreateAsync(dbEntityImages);
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 

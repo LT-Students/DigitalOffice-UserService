@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     #region private methods
 
-    private void EditCompanyEmployee(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
+    private async Task EditCompanyEmployeeAsync(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
       string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
       string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
@@ -67,16 +67,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        IOperationResult<(bool department, bool position, bool office)> response =
-          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
-          IEditCompanyEmployeeRequest.CreateObj(
-            userId,
-            _httpContextAccessor.HttpContext.GetUserId(),
-            departmentId: departmentId,
-            positionId: positionId,
-            officeId: officeId)).Result.Message;
+        Response<IOperationResult<(bool department, bool position, bool office)>> response =
+          await _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+            IEditCompanyEmployeeRequest.CreateObj(
+              userId,
+              _httpContextAccessor.HttpContext.GetUserId(),
+              departmentId: departmentId,
+              positionId: positionId,
+              officeId: officeId));
 
-        if (!response.IsSuccess)
+        if (!response.Message.IsSuccess)
         {
           _logger.LogWarning(logMessage, userId);
 
@@ -98,21 +98,21 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        if (!response.Body.department)
+        if (!response.Message.Body.department)
         {
           _logger.LogWarning(departmentLogMessage, userId, departmentId);
 
           errors.Add(departmentErrorMessage);
         }
 
-        if (!response.Body.position)
+        if (!response.Message.Body.position)
         {
           _logger.LogWarning(positionLogMessage, userId, positionId);
 
           errors.Add(positionErrorMessage);
         }
 
-        if (!response.Body.office)
+        if (!response.Message.Body.office)
         {
           _logger.LogWarning(officeLogMessage, userId, officeId);
 
@@ -140,18 +140,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+    private async Task ChangeUserRoleAsync(Guid roleId, Guid userId, List<string> errors)
     {
       string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
       const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'";
 
       try
       {
-        var response = _rcRole.GetResponse<IOperationResult<bool>>(
-          IChangeUserRoleRequest.CreateObj(
-            roleId,
-            userId,
-            _httpContextAccessor.HttpContext.GetUserId())).Result;
+        Response<IOperationResult<bool>> response =
+          await _rcRole.GetResponse<IOperationResult<bool>>(
+            IChangeUserRoleRequest.CreateObj(
+              roleId, userId, _httpContextAccessor.HttpContext.GetUserId()));
+
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
           _logger.LogWarning(logMessage, roleId, userId);
@@ -167,7 +167,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private void SendEmail(DbUser dbUser, string password, List<string> errors)
+    private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
     {
       var email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
 
@@ -186,18 +186,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       EmailTemplateType templateType = EmailTemplateType.Greeting;
       try
       {
-        var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-          userFirstName: dbUser.FirstName,
-          userEmail: email.Value,
-          userId: dbUser.Id.ToString(),
-          userPassword: password);
+        Dictionary<string, string> templateValues =
+          ISendEmailRequest.CreateTemplateValuesDictionary(
+            userFirstName: dbUser.FirstName,
+            userEmail: email.Value,
+            userId: dbUser.Id.ToString(),
+            userPassword: password);
 
-        var emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
+        object emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
 
-        IOperationResult<bool> rcSendEmailResponse = _rcSendEmail
-          .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default)
-          .Result
-          .Message;
+        IOperationResult<bool> rcSendEmailResponse = (await _rcSendEmail
+          .GetResponse<IOperationResult<bool>>(emailRequest)).Message;
 
         if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
         {
@@ -217,7 +216,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private Guid? GetAvatarImageId(AddImageRequest avatarRequest, List<string> errors)
+    private async Task<Guid?> GetAvatarImageIdAsync(AddImageRequest avatarRequest, List<string> errors)
     {
       if (avatarRequest == null)
       {
@@ -231,11 +230,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        Response<IOperationResult<ICreateImagesResponse>> createResponse = _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
-          ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }),
-            ImageSource.User))
-          .Result;
+        Response<IOperationResult<ICreateImagesResponse>> createResponse =
+          await _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+            ICreateImagesRequest.CreateObj(
+              _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }),
+              ImageSource.User));
 
         if (!createResponse.Message.IsSuccess)
         {
@@ -297,7 +296,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc/>
-    public async Task<OperationResultResponse<Guid>> Execute(CreateUserRequest request)
+    public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateUserRequest request)
     {
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
@@ -318,25 +317,25 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Conflict, response.Errors); ;
       }
 
-      Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
+      Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       DbUser dbUser = _mapperUser.Map(request, avatarImageId);
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
-      Guid userId = await _userRepository.Create(dbUser);
+      Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      await _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
+      await _userRepository.CreatePendingAsync(new DbPendingUser() { UserId = dbUser.Id, Password = password });
 
       if (avatarImageId.HasValue)
       {
-        await _imageRepository.Create(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
+        await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
       }
 
-      SendEmail(dbUser, password, response.Errors);
-      EditCompanyEmployee(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
+      await SendEmailAsync(dbUser, password, response.Errors);
+      await EditCompanyEmployeeAsync(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
 
       if (request.RoleId.HasValue)
       {
-        ChangeUserRole(request.RoleId.Value, userId, response.Errors);
+        await ChangeUserRoleAsync(request.RoleId.Value, userId, response.Errors);
       }
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;

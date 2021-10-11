@@ -320,7 +320,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc/>
-    public async Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter)
     {
       List<DbUser> dbUsers = null;
 

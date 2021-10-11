@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
         .Returns(_items);
 
       _mocker
-        .Setup<IEducationRepository, Task<bool>>(x => x.Remove(_dbUserEducation))
+        .Setup<IEducationRepository, Task<bool>>(x => x.RemoveAsync(_dbUserEducation))
         .Returns(Task.FromResult(true));
 
       _mocker
@@ -120,8 +120,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.EducationsCommandTests
         Body = true
       };
 
-      SerializerAssert.AreEqual(expectedResponse, await _command.Execute(_educationId));
-      _mocker.Verify<IEducationRepository, Task<bool>>(x => x.Remove(_dbUserEducation), Times.Once);
+      SerializerAssert.AreEqual(expectedResponse, await _command.ExecuteAsync(_educationId));
+      _mocker.Verify<IEducationRepository, Task<bool>>(x => x.RemoveAsync(_dbUserEducation), Times.Once);
       _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
       _mocker.Verify<IEducationRepository>(x => x.Get(_educationId), Times.Once);
     }

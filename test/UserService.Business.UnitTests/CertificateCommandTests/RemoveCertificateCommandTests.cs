@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_items);
 
             _mocker
-                .Setup<ICertificateRepository, bool>(x => x.Remove(_dbUserCertificate))
+                .Setup<ICertificateRepository, bool>(x => x.RemoveAsync(_dbUserCertificate))
                 .Returns(true);
 
             _mocker
@@ -90,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(false);
 
             Assert.Throws<ForbiddenException>(() => _command.Execute(_certificateId));
-            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(It.IsAny<DbUserCertificate>()), Times.Never);
+            _mocker.Verify<ICertificateRepository, bool>(x => x.RemoveAsync(It.IsAny<DbUserCertificate>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(userId), Times.Once);
             _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Once);
         }
@@ -103,7 +103,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Throws(new Exception());
 
             Assert.Throws<Exception>(() => _command.Execute(_certificateId));
-            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(It.IsAny<DbUserCertificate>()), Times.Never);
+            _mocker.Verify<ICertificateRepository, bool>(x => x.RemoveAsync(It.IsAny<DbUserCertificate>()), Times.Never);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Never);
         }
@@ -118,7 +118,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             };
 
             SerializerAssert.AreEqual(expectedResponse, _command.Execute(_certificateId));
-            _mocker.Verify<ICertificateRepository, bool>(x => x.Remove(_dbUserCertificate), Times.Once);
+            _mocker.Verify<ICertificateRepository, bool>(x => x.RemoveAsync(_dbUserCertificate), Times.Once);
             _mocker.Verify<IUserRepository>(x => x.Get(_dbUser.Id), Times.Once);
             _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Once);
         }

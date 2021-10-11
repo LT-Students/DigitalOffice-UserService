@@ -5,9 +5,9 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
 {
-    [AutoInject]
-    public interface ICreateEducationCommand
-    {
-        OperationResultResponse<Guid?> Execute(CreateEducationRequest request);
-    }
+  [AutoInject]
+  public interface ICreateEducationCommand
+  {
+    OperationResultResponse<Guid?> ExecuteAsync(CreateEducationRequest request);
+  }
 }

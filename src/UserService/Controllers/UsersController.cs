@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateUserCommand command,
       [FromBody] CreateUserRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] Guid userId,
       [FromBody] JsonPatchDocument<EditUserRequest> request)
     {
-      return await command.Execute(userId, request);
+      return await command.ExecuteAsync(userId, request);
     }
 
     [HttpGet("get")]
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IGetUserCommand command,
       [FromQuery] GetUserFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
 
     [HttpGet("find")]
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IFindUserCommand command,
       [FromQuery] FindUsersFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
   }
 }

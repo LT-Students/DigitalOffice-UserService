@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces
   [AutoInject]
   public interface ICreateAchievementCommand
   {
-    Task<OperationResultResponse<Guid?>> Execute(CreateAchievementRequest request);
+    Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateAchievementRequest request);
   }
 }

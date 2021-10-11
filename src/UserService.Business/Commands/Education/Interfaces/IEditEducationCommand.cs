@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
 {
-    [AutoInject]
-    public interface IEditEducationCommand
-    {
-        Task<OperationResultResponse<bool>> Execute(Guid educationId, JsonPatchDocument<EditEducationRequest> request);
-    }
+  [AutoInject]
+  public interface IEditEducationCommand
+  {
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid educationId, JsonPatchDocument<EditEducationRequest> request);
+  }
 }

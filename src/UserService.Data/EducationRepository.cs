@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task Add(DbUserEducation education)
+    public async Task AddAsync(DbUserEducation education)
     {
       if (education == null)
       {
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Data
       return education;
     }
 
-    public async Task<bool> Edit(DbUserEducation education, JsonPatchDocument<DbUserEducation> request)
+    public async Task<bool> EditAsync(DbUserEducation education, JsonPatchDocument<DbUserEducation> request)
     {
       if (education == null)
       {
@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<bool> Remove(DbUserEducation education)
+    public async Task<bool> RemoveAsync(DbUserEducation education)
     {
       if (education == null)
       {

@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateSkillCommand command,
       [FromBody] CreateSkillRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
   }
 }

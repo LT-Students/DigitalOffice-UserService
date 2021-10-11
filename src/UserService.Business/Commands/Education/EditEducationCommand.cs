@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _validator = validator;
     }
 
-    public async Task<OperationResultResponse<bool>> Execute(Guid educationId, JsonPatchDocument<EditEducationRequest> request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid educationId, JsonPatchDocument<EditEducationRequest> request)
     {
       var senderId = _httpContextAccessor.HttpContext.GetUserId();
       var dbUser = _userRepository.Get(senderId);
@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
 
-      bool result = await _educationRepository.Edit(userEducation, dbRequest);
+      bool result = await _educationRepository.EditAsync(userEducation, dbRequest);
 
       return new OperationResultResponse<bool>
       {

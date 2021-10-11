@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
@@ -29,14 +30,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
   {
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUserRepository _userRepository;
     private readonly ICertificateRepository _certificateRepository;
     private readonly IPatchDbUserCertificateMapper _mapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly ILogger<EditCertificateCommand> _logger;
 
-    private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
+    private async Task<Guid?> GetImageIdAsync(AddImageRequest addImageRequest, List<string> errors)
     {
       Guid? imageId = null;
 
@@ -51,11 +51,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       try
       {
-        Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
+        Response<IOperationResult<Guid>> response = await _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }),
-            ImageSource.User))
-          .Result;
+            ImageSource.User));
 
         if (!response.Message.IsSuccess)
         {
@@ -82,7 +81,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     public EditCertificateCommand(
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IUserRepository userRepository,
       ICertificateRepository certificateRepository,
       IPatchDbUserCertificateMapper mapper,
       ICreateImageDataMapper createImageDataMapper,
@@ -91,7 +89,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
-      _userRepository = userRepository;
       _certificateRepository = certificateRepository;
       _mapper = mapper;
       _createImageDataMapper = createImageDataMapper;
@@ -99,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _logger = logger;
     }
 
-    public OperationResultResponse<bool> Execute(Guid certificateId, JsonPatchDocument<EditCertificateRequest> request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid certificateId, JsonPatchDocument<EditCertificateRequest> request)
     {
       DbUserCertificate certificate = _certificateRepository.Get(certificateId);
 
@@ -117,12 +114,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       if (imageOperation != null)
       {
-        imageId = GetImageId(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
+        imageId = await GetImageIdAsync(JsonConvert.DeserializeObject<AddImageRequest>(imageOperation.value?.ToString()), errors);
       }
 
       JsonPatchDocument<DbUserCertificate> dbRequest = _mapper.Map(request, imageId);
 
-      bool result = _certificateRepository.Edit(certificate, dbRequest);
+      bool result = await _certificateRepository.EditAsync(certificate, dbRequest);
 
       return new OperationResultResponse<bool>
       {

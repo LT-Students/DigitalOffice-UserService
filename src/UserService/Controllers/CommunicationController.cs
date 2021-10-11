@@ -1,7 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -18,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] ICreateCommunicationCommand command,
       [FromBody] CreateCommunicationRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
@@ -27,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromBody] JsonPatchDocument<EditCommunicationRequest> request,
       [FromQuery] Guid communicationId)
     {
-      return await command.Execute(communicationId, request);
+      return await command.ExecuteAsync(communicationId, request);
     }
 
     [HttpDelete("remove")]
@@ -35,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IRemoveCommunicationCommand command,
       [FromQuery] Guid communicationId)
     {
-      return await command.Execute(communicationId);
+      return await command.ExecuteAsync(communicationId);
     }
   }
 }

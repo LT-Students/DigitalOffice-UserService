@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<OperationResultResponse<Guid>> Execute(CreateCommunicationRequest request)
+    public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCommunicationRequest request)
     {
       DbUser sender = _userRepository.Get(_httpContextAccessor.HttpContext.GetUserId());
 
@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       return new OperationResultResponse<Guid>
       {
         Status = OperationResultStatusType.FullSuccess,
-        Body = await _repository.Add(_mapper.Map(request)),
+        Body = await _repository.AddAsync(_mapper.Map(request)),
         Errors = new()
       };
     }

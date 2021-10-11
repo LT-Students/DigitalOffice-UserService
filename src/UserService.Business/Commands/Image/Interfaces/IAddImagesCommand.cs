@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces
   [AutoInject]
   public interface IAddImagesCommand
   {
-    Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request);
+    Task<OperationResultResponse<List<Guid>>> ExecuteAsync(AddImagesRequest request);
   }
 }

@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill.Interfaces
   [AutoInject]
   public interface ICreateSkillCommand
   {
-    Task<OperationResultResponse<Guid>> Execute(CreateSkillRequest request);
+    Task<OperationResultResponse<Guid>> ExecuteAsync(CreateSkillRequest request);
   }
 }

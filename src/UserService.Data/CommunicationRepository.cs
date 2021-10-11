@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<Guid> Add(DbUserCommunication userCommunication)
+        public async Task<Guid> AddAsync(DbUserCommunication userCommunication)
         {
             if (userCommunication == null)
             {
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Data
             return userCommunication.Id;
         }
 
-        public async Task<bool> Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request)
+        public async Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request)
         {
             DbUserCommunication communication = _provider.UserCommunications.FirstOrDefault(x => x.Id == communicationId)
                 ?? throw new NotFoundException($"User communication with ID '{communicationId}' was not found.");
@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.UserCommunications.Any(uc => uc.Value == value);
         }
 
-        public async Task<bool> Remove(DbUserCommunication communication)
+        public async Task<bool> RemoveAsync(DbUserCommunication communication)
         {
             if (communication == null)
             {

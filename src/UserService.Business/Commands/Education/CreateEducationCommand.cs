@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _validator = validator;
     }
 
-    public OperationResultResponse<Guid?> Execute(CreateEducationRequest request)
+    public OperationResultResponse<Guid?> ExecuteAsync(CreateEducationRequest request)
     {
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       DbUserEducation dbEducation = _mapper.Map(request);
 
-      _educationRepository.Add(dbEducation);
+      _educationRepository.AddAsync(dbEducation);
 
       return new OperationResultResponse<Guid?>
       {
