@@ -16,12 +16,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         private readonly IUserCredentialsRepository _credentialsRepository;
         private readonly IDbUserMapper _mapper;
 
-        private object CreateAdmin(ICreateAdminRequest request)
+        private async Task<object> CreateAdmin(ICreateAdminRequest request)
         {
             string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
 
             DbUser admin = _mapper.Map(request);
-            _userRepository.CreateAsync(admin);
+            await _userRepository.CreateAsync(admin);
 
             DbUserCredentials adminCredentials = new()
             {
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
                 PasswordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password),
                 IsActive = true
             };
-            _credentialsRepository.CreateAsync(adminCredentials);
+            await _credentialsRepository.CreateAsync(adminCredentials);
 
             return true;
         }
