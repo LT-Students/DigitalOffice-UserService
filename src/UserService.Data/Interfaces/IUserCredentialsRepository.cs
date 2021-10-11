@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -17,16 +18,16 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
         /// </summary>
         DbUserCredentials Get(GetCredentialsFilter filter);
 
-        Guid Create(DbUserCredentials dbUserCredentials);
+        Task<Guid> Create(DbUserCredentials dbUserCredentials);
 
-        void SwitchActiveStatus(Guid userId, bool isActiveStatus);
+        Task SwitchActiveStatus(Guid userId, bool isActiveStatus);
 
         /// <summary>
         /// Edit existing user credentials. Returns whether it was successful to edit.
         /// </summary>
         /// <param name="userCredentials">User credentials to edit.</param>
         /// <returns>Whether it was successful to edit.</returns>
-        bool Edit(DbUserCredentials userCredentials);
+        Task<bool> Edit(DbUserCredentials userCredentials);
 
         bool IsLoginExist(string login);
 

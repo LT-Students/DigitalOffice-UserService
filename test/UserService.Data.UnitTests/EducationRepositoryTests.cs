@@ -49,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             //_repository = new EducationRepository(_provider);
 
             _provider.UserEducations.Add(_dbUserEducation);
-            _provider.Save();
+            await _provider.SaveAsync()
         }
 
         [TearDown]

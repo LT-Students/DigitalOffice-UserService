@@ -2,18 +2,19 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
   [AutoInject]
   public interface IImageRepository
   {
-    List<Guid> Create(List<DbEntityImage> dbEntityImages);
+    Task<List<Guid>> Create(List<DbEntityImage> dbEntityImages);
 
     List<Guid> GetImagesIds(Guid entityId);
 
     List<DbEntityImage> Get(List<Guid> imagesIds);
 
-    bool Remove(List<Guid> imagesIds);
+    Task<bool> Remove(List<Guid> imagesIds);
   }
 }

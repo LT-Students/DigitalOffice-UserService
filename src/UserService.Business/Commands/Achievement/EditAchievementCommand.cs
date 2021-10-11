@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 {
@@ -38,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       _validator = validator;
     }
 
-    public OperationResultResponse<bool> Execute(Guid achievementId, JsonPatchDocument<EditAchievementRequest> request)
+    public async Task<OperationResultResponse<bool>> Execute(Guid achievementId, JsonPatchDocument<EditAchievementRequest> request)
     {
       if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
@@ -64,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 
       OperationResultResponse<bool> response = new();
 
-      response.Body = _repository.Edit(achievementId, _mapper.Map(request));
+      response.Body = await _repository.Edit(achievementId, _mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
 
       if (!response.Body)

@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
@@ -16,6 +17,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// <summary>
         /// Editing an existing user. Returns true if it succeeded to edit a user, otherwise false.
         /// </summary>
-        OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch);
+        Task<OperationResultResponse<bool>> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch);
     }
 }

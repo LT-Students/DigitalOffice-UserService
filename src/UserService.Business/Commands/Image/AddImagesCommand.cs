@@ -145,7 +145,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       {
         List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
 
-        _imageRepository.Create(dbEntityImages);
+        await _imageRepository.Create(dbEntityImages);
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 

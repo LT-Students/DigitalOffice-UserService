@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -10,11 +11,11 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     {
         DbUserCommunication Get(Guid communicationId);
 
-        Guid Add(DbUserCommunication userCommunication);
+        Task<Guid> Add(DbUserCommunication userCommunication);
 
-        bool Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
+        Task<bool> Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
 
-        bool Remove(DbUserCommunication communication);
+        Task<bool> Remove(DbUserCommunication communication);
 
         bool IsCommunicationValueExist(string value);
     }

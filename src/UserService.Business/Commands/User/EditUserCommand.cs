@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
@@ -136,16 +137,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     #endregion
 
     public EditUserCommand(
-        IUserRepository userRepository,
-        IUserCredentialsRepository credentialsRepository,
-        IPatchDbUserMapper mapperUser,
-        IAccessValidator accessValidator,
-        ILogger<EditUserCommand> logger,
-        IRequestClient<ICreateImagesRequest> rcImage,
-        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
-        IRequestClient<IChangeUserRoleRequest> rcRole,
-        IHttpContextAccessor httpContextAccessor,
-        IBus bus)
+      IUserRepository userRepository,
+      IUserCredentialsRepository credentialsRepository,
+      IPatchDbUserMapper mapperUser,
+      IAccessValidator accessValidator,
+      ILogger<EditUserCommand> logger,
+      IRequestClient<ICreateImagesRequest> rcImage,
+      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IChangeUserRoleRequest> rcRole,
+      IHttpContextAccessor httpContextAccessor,
+      IBus bus)
     {
       _userRepository = userRepository;
       _credentialsRepository = credentialsRepository;
@@ -160,30 +161,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc/>
-    public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
+    public async Task<OperationResultResponse<bool>> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
       Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
       OperationResultResponse<bool> response = new();
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
-          _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-          (userId == requestSenderId
-          && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
-          && positionOperation == null
-          && departmentOperation == null
-          && roleOperation == null
-          && officeOperation == null)))
+        _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
+        (userId == requestSenderId
+        && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
+        && positionOperation == null
+        && departmentOperation == null
+        && roleOperation == null
+        && officeOperation == null)))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         response.Status = OperationResultStatusType.Failed;
@@ -243,19 +244,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         bool newValue = bool.Parse(isActiveOperation.value.ToString());
 
-        _credentialsRepository.SwitchActiveStatus(
+        await _credentialsRepository.SwitchActiveStatus(
             userId,
             newValue);
 
         if (!newValue)
         {
-          _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
+          await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
               userId,
               requestSenderId));
         }
       }
 
-      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch));
+      response.Body = await _userRepository.EditUser(userId, _mapperUser.Map(patch));
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess

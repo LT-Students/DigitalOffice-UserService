@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces
 {
@@ -14,6 +15,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces
         /// <summary>
         /// Change password of the user with specified login.
         /// </summary>
-        OperationResultResponse<bool> Execute(ChangePasswordRequest request);
+        Task<OperationResultResponse<bool>> Execute(ChangePasswordRequest request);
     }
 }

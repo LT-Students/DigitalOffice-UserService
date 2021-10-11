@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -72,14 +73,14 @@ namespace LT.DigitalOffice.UserService.Data
     }
 
     public UserRepository(
-        IDataProvider provider,
-        IHttpContextAccessor httpContextAccessor)
+      IDataProvider provider,
+      IHttpContextAccessor httpContextAccessor)
     {
       _provider = provider;
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid Create(DbUser dbUser)
+    public async Task<Guid> Create(DbUser dbUser)
     {
       if (dbUser == null)
       {
@@ -87,12 +88,12 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       _provider.Users.Add(dbUser);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbUser.Id;
     }
 
-    public void CreatePending(DbPendingUser dbPendingUser)
+    public async Task CreatePending(DbPendingUser dbPendingUser)
     {
       if (dbPendingUser == null)
       {
@@ -105,7 +106,7 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       _provider.PendingUsers.Add(dbPendingUser);
-      _provider.Save();
+      await _provider.SaveAsync();
     }
 
     public DbUser Get(Guid id)
@@ -149,7 +150,7 @@ namespace LT.DigitalOffice.UserService.Data
           .Select(u => u.Id).ToList();
     }
 
-    public bool EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
+    public async Task<bool> EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
     {
       if (userPatch == null)
       {
@@ -162,7 +163,7 @@ namespace LT.DigitalOffice.UserService.Data
       userPatch.ApplyTo(dbUser);
       dbUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }
@@ -172,7 +173,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Skills.FirstOrDefault(s => s.Name == name);
     }
 
-    public Guid CreateSkill(string name)
+    public async Task<Guid> CreateSkill(string name)
     {
       if (string.IsNullOrEmpty(name))
       {
@@ -193,13 +194,13 @@ namespace LT.DigitalOffice.UserService.Data
       };
 
       _provider.Skills.Add(skill);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return skill.Id;
     }
 
     /// <inheritdoc />
-    public bool SwitchActiveStatus(Guid userId, bool status)
+    public async Task<bool> SwitchActiveStatus(Guid userId, bool status)
     {
       DbUser dbUser = _provider.Users.FirstOrDefault(u => u.Id == userId);
       if (dbUser == null)
@@ -214,7 +215,7 @@ namespace LT.DigitalOffice.UserService.Data
           _httpContextAccessor.HttpContext.GetUserId() :
           null;
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }
@@ -244,12 +245,12 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
     }
 
-    public void DeletePendingUser(Guid userId)
+    public async Task DeletePendingUser(Guid userId)
     {
       DbPendingUser dbPendingUser = _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
 
       _provider.PendingUsers.Remove(dbPendingUser);
-      _provider.Save();
+      await _provider.SaveAsync();
     }
 
     public bool IsUserExist(Guid userId)
@@ -267,7 +268,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
     }
 
-    public bool RemoveAvatar(Guid userId)
+    public async Task<bool> RemoveAvatar(Guid userId)
     {
       DbUser dbUser = Get(userId);
 
@@ -278,7 +279,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       dbUser.AvatarFileId = null;
 
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }

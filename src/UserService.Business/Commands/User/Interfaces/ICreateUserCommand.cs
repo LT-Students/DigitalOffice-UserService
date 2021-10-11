@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
@@ -15,6 +16,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
         /// <summary>
         /// Adds a new user. Returns true if it succeeded to add a user, otherwise false.
         /// </summary>
-        OperationResultResponse<Guid> Execute(CreateUserRequest request);
+        Task<OperationResultResponse<Guid>> Execute(CreateUserRequest request);
     }
 }

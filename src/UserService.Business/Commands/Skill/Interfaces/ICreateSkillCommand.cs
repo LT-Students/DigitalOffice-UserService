@@ -2,12 +2,13 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Skill.Interfaces
 {
-    [AutoInject]
-    public interface ICreateSkillCommand
-    {
-        OperationResultResponse<Guid> Execute(CreateSkillRequest request);
-    }
+  [AutoInject]
+  public interface ICreateSkillCommand
+  {
+    Task<OperationResultResponse<Guid>> Execute(CreateSkillRequest request);
+  }
 }

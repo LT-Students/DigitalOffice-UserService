@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 {
@@ -42,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
       _validator = validator;
     }
 
-    public OperationResultResponse<Guid> Execute(CreateSkillRequest request)
+    public async Task<OperationResultResponse<Guid>> Execute(CreateSkillRequest request)
     {
       OperationResultResponse<Guid> response = new();
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
@@ -77,8 +78,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 
         return response;
       }
-      
-      response.Body = _skillRepository.Add(_mapper.Map(request));
+
+      response.Body = await _skillRepository.Add(_mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;

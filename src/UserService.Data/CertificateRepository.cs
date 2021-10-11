@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             _provider.UserCertificates.Add(certificate);
-            _provider.Save();
+            _provider.SaveAsync();
         }
 
         public DbUserCertificate Get(Guid certificateId)
@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Data
             request.ApplyTo(certificate);
             certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
             certificate.ModifiedAtUtc = DateTime.UtcNow;
-            _provider.Save();
+            _provider.SaveAsync();
 
             return true;
         }
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Data
             certificate.IsActive = false;
             certificate.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
             certificate.ModifiedAtUtc = DateTime.UtcNow;
-            _provider.Save();
+            _provider.SaveAsync();
 
             return true;
         }

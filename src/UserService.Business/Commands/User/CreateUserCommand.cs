@@ -5,6 +5,7 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
@@ -29,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -49,6 +51,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
+    private readonly IResponseCreater _responseCreater;
 
     #region private methods
 
@@ -273,7 +276,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       ICreateImageDataMapper createImageDataMapper,
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
-      IImageRepository imageRepository)
+      IImageRepository imageRepository,
+      IResponseCreater responseCreater)
     {
       _logger = logger;
       _rcImage = rcImage;
@@ -289,52 +293,42 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
       _imageRepository = imageRepository;
+      _responseCreater = responseCreater;
     }
 
     /// <inheritdoc/>
-    public OperationResultResponse<Guid> Execute(CreateUserRequest request)
+    public async Task<OperationResultResponse<Guid>> Execute(CreateUserRequest request)
     {
-      OperationResultResponse<Guid> response = new();
-
-      if (!(_accessValidator.IsAdmin() ||
-        _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
+      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("Not enough rights.");
-
-        return response;
+        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
       }
 
       if (!_validator.ValidateCustom(request, out List<string> errors))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.AddRange(errors);
-
-        return response;
+        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
       }
+
+      OperationResultResponse<Guid> response = new();
 
       if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-        response.Status = OperationResultStatusType.Failed;
         response.Errors.Add("Communication value already exist");
 
-        return response;
+        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Conflict, response.Errors); ;
       }
 
       Guid? avatarImageId = GetAvatarImageId(request.AvatarImage, response.Errors);
       DbUser dbUser = _mapperUser.Map(request, avatarImageId);
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
-      Guid userId = _userRepository.Create(dbUser);
+      Guid userId = await _userRepository.Create(dbUser);
 
-      _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
+      await _userRepository.CreatePending(new DbPendingUser() { UserId = dbUser.Id, Password = password });
 
       if (avatarImageId.HasValue)
       {
-        _imageRepository.Create(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
+        await _imageRepository.Create(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
       }
 
       SendEmail(dbUser, password, response.Errors);

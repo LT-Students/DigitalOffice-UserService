@@ -4,15 +4,16 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement.Filters;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
   [AutoInject]
   public interface IAchievementRepository
   {
-    Guid Create(DbAchievement dbAchievement);
+    Task<Guid> Create(DbAchievement dbAchievement);
 
-    bool Edit(Guid achievementId, JsonPatchDocument<DbAchievement> request);
+    Task<bool> Edit(Guid achievementId, JsonPatchDocument<DbAchievement> request);
 
     DbAchievement Get(Guid achievementId);
 

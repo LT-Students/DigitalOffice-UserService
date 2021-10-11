@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
@@ -10,7 +11,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -27,6 +27,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IUserRepository _repository;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
+    private readonly IRedisHelper _redisHelper;
 
     private List<UserData> GetUserInfo(IGetUsersDataRequest request)
     {
@@ -48,11 +49,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     public GetUsersDataConsumer(
       IUserRepository repository,
       IConnectionMultiplexer cache,
-      IOptions<RedisConfig> redisConfig)
+      IOptions<RedisConfig> redisConfig,
+      IRedisHelper redisHelper)
     {
       _repository = repository;
       _cache = cache;
       _redisConfig = redisConfig;
+      _redisHelper = redisHelper;
     }
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
@@ -64,9 +67,10 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users != null)
       {
-        await _cache.GetDatabase(Cache.Users).StringSetAsync(
+        await _redisHelper.CreateAsync(
+          Cache.Users,
           context.Message.UserIds.GetRedisCacheHashCode(),
-          JsonConvert.SerializeObject(users),
+          users,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }
