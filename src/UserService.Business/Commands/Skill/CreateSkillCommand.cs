@@ -21,7 +21,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
   public class CreateSkillCommand : ICreateSkillCommand
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUserRepository _userRepository;
     private readonly IDbSkillMapper _mapper;
     private readonly ISkillRepository _skillRepository;
     private readonly IAccessValidator _accessValidator;
@@ -29,14 +28,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
 
     public CreateSkillCommand(
       IHttpContextAccessor httpContextAccessor,
-      IUserRepository userRepository,
       IDbSkillMapper mapper,
       ISkillRepository skillRepository,
       IAccessValidator accessValidator,
       ICreateSkillRequestValidator validator)
     {
       _httpContextAccessor = httpContextAccessor;
-      _userRepository = userRepository;
       _mapper = mapper;
       _skillRepository = skillRepository;
       _accessValidator = accessValidator;
@@ -46,10 +43,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Skill
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateSkillRequest request)
     {
       OperationResultResponse<Guid> response = new();
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser dbUser = _userRepository.Get(senderId);
 
-      if (!(dbUser.IsAdmin || _accessValidator.HasRights(Rights.AddEditRemoveUsers)))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 

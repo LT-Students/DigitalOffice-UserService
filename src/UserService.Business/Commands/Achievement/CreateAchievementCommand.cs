@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateAchievementRequest request)
     {
-      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 

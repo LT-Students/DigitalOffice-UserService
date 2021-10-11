@@ -35,11 +35,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId)
     {
       var senderId = _httpContextAccessor.HttpContext.GetUserId();
-      var sender = _userRepository.Get(senderId);
       DbUserCommunication userCommunication = _communicationRepository.Get(communicationId);
 
-      if (!(sender.IsAdmin ||
-        _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
         && senderId != userCommunication.UserId)
       {
         throw new ForbiddenException("Not enough rights.");

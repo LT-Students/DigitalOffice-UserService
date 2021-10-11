@@ -94,7 +94,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCertificateRequest request)
     {
-      if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
         && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
       {
         throw new ForbiddenException("Not enough rights.");

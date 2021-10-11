@@ -2,12 +2,13 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces
 {
   [AutoInject]
   public interface ICreateEducationCommand
   {
-    OperationResultResponse<Guid?> ExecuteAsync(CreateEducationRequest request);
+    Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateEducationRequest request);
   }
 }

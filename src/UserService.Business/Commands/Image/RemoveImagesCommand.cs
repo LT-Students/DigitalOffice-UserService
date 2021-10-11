@@ -107,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
+      if (!await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers)
         && senderId != GetUserIdFromEntity(request.EntityId, request.EntityType))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;

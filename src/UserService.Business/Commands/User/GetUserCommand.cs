@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -56,6 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IConnectionMultiplexer _cache;
     private readonly IRedisHelper _redisHelper;
+    private readonly IResponseCreater _responseCreater;
 
     #region private methods
 
@@ -326,7 +328,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IConnectionMultiplexer cache,
-      IRedisHelper redisHelper)
+      IRedisHelper redisHelper,
+      IResponseCreater responseCreater)
     {
       _logger = logger;
       _repository = repository;
@@ -344,6 +347,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetUserRoles = rcGetUserRoles;
       _cache = cache;
       _redisHelper = redisHelper;
+      _responseCreater = responseCreater;
     }
 
     /// <inheritdoc />
@@ -354,7 +358,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           string.IsNullOrEmpty(filter.Name) &&
           string.IsNullOrEmpty(filter.Email)))
       {
-        throw new BadRequestException("You must specify 'userId' or|and 'name' or|and 'email'.");
+        return _responseCreater.CreateFailureResponse<UserResponse>(
+          HttpStatusCode.BadRequest,
+          new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
       }
 
       OperationResultResponse<UserResponse> response = new();
@@ -362,7 +368,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       DbUser dbUser = _repository.Get(filter);
       if (dbUser == null)
       {
-        throw new NotFoundException($"User was not found.");
+        return _responseCreater.CreateFailureResponse<UserResponse>(
+          HttpStatusCode.NotFound,
+          new List<string> { "User was not found." });
       }
 
       List<Guid> images = new();

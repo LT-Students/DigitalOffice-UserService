@@ -45,11 +45,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCommunicationRequest request)
     {
-      DbUser sender = _userRepository.Get(_httpContextAccessor.HttpContext.GetUserId());
-
-      if (!(sender.IsAdmin
-        || _accessValidator.HasRights(Rights.AddEditRemoveUsers)
-        || request.UserId == _httpContextAccessor.HttpContext.GetUserId()))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
+        || request.UserId == _httpContextAccessor.HttpContext.GetUserId())
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         return new OperationResultResponse<Guid>

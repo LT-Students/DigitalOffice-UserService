@@ -28,6 +28,7 @@ using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Net;
 using System.Threading.Tasks;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {

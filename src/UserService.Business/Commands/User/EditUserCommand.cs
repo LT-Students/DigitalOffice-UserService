@@ -8,6 +8,7 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
@@ -37,6 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreater;
     private readonly IBus _bus;
 
     #region private method
@@ -143,6 +145,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
+      IResponseCreater responseCreater,
       IBus bus)
     {
       _userRepository = userRepository;
@@ -154,6 +157,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
+      _responseCreater = responseCreater;
       _bus = bus;
     }
 
@@ -171,11 +175,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
-      OperationResultResponse<bool> response = new();
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
-        _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
+        await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
         && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
         && positionOperation == null
@@ -183,12 +186,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         && roleOperation == null
         && officeOperation == null)))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("Not enough rights.");
-
-        return response;
+        _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
+
+      OperationResultResponse<bool> response = new();
 
       List<string> errors = new List<string>();
 

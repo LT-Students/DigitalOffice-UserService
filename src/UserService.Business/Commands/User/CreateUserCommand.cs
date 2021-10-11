@@ -298,7 +298,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateUserRequest request)
     {
-      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
       }

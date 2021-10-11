@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       DbUserCertificate userCertificate = _certificateRepository.Get(certificateId);
 
       if (senderId != userCertificate.UserId
-        && !_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         throw new ForbiddenException("Not enough rights.");
       }

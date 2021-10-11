@@ -53,8 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       DbUser sender = _userRepository.Get(senderId);
       DbUserCommunication communication = _repository.Get(communicationId);
 
-      if (!(sender.IsAdmin ||
-        _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
         && senderId != communication.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
