@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Achievement
       _mapper = mapper;
     }
 
-    public OperationResultResponse<AchievementResponse> ExecuteAsync(Guid achievementId)
+    public OperationResultResponse<AchievementResponse> Execute(Guid achievementId)
     {
       OperationResultResponse<AchievementResponse> response = new();
 

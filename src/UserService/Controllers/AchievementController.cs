@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IFindAchievementCommand command,
       [FromQuery] FindAchievementFilter filter)
     {
-      return command.ExecuteAsync(filter);
+      return command.Execute(filter);
     }
 
     [HttpGet("get")]
@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IGetAchievementCommand command,
       [FromQuery] Guid achievementId)
     {
-      return command.ExecuteAsync(achievementId);
+      return command.Execute(achievementId);
     }
   }
 }
