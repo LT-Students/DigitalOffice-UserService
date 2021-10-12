@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                         Type = (int)CommunicationType.Email,
                         Value = request.Email,
                         UserId = userId,
-                        CreatedBy =  userId,
+                        CreatedBy = userId,
                         CreatedAtUtc = createdAtUtc
                     }
                 }
