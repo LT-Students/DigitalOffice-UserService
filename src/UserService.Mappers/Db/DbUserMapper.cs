@@ -29,6 +29,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             }
 
             Guid userId = Guid.NewGuid();
+            Guid createdBy = _httpContextAccessor.HttpContext.GetUserId();
+            DateTime createdAtUtc = DateTime.UtcNow;
 
             DbUser dbUser = new()
             {
@@ -45,14 +47,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Rate = request.Rate,
                 StartWorkingAt = request.StartWorkingAt,
                 DateOfBirth = request.DateOfBirth,
-                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-                CreatedAtUtc = DateTime.UtcNow,
+                CreatedBy = createdBy,
+                CreatedAtUtc = createdAtUtc,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
                     Type = (int)x.Type,
                     Value = x.Value,
-                    UserId = userId
+                    UserId = userId,
+                    CreatedBy = createdBy,
+                    CreatedAtUtc = createdAtUtc
                 }).ToList()
             };
 
@@ -67,6 +71,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             }
 
             Guid userId = Guid.NewGuid();
+            DateTime createdAtUtc = DateTime.UtcNow;
 
             return new DbUser
             {
@@ -80,14 +85,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 IsAdmin = true,
                 Rate = 1,
                 CreatedBy = userId,
-                CreatedAtUtc = DateTime.UtcNow,
+                CreatedAtUtc = createdAtUtc,
                 Communications = new List<DbUserCommunication> {
                     new DbUserCommunication
                     {
                         Id = Guid.NewGuid(),
                         Type = (int)CommunicationType.Email,
                         Value = request.Email,
-                        UserId = userId
+                        UserId = userId,
+                        CreatedBy =  userId,
+                        CreatedAtUtc = createdAtUtc
                     }
                 }
             };

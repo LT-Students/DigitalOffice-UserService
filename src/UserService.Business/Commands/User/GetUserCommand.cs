@@ -31,6 +31,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -54,6 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IConnectionMultiplexer _cache;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     #region private methods
 
@@ -332,7 +335,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-      IConnectionMultiplexer cache)
+      IConnectionMultiplexer cache,
+      IHttpContextAccessor httpContextAccessor)
     {
       _logger = logger;
       _repository = repository;
@@ -349,25 +353,34 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _cache = cache;
+      _httpContextAccessor = httpContextAccessor;
     }
 
     /// <inheritdoc />
     public async Task<OperationResultResponse<UserResponse>> Execute(GetUserFilter filter)
     {
+      OperationResultResponse<UserResponse> response = new();
+
       if (filter == null ||
         (filter.UserId == null &&
           string.IsNullOrEmpty(filter.Name) &&
           string.IsNullOrEmpty(filter.Email)))
       {
-        throw new BadRequestException("You must specify 'userId' or|and 'name' or|and 'email'.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.Errors.Add("You must specify 'userId' or|and 'name' or|and 'email'.");
+        response.Status = OperationResultStatusType.Failed;
+
+        return response;
       }
 
-      OperationResultResponse<UserResponse> response = new();
-
       DbUser dbUser = _repository.Get(filter);
+
       if (dbUser == null)
       {
-        throw new NotFoundException($"User was not found.");
+        response.Errors.Add("User was not found.");
+        response.Status = OperationResultStatusType.Failed;
+
+        return response;
       }
 
       List<Guid> images = new();
