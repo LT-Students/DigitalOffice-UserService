@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
@@ -151,6 +152,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
+      _logger.LogInformation($"CompanyEmployee was taken from the cache. Employee id: {userId}");
+
       return (departments, positions, offices);
     }
 
@@ -180,6 +183,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (response.Message.IsSuccess)
         {
+          _logger.LogInformation($"CompanyEmployee was taken from the service. Employee id: {usersIds[0]}");
+
           return response.Message.Body;
         }
         else
@@ -353,6 +358,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc />
     public async Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter)
     {
+      OperationResultResponse<UserResponse> response = new();
+
       if (filter == null ||
         (filter.UserId == null &&
           string.IsNullOrEmpty(filter.Name) &&
@@ -363,9 +370,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
       }
 
-      OperationResultResponse<UserResponse> response = new();
-
       DbUser dbUser = _repository.Get(filter);
+
       if (dbUser == null)
       {
         return _responseCreater.CreateFailureResponse<UserResponse>(
