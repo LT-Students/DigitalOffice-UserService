@@ -377,7 +377,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (dbUser == null)
       {
-        response.Errors.Add("User was not found.");
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
         response.Status = OperationResultStatusType.Failed;
 
         return response;
