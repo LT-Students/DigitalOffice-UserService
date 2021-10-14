@@ -9,49 +9,48 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
-    public class RemoveCommunicationCommand : IRemoveCommunicationCommand
+  public class RemoveCommunicationCommand : IRemoveCommunicationCommand
+  {
+    private readonly IAccessValidator _accessValidator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IUserRepository _userRepository;
+    private readonly ICommunicationRepository _communicationRepository;
+
+    public RemoveCommunicationCommand(
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IUserRepository userRepository,
+      ICommunicationRepository communicationRepository)
     {
-        private readonly IAccessValidator _accessValidator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _userRepository;
-        private readonly ICommunicationRepository _communicationRepository;
-
-        public RemoveCommunicationCommand(
-            IAccessValidator accessValidator,
-            IHttpContextAccessor httpContextAccessor,
-            IUserRepository userRepository,
-            ICommunicationRepository communicationRepository)
-        {
-            _accessValidator = accessValidator;
-            _httpContextAccessor = httpContextAccessor;
-            _userRepository = userRepository;
-            _communicationRepository = communicationRepository;
-        }
-
-        public OperationResultResponse<bool> Execute(Guid communicationId)
-        {
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var sender = _userRepository.Get(senderId);
-            DbUserCommunication userCommunication = _communicationRepository.Get(communicationId);
-
-            if (!(sender.IsAdmin ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userCommunication.UserId)
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
-
-            bool result = _communicationRepository.Remove(userCommunication);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
-                Body = result,
-                Errors = new()
-            };
-        }
+      _accessValidator = accessValidator;
+      _httpContextAccessor = httpContextAccessor;
+      _userRepository = userRepository;
+      _communicationRepository = communicationRepository;
     }
+
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId)
+    {
+      var senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUserCommunication userCommunication = _communicationRepository.Get(communicationId);
+
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
+        && senderId != userCommunication.UserId)
+      {
+        throw new ForbiddenException("Not enough rights.");
+      }
+
+      bool result = await _communicationRepository.RemoveAsync(userCommunication);
+
+      return new OperationResultResponse<bool>
+      {
+        Status = result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
+        Body = result,
+        Errors = new()
+      };
+    }
+  }
 }

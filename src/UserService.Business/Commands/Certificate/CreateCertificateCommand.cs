@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 {
@@ -26,14 +27,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
   {
     private IAccessValidator _accessValidator;
     private IHttpContextAccessor _httpContextAccessor;
-    private IUserRepository _userRepository;
     private ICertificateRepository _certificateRepository;
     private IDbUserCertificateMapper _mapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly ILogger<CreateCertificateCommand> _logger;
 
-    private Guid? GetImageId(AddImageRequest addImageRequest, List<string> errors)
+    private async Task<Guid?> GetImageIdAsync(AddImageRequest addImageRequest, List<string> errors)
     {
       Guid? imageId = null;
 
@@ -46,10 +46,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       try
       {
-        Response<IOperationResult<Guid>> response = _rcImage.GetResponse<IOperationResult<Guid>>(
+        Response<IOperationResult<Guid>> response = await _rcImage.GetResponse<IOperationResult<Guid>>(
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(new List<AddImageRequest>() { addImageRequest }),
-            ImageSource.User)).Result;
+            ImageSource.User));
 
         if (!response.Message.IsSuccess)
         {
@@ -78,7 +78,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IDbUserCertificateMapper mapper,
-      IUserRepository userRepository,
       ICertificateRepository certificateRepository,
       IRequestClient<ICreateImagesRequest> rcAddIImage,
       ICreateImageDataMapper createImageDataMapper,
@@ -87,16 +86,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _mapper = mapper;
-      _userRepository = userRepository;
       _certificateRepository = certificateRepository;
       _rcImage = rcAddIImage;
       _logger = logger;
       _createImageDataMapper = createImageDataMapper;
     }
 
-    public OperationResultResponse<Guid> Execute(CreateCertificateRequest request)
+    public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCertificateRequest request)
     {
-      if (!(_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
         && _httpContextAccessor.HttpContext.GetUserId() != request.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
@@ -104,7 +102,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       List<string> errors = new();
 
-      Guid? imageId = GetImageId(request.Image, errors);
+      Guid? imageId = await GetImageIdAsync(request.Image, errors);
 
       if (!imageId.HasValue)
       {
@@ -117,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Certificate
 
       DbUserCertificate dbUserCertificate = _mapper.Map(request, imageId.Value);
 
-      _certificateRepository.Add(dbUserCertificate);
+      await _certificateRepository.AddAsync(dbUserCertificate);
 
       return new OperationResultResponse<Guid>
       {

@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -16,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public List<Guid> Create(List<DbEntityImage> dbEntityImages)
+    public async Task<List<Guid>> CreateAsync(List<DbEntityImage> dbEntityImages)
     {
       if (dbEntityImages == null || !dbEntityImages.Any() || dbEntityImages.Contains(null))
       {
@@ -24,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       _provider.EntitiesImages.AddRange(dbEntityImages);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbEntityImages.Select(x => x.ImageId).ToList();
     }
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.EntitiesImages.Where(x => imagesIds.Contains(x.ImageId)).ToList();
     }
 
-    public bool Remove(List<Guid> imagesIds)
+    public async Task<bool> RemoveAsync(List<Guid> imagesIds)
     {
       if (imagesIds == null || !imagesIds.Any())
       {
@@ -54,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Data
       List<DbEntityImage> removeUsersAvatars = Get(imagesIds);
 
       _provider.EntitiesImages.RemoveRange(removeUsersAvatars);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }

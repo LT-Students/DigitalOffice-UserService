@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -77,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials;
     }
 
-    public bool Edit(DbUserCredentials userCredentials)
+    public async Task<bool> EditAsync(DbUserCredentials userCredentials)
     {
       if (userCredentials == null)
       {
@@ -97,7 +98,7 @@ namespace LT.DigitalOffice.UserService.Data
         _provider.UserCredentials.Update(userCredentials);
         userCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
         userCredentials.ModifiedAtUtc = DateTime.UtcNow;
-        _provider.Save();
+        await _provider.SaveAsync();
       }
       catch (Exception exc)
       {
@@ -109,7 +110,7 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public Guid Create(DbUserCredentials dbUserCredentials)
+    public async Task<Guid> CreateAsync(DbUserCredentials dbUserCredentials)
     {
       if (dbUserCredentials == null)
       {
@@ -117,12 +118,12 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       _provider.UserCredentials.Add(dbUserCredentials);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbUserCredentials.Id;
     }
 
-    public void SwitchActiveStatus(Guid userId, bool isActiveStatus)
+    public async Task SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
     {
       DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
 
@@ -136,7 +137,7 @@ namespace LT.DigitalOffice.UserService.Data
       _provider.UserCredentials.Update(dbUserCredentials);
       dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
     }
 
     public bool IsLoginExist(string login)

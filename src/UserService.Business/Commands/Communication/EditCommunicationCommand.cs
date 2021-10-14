@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
     }
-    public OperationResultResponse<bool> Execute(
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
       JsonPatchDocument<EditCommunicationRequest> request)
     {
@@ -52,8 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       DbUser sender = _userRepository.Get(senderId);
       DbUserCommunication communication = _repository.Get(communicationId);
 
-      if (!(sender.IsAdmin ||
-        _accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
         && senderId != communication.UserId)
       {
         throw new ForbiddenException("Not enough rights.");
@@ -78,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       return new OperationResultResponse<bool>
       {
         Status = OperationResultStatusType.FullSuccess,
-        Body = _repository.Edit(communicationId, _mapper.Map(request)),
+        Body = await _repository.EditAsync(communicationId, _mapper.Map(request)),
         Errors = new()
       };
     }

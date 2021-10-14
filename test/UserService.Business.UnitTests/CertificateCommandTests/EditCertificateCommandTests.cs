@@ -196,8 +196,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_dbRequest);
 
             _mocker
-                .Setup<ICertificateRepository, bool>(x => x.Edit(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
-                .Returns(true);
+                .Setup<ICertificateRepository, Task<bool>>(x => x.EditAsync(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
+                .Returns(Task.FromResult(true));
 
             _mocker
                 .Setup<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId))

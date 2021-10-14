@@ -101,13 +101,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<bool>> Execute(RemoveImagesRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(RemoveImagesRequest request)
     {
       OperationResultResponse<bool> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
+      if (!await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers)
         && senderId != GetUserIdFromEntity(request.EntityId, request.EntityType))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -126,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      response.Body = _imageRepository.Remove(request.ImagesIds);
+      response.Body = await _imageRepository.RemoveAsync(request.ImagesIds);
 
       if (response.Body)
       {
@@ -138,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           && dbUser.AvatarFileId.HasValue
           && request.ImagesIds.Contains(dbUser.AvatarFileId.Value))
         {
-          _userRepository.RemoveAvatar(request.EntityId);
+          await _userRepository.RemoveAvatarAsync(request.EntityId);
         }
 
         await RemoveImages(request.ImagesIds, response.Errors);

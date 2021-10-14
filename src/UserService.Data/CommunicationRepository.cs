@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -16,14 +17,14 @@ namespace LT.DigitalOffice.UserService.Data
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CommunicationRepository(
-            IDataProvider provider,
-            IHttpContextAccessor httpContextAccessor)
+          IDataProvider provider,
+          IHttpContextAccessor httpContextAccessor)
         {
             _provider = provider;
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid Add(DbUserCommunication userCommunication)
+        public async Task<Guid> AddAsync(DbUserCommunication userCommunication)
         {
             if (userCommunication == null)
             {
@@ -31,12 +32,12 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             _provider.UserCommunications.Add(userCommunication);
-            _provider.Save();
+            await _provider.SaveAsync();
 
             return userCommunication.Id;
         }
 
-        public bool Edit(Guid communicationId, JsonPatchDocument<DbUserCommunication> request)
+        public async Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request)
         {
             DbUserCommunication communication = _provider.UserCommunications.FirstOrDefault(x => x.Id == communicationId)
                 ?? throw new NotFoundException($"User communication with ID '{communicationId}' was not found.");
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Data
             request.ApplyTo(communication);
             communication.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
             communication.ModifiedAtUtc = DateTime.UtcNow;
-            _provider.Save();
+            await _provider.SaveAsync();
 
             return true;
         }
@@ -60,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Data
             return _provider.UserCommunications.Any(uc => uc.Value == value);
         }
 
-        public bool Remove(DbUserCommunication communication)
+        public async Task<bool> RemoveAsync(DbUserCommunication communication)
         {
             if (communication == null)
             {
@@ -68,7 +69,7 @@ namespace LT.DigitalOffice.UserService.Data
             }
 
             _provider.UserCommunications.Remove(communication);
-            _provider.Save();
+            await _provider.SaveAsync();
 
             return true;
         }
