@@ -86,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<List<RoleData>> GetRoles(List<Guid> userIds, List<string> errors)
+    private async Task<List<RoleData>> GetRoles(List<Guid> userIds, string locale, List<string> errors)
     {
       if (userIds == null || !userIds.Any())
       {
@@ -100,7 +100,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         Response<IOperationResult<IGetUserRolesResponse>> response =
           await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(userIds));
+            IGetUserRolesRequest.CreateObj(userIds, locale));
 
         if (response.Message.IsSuccess)
         {
@@ -374,7 +374,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           response.Errors);
 
       List<RoleData> roles = filter.IncludeRole
-        ? await GetRoles(usersIds, response.Errors)
+        ? await GetRoles(usersIds, filter.Locale, response.Errors)
         : null;
 
       List<ImageData> images = filter.IncludeAvatar
@@ -392,7 +392,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             filter.IncludeOffice ? _officeInfoMapper.Map(
               companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
-              roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
+              roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeAvatar ? _imageInfoMapper.Map(
               images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
 

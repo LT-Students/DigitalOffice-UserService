@@ -203,7 +203,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<RoleInfo> GetRole(Guid userId, List<string> errors)
+    private async Task<RoleInfo> GetRole(Guid userId, string locale, List<string> errors)
     {
       string errorMessage = "Can not get role. Please try again later.";
       const string logMessage = "Can not get role for user with id: {Id}";
@@ -212,11 +212,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         Response<IOperationResult<IGetUserRolesResponse>> response =
           await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(new() { userId }));
+            IGetUserRolesRequest.CreateObj(new() { userId }, locale));
 
         if (response.Message.IsSuccess)
         {
-          return _roleMapper.Map(response.Message.Body.Roles[0]);
+          return _roleMapper.Map(response.Message.Body.Roles.FirstOrDefault());
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
@@ -417,7 +417,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _departmentMapper.Map(employeeInfo.department),
         _positionMapper.Map(employeeInfo.position),
         _officeMapper.Map(employeeInfo.office),
-        filter.IncludeRole ? await GetRole(dbUser.Id, response.Errors) : null,
+        filter.IncludeRole ? await GetRole(dbUser.Id, filter.Locale, response.Errors) : null,
         filter.IncludeProjects ? (await GetProjects(dbUser.Id, response.Errors)).Select(_projectMapper.Map).ToList() : null,
         imagesResult,
         dbUser.AvatarFileId.HasValue ? imagesResult?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,

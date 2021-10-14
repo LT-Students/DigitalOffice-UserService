@@ -53,6 +53,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
       const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
+      if (!removeDepartment && !departmentId.HasValue && !positionId.HasValue && !officeId.HasValue)
+      {
+        return;
+      }
+
       try
       {
         IOperationResult<(bool department, bool position, bool office)> response =

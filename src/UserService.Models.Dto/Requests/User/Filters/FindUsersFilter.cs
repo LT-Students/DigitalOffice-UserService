@@ -31,5 +31,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 
     [FromQuery(Name = "includeavatar")]
     public bool IncludeAvatar { get; set; } = false;
+
+    [FromQuery(Name = "locale")]
+    public string Locale { get; set; }
   }
 }
