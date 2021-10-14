@@ -56,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
         }
 
-        [SetUp]
+        /*[SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
@@ -110,12 +110,12 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_dbCertificate);
 
             _mocker
-                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+                .Setup<IUserRepository, DbUser>(x => x.GetAsync(_dbUser.Id))
                 .Returns(_dbUser);
 
             RequestClientMock();
         }
-        /*
+        
         [Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {

@@ -13,13 +13,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   {
     private readonly IUserRepository _repository;
 
-    private object GetUserData(IGetUserDataRequest request)
+    private async Task<object> GetUserDataAsync(IGetUserDataRequest request)
     {
-      DbUser dbUser = _repository.Get(request.UserId);
+      DbUser dbUser = await _repository.GetAsync(request.UserId);
 
       if (dbUser == null)
       {
-        throw new NotFoundException("The user was not found.");
+        return null;
       }
 
       return IGetUserDataResponse.CreateObj(dbUser.Id, dbUser.FirstName, dbUser.MiddleName, dbUser.LastName, dbUser.IsActive);
@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public async Task Consume(ConsumeContext<IGetUserDataRequest> context)
     {
-      object response = OperationResultWrapper.CreateResponse(GetUserData, context.Message);
+      object response = OperationResultWrapper.CreateResponse(GetUserDataAsync, context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUserDataResponse>>(response);
     }

@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Validation.Certificates
                 .WithMessage("Wrong education type value.");
 
             RuleFor(x => x.UserId)
-                .Must(id => repository.Get(id) != null)
+                .Must(id => repository.GetAsync(id) != null)
                 .WithMessage("The user must exist");
 
             RuleFor(x => x.Image)

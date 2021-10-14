@@ -29,9 +29,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
 
-    private List<UserData> GetUserInfo(IGetUsersDataRequest request)
+    private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = _repository.Get(request.UserIds);
+      List<DbUser> dbUsers = await _repository.GetAsync(request.UserIds);
 
       return dbUsers
         .Select(dbUser => new UserData(
@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
     {
-      List<UserData> users = GetUserInfo(context.Message);
+      List<UserData> users = await GetUserInfoAsync(context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));

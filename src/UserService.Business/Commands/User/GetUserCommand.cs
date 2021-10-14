@@ -1,12 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
@@ -30,16 +30,11 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
-using Microsoft.AspNetCore.Http;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
-  /// <summary>
-  /// Represents command class in command pattern. Provides method for getting user model by id.
-  /// </summary>
   public class GetUserCommand : IGetUserCommand
   {
     private readonly ILogger<GetUserCommand> _logger;
@@ -370,7 +365,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
       }
 
-      DbUser dbUser = _repository.Get(filter);
+      DbUser dbUser = await _repository.GetAsync(filter);
 
       if (dbUser == null)
       {

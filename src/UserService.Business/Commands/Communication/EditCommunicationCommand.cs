@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       JsonPatchDocument<EditCommunicationRequest> request)
     {
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser sender = _userRepository.Get(senderId);
+      DbUser sender = await _userRepository.GetAsync(senderId);
       DbUserCommunication communication = _repository.Get(communicationId);
 
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)

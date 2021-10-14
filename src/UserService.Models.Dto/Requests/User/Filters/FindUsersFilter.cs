@@ -1,16 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LT.DigitalOffice.Kernel.Requests;
+using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 {
-  public record FindUsersFilter
+  public record FindUsersFilter : BaseFindFilter
   {
-    [FromQuery(Name = "skipcount")]
-    public int SkipCount { get; set; }
-
-    [FromQuery(Name = "takecount")]
-    public int TakeCount { get; set; }
-
     [FromQuery(Name = "departmentId")]
     public Guid? DepartmentId { get; set; }
 
