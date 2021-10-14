@@ -18,20 +18,20 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class UsersController : ControllerBase
   {
     [HttpPost("create")]
-    public OperationResultResponse<Guid> Create(
+    public async Task<OperationResultResponse<Guid>> Create(
       [FromServices] ICreateUserCommand command,
       [FromBody] CreateUserRequest request)
     {
-      return command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
-    public OperationResultResponse<bool> Edit(
+    public async Task<OperationResultResponse<bool>> Edit(
       [FromServices] IEditUserCommand command,
       [FromQuery] Guid userId,
       [FromBody] JsonPatchDocument<EditUserRequest> request)
     {
-      return command.Execute(userId, request);
+      return await command.ExecuteAsync(userId, request);
     }
 
     [HttpGet("get")]
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IGetUserCommand command,
       [FromQuery] GetUserFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
 
     [HttpGet("find")]
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IFindUserCommand command,
       [FromQuery] FindUsersFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
   }
 }

@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces
     [AutoInject]
     public interface ICreateCredentialsCommand
     {
-        OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request);
+        OperationResultResponse<CredentialsResponse> ExecuteAsync(CreateCredentialsRequest request);
     }
 }

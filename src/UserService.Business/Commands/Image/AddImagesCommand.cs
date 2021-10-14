@@ -114,13 +114,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request)
+    public async Task<OperationResultResponse<List<Guid>>> ExecuteAsync(AddImagesRequest request)
     {
       OperationResultResponse<List<Guid>> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
+      if (!await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers)
         && senderId != GetUserIdFromEntity(request.EntityId, request.EntityType))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -145,7 +145,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       {
         List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
 
-        _imageRepository.Create(dbEntityImages);
+        await _imageRepository.CreateAsync(dbEntityImages);
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 

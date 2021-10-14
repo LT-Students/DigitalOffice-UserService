@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Database;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
 {
@@ -39,6 +40,11 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     {
       Entry(obj).State = EntityState.Detached;
       return Entry(obj).State;
+    }
+
+    async Task IBaseDataProvider.SaveAsync()
+    {
+      await SaveChangesAsync();
     }
 
     void IBaseDataProvider.Save()

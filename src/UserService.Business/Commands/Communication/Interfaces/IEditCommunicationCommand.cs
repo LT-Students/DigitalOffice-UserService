@@ -3,12 +3,13 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces
 {
     [AutoInject]
     public interface IEditCommunicationCommand
     {
-        OperationResultResponse<bool> Execute(Guid communicationId, JsonPatchDocument<EditCommunicationRequest> request);
+        Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId, JsonPatchDocument<EditCommunicationRequest> request);
     }
 }

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
@@ -21,7 +23,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -37,11 +38,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreater;
     private readonly IBus _bus;
 
     #region private method
 
-    private void EditCompanyEmployee(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
+    private async Task EditCompanyEmployeeAsync(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
     {
       string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
       string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
@@ -59,14 +61,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         IOperationResult<(bool department, bool position, bool office)> response =
-          _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
-          IEditCompanyEmployeeRequest.CreateObj(
-            userId,
-            _httpContextAccessor.HttpContext.GetUserId(),
-            removeUserFromDepartment: removeDepartment,
-            departmentId: departmentId,
-            positionId: positionId,
-            officeId: officeId)).Result.Message;
+          (await _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
+            IEditCompanyEmployeeRequest.CreateObj(
+              userId,
+              _httpContextAccessor.HttpContext.GetUserId(),
+              removeUserFromDepartment: removeDepartment,
+              departmentId: departmentId,
+              positionId: positionId,
+              officeId: officeId))).Message;
 
         if (!response.IsSuccess)
         {
@@ -110,18 +112,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private void ChangeUserRole(Guid roleId, Guid userId, List<string> errors)
+    private async Task ChangeUserRoleAsync(Guid roleId, Guid userId, List<string> errors)
     {
       string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
       const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
 
       try
       {
-        Response<IOperationResult<bool>> response = _rcRole.GetResponse<IOperationResult<bool>>(
-            IChangeUserRoleRequest.CreateObj(
-                roleId,
-                userId,
-                _httpContextAccessor.HttpContext.GetUserId())).Result;
+        Response<IOperationResult<bool>> response = await _rcRole.GetResponse<IOperationResult<bool>>(
+          IChangeUserRoleRequest.CreateObj(
+            roleId, userId, _httpContextAccessor.HttpContext.GetUserId()));
 
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
@@ -141,16 +141,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     #endregion
 
     public EditUserCommand(
-        IUserRepository userRepository,
-        IUserCredentialsRepository credentialsRepository,
-        IPatchDbUserMapper mapperUser,
-        IAccessValidator accessValidator,
-        ILogger<EditUserCommand> logger,
-        IRequestClient<ICreateImagesRequest> rcImage,
-        IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
-        IRequestClient<IChangeUserRoleRequest> rcRole,
-        IHttpContextAccessor httpContextAccessor,
-        IBus bus)
+      IUserRepository userRepository,
+      IUserCredentialsRepository credentialsRepository,
+      IPatchDbUserMapper mapperUser,
+      IAccessValidator accessValidator,
+      ILogger<EditUserCommand> logger,
+      IRequestClient<ICreateImagesRequest> rcImage,
+      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IChangeUserRoleRequest> rcRole,
+      IHttpContextAccessor httpContextAccessor,
+      IResponseCreater responseCreater,
+      IBus bus)
     {
       _userRepository = userRepository;
       _credentialsRepository = credentialsRepository;
@@ -161,41 +162,39 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
+      _responseCreater = responseCreater;
       _bus = bus;
     }
 
     /// <inheritdoc/>
-    public OperationResultResponse<bool> Execute(Guid userId, JsonPatchDocument<EditUserRequest> patch)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
       Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
+        o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
-      OperationResultResponse<bool> response = new();
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
-          _accessValidator.HasRights(Rights.AddEditRemoveUsers) ||
-          (userId == requestSenderId
-          && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
-          && positionOperation == null
-          && departmentOperation == null
-          && roleOperation == null
-          && officeOperation == null)))
+        await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
+        (userId == requestSenderId
+        && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
+        && positionOperation == null
+        && departmentOperation == null
+        && roleOperation == null
+        && officeOperation == null)))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("Not enough rights.");
-
-        return response;
+        _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
+
+      OperationResultResponse<bool> response = new();
 
       List<string> errors = new List<string>();
 
@@ -231,7 +230,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         newOfficeId = Guid.Parse(officeOperation?.value.ToString());
       }
 
-      EditCompanyEmployee(
+      await EditCompanyEmployeeAsync(
         removeUserFromDepartmen,
         newDepartmentId,
         newPositionId,
@@ -241,26 +240,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (roleOperation != null)
       {
-        ChangeUserRole(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
+        await ChangeUserRoleAsync(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
       }
 
       if (isActiveOperation != null)
       {
         bool newValue = bool.Parse(isActiveOperation.value.ToString());
 
-        _credentialsRepository.SwitchActiveStatus(
+        await _credentialsRepository.SwitchActiveStatusAsync(
             userId,
             newValue);
 
         if (!newValue)
         {
-          _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
+          await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
               userId,
               requestSenderId));
         }
       }
 
-      response.Body = _userRepository.EditUser(userId, _mapperUser.Map(patch));
+      response.Body = await _userRepository.EditUserAsync(userId, _mapperUser.Map(patch));
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess

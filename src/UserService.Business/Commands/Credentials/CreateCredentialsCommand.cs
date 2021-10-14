@@ -49,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
+    public OperationResultResponse<CredentialsResponse> ExecuteAsync(CreateCredentialsRequest request)
     {
       if (request == null)
       {
@@ -113,9 +113,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
           string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
-          _userCredentialsRepository.Create(_mapper.Map(request, salt, passwordHash));
-          _userRepository.DeletePendingUser(request.UserId);
-          _userRepository.SwitchActiveStatus(request.UserId, true);
+          _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
+          _userRepository.DeletePendingUserAsync(request.UserId);
+          _userRepository.SwitchActiveStatusAsync(request.UserId, true);
 
           response.Body = new CredentialsResponse
           {

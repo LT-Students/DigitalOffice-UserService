@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IAddImagesCommand command,
       [FromBody] AddImagesRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpGet("get")]
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] Guid entityId,
       [FromQuery] EntityType entityType)
     {
-      return await command.Execute(entityId, entityType);
+      return await command.ExecuteAsync(entityId, entityType);
     }
 
     [HttpPost("remove")]
@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromServices] IRemoveImagesCommand command,
       [FromBody] RemoveImagesRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
   }
 }
