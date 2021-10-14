@@ -96,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             _provider.UserEducations.Add(_dbUserEducation);
             _provider.Users.Add(_dbUser);
             _provider.Skills.Add(_dbSkillInDb);
-            _provider.Save();
+            await _provider.SaveAsync()
         }
 
         [TearDown]

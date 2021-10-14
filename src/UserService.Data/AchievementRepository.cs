@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -24,15 +25,15 @@ namespace LT.DigitalOffice.UserService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid Create(DbAchievement dbAchievement)
+    public async Task<Guid> CreateAsync(DbAchievement dbAchievement)
     {
       _provider.Achievements.Add(dbAchievement);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbAchievement.Id;
     }
 
-    public bool Edit(Guid achievementId, JsonPatchDocument<DbAchievement> request)
+    public async Task<bool> EditAsync(Guid achievementId, JsonPatchDocument<DbAchievement> request)
     {
       DbAchievement dbAchievement = _provider.Achievements.FirstOrDefault(x => x.Id == achievementId);
 
@@ -44,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Data
       request.ApplyTo(dbAchievement);
       dbAchievement.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbAchievement.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }

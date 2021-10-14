@@ -28,6 +28,7 @@ using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Net;
 using System.Threading.Tasks;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -49,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConnectionMultiplexer _cache;
 
-    private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
+    private async Task<List<ImageData>> GetImages(List<Guid> imageIds, List<string> errors)
     {
       if (imageIds == null || !imageIds.Any())
       {
@@ -61,18 +62,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
+        Response<IOperationResult<IGetImagesResponse>> response =
+          await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return response.Body.ImagesData;
+          return response.Message.Body.ImagesData;
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
         _logger.LogWarning(warningMessage,
-            string.Join(", ", imageIds),
-            string.Join("\n", response.Errors));
+          string.Join(", ", imageIds),
+          string.Join("\n", response.Message.Errors));
       }
       catch (Exception exc)
       {
@@ -84,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
+    private async Task<List<RoleData>> GetRoles(List<Guid> userIds, string locale, List<string> errors)
     {
       if (userIds == null || !userIds.Any())
       {
@@ -96,18 +98,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(userIds)).Result.Message;
+        Response<IOperationResult<IGetUserRolesResponse>> response =
+          await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
+            IGetUserRolesRequest.CreateObj(userIds, locale));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return response.Body.Roles;
+          return response.Message.Body.Roles;
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
         _logger.LogWarning(warningMessage,
-            string.Join(", ", userIds),
-            string.Join("\n", response.Errors));
+          string.Join(", ", userIds),
+          string.Join("\n", response.Message.Errors));
       }
       catch (Exception exc)
       {
@@ -119,12 +122,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
+    private async Task<IGetDepartmentUsersResponse> GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
       try
       {
-        var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-        var response = _rcGetDepartmentUsers.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
+        Response<IOperationResult<IGetDepartmentUsersResponse>> response =
+          await _rcGetDepartmentUsers.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(
+            IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount));
 
         if (response.Message.IsSuccess)
         {
@@ -321,7 +325,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     /// <inheritdoc/>
-    public async Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter)
     {
       List<DbUser> dbUsers = null;
 
@@ -330,7 +334,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (filter.DepartmentId.HasValue)
       {
-        IGetDepartmentUsersResponse departmentUsers = GetUserIdsByDepartment(
+        IGetDepartmentUsersResponse departmentUsers = await GetUserIdsByDepartment(
           filter.DepartmentId.Value,
           filter.SkipCount,
           filter.TakeCount,
@@ -369,10 +373,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           filter.IncludeOffice,
           response.Errors);
 
-      List<RoleData> roles = filter.IncludeRole ? GetRoles(usersIds, response.Errors) : null;
+      List<RoleData> roles = filter.IncludeRole
+        ? await GetRoles(usersIds, filter.Locale, response.Errors)
+        : null;
 
-      List<ImageData> images = filter.IncludeAvatar ? GetImages(dbUsers.Where(x =>
-        x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors) : null;
+      List<ImageData> images = filter.IncludeAvatar
+        ? await GetImages(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
+        : null;
 
       response.Body
         .AddRange(dbUsers.Select(dbUser =>
@@ -385,7 +392,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             filter.IncludeOffice ? _officeInfoMapper.Map(
               companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
-              roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
+              roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeAvatar ? _imageInfoMapper.Map(
               images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
 

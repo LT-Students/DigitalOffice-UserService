@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _logger = logger;
     }
 
-    public async Task<OperationResultResponse<ImagesResponse>> Execute(Guid entityId, EntityType entityType)
+    public async Task<OperationResultResponse<ImagesResponse>> ExecuteAsync(Guid entityId, EntityType entityType)
     {
       OperationResultResponse<ImagesResponse> response = new();
 

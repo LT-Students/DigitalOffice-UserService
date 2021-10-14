@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
@@ -38,9 +39,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       _validator = validator;
     }
 
-    public OperationResultResponse<Guid?> Execute(CreateEducationRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateEducationRequest request)
     {
-      if (!_accessValidator.HasRights(Rights.AddEditRemoveUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
@@ -64,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
 
       DbUserEducation dbEducation = _mapper.Map(request);
 
-      _educationRepository.Add(dbEducation);
+      await _educationRepository.AddAsync(dbEducation);
 
       return new OperationResultResponse<Guid?>
       {

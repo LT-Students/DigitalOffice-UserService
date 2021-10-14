@@ -31,6 +31,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -54,15 +57,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IConnectionMultiplexer _cache;
+    private readonly IRedisHelper _redisHelper;
+    private readonly IResponseCreater _responseCreater;
 
     #region private methods
 
     private async Task<(DepartmentData departments, PositionData positions, OfficeData offices)> GetCompanyEmployee(
-        Guid userId,
-        bool includeDepartments,
-        bool includePositions,
-        bool includeOffices,
-        List<string> errors)
+      Guid userId,
+      bool includeDepartments,
+      bool includePositions,
+      bool includeOffices,
+      List<string> errors)
     {
       if (!includeDepartments && !includePositions && !includeOffices)
       {
@@ -198,23 +203,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private RoleInfo GetRole(Guid userId, List<string> errors)
+    private async Task<RoleInfo> GetRole(Guid userId, string locale, List<string> errors)
     {
       string errorMessage = "Can not get role. Please try again later.";
       const string logMessage = "Can not get role for user with id: {Id}";
 
       try
       {
-        var response = _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(new() { userId })).Result.Message;
+        Response<IOperationResult<IGetUserRolesResponse>> response =
+          await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
+            IGetUserRolesRequest.CreateObj(new() { userId }, locale));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return _roleMapper.Map(response.Body.Roles[0]);
+          return _roleMapper.Map(response.Message.Body.Roles.FirstOrDefault());
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
-        _logger.LogWarning(warningMessage, userId, string.Join("\n", response.Errors));
+        _logger.LogWarning(warningMessage, userId, string.Join("\n", response.Message.Errors));
       }
       catch (Exception exc)
       {
@@ -228,16 +234,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task<List<ProjectData>> GetProjects(Guid userId, List<string> errors)
     {
-      RedisValue projectsFromCache = await _cache.GetDatabase(Cache.Projects).StringGetAsync(userId.GetRedisCacheHashCode().ToString());
+      (List<ProjectData> projects, int _) = await _redisHelper.GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
 
-      if (projectsFromCache.HasValue)
-      {
-        (List<ProjectData> projects, int _) = JsonConvert.DeserializeObject<(List<ProjectData>, int)>(projectsFromCache);
-
-        return projects;
-      }
-
-      return await GetProjectsThroughBroker(userId, errors);
+      return projects
+        ?? await GetProjectsThroughBroker(userId, errors);
     }
 
     private async Task<List<ProjectData>> GetProjectsThroughBroker(Guid userId, List<string> errors)
@@ -332,7 +332,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
-      IConnectionMultiplexer cache)
+      IConnectionMultiplexer cache,
+      IRedisHelper redisHelper,
+      IResponseCreater responseCreater)
     {
       _logger = logger;
       _repository = repository;
@@ -349,25 +351,32 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _cache = cache;
+      _redisHelper = redisHelper;
+      _responseCreater = responseCreater;
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultResponse<UserResponse>> Execute(GetUserFilter filter)
+    public async Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter)
     {
+      OperationResultResponse<UserResponse> response = new();
+
       if (filter == null ||
         (filter.UserId == null &&
           string.IsNullOrEmpty(filter.Name) &&
           string.IsNullOrEmpty(filter.Email)))
       {
-        throw new BadRequestException("You must specify 'userId' or|and 'name' or|and 'email'.");
+        return _responseCreater.CreateFailureResponse<UserResponse>(
+          HttpStatusCode.BadRequest,
+          new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
       }
 
-      OperationResultResponse<UserResponse> response = new();
-
       DbUser dbUser = _repository.Get(filter);
+
       if (dbUser == null)
       {
-        throw new NotFoundException($"User was not found.");
+        return _responseCreater.CreateFailureResponse<UserResponse>(
+          HttpStatusCode.NotFound,
+          new List<string> { "User was not found." });
       }
 
       List<Guid> images = new();
@@ -408,7 +417,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _departmentMapper.Map(employeeInfo.department),
         _positionMapper.Map(employeeInfo.position),
         _officeMapper.Map(employeeInfo.office),
-        filter.IncludeRole ? GetRole(dbUser.Id, response.Errors) : null,
+        filter.IncludeRole ? await GetRole(dbUser.Id, filter.Locale, response.Errors) : null,
         filter.IncludeProjects ? (await GetProjects(dbUser.Id, response.Errors)).Select(_projectMapper.Map).ToList() : null,
         imagesResult,
         dbUser.AvatarFileId.HasValue ? imagesResult?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,

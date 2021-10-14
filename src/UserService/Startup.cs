@@ -4,6 +4,8 @@ using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.Broker.Consumer;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
@@ -289,6 +291,7 @@ namespace LT.DigitalOffice.UserService
 
       services.AddMemoryCache();
       services.AddBusinessObjects();
+      services.AddTransient<IRedisHelper, RedisHelper>();
 
       ConfigureMassTransit(services);
 
