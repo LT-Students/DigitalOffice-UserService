@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<ICheckUsersExistence>>(response);
     }
 
-    private async Task<object> GetUsersExistenceInfoAsync(ICheckUsersExistence requestIds)
+    public async Task<object> GetUsersExistenceInfoAsync(ICheckUsersExistence requestIds)
     {
       List<Guid> userIds = await _repository.AreExistingIdsAsync(requestIds.UserIds);
 

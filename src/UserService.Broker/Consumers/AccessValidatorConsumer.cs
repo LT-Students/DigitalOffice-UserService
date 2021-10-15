@@ -2,7 +2,6 @@
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
@@ -10,11 +9,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
   public class AccessValidatorConsumer : IConsumer<ICheckUserIsAdminRequest>
   {
-    private readonly IUserRepository repository;
+    private readonly IUserRepository _repository;
 
-    public AccessValidatorConsumer([FromServices] IUserRepository repository)
+    public AccessValidatorConsumer(IUserRepository repository)
     {
-      this.repository = repository;
+      _repository = repository;
     }
 
     public async Task Consume(ConsumeContext<ICheckUserIsAdminRequest> context)
@@ -24,9 +23,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<bool>>(response);
     }
 
-    private async Task<object> IsAdminAsync(Guid userId)
+    public async Task<object> IsAdminAsync(Guid userId)
     {
-      return (await repository.GetAsync(userId)).IsAdmin;
+      return (await _repository.GetAsync(userId)).IsAdmin;
     }
   }
 }

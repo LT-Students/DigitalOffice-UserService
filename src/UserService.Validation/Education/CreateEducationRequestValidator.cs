@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Validation.Education
     public CreateEducationRequestValidator(IUserRepository _userRepository)
     {
       RuleFor(education => education.UserId)
-        .MustAsync(async (e, token, context) => await _userRepository.IsUserExistAsync(e.UserId));
+        .MustAsync(async (e, _, _) => await _userRepository.IsUserExistAsync(e.UserId));
 
       RuleFor(education => education.UniversityName)
         .NotEmpty().WithMessage("University name must not be empty.")

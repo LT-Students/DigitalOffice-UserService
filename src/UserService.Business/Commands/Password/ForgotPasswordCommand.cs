@@ -58,15 +58,20 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       EmailTemplateType templateType = EmailTemplateType.Warning;
       try
       {
-        var templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
+        Dictionary<string, string> templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
           userFirstName: dbUser.FirstName,
           userId: dbUser.Id.ToString(),
           secret: secret.ToString());
 
-        var emailRequest = ISendEmailRequest.CreateObj(null, dbUser.Id, email, templateLanguage, templateType, templateValues);
-
-        Response<IOperationResult<bool>> response = await _rcSendEmail
-          .GetResponse<IOperationResult<bool>>(emailRequest, timeout: RequestTimeout.Default);
+        Response<IOperationResult<bool>> response =
+          await _rcSendEmail
+            .GetResponse<IOperationResult<bool>>(ISendEmailRequest.CreateObj(
+              null,
+              dbUser.Id,
+              email,
+              templateLanguage,
+              templateType,
+              templateValues));
 
         if (response.Message.IsSuccess)
         {
