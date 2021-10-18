@@ -182,7 +182,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!(_userRepository.Get(_httpContextAccessor.HttpContext.GetUserId()).IsAdmin ||
+      if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
         && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null

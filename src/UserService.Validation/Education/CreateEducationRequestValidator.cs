@@ -5,25 +5,23 @@ using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Validation.Education
 {
-    public class CreateEducationRequestValidator : AbstractValidator<CreateEducationRequest>, ICreateEducationRequestValidator
+  public class CreateEducationRequestValidator : AbstractValidator<CreateEducationRequest>, ICreateEducationRequestValidator
+  {
+    public CreateEducationRequestValidator(IUserRepository _userRepository)
     {
-        public CreateEducationRequestValidator(IUserRepository repository)
-        {
-            RuleFor(education => education.UserId)
-                .Must(id => repository.IsUserExist(id));
+      RuleFor(education => education.UserId)
+        .MustAsync(async (e, _, _) => await _userRepository.IsUserExistAsync(e.UserId));
 
-            RuleFor(education => education.UniversityName)
-                .NotEmpty()
-                .MaximumLength(100)
-                .WithMessage("University name is too long");
+      RuleFor(education => education.UniversityName)
+        .NotEmpty().WithMessage("University name must not be empty.")
+        .MaximumLength(100).WithMessage("University name is too long");
 
-            RuleFor(education => education.QualificationName)
-                .NotEmpty()
-                .MaximumLength(100)
-                .WithMessage("Qualification name is too long");
+      RuleFor(education => education.QualificationName)
+        .NotEmpty().WithMessage("Qualification name must not be empty.")
+        .MaximumLength(100).WithMessage("Qualification name is too long");
 
-            RuleFor(education => education.FormEducation)
-                .IsInEnum().WithMessage("Wrong form education.");
-        }
+      RuleFor(education => education.FormEducation)
+        .IsInEnum().WithMessage("Wrong form education.");
     }
+  }
 }

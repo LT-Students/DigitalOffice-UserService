@@ -1,11 +1,10 @@
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Company;
@@ -26,15 +25,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
   public class FindUserCommand : IFindUserCommand
   {
     /// <inheritdoc/>
+    private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IUserInfoMapper _mapper;
     private readonly IImageInfoMapper _imageInfoMapper;
     private readonly IOfficeInfoMapper _officeInfoMapper;
@@ -50,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConnectionMultiplexer _cache;
 
-    private async Task<List<ImageData>> GetImages(List<Guid> imageIds, List<string> errors)
+    private async Task<List<ImageData>> GetImagesAsync(List<Guid> imageIds, List<string> errors)
     {
       if (imageIds == null || !imageIds.Any())
       {
@@ -86,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<List<RoleData>> GetRoles(List<Guid> userIds, string locale, List<string> errors)
+    private async Task<List<RoleData>> GetRolesAsync(List<Guid> userIds, string locale, List<string> errors)
     {
       if (userIds == null || !userIds.Any())
       {
@@ -122,7 +124,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<IGetDepartmentUsersResponse> GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
+    private async Task<IGetDepartmentUsersResponse> GetUserIdsByDepartmentAsync(Guid departmentId, int skipCount, int takeCount, List<string> errors)
     {
       try
       {
@@ -151,7 +153,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployess(
+    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessAsync(
       List<Guid> usersIds,
       bool includeDepartments,
       bool includePositions,
@@ -163,10 +165,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return default;
       }
 
-      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) =
-        await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
+      (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) =
+        await GetCompanyEmployessFromCacheAsync(usersIds, includeDepartments, includePositions, includeOffices);
 
-      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
+      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBrokerAsync(
         usersIds,
         includeDepartments && departments == null,
         includePositions && positions == null,
@@ -178,7 +180,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         offices ?? brokerResponse?.Offices);
     }
 
-    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
+    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCacheAsync(
       List<Guid> usersIds,
       bool includeDepartments,
       bool includePositions,
@@ -246,7 +248,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return (departments, positions, offices);
     }
 
-    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
+    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBrokerAsync(
       List<Guid> usersIds,
       bool includeDepartments,
       bool includePositions,
@@ -293,6 +295,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     }
 
     public FindUserCommand(
+      IBaseFindFilterValidator baseFindValidator,
       IUserRepository repository,
       IUserInfoMapper mapper,
       IImageInfoMapper imageInfoMapper,
@@ -308,6 +311,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IHttpContextAccessor httpContextAccessor,
       IConnectionMultiplexer cache)
     {
+      _baseFindValidator = baseFindValidator;
       _logger = logger;
       _mapper = mapper;
       _imageInfoMapper = imageInfoMapper;
@@ -327,6 +331,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter)
     {
+      if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        return new()
+        {
+          Status = OperationResultStatusType.Failed,
+          Errors = errors
+        };
+      }
+
       List<DbUser> dbUsers = null;
 
       FindResultResponse<UserInfo> response = new();
@@ -334,7 +349,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (filter.DepartmentId.HasValue)
       {
-        IGetDepartmentUsersResponse departmentUsers = await GetUserIdsByDepartment(
+        IGetDepartmentUsersResponse departmentUsers = await GetUserIdsByDepartmentAsync(
           filter.DepartmentId.Value,
           filter.SkipCount,
           filter.TakeCount,
@@ -342,7 +357,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (departmentUsers != null)
         {
-          dbUsers = _repository.Get(departmentUsers.UserIds);
+          dbUsers = await _repository.GetAsync(departmentUsers.UserIds);
 
           response.TotalCount = departmentUsers.TotalCount;
         }
@@ -357,7 +372,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       else
       {
         (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-          _repository.Find(filter);
+          await _repository.FindAsync(filter);
 
         dbUsers = findUsersResponse.dbUsers;
         response.TotalCount = findUsersResponse.totalCount;
@@ -366,7 +381,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
       (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) companyEmployeesData =
-        await GetCompanyEmployess(
+        await GetCompanyEmployessAsync(
           usersIds,
           filter.IncludeDepartment,
           filter.IncludePosition,
@@ -374,11 +389,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           response.Errors);
 
       List<RoleData> roles = filter.IncludeRole
-        ? await GetRoles(usersIds, filter.Locale, response.Errors)
+        ? await GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : null;
 
       List<ImageData> images = filter.IncludeAvatar
-        ? await GetImages(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
+        ? await GetImagesAsync(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
         : null;
 
       response.Body

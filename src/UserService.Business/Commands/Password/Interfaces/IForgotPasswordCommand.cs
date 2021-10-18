@@ -1,17 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Responses;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces
 {
-    /// <summary>
-    /// Represents interface for a command in command pattern.
-    /// </summary>
-    [AutoInject]
-    public interface IForgotPasswordCommand
-    {
-        /// <summary>
-        /// Method for getting user description by email and sent request in Message Service.
-        /// </summary>
-        OperationResultResponse<bool> Execute(string userEmail);
-    }
+  [AutoInject]
+  public interface IForgotPasswordCommand
+  {
+    Task<OperationResultResponse<bool>> ExecuteAsync(string userEmail);
+  }
 }

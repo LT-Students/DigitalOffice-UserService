@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
@@ -49,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public OperationResultResponse<CredentialsResponse> ExecuteAsync(CreateCredentialsRequest request)
+    public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(CreateCredentialsRequest request)
     {
       if (request == null)
       {
@@ -59,7 +60,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _validator.ValidateAndThrowCustom(request);
 
       OperationResultResponse<CredentialsResponse> response = new();
-      DbPendingUser dbPendingUser = _userRepository.GetPendingUser(request.UserId);
+      DbPendingUser dbPendingUser = await _userRepository.GetPendingUserAsync(request.UserId);
 
       if (dbPendingUser == null)
       {

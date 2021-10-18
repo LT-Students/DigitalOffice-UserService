@@ -132,7 +132,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       {
         DbUser dbUser = request.EntityType == EntityType.User
           ? null
-          : _userRepository.Get(request.EntityId);
+          : await _userRepository.GetAsync(request.EntityId);
 
         if (dbUser != null
           && dbUser.AvatarFileId.HasValue

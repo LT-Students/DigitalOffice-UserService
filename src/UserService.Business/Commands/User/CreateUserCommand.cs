@@ -2,7 +2,6 @@ using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -310,20 +309,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       OperationResultResponse<Guid> response = new();
 
-      if (_userRepository.IsCommunicationValueExist(request.Communications.Select(x => x.Value).ToList()))
-      {
-        response.Errors.Add("Communication value already exist");
-
-        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Conflict, response.Errors); ;
-      }
-
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
+
       DbUser dbUser = _mapperUser.Map(request, avatarImageId);
+
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
+
       Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      await _userRepository.CreatePendingAsync(new DbPendingUser() { UserId = dbUser.Id, Password = password });
+      await _userRepository.CreatePendingAsync(new DbPendingUser() { UserId = userId, Password = password });
 
       if (avatarImageId.HasValue)
       {
@@ -331,7 +326,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       await SendEmailAsync(dbUser, password, response.Errors);
-      await EditCompanyEmployeeAsync(request.DepartmentId, request.PositionId, request.OfficeId, dbUser.Id, response.Errors);
+      await EditCompanyEmployeeAsync(request.DepartmentId, request.PositionId, request.OfficeId, userId, response.Errors);
 
       if (request.RoleId.HasValue)
       {
