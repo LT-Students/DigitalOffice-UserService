@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  /// <inheritdoc />
   public class UserCredentialsRepository : IUserCredentialsRepository
   {
     private readonly HttpContext _httpContext;
