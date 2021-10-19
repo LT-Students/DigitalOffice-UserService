@@ -6,26 +6,19 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
-  /// <summary>
-  /// Represents interface of repository in repository pattern.
-  /// Provides methods for working with the database of UserService.
-  /// </summary>
   [AutoInject]
   public interface IUserCredentialsRepository
   {
-    /// <summary>
-    /// Returns the user credentials.
-    /// </summary>
     DbUserCredentials Get(GetCredentialsFilter filter);
 
-    Task<Guid> CreateAsync(DbUserCredentials dbUserCredentials);
+    Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials);
 
-    Task SwitchActiveStatusAsync(Guid userId, bool isActiveStatus);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus);
 
     Task<bool> EditAsync(DbUserCredentials userCredentials);
 
-    bool IsLoginExist(string login);
+    Task<bool> LoginExistAsync(string login);
 
-    bool IsCredentialsExist(Guid userId);
+    Task<bool> CredentialsExistAsync(Guid userId);
   }
 }
