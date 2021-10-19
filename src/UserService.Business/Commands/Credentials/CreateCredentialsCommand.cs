@@ -114,9 +114,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
           string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
-          _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
-          _userRepository.DeletePendingUserAsync(request.UserId);
-          _userRepository.SwitchActiveStatusAsync(request.UserId, true);
+          await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
+          await _userRepository.DeletePendingUserAsync(request.UserId);
+          await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
 
           response.Body = new CredentialsResponse
           {
