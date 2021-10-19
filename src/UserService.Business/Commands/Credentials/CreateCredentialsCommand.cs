@@ -61,8 +61,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<CredentialsResponse> response = new();
-
       try
       {
         Response<IOperationResult<IGetTokenResponse>> tokenResponse =
@@ -89,7 +87,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
               RefreshToken = tokenResponse.Message.Body.RefreshToken,
               AccessTokenExpiresIn = tokenResponse.Message.Body.AccessTokenExpiresIn,
               RefreshTokenExpiresIn = tokenResponse.Message.Body.RefreshTokenExpiresIn
-            }
+            },
+            Status = OperationResultStatusType.FullSuccess
           };
         }
         else
@@ -97,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           _logger.LogWarning(
             "Can not get token for pending user '{UserId}' reason:\n{Errors}",
             request.UserId,
-            string.Join('\n', response.Errors));
+            string.Join('\n', tokenResponse.Message.Errors));
         }
       }
       catch (Exception exc)
