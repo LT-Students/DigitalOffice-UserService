@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
     private readonly ICreateCredentialsRequestValidator _validator;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreater _responseCreator;
 
     public CreateCredentialsCommand(
       IDbUserCredentialsMapper mapper,
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
       ICreateCredentialsRequestValidator validator,
-      IResponseCreater responseCreater)
+      IResponseCreater responseCreator)
     {
       _mapper = mapper;
       _userRepository = userRepository;
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _rcToken = rcToken;
       _logger = logger;
       _validator = validator;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(CreateCredentialsRequest request)
@@ -56,7 +56,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
       if (!validationResult.IsValid)
       {
-        return _responseCreater.CreateFailureResponse<CredentialsResponse>(
+        return _responseCreator.CreateFailureResponse<CredentialsResponse>(
           HttpStatusCode.BadRequest,
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
