@@ -247,15 +247,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         bool newValue = bool.Parse(isActiveOperation.value.ToString());
 
-        await _credentialsRepository.SwitchActiveStatusAsync(
-            userId,
-            newValue);
+        bool switchActiveStatusResult = await _credentialsRepository.SwitchActiveStatusAsync(userId, newValue);
 
-        if (!newValue)
+        if (!switchActiveStatusResult)
+        {
+          errors.Add("Can not change is active status.");
+        }
+        else if (!newValue)
         {
           await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
-              userId,
-              requestSenderId));
+            userId,
+            requestSenderId));
         }
       }
 
@@ -269,40 +271,5 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       return response;
     }
-
-    // TODO fix
-    //private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
-    //{
-    //    if (request.Skills == null)
-    //    {
-    //        return;
-    //    }
-
-    //    foreach (var skillName in request.Skills)
-    //    {
-    //        var dbSkill = _userRepository.FindSkillByName(skillName);
-
-    //        if (dbSkill != null)
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = dbSkill.Id
-    //                });
-    //        }
-    //        else
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = _userRepository.CreateSkill(skillName)
-    //                });
-    //        }
-    //    }
-    //}
   }
 }
