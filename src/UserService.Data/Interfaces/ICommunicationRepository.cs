@@ -17,6 +17,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> RemoveAsync(DbUserCommunication dbUserCommunication);
 
-    Task<bool> ValueExist(string value);
+    Task<bool> CheckExistingValue(string value);
+
+    Task<int> CountUserEmails(Guid userId);
   }
 }

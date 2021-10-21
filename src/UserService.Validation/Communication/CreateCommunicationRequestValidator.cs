@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
           .WithMessage("Incorrect email address."));
 
       RuleFor(c => c.Value)
-        .MustAsync(async (v, _, _) => !await _communicationRepository.ValueExist(v.Value))
+        .MustAsync(async (v, _, _) => !await _communicationRepository.CheckExistingValue(v.Value))
         .WithMessage("Communication value already exist.");
     }
   }

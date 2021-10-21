@@ -52,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
         new()
         {
           { async x =>
-            !await _communicationRepository.ValueExist(x.value.ToString()),
+            !await _communicationRepository.CheckExistingValue(x.value.ToString()),
             "Communication value already exist."
           }
         });

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -62,7 +63,7 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync(x => x.Id == communicationId);
     }
 
-    public async Task<bool> ValueExist(string value)
+    public async Task<bool> CheckExistingValue(string value)
     {
       return await _provider.UserCommunications.AnyAsync(uc => uc.Value == value);
     }
@@ -78,6 +79,13 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
 
       return true;
+    }
+
+    public async Task<int> CountUserEmails(Guid userId)
+    {
+      return await _provider.UserCommunications
+        .Where(uc => uc.UserId == userId && uc.Type == 0)
+        .CountAsync();
     }
   }
 }
