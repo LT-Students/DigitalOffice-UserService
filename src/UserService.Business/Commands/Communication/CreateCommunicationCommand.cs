@@ -1,18 +1,18 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -20,60 +20,51 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class CreateCommunicationCommand : ICreateCommunicationCommand
   {
-    private readonly IUserRepository _userRepository;
+    private readonly ICreateCommunicationRequestValidator _validator;
+    private readonly IDbUserCommunicationMapper _mapper;
     private readonly ICommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
-    private readonly IDbUserCommunicationMapper _mapper;
-    private readonly ICreateCommunicationRequestValidator _validator;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreator;
 
     public CreateCommunicationCommand(
-      IUserRepository userRepository,
+      ICreateCommunicationRequestValidator validator,
+      IDbUserCommunicationMapper mapper,
       ICommunicationRepository repository,
       IAccessValidator accessValidator,
-      IDbUserCommunicationMapper mapper,
-      ICreateCommunicationRequestValidator validator,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      IResponseCreater responseCreator)
     {
-      _userRepository = userRepository;
+      _validator = validator;
+      _mapper = mapper;
       _repository = repository;
       _accessValidator = accessValidator;
-      _mapper = mapper;
-      _validator = validator;
       _httpContextAccessor = httpContextAccessor;
+      _responseCreator = responseCreator;
     }
 
-    public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateCommunicationRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateCommunicationRequest request)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
-        || request.UserId == _httpContextAccessor.HttpContext.GetUserId())
+      if ((request.UserId != _httpContextAccessor.HttpContext.GetUserId()) &&
+        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-        return new OperationResultResponse<Guid>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = new List<string>() { "Not enought rights" }
-        };
+        _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }
 
-      _validator.ValidateAndThrowCustom(request);
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
 
-      if (_repository.IsCommunicationValueExist(request.Value))
+      if (!validationResult.IsValid)
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-        return new OperationResultResponse<Guid>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = new() { $"The communication '{request.Value}' already exists." }
-        };
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-      return new OperationResultResponse<Guid>
+
+      return new OperationResultResponse<Guid?>
       {
         Status = OperationResultStatusType.FullSuccess,
-        Body = await _repository.AddAsync(_mapper.Map(request)),
-        Errors = new()
+        Body = await _repository.CreateAsync(_mapper.Map(request))
       };
     }
   }

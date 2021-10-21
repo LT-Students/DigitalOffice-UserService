@@ -1,9 +1,9 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -13,7 +13,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Linq;
 using System.Net;
@@ -23,64 +22,58 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class EditCommunicationCommand : IEditCommunicationCommand
   {
-    private readonly IUserRepository _userRepository;
     private readonly ICommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
     private readonly IPatchDbUserCommunicationMapper _mapper;
     private readonly IEditCommunicationRequestValidator _validator;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreator;
 
     public EditCommunicationCommand(
-      IUserRepository userRepository,
       ICommunicationRepository repository,
       IAccessValidator accessValidator,
       IPatchDbUserCommunicationMapper mapper,
       IEditCommunicationRequestValidator validator,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      IResponseCreater responseCreator)
     {
-      _userRepository = userRepository;
       _repository = repository;
       _accessValidator = accessValidator;
       _mapper = mapper;
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
+      _responseCreator = responseCreator;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
       JsonPatchDocument<EditCommunicationRequest> request)
     {
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-      DbUser sender = await _userRepository.GetAsync(senderId);
-      DbUserCommunication communication = _repository.Get(communicationId);
+      DbUserCommunication communication = await _repository.GetAsync(communicationId);
 
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
-        && senderId != communication.UserId)
+      if (_httpContextAccessor.HttpContext.GetUserId() != communication.UserId &&
+        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
-        throw new ForbiddenException("Not enough rights.");
+        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      _validator.ValidateAndThrowCustom(request);
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
 
-      Operation<EditCommunicationRequest> valueOperation = request.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase));
-
-      if (valueOperation != null && _repository.IsCommunicationValueExist(valueOperation.value.ToString()))
+      if (!validationResult.IsValid)
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-        return new OperationResultResponse<bool>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = new() { $"The communication '{valueOperation.value}' already exists." }
-        };
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      return new OperationResultResponse<bool>
+      OperationResultResponse<bool> response = new();
+      response.Body = await _repository.EditAsync(communicationId, _mapper.Map(request));
+      response.Status = OperationResultStatusType.FullSuccess;
+
+      if (!response.Body)
       {
-        Status = OperationResultStatusType.FullSuccess,
-        Body = await _repository.EditAsync(communicationId, _mapper.Map(request)),
-        Errors = new()
-      };
+        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
+
+      return response;
     }
   }
 }

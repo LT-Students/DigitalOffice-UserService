@@ -13,7 +13,8 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
   {
     private static Regex PhoneRegex = new(@"^\d+$");
 
-    public CreateCommunicationRequestValidator(IUserRepository _userRepository)
+    public CreateCommunicationRequestValidator(
+      ICommunicationRepository _communicationRepository)
     {
       RuleFor(c => c.Value)
         .NotEmpty().WithMessage("Communication value must not be empty.");
@@ -42,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
           .WithMessage("Incorrect email address."));
 
       RuleFor(c => c.Value)
-        .MustAsync(async (v, _, _) => !(await _userRepository.IsCommunicationValueExist(new List<string>() { v.Value })))
+        .MustAsync(async (v, _, _) => !await _communicationRepository.ValueExist(v.Value))
         .WithMessage("Communication value already exist.");
     }
   }

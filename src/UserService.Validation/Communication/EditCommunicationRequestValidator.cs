@@ -1,107 +1,88 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
+using LT.DigitalOffice.Kernel.Validators;
+using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Validation.Communication
 {
-    public class EditCommunicationRequestValidator 
-        : AbstractValidator<JsonPatchDocument<EditCommunicationRequest>>, IEditCommunicationRequestValidator
+  public class EditCommunicationRequestValidator :
+    BaseEditRequestValidator<EditCommunicationRequest>, IEditCommunicationRequestValidator
+  {
+    private readonly ICommunicationRepository _communicationRepository;
+
+    private async Task HandleInternalPropertyValidation(Operation<EditCommunicationRequest> requestedOperation, CustomContext context)
     {
-        private void HandleInternalPropertyValidation(Operation<EditCommunicationRequest> requestedOperation, CustomContext context)
+      RequestedOperation = requestedOperation;
+      Context = context;
+
+      #region Paths
+
+      AddСorrectPaths(
+        new List<string>
         {
-            #region local functions
+          nameof(EditCommunicationRequest.Type),
+          nameof(EditCommunicationRequest.Value)
+        });
 
-            void AddСorrectPaths(List<string> paths)
-            {
-                if (paths.FirstOrDefault(p => p.EndsWith(requestedOperation.path[1..], StringComparison.OrdinalIgnoreCase)) == null)
-                {
-                    context.AddFailure(requestedOperation.path, $"This path {requestedOperation.path} is not available");
-                }
-            }
+      AddСorrectOperations(nameof(EditCommunicationRequest.Type), new() { OperationType.Replace });
+      AddСorrectOperations(nameof(EditCommunicationRequest.Value), new() { OperationType.Replace });
 
-            void AddСorrectOperations(
-                string propertyName,
-                List<OperationType> types)
-            {
-                if (requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
-                    && !types.Contains(requestedOperation.OperationType))
-                {
-                    context.AddFailure(propertyName, $"This operation {requestedOperation.OperationType} is prohibited for {propertyName}");
-                }
-            }
+      #endregion
 
-            void AddFailureForPropertyIf(
-                string propertyName,
-                Func<OperationType, bool> type,
-                Dictionary<Func<Operation<EditCommunicationRequest>, bool>, string> predicates)
-            {
-                if (!requestedOperation.path.EndsWith(propertyName, StringComparison.OrdinalIgnoreCase)
-                    || !type(requestedOperation.OperationType))
-                {
-                    return;
-                }
+      #region Value
 
-                foreach (var validateDelegate in predicates)
-                {
-                    if (!validateDelegate.Key(requestedOperation))
-                    {
-                        context.AddFailure(propertyName, validateDelegate.Value);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region paths
-
-            AddСorrectPaths(
-                new List<string>
-                {
-                    nameof(EditCommunicationRequest.Type),
-                    nameof(EditCommunicationRequest.Value)
-                });
-
-            AddСorrectOperations(nameof(EditCommunicationRequest.Type), new List<OperationType> { OperationType.Replace });
-            AddСorrectOperations(nameof(EditCommunicationRequest.Value), new List<OperationType> { OperationType.Replace });
-
-            #endregion
-
-            #region Value
-
-            AddFailureForPropertyIf(
-                nameof(EditCommunicationRequest.Value),
-                x => x == OperationType.Replace,
-                new()
-                {
-                    { x => !string.IsNullOrEmpty(x.value.ToString()), "Value must not be empty." }
-                });
-
-            #endregion
-
-            #region Types
-
-            AddFailureForPropertyIf(
-                nameof(EditCommunicationRequest.Type),
-                x => x == OperationType.Replace,
-                new()
-                {
-                    { x => Enum.TryParse(typeof(CommunicationType), x.value.ToString(), out _), "Incorrect format of communication type." }
-                });
-
-            #endregion
-        }
-
-        public EditCommunicationRequestValidator()
+      AddFailureForPropertyIf(
+        nameof(EditCommunicationRequest.Value),
+        x => x == OperationType.Replace,
+        new()
         {
-            RuleForEach(x => x.Operations)
-               .Custom(HandleInternalPropertyValidation);
-        }
+          { x => !string.IsNullOrEmpty(x.value.ToString()), "Communication value must not be empty." }
+        });
+
+      await AddFailureForPropertyIfAsync(
+        nameof(EditCommunicationRequest.Value),
+        x => x == OperationType.Replace,
+        new()
+        {
+          { async x =>
+            !await _communicationRepository.ValueExist(x.value.ToString()),
+            "Communication value already exist."
+          }
+        });
+
+      #endregion
+
+      #region Types
+
+      AddFailureForPropertyIf(
+        nameof(EditCommunicationRequest.Type),
+        x => x == OperationType.Replace,
+        new()
+        {
+          {
+            x =>
+            Enum.TryParse(typeof(CommunicationType), x.value.ToString(), out _),
+            "Incorrect format of communication type."
+          }
+        });
+
+      #endregion
     }
+
+    public EditCommunicationRequestValidator(
+      ICommunicationRepository communicationRepository)
+    {
+      _communicationRepository = communicationRepository;
+
+      RuleForEach(x => x.Operations)
+       .CustomAsync(async (x, context, _) => await HandleInternalPropertyValidation(x, context));
+    }
+  }
 }
