@@ -120,7 +120,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 MiddleName = _createUserRequest.MiddleName,
                 Gender = (int)_createUserRequest.Gender,
                 Status = (int)_createUserRequest.Status,
-                AvatarFileId = null,
                 IsAdmin = (bool)_createUserRequest.IsAdmin,
                 IsActive = true,
                 Communications = new List<DbUserCommunication>

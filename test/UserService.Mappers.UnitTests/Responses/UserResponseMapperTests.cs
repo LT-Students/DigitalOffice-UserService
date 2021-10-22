@@ -173,7 +173,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Gender = 0,
                 City = "Spb",
                 Status = 0,
-                AvatarFileId = Guid.NewGuid(),
                 IsActive = true,
                 IsAdmin = false,
                 Rate = 1,
@@ -238,14 +237,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     Name = "Project name",
                     Status = "Active"
                 }
-            };
-
-            _avatarInfo = new ImageInfo
-            {
-                Id = _dbUser.AvatarFileId,
-                Content = "Content",
-                Extension = ".jpg",
-                ParentId = null
             };
 
             _images = new List<ImageInfo>
