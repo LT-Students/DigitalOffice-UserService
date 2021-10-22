@@ -6,17 +6,19 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
-    [AutoInject]
-    public interface ICommunicationRepository
-    {
-        DbUserCommunication Get(Guid communicationId);
+  [AutoInject]
+  public interface ICommunicationRepository
+  {
+    Task<DbUserCommunication> GetAsync(Guid communicationId);
 
-        Task<Guid> AddAsync(DbUserCommunication userCommunication);
+    Task<Guid?> CreateAsync(DbUserCommunication dbUserCommunication);
 
-        Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
+    Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
 
-        Task<bool> RemoveAsync(DbUserCommunication communication);
+    Task<bool> RemoveAsync(DbUserCommunication dbUserCommunication);
 
-        bool IsCommunicationValueExist(string value);
-    }
+    Task<bool> CheckExistingValue(string value);
+
+    Task<int> CountUserEmails(Guid userId);
+  }
 }

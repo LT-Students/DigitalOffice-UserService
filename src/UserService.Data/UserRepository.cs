@@ -269,17 +269,6 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync(u => u.Id == userId) != null;
     }
 
-    public async Task<bool> IsCommunicationValueExist(List<string> value)
-    {
-      if (value == null)
-      {
-        return false;
-      }
-
-      return await _provider.UserCommunications
-        .AnyAsync(v => value.Contains(v.Value));
-    }
-
     public async Task<List<DbUser>> SearchAsync(string text)
     {
       return await _provider.Users
