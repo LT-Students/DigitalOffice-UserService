@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       if (_httpContextAccessor.HttpContext.GetUserId() != communication.UserId &&
         !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
-        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       ValidationResult validationResult = await _validator.ValidateAsync(request);

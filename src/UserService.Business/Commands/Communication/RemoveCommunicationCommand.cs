@@ -42,13 +42,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       if ((_httpContextAccessor.HttpContext.GetUserId() != dbUserCommunication.UserId) &&
         !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
-        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       if (dbUserCommunication.Type == (int)CommunicationType.Email &&
         (await _repository.CountUserEmails(dbUserCommunication.UserId)) < 2)
       {
-        _responseCreator.CreateFailureResponse<bool>(
+        return _responseCreator.CreateFailureResponse<bool>(
           HttpStatusCode.BadRequest,
           new List<string>() { "Last email can not be removed." });
       }
