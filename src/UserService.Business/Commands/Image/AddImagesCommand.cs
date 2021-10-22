@@ -58,7 +58,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
             _createImageDataMapper.Map(request),
             ImageSource.User));
 
-        if (createResponse.Message.IsSuccess)
+        if (createResponse.Message.IsSuccess
+          && createResponse.Message.Body != null
+          && createResponse.Message.Body.ImagesIds != null)
         {
           return createResponse.Message.Body.ImagesIds;
         }
@@ -143,7 +145,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
       if (response.Body != null)
       {
-        List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
+        List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request);
 
         await _imageRepository.CreateAsync(dbEntityImages);
 

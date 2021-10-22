@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
@@ -87,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     {
       OperationResultResponse<ImagesResponse> response = new();
 
-      List<Guid> dbImagesIds = _imageRepository.GetImagesIds(entityId);
+      List<Guid> dbImagesIds = await _imageRepository.GetImagesIdsByEntityIdAsync(entityId);
 
       if (dbImagesIds == null || !dbImagesIds.Any())
       {

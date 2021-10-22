@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -117,11 +118,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      if (!_removeRequestValidator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _removeRequestValidator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         response.Status = OperationResultStatusType.Failed;
-        response.Errors.AddRange(errors);
+        response.Errors.AddRange(validationResult.Errors.Select(validationFailure => validationFailure.ErrorMessage).ToList());
 
         return response;
       }
@@ -130,17 +133,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
       if (response.Body)
       {
-        DbUser dbUser = request.EntityType == EntityType.User
-          ? null
-          : await _userRepository.GetAsync(request.EntityId);
-
-        if (dbUser != null
-          && dbUser.AvatarFileId.HasValue
-          && request.ImagesIds.Contains(dbUser.AvatarFileId.Value))
-        {
-          await _userRepository.RemoveAvatarAsync(request.EntityId);
-        }
-
         await RemoveImages(request.ImagesIds, response.Errors);
       }
 

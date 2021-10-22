@@ -43,7 +43,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRoleInfoMapper _roleInfoMapper;
     private readonly IDepartmentInfoMapper _departmentInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly ILogger<FindUserCommand> _logger;
     private readonly IRequestClient<IGetDepartmentUsersRequest> _rcGetDepartmentUsers;
     private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
@@ -296,7 +297,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     public FindUserCommand(
       IBaseFindFilterValidator baseFindValidator,
-      IUserRepository repository,
+      IUserRepository userRepository,
+      IImageRepository imageRepository,
       IUserInfoMapper mapper,
       IImageInfoMapper imageInfoMapper,
       IOfficeInfoMapper officeInfoMapper,
@@ -319,7 +321,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _roleInfoMapper = roleInfoMapper;
       _departmentInfoMapper = departmentInfoMapper;
       _positionInfoMapper = positionInfoMapper;
-      _repository = repository;
+      _userRepository = userRepository;
+      _imageRepository = imageRepository;
       _rcGetDepartmentUsers = rcGetDepartmentUser;
       _rcGetCompanyEmployees = rcGetCompanyEmployees;
       _rcGetUserRoles = rcGetUserRoles;
@@ -343,6 +346,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       List<DbUser> dbUsers = null;
+      List<ImageData> images = null;
+      List<DbEntityImage> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
       response.Body = new();
@@ -357,7 +362,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (departmentUsers != null)
         {
-          dbUsers = await _repository.GetAsync(departmentUsers.UserIds);
+          dbUsers = await _userRepository.GetAsync(departmentUsers.UserIds);
 
           response.TotalCount = departmentUsers.TotalCount;
         }
@@ -372,7 +377,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       else
       {
         (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-          await _repository.FindAsync(filter);
+          await _userRepository.FindAsync(filter);
 
         dbUsers = findUsersResponse.dbUsers;
         response.TotalCount = findUsersResponse.totalCount;
@@ -392,9 +397,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? await GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : null;
 
-      List<ImageData> images = filter.IncludeAvatar
-        ? await GetImagesAsync(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
-        : null;
+      if (filter.IncludeAvatar)
+      {
+        usersImages = await _imageRepository.GetAvatarsAsync(usersIds);
+        images = await GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors);
+      }
 
       response.Body
         .AddRange(dbUsers.Select(dbUser =>
@@ -408,8 +415,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
               companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
               roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-            filter.IncludeAvatar ? _imageInfoMapper.Map(
-              images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
+            filter.IncludeAvatar
+            ? _imageInfoMapper.Map(images?.FirstOrDefault(
+              x => x.ImageId == usersImages.Where(dbImage => (dbImage.EntityId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
+            : null)));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

@@ -288,21 +288,5 @@ namespace LT.DigitalOffice.UserService.Data
         .Contains(text))
         .ToListAsync();
     }
-
-    public async Task<bool> RemoveAvatarAsync(Guid userId)
-    {
-      DbUser dbUser = await GetAsync(userId);
-
-      if (dbUser == null)
-      {
-        return false;
-      }
-
-      dbUser.AvatarFileId = null;
-
-      await _provider.SaveAsync();
-
-      return true;
-    }
   }
 }

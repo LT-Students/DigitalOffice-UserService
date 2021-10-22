@@ -43,7 +43,5 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     Task<bool> IsCommunicationValueExist(List<string> value);
 
     Task<List<DbUser>> SearchAsync(string text);
-
-    Task<bool> RemoveAvatarAsync(Guid userId);
   }
 }

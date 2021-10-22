@@ -19,7 +19,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public int Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string City { get; set; }
-    public Guid? AvatarFileId { get; set; }
     public int Status { get; set; }
     public bool IsAdmin { get; set; }
     public double Rate { get; set; }

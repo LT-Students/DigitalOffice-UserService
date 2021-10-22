@@ -24,19 +24,21 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _repository.GetAsync(request.UserIds);
+      List<DbUser> dbUsers = await _userRepository.GetAsync(request.UserIds);
+      List<DbEntityImage> usersAvatars = await _imageRepository.GetAvatarsAsync(request.UserIds);
 
       return dbUsers
         .Select(dbUser => new UserData(
           dbUser.Id,
-          dbUser.AvatarFileId,
+          usersAvatars.Where(x => x.EntityId == dbUser.Id).Select(x => x.ImageId).FirstOrDefault(),
           dbUser.FirstName,
           dbUser.MiddleName,
           dbUser.LastName,
@@ -47,12 +49,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     }
 
     public GetUsersDataConsumer(
-      IUserRepository repository,
+      IUserRepository userRepository,
+      IImageRepository imageRepository,
       IConnectionMultiplexer cache,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper)
     {
-      _repository = repository;
+      _userRepository = userRepository;
+      _imageRepository = imageRepository;
       _cache = cache;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;

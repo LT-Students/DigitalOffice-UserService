@@ -11,9 +11,17 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<List<Guid>> CreateAsync(List<DbEntityImage> dbEntityImages);
 
-    List<Guid> GetImagesIds(Guid entityId);
+    Task<List<Guid>> GetImagesIdsByEntityIdAsync(Guid entityId);
 
-    List<DbEntityImage> Get(List<Guid> imagesIds);
+    Task<List<DbEntityImage>> GetAsync(List<Guid> imagesIds);
+
+    Task<List<DbEntityImage>> GetAvatarsAsync(List<Guid> usersIds);
+
+    Task<DbEntityImage> GetAvatarAsync(Guid userId);
+
+    Task<Guid?> UpdateAvatarAsync(Guid userId, Guid imageId);
+
+    Task<Guid?> UpdateAvatarAsync(DbEntityImage avatarImage);
 
     Task<bool> RemoveAsync(List<Guid> imagesIds);
   }

@@ -198,19 +198,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<string> errors = new List<string>();
 
-      Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
-
-      /*Guid? imageId = null;
-
-      if (imageOperation != null)
-      {
-        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
-          ? Guid.Parse(imageOperation.value?.ToString())
-          : null;
-      }*/
-
-      bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
+      bool removeUserFromDepartment = departmentOperation != null && departmentOperation.value == null;
       Guid? newDepartmentId = null;
       Guid? newPositionId = null;
       Guid? newOfficeId = null;
@@ -231,7 +219,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       await EditCompanyEmployeeAsync(
-        removeUserFromDepartmen,
+        removeUserFromDepartment,
         newDepartmentId,
         newPositionId,
         newOfficeId,
