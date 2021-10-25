@@ -135,6 +135,31 @@ namespace LT.DigitalOffice.UserService.Data
         .ToListAsync();
     }
 
+    public async Task<List<(DbUser user, Guid avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds)
+    {
+      if (usersIds == null)
+      {
+        return null;
+      }
+
+      return (await
+        (from user in _provider.Users where usersIds.Contains(user.Id)
+         join image in _provider.EntitiesImages on user.Id equals image.EntityId
+         select new
+         {
+           User = user,
+           EntityImage = image
+         }).ToListAsync()).AsEnumerable().GroupBy(r => r.User.Id)
+         .Select(x =>
+         {
+           DbUser user = x.Select(x => x.User).FirstOrDefault();
+           Guid avatarId = x.Select(x => x.EntityImage).Where(x => x.EntityId == user.Id && x.IsCurrentAvatar)
+           .Select(x => x.ImageId).FirstOrDefault();
+
+           return (user, avatarId);
+         }).ToList();
+    }
+
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
     {
       if (usersIds == null)

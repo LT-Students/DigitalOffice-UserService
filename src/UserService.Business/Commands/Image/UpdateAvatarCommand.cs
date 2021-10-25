@@ -43,7 +43,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
     private async Task<Guid?> AddImageAsync(string name, string content, string extension, List<string> errors)
     {
-      const string errorMessage = "Can not add images. Please try again later.";
       const string logMessage = "Errors while adding images.";
 
       try
@@ -63,15 +62,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
           string.Join('\n', createResponse.Message.Errors));
-
-        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
         _logger.LogError(e, logMessage);
-
-        errors.Add(errorMessage);
       }
+
+      errors.Add("Can not add images. Please try again later.");
 
       return null;
     }
@@ -131,12 +128,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _createImageDataMapper = createImageDataMapper;
       _imageRepository = imageRepository;
     }
+
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(UpdateAvatarRequest request)
     {
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers)
-        && senderId != request.UserId)
+      if (senderId != request.UserId
+        && !await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers))
       {
         return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }

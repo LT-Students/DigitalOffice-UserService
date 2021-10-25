@@ -32,19 +32,18 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _userRepository.GetAsync(request.UserIds);
-      List<DbEntityImage> usersAvatars = await _imageRepository.GetAvatarsAsync(request.UserIds);
+      List<(DbUser user, Guid avatarId)> users = await _userRepository.GetWithAvatarsAsync(request.UserIds);
 
-      return dbUsers
-        .Select(dbUser => new UserData(
-          dbUser.Id,
-          usersAvatars.Where(x => x.EntityId == dbUser.Id).Select(x => x.ImageId).FirstOrDefault(),
-          dbUser.FirstName,
-          dbUser.MiddleName,
-          dbUser.LastName,
-          ((UserStatus)dbUser.Status).ToString(),
-          (float)dbUser.Rate,
-          dbUser.IsActive))
+      return users
+        .Select(users => new UserData(
+          users.user.Id,
+          users.avatarId == default ? null : users.avatarId,
+          users.user.FirstName,
+          users.user.MiddleName,
+          users.user.LastName,
+          ((UserStatus)users.user.Status).ToString(),
+          (float)users.user.Rate,
+          users.user.IsActive))
         .ToList();
     }
 
