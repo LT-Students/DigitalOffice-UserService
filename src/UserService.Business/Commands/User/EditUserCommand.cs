@@ -34,11 +34,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
-    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
+    private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
 
     #region private method
@@ -116,11 +116,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       ILogger<EditUserCommand> logger,
-      IRequestClient<ICreateImagesRequest> rcImage,
       IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
+      ICacheNotebook cacheNotebook,
       IBus bus)
     {
       _userRepository = userRepository;
@@ -128,11 +128,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _logger = logger;
-      _rcImage = rcImage;
       _rcEditUserOffice = rcEditUserOffice;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
+      _cacheNotebook = cacheNotebook;
       _bus = bus;
     }
 
@@ -216,6 +216,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       response.Body = await _userRepository.EditUserAsync(userId, _mapperUser.Map(patch));
+
+      await _cacheNotebook.RemoveAsync(userId);
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess

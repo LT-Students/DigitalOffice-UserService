@@ -11,7 +11,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +24,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
     private readonly IUserRepository _repository;
-    private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
+    private readonly ICacheNotebook _cacheNotebook;
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
@@ -47,14 +46,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public GetUsersDataConsumer(
       IUserRepository repository,
-      IConnectionMultiplexer cache,
       IOptions<RedisConfig> redisConfig,
-      IRedisHelper redisHelper)
+      IRedisHelper redisHelper,
+      ICacheNotebook cacheNotebook)
     {
       _repository = repository;
-      _cache = cache;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
+      _cacheNotebook = cacheNotebook;
     }
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
@@ -66,11 +65,15 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users != null)
       {
+        string key = context.Message.UserIds.GetRedisCacheHashCode();
+
         await _redisHelper.CreateAsync(
           Cache.Users,
-          context.Message.UserIds.GetRedisCacheHashCode(),
+          key,
           users,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+
+        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
       }
     }
   }
