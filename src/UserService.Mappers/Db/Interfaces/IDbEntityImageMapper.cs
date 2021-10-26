@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
   [AutoInject]
   public interface IDbEntityImageMapper
   {
-    List<DbEntityImage> Map(List<Guid> imagesIds, AddImagesRequest request);
+    List<DbEntityImage> Map(List<Guid> imagesIds, CreateImageRequest request);
     DbEntityImage Map(Guid imageId, Guid entityId, bool isCurrentAvatar = false);
   }
 }

@@ -29,17 +29,17 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
-  public class UpdateAvatarCommand : IUpdateAvatarCommand
+  public class EditAvatarCommand : IEditAvatarCommand
   {
     private readonly IImageRepository _imageRepository;
     private readonly IAccessValidator _accessValidator;
-    private readonly IUpdateAvatarRequestValidator _requestValidator;
+    private readonly IEditAvatarRequestValidator _requestValidator;
     private readonly IDbEntityImageMapper _dbEntityImageMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreator;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
-    private readonly ILogger<CreateImagesCommand> _logger;
+    private readonly ILogger<CreateImageCommand> _logger;
 
     private async Task<Guid?> AddImageAsync(string name, string content, string extension, List<string> errors)
     {
@@ -90,30 +90,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       return response;
     }
 
-    async Task<OperationResultResponse<Guid?>> UpdateByNewImage(Guid userId, string name, string content, string extension)
-    {
-      OperationResultResponse<Guid?> response = new();
-
-      Guid? avatarImageId = await AddImageAsync(name, content, extension, response.Errors);
-
-      if (!avatarImageId.HasValue)
-      {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, response.Errors);
-      }
-
-      response.Body = await _imageRepository.UpdateAvatarAsync(_dbEntityImageMapper.Map(avatarImageId.Value, userId, true));
-      response.Status = OperationResultStatusType.FullSuccess;
-
-      return response;
-    }
-
-    public UpdateAvatarCommand(
-      ILogger<CreateImagesCommand> logger,
+    public EditAvatarCommand(
+      ILogger<CreateImageCommand> logger,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
       IAccessValidator accessValidator,
       IDbEntityImageMapper dbEntityImageMapper,
-      IUpdateAvatarRequestValidator requestValidator,
+      IEditAvatarRequestValidator requestValidator,
       IResponseCreater responseCreator,
       ICreateImageDataMapper createImageDataMapper,
       IImageRepository imageRepository)
@@ -129,17 +112,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _imageRepository = imageRepository;
     }
 
-    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(UpdateAvatarRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(Guid userId, Guid imageId)
     {
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (senderId != request.UserId
+      if (senderId != userId
         && !await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers))
       {
         return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _requestValidator.ValidateAsync(request);
+      ValidationResult validationResult = await _requestValidator.ValidateAsync((userId, imageId));
       if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<Guid?>(
@@ -147,14 +130,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           validationResult.Errors.Select(validationFailure => validationFailure.ErrorMessage).ToList());
       }
 
-      if (request.ImageId != null)
+      OperationResultResponse<Guid?> response = new();
+
+      response.Body = await _imageRepository.UpdateAvatarAsync(userId, imageId);
+
+      if (response.Body == null)
       {
-        return await UpdateById(request.UserId, request.ImageId.Value);
+        return _responseCreator.CreateFailureResponse<Guid?>(
+          HttpStatusCode.NotFound,
+          new List<string>() { "Can't find image with sended Id." });
       }
-      else
-      {
-        return await UpdateByNewImage(request.UserId, request.Name, request.Content, request.Extension);
-      }
+
+      response.Status = OperationResultStatusType.FullSuccess;
+      return response;
     }
   }
 }

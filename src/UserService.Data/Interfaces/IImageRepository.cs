@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IImageRepository
   {
-    Task<List<Guid>> CreateAsync(List<DbEntityImage> dbEntityImages);
+    Task<Guid?> CreateAsync(DbEntityImage dbEntityImage);
 
     Task<List<Guid>> GetImagesIdsByEntityIdAsync(Guid entityId);
 

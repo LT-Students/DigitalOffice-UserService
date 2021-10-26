@@ -18,17 +18,17 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<List<Guid>> CreateAsync(List<DbEntityImage> dbEntityImages)
+    public async Task<Guid?> CreateAsync(DbEntityImage dbEntityImage)
     {
-      if (dbEntityImages == null || !dbEntityImages.Any() || dbEntityImages.Contains(null))
+      if (dbEntityImage == null)
       {
         return null;
       }
 
-      _provider.EntitiesImages.AddRange(dbEntityImages);
+      _provider.EntitiesImages.Add(dbEntityImage);
       await _provider.SaveAsync();
 
-      return dbEntityImages.Select(x => x.ImageId).ToList();
+      return dbEntityImage.ImageId;
     }
 
     public async Task<List<Guid>> GetImagesIdsByEntityIdAsync(Guid entityId)

@@ -321,11 +321,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)
       {
-        await _imageRepository.CreateAsync(
-          new List<DbEntityImage>()
-          {
-            _dbEntityImageMapper.Map(avatarImageId.Value, userId, true)
-          });
+        await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(avatarImageId.Value, userId, true));
       }
 
       await SendEmailAsync(dbUser, password, response.Errors);

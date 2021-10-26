@@ -5,7 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Images;
 namespace LT.DigitalOffice.UserService.Validation.Image.Interfaces
 {
   [AutoInject]
-  public interface IAddImagesRequestValidator : IValidator<AddImagesRequest>
+  public interface IAddImagesRequestValidator : IValidator<CreateImageRequest>
   {
   }
 }

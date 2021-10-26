@@ -2,13 +2,14 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Images;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces
 {
   [AutoInject]
-  public interface IUpdateAvatarCommand
+  public interface ICreateImageCommand
   {
-    Task<OperationResultResponse<Guid?>> ExecuteAsync(UpdateAvatarRequest request);
+    Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateImageRequest request);
   }
 }

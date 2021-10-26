@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 {
   public class DbEntityImageMapper : IDbEntityImageMapper
   {
-    public List<DbEntityImage> Map(List<Guid> imagesIds, AddImagesRequest request)
+    public List<DbEntityImage> Map(List<Guid> imagesIds, CreateImageRequest request)
     {
       if (imagesIds == null || !imagesIds.Any() || request == null)
       {

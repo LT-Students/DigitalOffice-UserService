@@ -15,9 +15,9 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class ImageController : ControllerBase
   {
     [HttpPost("create")]
-    public async Task<OperationResultResponse<List<Guid>>> CreateAsync(
-      [FromServices] ICreateImagesCommand command,
-      [FromBody] AddImagesRequest request)
+    public async Task<OperationResultResponse<Guid?>> CreateAsync(
+      [FromServices] ICreateImageCommand command,
+      [FromBody] CreateImageRequest request)
     {
       return await command.ExecuteAsync(request);
     }
@@ -39,12 +39,13 @@ namespace LT.DigitalOffice.UserService.Controllers
       return await command.ExecuteAsync(request);
     }
 
-    [HttpPost("updateavatar")]
-    public async Task<OperationResultResponse<Guid?>> UpdateAvatarAsync(
-      [FromServices] IUpdateAvatarCommand command,
-      [FromBody] UpdateAvatarRequest request)
+    [HttpGet("editavatar")]
+    public async Task<OperationResultResponse<Guid?>> EditAvatarAsync(
+      [FromServices] IEditAvatarCommand command,
+      [FromQuery] Guid userId,
+      [FromQuery] Guid imageId)
     {
-      return await command.ExecuteAsync(request);
+      return await command.ExecuteAsync(userId, imageId);
     }
   }
 }

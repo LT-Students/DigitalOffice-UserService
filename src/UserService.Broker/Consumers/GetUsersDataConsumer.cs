@@ -24,8 +24,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
     private readonly IUserRepository _userRepository;
-    private readonly IImageRepository _imageRepository;
-    private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
     private readonly ICacheNotebook _cacheNotebook;
@@ -49,15 +47,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public GetUsersDataConsumer(
       IUserRepository userRepository,
-      IImageRepository imageRepository,
-      IConnectionMultiplexer cache,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper,
       ICacheNotebook cacheNotebook)
     {
       _userRepository = userRepository;
-      _imageRepository = imageRepository;
-      _cache = cache;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
       _cacheNotebook = cacheNotebook;
