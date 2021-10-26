@@ -41,7 +41,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           dbUser.MiddleName,
           dbUser.LastName,
           ((UserStatus)dbUser.Status).ToString(),
-          (float)dbUser.Rate,
           dbUser.IsActive))
         .ToList();
     }

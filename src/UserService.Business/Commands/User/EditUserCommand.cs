@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
-    private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
+    private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
@@ -43,77 +43,47 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     #region private method
 
-    private async Task EditCompanyEmployeeAsync(bool removeDepartment, Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
+    private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
     {
-      string departmentErrorMessage = $"Cannot assign position to user. Please try again later.";
-      string positionErrorMessage = $"Cannot assign department to user. Please try again later.";
       string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
-      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
-      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
       const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
-      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
 
-      if (!removeDepartment && !departmentId.HasValue && !positionId.HasValue && !officeId.HasValue)
+      if (!officeId.HasValue)
       {
         return;
       }
 
       try
       {
-        IOperationResult<(bool department, bool position, bool office)> response =
-          (await _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
-            IEditCompanyEmployeeRequest.CreateObj(
-              userId,
-              _httpContextAccessor.HttpContext.GetUserId(),
-              removeUserFromDepartment: removeDepartment,
-              departmentId: departmentId,
-              positionId: positionId,
+        IOperationResult<bool> response =
+          (await _rcEditUserOffice.GetResponse<IOperationResult<bool>>(
+            IEditUserOfficeRequest.CreateObj(
+              userId: userId,
+              modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
               officeId: officeId))).Message;
 
-        if (!response.IsSuccess)
+        if (response.IsSuccess && response.Body)
         {
-          _logger.LogWarning(logMessage, userId);
-
-          errors.Add(departmentErrorMessage);
-          errors.Add(positionErrorMessage);
-          errors.Add(officeErrorMessage);
-
           return;
         }
 
-        if (!response.Body.department)
-        {
-          _logger.LogWarning(departmentLogMessage, userId, departmentId);
-
-          errors.Add(departmentErrorMessage);
-        }
-
-        if (!response.Body.position)
-        {
-          _logger.LogWarning(positionLogMessage, userId, positionId);
-
-          errors.Add(positionErrorMessage);
-        }
-
-        if (!response.Body.office)
-        {
-          _logger.LogWarning(officeLogMessage, userId, officeId);
-
-          errors.Add(officeErrorMessage);
-        }
+        _logger.LogWarning(officeLogMessage, officeId, userId);
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, userId);
-
-        errors.Add(departmentErrorMessage);
-        errors.Add(positionErrorMessage);
-        errors.Add(officeErrorMessage);
+        _logger.LogError(exc, officeLogMessage, officeId, userId);
       }
+
+      errors.Add(officeErrorMessage);
     }
 
-    private async Task ChangeUserRoleAsync(Guid roleId, Guid userId, List<string> errors)
+    private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
     {
+      if (!roleId.HasValue)
+      {
+        return;
+      }
+
       string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
       const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
 
@@ -121,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         Response<IOperationResult<bool>> response = await _rcRole.GetResponse<IOperationResult<bool>>(
           IChangeUserRoleRequest.CreateObj(
-            roleId, userId, _httpContextAccessor.HttpContext.GetUserId()));
+            roleId.Value, userId, _httpContextAccessor.HttpContext.GetUserId()));
 
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
@@ -147,7 +117,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       ILogger<EditUserCommand> logger,
       IRequestClient<ICreateImagesRequest> rcImage,
-      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
+      IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
@@ -159,7 +129,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _logger = logger;
       _rcImage = rcImage;
-      _rcEditCompanyEmployee = rcEditCompanyEmployee;
+      _rcEditUserOffice = rcEditUserOffice;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
@@ -169,10 +139,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
-      Operation<EditUserRequest> positionOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase));
-      Operation<EditUserRequest> departmentOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
@@ -185,18 +151,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
-        && patch.Operations.FirstOrDefault(o => o.path.EndsWith(nameof(EditUserRequest.Rate), StringComparison.OrdinalIgnoreCase)) == null
-        && positionOperation == null
-        && departmentOperation == null
         && roleOperation == null
-        && officeOperation == null)))
+        && officeOperation == null
+        && isActiveOperation == null)))
       {
         _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       OperationResultResponse<bool> response = new();
 
-      List<string> errors = new List<string>();
+      var errors = new List<string>();
 
       Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
           o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
@@ -210,33 +174,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           : null;
       }*/
 
-      bool removeUserFromDepartmen = departmentOperation != null && departmentOperation.value == null;
-      Guid? newDepartmentId = null;
-      Guid? newPositionId = null;
+      // todo rework
       Guid? newOfficeId = null;
-
-      if (departmentOperation != null && departmentOperation.value != null)
-      {
-        newDepartmentId = Guid.Parse(departmentOperation?.value.ToString());
-      }
-
-      if (positionOperation != null)
-      {
-        newPositionId = Guid.Parse(positionOperation?.value.ToString());
-      }
+      Guid? newRoleId = null;
 
       if (officeOperation != null)
       {
-        newOfficeId = Guid.Parse(officeOperation?.value.ToString());
+        newOfficeId = Guid.Parse(officeOperation.value.ToString());
       }
 
-      await EditCompanyEmployeeAsync(
-        removeUserFromDepartmen,
-        newDepartmentId,
-        newPositionId,
-        newOfficeId,
-        userId,
-        errors);
+      if (roleOperation != null)
+      {
+        newRoleId = Guid.Parse(roleOperation.value.ToString());
+      }
+
+      await Task.WhenAll(
+        EditUserOfficeAsync(newOfficeId, userId, errors),
+        ChangeUserRoleAsync(newRoleId, userId, errors));
 
       if (roleOperation != null)
       {

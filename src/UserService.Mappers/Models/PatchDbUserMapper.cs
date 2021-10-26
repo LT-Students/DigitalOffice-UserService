@@ -24,11 +24,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             Func<Operation<EditUserRequest>, string> value = item => !string.IsNullOrEmpty(item.value?.ToString().Trim())
                 ? item.value.ToString().Trim() : null;
 
-            foreach (var item in request.Operations)
+            foreach (Operation<EditUserRequest> item in request.Operations)
             {
-                if (item.path.EndsWith(nameof(EditUserRequest.DepartmentId), StringComparison.OrdinalIgnoreCase)
-                    || item.path.EndsWith(nameof(EditUserRequest.PositionId), StringComparison.OrdinalIgnoreCase)
-                    || item.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase)
+                if (item.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase)
                     || item.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase))
                 {
                     continue;

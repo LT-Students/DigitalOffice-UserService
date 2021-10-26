@@ -44,7 +44,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
                 IsActive = false,
-                Rate = request.Rate,
                 StartWorkingAt = request.StartWorkingAt,
                 DateOfBirth = request.DateOfBirth,
                 CreatedBy = createdBy,
@@ -83,7 +82,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = true,
-                Rate = 1,
                 CreatedBy = userId,
                 CreatedAtUtc = createdAtUtc,
                 Communications = new List<DbUserCommunication> {
