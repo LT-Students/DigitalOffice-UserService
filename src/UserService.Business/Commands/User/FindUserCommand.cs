@@ -377,13 +377,21 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
-      Task<List<OfficeData>> officesTask = filter.IncludeOffice ? GetOfficesAsync(usersIds, response.Errors) : null;
-      Task<List<PositionData>> positionsTask = filter.IncludePosition ? GetPositionsAsync(usersIds, response.Errors) : null;
-      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment ? GetDepartmentsAsync(usersIds, response.Errors) : null;
-      Task<List<RoleData>> rolesTask = filter.IncludeRole ? GetRolesAsync(usersIds, filter.Locale, response.Errors) : null;
+      Task<List<OfficeData>> officesTask = filter.IncludeOffice
+        ? GetOfficesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<OfficeData>);
+      Task<List<PositionData>> positionsTask = filter.IncludePosition
+        ? GetPositionsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<PositionData>);
+      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
+        ? GetDepartmentsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<DepartmentData>);
+      Task<List<RoleData>> rolesTask = filter.IncludeRole
+        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
+        : Task.FromResult(null as List<RoleData>);
       Task<List<ImageData>> imagesTask = filter.IncludeAvatar
         ? GetImagesAsync(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
-        : null;
+        : Task.FromResult(null as List<ImageData>);
 
       await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
 

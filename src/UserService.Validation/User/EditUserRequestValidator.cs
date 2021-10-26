@@ -222,7 +222,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
+          { x => x.value == null || Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
         });
 
       #endregion

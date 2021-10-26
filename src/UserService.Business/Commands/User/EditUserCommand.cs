@@ -48,11 +48,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
       const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
 
-      if (!officeId.HasValue)
-      {
-        return;
-      }
-
       try
       {
         IOperationResult<bool> response =
@@ -180,7 +175,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (officeOperation != null)
       {
-        newOfficeId = Guid.Parse(officeOperation.value.ToString());
+        newOfficeId = officeOperation.value == null ? null : Guid.Parse(officeOperation.value.ToString());
       }
 
       if (roleOperation != null)

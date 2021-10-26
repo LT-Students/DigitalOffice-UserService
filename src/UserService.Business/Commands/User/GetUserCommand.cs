@@ -448,12 +448,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> usersIds = new() { dbUser.Id };
 
-      Task<List<OfficeData>> officesTask = filter.IncludeOffice ? GetOfficesAsync(usersIds, response.Errors) : null;
-      Task<List<PositionData>> positionsTask = filter.IncludePosition ? GetPositionsAsync(usersIds, response.Errors) : null;
-      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment ? GetDepartmentsAsync(usersIds, response.Errors) : null;
-      Task<RoleInfo> rolesTask = filter.IncludeRole ? GetRolesAsync(usersIds, filter.Locale, response.Errors) : null;
-      Task<List<ImageInfo>> imagesTask = filter.IncludeImages ? GetImagesAsync(imagesIds, response.Errors) : null;
-      Task<List<ProjectData>> projectsTask = filter.IncludeProjects ? (GetProjectsAsync(dbUser.Id, response.Errors)) : null;
+      Task<List<OfficeData>> officesTask = filter.IncludeOffice
+        ? GetOfficesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<OfficeData>);
+      Task<List<PositionData>> positionsTask = filter.IncludePosition
+        ? GetPositionsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<PositionData>);
+      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
+        ? GetDepartmentsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<DepartmentData>);
+      Task<RoleInfo> rolesTask = filter.IncludeRole
+        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
+        : Task.FromResult(null as RoleInfo);
+      Task<List<ImageInfo>> imagesTask = filter.IncludeImages
+        ? GetImagesAsync(imagesIds, response.Errors)
+        : Task.FromResult(null as List<ImageInfo>);
+      Task<List<ProjectData>> projectsTask = filter.IncludeProjects
+        ? (GetProjectsAsync(dbUser.Id, response.Errors))
+        : Task.FromResult(null as List<ProjectData>);
 
       await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask, projectsTask);
 

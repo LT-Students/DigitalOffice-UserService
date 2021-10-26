@@ -350,7 +350,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       await Task.WhenAll(
         SendEmailAsync(dbUser, password, response.Errors),
         EditUserOfficeAsync(request.OfficeId, userId, response.Errors),
-        ChangeUserRoleAsync(request.RoleId.Value, userId, response.Errors),
+        ChangeUserRoleAsync(request.RoleId, userId, response.Errors),
         CreateDepartmentEntityAsync(request.DepartmentId, userId, response.Errors),
         CreateUserPositionAsync(request.PositionId, userId, request.Rate, response.Errors));
 
