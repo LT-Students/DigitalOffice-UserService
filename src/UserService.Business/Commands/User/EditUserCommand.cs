@@ -12,7 +12,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -34,11 +33,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
-    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
+    private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
 
     #region private method
@@ -146,11 +145,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       ILogger<EditUserCommand> logger,
-      IRequestClient<ICreateImagesRequest> rcImage,
       IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
+      ICacheNotebook cacheNotebook,
       IBus bus)
     {
       _userRepository = userRepository;
@@ -158,11 +157,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _logger = logger;
-      _rcImage = rcImage;
       _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
+      _cacheNotebook = cacheNotebook;
       _bus = bus;
     }
 
@@ -235,19 +234,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         bool newValue = bool.Parse(isActiveOperation.value.ToString());
 
-        await _credentialsRepository.SwitchActiveStatusAsync(
-            userId,
-            newValue);
+        bool switchActiveStatusResult = await _credentialsRepository.SwitchActiveStatusAsync(userId, newValue);
 
-        if (!newValue)
+        if (!switchActiveStatusResult)
+        {
+          errors.Add("Can not change is active status.");
+        }
+        else if (!newValue)
         {
           await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
-              userId,
-              requestSenderId));
+            userId,
+            requestSenderId));
         }
       }
 
       response.Body = await _userRepository.EditUserAsync(userId, _mapperUser.Map(patch));
+
+      await _cacheNotebook.RemoveAsync(userId);
 
       response.Status = errors.Any()
         ? OperationResultStatusType.PartialSuccess
@@ -257,40 +260,5 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       return response;
     }
-
-    // TODO fix
-    //private void AddUserSkillsToDbUser(DbUser dbUser, CreateUserRequest request)
-    //{
-    //    if (request.Skills == null)
-    //    {
-    //        return;
-    //    }
-
-    //    foreach (var skillName in request.Skills)
-    //    {
-    //        var dbSkill = _userRepository.FindSkillByName(skillName);
-
-    //        if (dbSkill != null)
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = dbSkill.Id
-    //                });
-    //        }
-    //        else
-    //        {
-    //            dbUser.Skills.Add(
-    //                new DbUserSkill
-    //                {
-    //                    Id = Guid.NewGuid(),
-    //                    UserId = dbUser.Id,
-    //                    SkillId = _userRepository.CreateSkill(skillName)
-    //                });
-    //        }
-    //    }
-    //}
   }
 }

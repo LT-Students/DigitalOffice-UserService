@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  /// <inheritdoc />
   public class UserCredentialsRepository : IUserCredentialsRepository
   {
     private readonly HttpContext _httpContext;
@@ -110,11 +109,11 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<Guid> CreateAsync(DbUserCredentials dbUserCredentials)
+    public async Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials)
     {
       if (dbUserCredentials == null)
       {
-        throw new ArgumentNullException(nameof(dbUserCredentials));
+        return null;
       }
 
       _provider.UserCredentials.Add(dbUserCredentials);
@@ -123,13 +122,14 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials.Id;
     }
 
-    public async Task SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
     {
-      DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
+      DbUserCredentials dbUserCredentials = await _provider.UserCredentials
+        .FirstOrDefaultAsync(c => c.UserId == userId);
 
       if (dbUserCredentials == null)
       {
-        throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
+        return false;
       }
 
       dbUserCredentials.IsActive = isActiveStatus;
@@ -138,16 +138,18 @@ namespace LT.DigitalOffice.UserService.Data
       dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
+
+      return true;
     }
 
-    public bool IsLoginExist(string login)
+    public async Task<bool> LoginExistAsync(string login)
     {
-      return _provider.UserCredentials.Any(uc => uc.Login == login);
+      return await _provider.UserCredentials.AnyAsync(uc => uc.Login == login);
     }
 
-    public bool IsCredentialsExist(Guid userId)
+    public async Task<bool> CredentialsExistAsync(Guid userId)
     {
-      return _provider.UserCredentials.Any(uc => uc.UserId == userId);
+      return await _provider.UserCredentials.AnyAsync(uc => uc.UserId == userId);
     }
   }
 }

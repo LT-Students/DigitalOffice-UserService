@@ -5,28 +5,28 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
-    public class DbUserCredentialsMapper : IDbUserCredentialsMapper
+  public class DbUserCredentialsMapper : IDbUserCredentialsMapper
+  {
+    public DbUserCredentials Map(
+      CreateCredentialsRequest request,
+      string salt,
+      string passwordHash)
     {
-        public DbUserCredentials Map(
-            CreateCredentialsRequest request,
-            string salt,
-            string passwordHash)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
+      if (request == null)
+      {
+        return null;
+      }
 
-            return new DbUserCredentials
-            {
-                Id = Guid.NewGuid(),
-                Login = request.Login,
-                Salt = salt,
-                UserId = request.UserId,
-                PasswordHash = passwordHash,
-                IsActive = true,
-                CreatedAtUtc = DateTime.UtcNow
-            };
-        }
+      return new DbUserCredentials
+      {
+        Id = Guid.NewGuid(),
+        Login = request.Login,
+        Salt = salt,
+        UserId = request.UserId,
+        PasswordHash = passwordHash,
+        IsActive = true,
+        CreatedAtUtc = DateTime.UtcNow
+      };
     }
+  }
 }

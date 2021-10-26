@@ -1,6 +1,5 @@
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -293,17 +292,6 @@ namespace LT.DigitalOffice.UserService.Data
     {
       return await _provider.Users
         .FirstOrDefaultAsync(u => u.Id == userId) != null;
-    }
-
-    public async Task<bool> IsCommunicationValueExist(List<string> value)
-    {
-      if (value == null)
-      {
-        return false;
-      }
-
-      return await _provider.UserCommunications
-        .AnyAsync(v => value.Contains(v.Value));
     }
 
     public async Task<List<DbUser>> SearchAsync(string text)

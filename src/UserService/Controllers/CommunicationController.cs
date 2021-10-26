@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class CommunicationController : ControllerBase
   {
     [HttpPost("create")]
-    public async Task<OperationResultResponse<Guid>> Create(
+    public async Task<OperationResultResponse<Guid?>> CreateAsync(
       [FromServices] ICreateCommunicationCommand command,
       [FromBody] CreateCommunicationRequest request)
     {
@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpPatch("edit")]
-    public async Task<OperationResultResponse<bool>> Edit(
+    public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditCommunicationCommand command,
       [FromBody] JsonPatchDocument<EditCommunicationRequest> request,
       [FromQuery] Guid communicationId)
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpDelete("remove")]
-    public async Task<OperationResultResponse<bool>> Remove(
+    public async Task<OperationResultResponse<bool>> RemoveAsync(
       [FromServices] IRemoveCommunicationCommand command,
       [FromQuery] Guid communicationId)
     {

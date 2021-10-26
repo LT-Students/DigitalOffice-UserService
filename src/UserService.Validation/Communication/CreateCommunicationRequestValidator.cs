@@ -3,7 +3,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
-using System.Collections.Generic;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 
@@ -13,7 +12,8 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
   {
     private static Regex PhoneRegex = new(@"^\d+$");
 
-    public CreateCommunicationRequestValidator(IUserRepository _userRepository)
+    public CreateCommunicationRequestValidator(
+      ICommunicationRepository _communicationRepository)
     {
       RuleFor(c => c.Value)
         .NotEmpty().WithMessage("Communication value must not be empty.");
@@ -21,11 +21,11 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
       RuleFor(c => c.Type)
         .IsInEnum().WithMessage("Incorrect communication type format.");
 
-      When(c => c.Type == CommunicationType.Phone, () =>
+      When(c => c.Type == CommunicationType.Phone && c.Value != null, () =>
         RuleFor(c => c.Value)
           .Must(v => PhoneRegex.IsMatch(v.Trim())).WithMessage("Incorrect phone number."));
 
-      When(c => c.Type == CommunicationType.Email, () =>
+      When(c => c.Type == CommunicationType.Email && c.Value != null, () =>
         RuleFor(c => c.Value)
           .Must(v =>
           {
@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
           .WithMessage("Incorrect email address."));
 
       RuleFor(c => c.Value)
-        .MustAsync(async (v, _, _) => !(await _userRepository.IsCommunicationValueExist(new List<string>() { v.Value })))
+        .MustAsync(async (v, _, _) => !await _communicationRepository.CheckExistingValue(v.Value))
         .WithMessage("Communication value already exist.");
     }
   }
