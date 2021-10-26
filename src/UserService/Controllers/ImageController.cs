@@ -14,9 +14,9 @@ namespace LT.DigitalOffice.UserService.Controllers
   [ApiController]
   public class ImageController : ControllerBase
   {
-    [HttpPost("add")]
-    public async Task<OperationResultResponse<List<Guid>>> AddAsync(
-      [FromServices] IAddImagesCommand command,
+    [HttpPost("create")]
+    public async Task<OperationResultResponse<List<Guid>>> CreateAsync(
+      [FromServices] ICreateImagesCommand command,
       [FromBody] AddImagesRequest request)
     {
       return await command.ExecuteAsync(request);

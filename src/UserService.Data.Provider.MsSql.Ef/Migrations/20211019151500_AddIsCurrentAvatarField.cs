@@ -16,7 +16,8 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
       builder.AddColumn<bool>(
         name: "IsCurrentAvatar",
         table: "EntitiesImages",
-        defaultValue: "false");
+        defaultValue: "false",
+        nullable: false);
     }
   }
 }

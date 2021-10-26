@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreator;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
-    private readonly ILogger<AddImagesCommand> _logger;
+    private readonly ILogger<CreateImagesCommand> _logger;
 
     private async Task<Guid?> AddImageAsync(string name, string content, string extension, List<string> errors)
     {
@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       {
         return _responseCreator.CreateFailureResponse<Guid?>(
           HttpStatusCode.NotFound,
-          new List<string>() { "Can't find image with sended Id."});
+          new List<string>() { "Can't find image with sended Id." });
       }
 
       response.Status = OperationResultStatusType.FullSuccess;
@@ -108,7 +108,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     }
 
     public UpdateAvatarCommand(
-      ILogger<AddImagesCommand> logger,
+      ILogger<CreateImagesCommand> logger,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
       IAccessValidator accessValidator,

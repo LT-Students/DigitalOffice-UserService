@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
-  public class AddImagesCommand : IAddImagesCommand
+  public class CreateImagesCommand : ICreateImagesCommand
   {
     private readonly IImageRepository _imageRepository;
     private readonly ICertificateRepository _certificateRepository;
@@ -39,16 +39,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
-    private readonly ILogger<AddImagesCommand> _logger;
+    private readonly ILogger<CreateImagesCommand> _logger;
 
-    private async Task<List<Guid>> AddImages(List<AddImageRequest> request, List<string> errors)
+    private async Task<List<Guid>> CreateImages(List<AddImageRequest> request, List<string> errors)
     {
       if (request == null || !request.Any())
       {
         return null;
       }
 
-      const string errorMessage = "Can not add images. Please try again later.";
       const string logMessage = "Errors while adding images.";
 
       try
@@ -68,15 +67,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
           string.Join('\n', createResponse.Message.Errors));
-
-        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
         _logger.LogError(e, logMessage);
-
-        errors.Add(errorMessage);
       }
+
+      errors.Add("Can not add images. Please try again later.");
 
       return null;
     }
@@ -92,7 +89,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       };
     }
 
-    public AddImagesCommand(
+    public CreateImagesCommand(
       IImageRepository imageRepository,
       ICertificateRepository certificateRepository,
       IEducationRepository educationRepository,
@@ -102,7 +99,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       ICreateImageDataMapper createImageDataMapper,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
-      ILogger<AddImagesCommand> logger)
+      ILogger<CreateImagesCommand> logger)
     {
       _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;
@@ -141,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      response.Body = await AddImages(request.Images, response.Errors);
+      response.Body = await CreateImages(request.Images, response.Errors);
 
       if (response.Body != null)
       {
