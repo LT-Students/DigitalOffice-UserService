@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
@@ -23,7 +24,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
   public class GetImagesCommand : IGetImagesCommand
   {
     private readonly IImageRepository _imageRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IImagesResponseMapper _imagesResponseMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
@@ -68,14 +68,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
     public GetImagesCommand(
       IImageRepository imageRepository,
-      IUserRepository userRepository,
       IImagesResponseMapper imagesResponseMapper,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<IGetImagesRequest> rcGetImages,
       ILogger<GetImagesCommand> logger)
     {
       _imageRepository = imageRepository;
-      _userRepository = userRepository;
       _imagesResponseMapper = imagesResponseMapper;
       _httpContextAccessor = httpContextAccessor;
       _rcGetImages = rcGetImages;
@@ -91,6 +89,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       if (dbImagesIds == null || !dbImagesIds.Any())
       {
         response.Status = OperationResultStatusType.Failed;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
         response.Errors.Add("Images were not found.");
 
         return response;

@@ -1,7 +1,5 @@
 ﻿using FluentValidation;
-using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Images;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,8 +9,6 @@ namespace LT.DigitalOffice.UserService.Validation.Image
   public class EditAvatarValidator : AbstractValidator<(Guid userId, Guid imageId)>, IEditAvatarRequestValidator
   {
     public EditAvatarValidator(
-      IImageContentValidator imageContentValidator,
-      IImageExtensionValidator imageExtensionValidator,
       IUserRepository userRepository,
       IImageRepository imageRepository)
     {
