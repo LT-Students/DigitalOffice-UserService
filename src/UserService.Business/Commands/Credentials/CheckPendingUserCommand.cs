@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.Responses;
+﻿using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using System;
@@ -20,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       return new()
       {
         Body = await _repository.PendingUserExistAsync(userId),
-        Status = Kernel.Enums.OperationResultStatusType.FullSuccess
+        Status = OperationResultStatusType.FullSuccess
       };
     }
   }
