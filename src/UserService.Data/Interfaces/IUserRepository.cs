@@ -44,6 +44,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> RemoveAvatarAsync(Guid userId);
 
-    Task<bool> PendingUserExistAsync(Guid pendingId);
+    Task<bool> PendingUserExistAsync(Guid userId);
   }
 }

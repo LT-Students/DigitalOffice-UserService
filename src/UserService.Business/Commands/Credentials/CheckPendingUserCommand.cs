@@ -15,11 +15,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _repository = repository;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid pendingUserId)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId)
     {
       return new()
       {
-        Body = await _repository.PendingUserExistAsync(pendingUserId),
+        Body = await _repository.PendingUserExistAsync(userId),
         Status = Kernel.Enums.OperationResultStatusType.FullSuccess
       };
     }

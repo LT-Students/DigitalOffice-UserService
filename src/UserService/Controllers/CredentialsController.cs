@@ -23,9 +23,9 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpGet("checkpending")]
     public async Task<OperationResultResponse<bool>> СheckPendingAsync(
     [FromServices] ICheckPendingUserCommand command,
-    [FromQuery] Guid pendingId)
+    [FromQuery] Guid userId)
     {
-      return await command.ExecuteAsync(pendingId);
+      return await command.ExecuteAsync(userId);
     }
   }
 }

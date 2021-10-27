@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces
   [AutoInject]
   public interface ICheckPendingUserCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(Guid pendingUserId);
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId);
   }
 }

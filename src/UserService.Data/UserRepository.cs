@@ -293,9 +293,9 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<bool> PendingUserExistAsync(Guid pendingId)
+    public async Task<bool> PendingUserExistAsync(Guid userId)
     {
-      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == pendingId);
+      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
     }
   }
 }
