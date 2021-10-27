@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly ILogger<CreateImageCommand> _logger;
     private readonly IResponseCreater _responseCreator;
 
-    private async Task<Guid?> CreateImage(string name, string content, string extension, List<string> errors)
+    private async Task<Guid?> CreateImageAsync(string name, string content, string extension, List<string> errors)
     {
       const string logMessage = "Errors while adding images.";
 
@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
           validationResult.Errors.Select(validationFailure => validationFailure.ErrorMessage).ToList());
       }
 
-      response.Body = await CreateImage(request.Name, request.Content, request.Extension, response.Errors);
+      response.Body = await CreateImageAsync(request.Name, request.Content, request.Extension, response.Errors);
 
       if (response.Body != null)
       {

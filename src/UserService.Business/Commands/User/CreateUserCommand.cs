@@ -236,16 +236,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
               ImageSource.User));
 
         if (createResponse.Message.IsSuccess
-            && createResponse.Message.Body != null
-            && createResponse.Message.Body.ImagesIds != null)
+          && createResponse.Message.Body != null
+          && createResponse.Message.Body.ImagesIds != null)
         {
           return createResponse.Message.Body.ImagesIds.FirstOrDefault();
         }
 
         _logger.LogWarning(
-            "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
-            senderId,
-            string.Join(',', createResponse.Message.Errors));
+          "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
+          senderId,
+          string.Join(',', createResponse.Message.Errors));
 
         errors.Add(errorMessage);
       }

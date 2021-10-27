@@ -48,8 +48,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<Guid?> UpdateAvatarAsync(Guid userId, Guid imageId)
     {
-      List<DbEntityImage> dbEntityImages = await GetAsync(new List<Guid> { imageId });
-      DbEntityImage image = dbEntityImages?.FirstOrDefault();
+      DbEntityImage image = _provider.EntitiesImages.FirstOrDefault(x => x.ImageId == imageId);
 
       if (image == null || image.EntityId != userId)
       {

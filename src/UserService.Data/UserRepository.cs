@@ -153,7 +153,7 @@ namespace LT.DigitalOffice.UserService.Data
          {
            DbUser user = x.Select(x => x.User).FirstOrDefault();
            Guid avatarId = x.Select(x => x.EntityImage).Where(x => x.EntityId == user.Id && x.IsCurrentAvatar)
-           .Select(x => x.ImageId).FirstOrDefault();
+             .Select(x => x.ImageId).FirstOrDefault();
 
            return (user, avatarId);
          }).ToList();
