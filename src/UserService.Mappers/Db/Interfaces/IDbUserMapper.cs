@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
     [AutoInject]
     public interface IDbUserMapper
     {
-        DbUser Map(CreateUserRequest request, Guid? avatarImageId);
+        DbUser Map(CreateUserRequest request);
 
         DbUser Map(ICreateAdminRequest request);
     }

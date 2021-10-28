@@ -12,7 +12,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -155,21 +154,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       OperationResultResponse<bool> response = new();
 
-      var errors = new List<string>();
+      List<string> errors = new List<string>();
 
-      Operation<EditUserRequest> imageOperation = patch.Operations.FirstOrDefault(
-          o => o.path.EndsWith(nameof(EditUserRequest.AvatarFileId), StringComparison.OrdinalIgnoreCase));
-
-      /*Guid? imageId = null;
-
-      if (imageOperation != null)
-      {
-        imageId = !string.IsNullOrEmpty(imageOperation.value?.ToString())
-          ? Guid.Parse(imageOperation.value?.ToString())
-          : null;
-      }*/
-
-      // todo rework
       Guid? newOfficeId = null;
       Guid? newRoleId = null;
 

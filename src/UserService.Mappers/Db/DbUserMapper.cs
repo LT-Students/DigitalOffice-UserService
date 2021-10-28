@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public DbUser Map(CreateUserRequest request, Guid? avatarImageId)
+        public DbUser Map(CreateUserRequest request)
         {
             if (request == null)
             {
@@ -40,7 +40,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Gender = (int)request.Gender,
                 City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
-                AvatarFileId = avatarImageId,
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
                 IsActive = false,
@@ -79,7 +78,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 LastName = request.LastName,
                 MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Status = (int)UserStatus.WorkFromOffice,
-                AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = true,
                 CreatedBy = userId,

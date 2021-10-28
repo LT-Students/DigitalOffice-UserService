@@ -18,6 +18,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<List<DbUser>> GetAsync(List<Guid> usersIds);
 
+    Task<List<(DbUser user, Guid avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds);
+
     Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 
     Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter);
@@ -41,8 +43,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     Task<bool> IsUserExistAsync(Guid userId);
 
     Task<List<DbUser>> SearchAsync(string text);
-
-    Task<bool> RemoveAvatarAsync(Guid userId);
 
     Task<bool> PendingUserExistAsync(Guid userId);
   }

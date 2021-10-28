@@ -17,7 +17,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       {
         Id = image.ImageId,
         ParentId = image.ParentId,
-        Type = image.Type,
         Content = image.Content,
         Extension = image.Extension,
         Name = image.Name

@@ -23,34 +23,34 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepository;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
     private readonly ICacheNotebook _cacheNotebook;
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _repository.GetAsync(request.UserIds);
+      List<(DbUser user, Guid avatarId)> users = await _userRepository.GetWithAvatarsAsync(request.UserIds);
 
-      return dbUsers
-        .Select(dbUser => new UserData(
-          dbUser.Id,
-          dbUser.AvatarFileId,
-          dbUser.FirstName,
-          dbUser.MiddleName,
-          dbUser.LastName,
-          ((UserStatus)dbUser.Status).ToString(),
-          dbUser.IsActive))
+      return users
+        .Select(users => new UserData(
+          users.user.Id,
+          users.avatarId == default ? null : users.avatarId,
+          users.user.FirstName,
+          users.user.MiddleName,
+          users.user.LastName,
+          ((UserStatus)users.user.Status).ToString(),
+          users.user.IsActive))
         .ToList();
     }
 
     public GetUsersDataConsumer(
-      IUserRepository repository,
+      IUserRepository userRepository,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper,
       ICacheNotebook cacheNotebook)
     {
-      _repository = repository;
+      _userRepository = userRepository;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
       _cacheNotebook = cacheNotebook;

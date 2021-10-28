@@ -3,6 +3,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Validation.Helpers.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Validation.Helpers
 {
@@ -16,9 +17,9 @@ namespace LT.DigitalOffice.UserService.Validation.Helpers
       _imageRepository = imageRepository;
     }
 
-    public bool CheckAffiliation(List<Guid> imagesIds, Guid entityId)
+    public async Task<bool> CheckAffiliationAsync(List<Guid> imagesIds, Guid entityId)
     {
-      List<DbEntityImage> dbEntityImages = _imageRepository.Get(imagesIds);
+      List<DbEntityImage> dbEntityImages = await _imageRepository.GetAsync(imagesIds);
 
       foreach(DbEntityImage dbEntityImage in dbEntityImages)
       {

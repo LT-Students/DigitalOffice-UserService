@@ -37,7 +37,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.DateOfBirth),
           nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
-          nameof(EditUserRequest.AvatarFileId),
           nameof(EditUserRequest.IsActive),
           nameof(EditUserRequest.RoleId),
           nameof(EditUserRequest.OfficeId),
@@ -51,7 +50,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.AvatarFileId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
@@ -170,23 +168,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
               DateTime.TryParse(x.value.ToString(), out DateTime result),
             "Start working at has incorrect format."
           },
-        });
-
-      #endregion
-
-      #region AvatarId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.AvatarFileId),
-        x => x == OperationType.Replace,
-        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-        {
-          { x =>
-            string.IsNullOrEmpty(x.value?.ToString())
-              || (Guid.TryParse(x.value?.ToString(), out Guid avatarId)
-                && _imageRepository.Get(new List<Guid> { avatarId }).Any()),
-            "Incorrect ImageId."
-          }
         });
 
       #endregion

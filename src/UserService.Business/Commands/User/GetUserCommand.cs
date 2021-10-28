@@ -423,6 +423,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> imagesIds = new();
       List<Guid> userImagesIds = new();
+      DbEntityImage userAvatar = await _imageRepository.GetAvatarAsync(dbUser.Id);
 
       if (filter.IncludeImages)
       {
@@ -437,13 +438,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (filter.IncludeUserImages)
       {
-        userImagesIds.AddRange(_imageRepository.GetImagesIds(dbUser.Id));
+        userImagesIds.AddRange(await _imageRepository.GetImagesIdsByEntityIdAsync(dbUser.Id));
         imagesIds.AddRange(userImagesIds);
-      }
-
-      if (dbUser.AvatarFileId.HasValue)
-      {
-        imagesIds.Add(dbUser.AvatarFileId.Value);
       }
 
       List<Guid> usersIds = new() { dbUser.Id };
@@ -460,7 +456,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Task<RoleInfo> rolesTask = filter.IncludeRole
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as RoleInfo);
-      Task<List<ImageInfo>> imagesTask = filter.IncludeImages
+      Task<List<ImageInfo>> imagesTask = filter.IncludeImages || filter.IncludeUserImages
         ? GetImagesAsync(imagesIds, response.Errors)
         : Task.FromResult(null as List<ImageInfo>);
       Task<List<ProjectData>> projectsTask = filter.IncludeProjects
@@ -485,7 +481,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         role,
         projects,
         images,
-        dbUser.AvatarFileId.HasValue ? images?.FirstOrDefault(x => x.Id == dbUser.AvatarFileId) : null,
+        filter.IncludeUserImages ? images.FirstOrDefault(x => x.Id == userAvatar.ImageId) : null,
         userImagesIds,
         filter);
 

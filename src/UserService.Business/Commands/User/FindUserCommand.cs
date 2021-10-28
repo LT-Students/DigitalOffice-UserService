@@ -48,7 +48,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRoleInfoMapper _roleInfoMapper;
     private readonly IDepartmentInfoMapper _departmentInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly ILogger<FindUserCommand> _logger;
     private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
@@ -316,7 +317,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     public FindUserCommand(
       IBaseFindFilterValidator baseFindValidator,
-      IUserRepository repository,
+      IUserRepository userRepository,
+      IImageRepository imageRepository,
       IUserInfoMapper mapper,
       IImageInfoMapper imageInfoMapper,
       IOfficeInfoMapper officeInfoMapper,
@@ -340,7 +342,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _roleInfoMapper = roleInfoMapper;
       _departmentInfoMapper = departmentInfoMapper;
       _positionInfoMapper = positionInfoMapper;
-      _repository = repository;
+      _userRepository = userRepository;
+      _imageRepository = imageRepository;
       _rcGetDepartments = rcGetDepartments;
       _rcGetPositions = rcGetPositions;
       _rcGetOffices = rcGetOffices;
@@ -365,17 +368,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       List<DbUser> dbUsers = null;
+      List<DbEntityImage> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
       response.Body = new();
 
       (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-        await _repository.FindAsync(filter);
+        await _userRepository.FindAsync(filter);
 
       dbUsers = findUsersResponse.dbUsers;
       response.TotalCount = findUsersResponse.totalCount;
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
+
+      if (filter.IncludeAvatar)
+      {
+        usersImages = await _imageRepository.GetAvatarsAsync(usersIds);
+      }
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
         ? GetOfficesAsync(usersIds, response.Errors)
@@ -390,7 +399,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
       Task<List<ImageData>> imagesTask = filter.IncludeAvatar
-        ? GetImagesAsync(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
+        ? GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors)
         : Task.FromResult(null as List<ImageData>);
 
       await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
@@ -416,8 +425,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
               offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
               roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-            filter.IncludeAvatar ? _imageInfoMapper.Map(
-              images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
+            filter.IncludeAvatar
+            ? _imageInfoMapper.Map(images?.FirstOrDefault(
+              x => x.ImageId == usersImages.Where(dbImage => (dbImage.EntityId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
+            : null)));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

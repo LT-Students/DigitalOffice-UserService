@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public Guid Id { get; set; }
     public Guid EntityId { get; set; }
     public Guid ImageId { get; set; }
+    public bool IsCurrentAvatar { get; set; }
   }
 
   public class DbEntityImageConfiguration : IEntityTypeConfiguration<DbEntityImage>

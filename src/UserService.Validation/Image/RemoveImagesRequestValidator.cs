@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Validation.Image
         .NotEmpty().WithMessage("Images Ids can not be null.");
 
       RuleFor(request => request)
-        .Must(request => helper.CheckAffiliation(request.ImagesIds, request.EntityId))
+        .MustAsync(async (request, _) => await helper.CheckAffiliationAsync(request.ImagesIds, request.EntityId))
         .WithMessage("Images Ids must belong to only one entity.");
     }
   }

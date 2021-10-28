@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       PositionUserData positionUserData,
       OfficeInfo office,
       RoleInfo role,
-      ImageInfo image,
+      ImageInfo avatarImage,
       List<ImageInfo> images = null)
     {
       if (dbUser == null)
@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Position = position,
         Office = office,
         Role = role,
-        Avatar = image,
+        Avatar = avatarImage,
         Images = images
       };
     }

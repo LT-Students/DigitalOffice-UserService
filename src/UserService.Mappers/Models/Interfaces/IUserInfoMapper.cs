@@ -15,7 +15,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
       PositionUserData positionUserData,
       OfficeInfo office,
       RoleInfo role,
-      ImageInfo image,
+      ImageInfo avatarImage,
       List<ImageInfo> images = null);
   }
 }

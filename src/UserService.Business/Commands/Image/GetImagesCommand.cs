@@ -24,7 +24,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
   public class GetImagesCommand : IGetImagesCommand
   {
     private readonly IImageRepository _imageRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IImagesResponseMapper _imagesResponseMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
@@ -69,14 +68,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
     public GetImagesCommand(
       IImageRepository imageRepository,
-      IUserRepository userRepository,
       IImagesResponseMapper imagesResponseMapper,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<IGetImagesRequest> rcGetImages,
       ILogger<GetImagesCommand> logger)
     {
       _imageRepository = imageRepository;
-      _userRepository = userRepository;
       _imagesResponseMapper = imagesResponseMapper;
       _httpContextAccessor = httpContextAccessor;
       _rcGetImages = rcGetImages;
@@ -87,11 +84,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     {
       OperationResultResponse<ImagesResponse> response = new();
 
-      List<Guid> dbImagesIds = _imageRepository.GetImagesIds(entityId);
+      List<Guid> dbImagesIds = await _imageRepository.GetImagesIdsByEntityIdAsync(entityId);
 
       if (dbImagesIds == null || !dbImagesIds.Any())
       {
         response.Status = OperationResultStatusType.Failed;
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
         response.Errors.Add("Images were not found.");
 
         return response;

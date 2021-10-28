@@ -1,15 +1,14 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Images;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
@@ -29,7 +28,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IImageRepository _imageRepository;
     private readonly ICertificateRepository _certificateRepository;
     private readonly IEducationRepository _educationRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IRemoveImagesRequest> _rcRemoveImages;
     private readonly IRemoveImagesRequestValidator _removeRequestValidator;
@@ -83,7 +81,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       IImageRepository imageRepository,
       ICertificateRepository certificateRepository,
       IEducationRepository educationRepository,
-      IUserRepository userRepository,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<IRemoveImagesRequest> rcRemoveImages,
       IRemoveImagesRequestValidator removeRequestValidator,
@@ -93,7 +90,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;
       _educationRepository = educationRepository;
-      _userRepository = userRepository;
       _httpContextAccessor = httpContextAccessor;
       _rcRemoveImages = rcRemoveImages;
       _removeRequestValidator = removeRequestValidator;
@@ -117,11 +113,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
         return response;
       }
 
-      if (!_removeRequestValidator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _removeRequestValidator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         response.Status = OperationResultStatusType.Failed;
-        response.Errors.AddRange(errors);
+        response.Errors.AddRange(validationResult.Errors.Select(validationFailure => validationFailure.ErrorMessage).ToList());
 
         return response;
       }
@@ -130,17 +128,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
       if (response.Body)
       {
-        DbUser dbUser = request.EntityType == EntityType.User
-          ? null
-          : await _userRepository.GetAsync(request.EntityId);
-
-        if (dbUser != null
-          && dbUser.AvatarFileId.HasValue
-          && request.ImagesIds.Contains(dbUser.AvatarFileId.Value))
-        {
-          await _userRepository.RemoveAvatarAsync(request.EntityId);
-        }
-
         await RemoveImages(request.ImagesIds, response.Errors);
       }
 

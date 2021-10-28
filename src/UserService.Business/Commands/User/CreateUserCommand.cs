@@ -253,19 +253,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
               _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }),
               ImageSource.User));
 
-        if (!createResponse.Message.IsSuccess)
+        if (createResponse.Message.IsSuccess
+          && createResponse.Message.Body != null
+          && createResponse.Message.Body.ImagesIds != null)
         {
-          _logger.LogWarning(
-            "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
-            senderId,
-            string.Join(',', createResponse.Message.Errors));
+          return createResponse.Message.Body.ImagesIds.FirstOrDefault();
+        }
 
-          errors.Add(errorMessage);
-        }
-        else
-        {
-          avatarImageId = createResponse.Message.Body.ImagesIds.FirstOrDefault();
-        }
+        _logger.LogWarning(
+          "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
+          senderId,
+          string.Join(',', createResponse.Message.Errors));
+
+        errors.Add(errorMessage);
       }
       catch (Exception exc)
       {
@@ -331,9 +331,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       OperationResultResponse<Guid> response = new();
 
-      Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
-
-      DbUser dbUser = _mapperUser.Map(request, avatarImageId);
+      DbUser dbUser = _mapperUser.Map(request);
 
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
@@ -342,9 +340,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       await _userRepository.CreatePendingAsync(new DbPendingUser() { UserId = userId, Password = password });
 
+      Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)
       {
-        await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
+        await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(avatarImageId.Value, userId, true));
       }
 
       await Task.WhenAll(

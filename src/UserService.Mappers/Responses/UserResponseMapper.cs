@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         List<ProjectInfo> projects,
         List<ImageInfo> images,
         ImageInfo avatar,
-        List<Guid> userImagesIds, // TODO undestand for what is it
+        List<Guid> userImagesIds,
         GetUserFilter filter)
     {
       if (dbUser == null)
@@ -75,8 +75,10 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
       return new UserResponse
       {
-          User = _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar),
-          Projects = projects,
+        User = filter.IncludeUserImages
+          ? _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar, GetImages(images, userImagesIds))
+          : _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar),
+        Projects = projects,
           Skills = filter.IncludeSkills
             ? dbUser.Skills.Select(s => s.Skill.Name)
             : null,
