@@ -77,34 +77,19 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials;
     }
 
-    public async Task<bool> EditAsync(DbUserCredentials userCredentials)
+    public async Task<bool> EditAsync(DbUserCredentials dbUserCredentials)
     {
-      if (userCredentials == null)
+      if (dbUserCredentials == null)
       {
-        throw new ArgumentNullException(nameof(userCredentials));
+        return false;
       }
 
       _logger.LogInformation(
-        $"Updating user credentials for user '{userCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
+        $"Updating user credentials for user '{dbUserCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
 
-      if (!_provider.UserCredentials.Any(uc => uc.UserId == userCredentials.UserId))
-      {
-        throw new NotFoundException("User credentials was not found.");
-      }
-
-      try
-      {
-        _provider.UserCredentials.Update(userCredentials);
-        userCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-        userCredentials.ModifiedAtUtc = DateTime.UtcNow;
-        await _provider.SaveAsync();
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, $"Failed to update user credentials for user '{userCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
-
-        return false;
-      }
+      _provider.UserCredentials.Update(dbUserCredentials);
+      dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
+      await _provider.SaveAsync();
 
       return true;
     }

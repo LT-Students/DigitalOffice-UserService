@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRedisHelper _redisHelper;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreater _responseCreator;
 
     #region private methods
 
@@ -375,7 +375,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRedisHelper redisHelper,
-      IResponseCreater responseCreater)
+      IResponseCreater responseCreator)
     {
       _logger = logger;
       _repository = repository;
@@ -394,7 +394,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _redisHelper = redisHelper;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     /// <inheritdoc />
@@ -407,7 +407,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           string.IsNullOrEmpty(filter.Name) &&
           string.IsNullOrEmpty(filter.Email)))
       {
-        return _responseCreater.CreateFailureResponse<UserResponse>(
+        return _responseCreator.CreateFailureResponse<UserResponse>(
           HttpStatusCode.BadRequest,
           new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
       }
@@ -416,7 +416,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (dbUser == null)
       {
-        return _responseCreater.CreateFailureResponse<UserResponse>(
+        return _responseCreator.CreateFailureResponse<UserResponse>(
           HttpStatusCode.NotFound,
           new List<string> { "User was not found." });
       }
