@@ -22,7 +22,6 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         .WithMessage("Login must contain only letters or digits.");
 
       RuleFor(request => request.UserId)
-        .Cascade(CascadeMode.Stop)
         .NotEmpty().WithMessage("UserId can't be empty.");
 
       RuleFor(request => request.Password)

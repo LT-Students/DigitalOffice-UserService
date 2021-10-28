@@ -92,8 +92,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
       }
     }
 
-    #region Get
-    /*[Test]
+    /*#region Get
+    [Test]
     public void ShouldGetUserCredentialsSuccesfulByUserId()
     {
         var filter = new GetCredentialsFilter() { UserId = _dbUserCredentials.UserId };
@@ -125,14 +125,14 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
         Assert.AreEqual(_dbUserCredentials, _repository.Get(filter));
     }*/
 
-    [Test]
+    /*[Test]
     public void ShouldThrowExceptionWhenfiltrIsEmpty()
     {
       var filter = new GetCredentialsFilter(); ;
 
-      Assert.Throws<BadRequestException>(() => _repository.Get(filter));
+      Assert.Throws<BadRequestException>(() => _repository.GetAsync(filter));
     }
-    #endregion
+    #endregion*/
 
     //#region Edit
     //[Test]
