@@ -92,8 +92,8 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
       }
     }
 
-    #region Get
-    /*[Test]
+    /*#region Get
+    [Test]
     public void ShouldGetUserCredentialsSuccesfulByUserId()
     {
         var filter = new GetCredentialsFilter() { UserId = _dbUserCredentials.UserId };
