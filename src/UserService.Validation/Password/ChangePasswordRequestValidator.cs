@@ -26,8 +26,6 @@ namespace LT.DigitalOffice.UserService.Validation.Password
       RuleFor(r => r)
         .Must(r => cache.TryGetValue(r.Secret, out Guid savedUserId) && savedUserId == r.UserId)
         .WithMessage("Invalid user data.");
-
-
     }
   }
 }
