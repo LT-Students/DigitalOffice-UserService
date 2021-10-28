@@ -8,8 +8,10 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
@@ -41,7 +43,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IRequestClient<IEditCompanyEmployeeRequest> _rcEditCompanyEmployee;
+    private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
+    private readonly IRequestClient<ICreateUserPositionRequest> _rcCreateUserPosition;
+    private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ICreateUserRequestValidator _validator;
@@ -50,97 +54,111 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreater _responseCreator;
 
     #region private methods
 
-    private async Task EditCompanyEmployeeAsync(Guid? departmentId, Guid? positionId, Guid? officeId, Guid userId, List<string> errors)
+    private async Task CreateDepartmentEntityAsync(Guid? departmentId, Guid userId, List<string> errors)
     {
-      string positionErrorMessage = $"Cannot assign position to user. Please try again later.";
-      string departmentErrorMessage = $"Cannot assign department to user. Please try again later.";
-      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
-      const string departmentLogMessage = "Cannot assign department {departmentId} to user with id {UserId}.";
-      const string positionLogMessage = "Cannot assign position {positionId} to user with id {UserId}.";
-      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
-      const string logMessage = "Cannot edit company employee info for user witd id {UserId}.";
+      if (!departmentId.HasValue)
+      {
+        return;
+      }
+
+      string logMessage = "Unable to enroll a user {userId} in the department {departmentId}";
 
       try
       {
-        Response<IOperationResult<(bool department, bool position, bool office)>> response =
-          await _rcEditCompanyEmployee.GetResponse<IOperationResult<(bool department, bool position, bool office)>>(
-            IEditCompanyEmployeeRequest.CreateObj(
-              userId,
-              _httpContextAccessor.HttpContext.GetUserId(),
-              departmentId: departmentId,
-              positionId: positionId,
-              officeId: officeId));
+        Response<IOperationResult<bool>> response = await _rcCreateDepartmentEntity.GetResponse<IOperationResult<bool>>(
+          ICreateDepartmentEntityRequest.CreateObj(
+            departmentId: departmentId.Value,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
+            userId: userId));
 
-        if (!response.Message.IsSuccess)
+        if (response.Message.IsSuccess && response.Message.Body)
         {
-          _logger.LogWarning(logMessage, userId);
-
-          if (departmentId.HasValue)
-          {
-            errors.Add(departmentErrorMessage);
-          }
-
-          if (positionId.HasValue)
-          {
-            errors.Add(positionErrorMessage);
-          }
-
-          if (officeId.HasValue)
-          {
-            errors.Add(officeErrorMessage);
-          }
-
           return;
         }
 
-        if (!response.Message.Body.department)
-        {
-          _logger.LogWarning(departmentLogMessage, userId, departmentId);
+        _logger.LogWarning(logMessage, userId, departmentId);
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, logMessage, userId, departmentId);
+      }
 
-          errors.Add(departmentErrorMessage);
+      errors.Add("Unable to enroll a user in the department. Please try again later.");
+    }
+
+    private async Task CreateUserPositionAsync(Guid positionId, Guid userId, double rate, List<string> errors)
+    {
+      string logMessage = "Cannot assing position '{positionId}' to user '{userId}'";
+
+      try
+      {
+        Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
+          ICreateUserPositionRequest.CreateObj(
+            positionId: positionId,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
+            rate: rate,
+            userId: userId));
+
+        if (response.Message.IsSuccess && response.Message.Body)
+        {
+          return;
         }
 
-        if (!response.Message.Body.position)
-        {
-          _logger.LogWarning(positionLogMessage, userId, positionId);
+        _logger.LogWarning(logMessage, positionId, userId);
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, logMessage, positionId, userId);
+      }
 
-          errors.Add(positionErrorMessage);
+      errors.Add("Cannot assign position to user. Please try again later.");
+    }
+
+    private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
+    {
+      if (!officeId.HasValue)
+      {
+        return;
+      }
+
+      const string officeErrorMessage = "Cannot assign office to user. Please try again later.";
+      const string logMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+
+      try
+      {
+        Response<IOperationResult<bool>> response =
+          await _rcEditUserOffice.GetResponse<IOperationResult<bool>>(
+            IEditUserOfficeRequest.CreateObj(
+              userId: userId,
+              modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
+              officeId: officeId));
+
+        if (response.Message.IsSuccess && response.Message.Body)
+        {
+          return;
         }
 
-        if (!response.Message.Body.office)
-        {
-          _logger.LogWarning(officeLogMessage, userId, officeId);
-
-          errors.Add(officeErrorMessage);
-        }
+        _logger.LogWarning(logMessage, userId);
       }
       catch (Exception exc)
       {
         _logger.LogError(exc, logMessage, userId);
-
-        if (departmentId.HasValue)
-        {
-          errors.Add(departmentErrorMessage);
-        }
-
-        if (positionId.HasValue)
-        {
-          errors.Add(positionErrorMessage);
-        }
-
-        if (officeId.HasValue)
-        {
-          errors.Add(officeErrorMessage);
-        }
       }
+
+      errors.Add(officeErrorMessage);
     }
 
-    private async Task ChangeUserRoleAsync(Guid roleId, Guid userId, List<string> errors)
+    private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
     {
+      if (!roleId.HasValue)
+      {
+        return;
+      }
+
       string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
       const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'";
 
@@ -149,7 +167,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         Response<IOperationResult<bool>> response =
           await _rcRole.GetResponse<IOperationResult<bool>>(
             IChangeUserRoleRequest.CreateObj(
-              roleId, userId, _httpContextAccessor.HttpContext.GetUserId()));
+              roleId.Value, userId, _httpContextAccessor.HttpContext.GetUserId()));
 
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
@@ -168,7 +186,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
     {
-      var email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
+      DbUserCommunication email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
 
       if (email == null)
       {
@@ -262,10 +280,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     public CreateUserCommand(
       ILogger<CreateUserCommand> logger,
-      IRequestClient<ICreateImagesRequest> rcImage,
-      IHttpContextAccessor httpContextAccessor,
-      IRequestClient<IEditCompanyEmployeeRequest> rcEditCompanyEmployee,
       IRequestClient<IChangeUserRoleRequest> rcRole,
+      IRequestClient<ICreateImagesRequest> rcImage,
+      IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
+      IRequestClient<ICreateUserPositionRequest> rcCreateUserPosition,
+      IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
+      IHttpContextAccessor httpContextAccessor,
       IRequestClient<ISendEmailRequest> rcSendEmail,
       IUserRepository userRepository,
       ICreateUserRequestValidator validator,
@@ -275,12 +295,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
       IImageRepository imageRepository,
-      IResponseCreater responseCreater)
+      IResponseCreater responseCreator)
     {
       _logger = logger;
-      _rcImage = rcImage;
-      _rcEditCompanyEmployee = rcEditCompanyEmployee;
       _rcRole = rcRole;
+      _rcImage = rcImage;
+      _rcEditUserOffice = rcEditUserOffice;
+      _rcCreateUserPosition = rcCreateUserPosition;
+      _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
       _rcSendEmail = rcSendEmail;
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
@@ -291,7 +313,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
       _imageRepository = imageRepository;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     /// <inheritdoc/>
@@ -299,12 +321,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
-        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
       }
 
       if (!_validator.ValidateCustom(request, out List<string> errors))
       {
-        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
+        return _responseCreator.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
       }
 
       OperationResultResponse<Guid> response = new();
@@ -325,13 +347,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(new List<Guid>() { avatarImageId.Value }, userId));
       }
 
-      await SendEmailAsync(dbUser, password, response.Errors);
-      await EditCompanyEmployeeAsync(request.DepartmentId, request.PositionId, request.OfficeId, userId, response.Errors);
-
-      if (request.RoleId.HasValue)
-      {
-        await ChangeUserRoleAsync(request.RoleId.Value, userId, response.Errors);
-      }
+      await Task.WhenAll(
+        SendEmailAsync(dbUser, password, response.Errors),
+        EditUserOfficeAsync(request.OfficeId, userId, response.Errors),
+        ChangeUserRoleAsync(request.RoleId, userId, response.Errors),
+        CreateDepartmentEntityAsync(request.DepartmentId, userId, response.Errors),
+        CreateUserPositionAsync(request.PositionId, userId, request.Rate, response.Errors));
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;

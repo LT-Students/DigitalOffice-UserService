@@ -6,8 +6,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 {
   public record FindUsersFilter : BaseFindFilter
   {
-    [FromQuery(Name = "departmentId")]
-    public Guid? DepartmentId { get; set; }
 
     [FromQuery(Name = "includedeactivated")]
     public bool IncludeDeactivated { get; set; } = false;

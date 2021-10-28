@@ -1,32 +1,18 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
-using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.File;
-using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Commands.Certificate;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Moq;
 using Moq.AutoMock;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTests
 {
-    class CreateCertificateCommandTests
+  class CreateCertificateCommandTests
     {
         private ICreateCertificateCommand _command;
         private AutoMocker _mocker;
@@ -49,11 +35,11 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                .SetupGet(x => x.Message)
                .Returns(_operationResultAddImageMock.Object);
 
-            _mocker
-                .Setup<IRequestClient<IAddImageRequest>, Task>(
-                    x => x.GetResponse<IOperationResult<Guid>>(
-                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
+            //_mocker
+            //    .Setup<IRequestClient<IAddImageRequest>, Task>(
+            //        x => x.GetResponse<IOperationResult<Guid>>(
+            //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
+            //    .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
         }
 
         /*[SetUp]
@@ -115,7 +101,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
 
             RequestClientMock();
         }
-        
+
         [Test]
         public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
         {

@@ -22,7 +22,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public Guid? AvatarFileId { get; set; }
     public int Status { get; set; }
     public bool IsAdmin { get; set; }
-    public double Rate { get; set; }
     public DateTime? StartWorkingAt { get; set; }
     public string About { get; set; }
     public bool IsActive { get; set; }

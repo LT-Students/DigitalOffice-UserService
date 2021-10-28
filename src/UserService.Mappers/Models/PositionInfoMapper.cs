@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Company;
+﻿using LT.DigitalOffice.Models.Broker.Models.Position;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 

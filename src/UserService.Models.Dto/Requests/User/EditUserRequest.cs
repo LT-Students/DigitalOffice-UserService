@@ -5,8 +5,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
 {
     public class EditUserRequest
     {
-        public Guid? DepartmentId { get; set; }
-        public Guid PositionId { get; set; }
         public Guid RoleId { get; set; }
         public Guid OfficeId { get; set; }
         public string FirstName { get; set; }
@@ -19,7 +17,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
         public Guid? AvatarFileId { get; set; }
         public UserStatus Status { get; set; }
         public DateTime? StartWorkingAt { get; set; }
-        public double Rate { get; set; }
         public bool IsActive { get; set; }
     }
 }

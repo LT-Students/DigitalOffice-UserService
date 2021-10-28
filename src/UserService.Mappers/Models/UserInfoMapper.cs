@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
@@ -8,9 +9,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class UserInfoMapper : IUserInfoMapper
   {
-    public UserInfo Map(DbUser dbUser,
+    public UserInfo Map(
+      DbUser dbUser,
       DepartmentInfo department,
       PositionInfo position,
+      PositionUserData positionUserData,
       OfficeInfo office,
       RoleInfo role,
       ImageInfo image,
@@ -35,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         About = dbUser.About,
         IsActive = dbUser.IsActive,
         Status = (UserStatus)dbUser.Status,
-        Rate = dbUser.Rate,
+        Rate = positionUserData?.Rate,
         Department = department,
         Position = position,
         Office = office,

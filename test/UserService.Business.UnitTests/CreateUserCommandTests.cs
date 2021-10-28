@@ -1,33 +1,6 @@
-﻿using FluentValidation;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.File;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
-using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
-using LT.DigitalOffice.UserService.Business.Interfaces;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Models.Dto.Responses;
-using LT.DigitalOffice.UserService.Validation.User.Interfaces;
-using MassTransit;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Moq;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace LT.DigitalOffice.UserService.Business.UnitTests
+﻿namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
-    class CreateUserCommandTests
+  class CreateUserCommandTests
     {
         //private Mock<IDbUserMapper> _mapperUserMock;
         //private Mock<IUserRepository> _userRepositoryMock;
