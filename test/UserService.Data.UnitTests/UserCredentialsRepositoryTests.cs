@@ -130,7 +130,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
     {
       var filter = new GetCredentialsFilter(); ;
 
-      Assert.Throws<BadRequestException>(() => _repository.Get(filter));
+      Assert.Throws<BadRequestException>(() => _repository.GetAsync(filter));
     }
     #endregion
 

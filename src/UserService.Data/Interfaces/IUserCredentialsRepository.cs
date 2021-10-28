@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IUserCredentialsRepository
   {
-    DbUserCredentials Get(GetCredentialsFilter filter);
+    Task<DbUserCredentials> GetAsync(GetCredentialsFilter filter);
 
     Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials);
 

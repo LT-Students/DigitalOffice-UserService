@@ -32,29 +32,29 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public DbUserCredentials Get(GetCredentialsFilter filter)
+    public async Task<DbUserCredentials> GetAsync(GetCredentialsFilter filter)
     {
       DbUserCredentials dbUserCredentials = null;
       if (filter.UserId.HasValue)
       {
-        dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
+        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
           uc =>
             uc.UserId == filter.UserId.Value &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
-        dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
+        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
           uc =>
             uc.Login == filter.Login &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Email) || !string.IsNullOrEmpty(filter.Phone))
       {
-        dbUserCredentials = _provider.UserCredentials
+        dbUserCredentials = await _provider.UserCredentials
           .Include(uc => uc.User)
           .ThenInclude(u => u.Communications)
-          .FirstOrDefault(
+          .FirstOrDefaultAsync(
             uc =>
               uc.IsActive &&
               uc.User.Communications.Any(

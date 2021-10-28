@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest, errors);
       }
 
-      DbUserCredentials dbUserCredentials = _repository.Get(new GetCredentialsFilter() { UserId = request.UserId });
+      DbUserCredentials dbUserCredentials = await _repository.GetAsync(new GetCredentialsFilter() { UserId = request.UserId });
 
       if (dbUserCredentials is null)
       {
