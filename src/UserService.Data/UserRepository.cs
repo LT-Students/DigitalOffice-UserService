@@ -301,5 +301,10 @@ namespace LT.DigitalOffice.UserService.Data
         .Contains(text))
         .ToListAsync();
     }
+
+    public async Task<bool> PendingUserExistAsync(Guid userId)
+    {
+      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
+    }
   }
 }

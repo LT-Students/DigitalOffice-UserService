@@ -442,11 +442,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         imagesIds.AddRange(userImagesIds);
       }
 
-      if (userAvatar != null)
-      {
-        imagesIds.Add(userAvatar.ImageId);
-      }
-
       List<Guid> usersIds = new() { dbUser.Id };
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
@@ -461,7 +456,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Task<RoleInfo> rolesTask = filter.IncludeRole
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as RoleInfo);
-      Task<List<ImageInfo>> imagesTask = filter.IncludeImages
+      Task<List<ImageInfo>> imagesTask = filter.IncludeImages || filter.IncludeUserImages
         ? GetImagesAsync(imagesIds, response.Errors)
         : Task.FromResult(null as List<ImageInfo>);
       Task<List<ProjectData>> projectsTask = filter.IncludeProjects
@@ -486,7 +481,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         role,
         projects,
         images,
-        userAvatar != null ? images.FirstOrDefault(x => x.Id == userAvatar.ImageId) : null,
+        filter.IncludeUserImages ? images.FirstOrDefault(x => x.Id == userAvatar.ImageId) : null,
         userImagesIds,
         filter);
 

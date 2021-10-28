@@ -368,7 +368,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       List<DbUser> dbUsers = null;
-      List<ImageData> images = null;
       List<DbEntityImage> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
@@ -381,6 +380,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       response.TotalCount = findUsersResponse.totalCount;
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
+
+      if (filter.IncludeAvatar)
+      {
+        usersImages = await _imageRepository.GetAvatarsAsync(usersIds);
+      }
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
         ? GetOfficesAsync(usersIds, response.Errors)
@@ -395,7 +399,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
       Task<List<ImageData>> imagesTask = filter.IncludeAvatar
-        ? GetImagesAsync(dbUsers.Where(x => x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors)
+        ? GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors)
         : Task.FromResult(null as List<ImageData>);
 
       await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
