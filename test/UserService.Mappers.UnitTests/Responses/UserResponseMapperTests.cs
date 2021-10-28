@@ -175,7 +175,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Status = 0,
                 IsActive = true,
                 IsAdmin = false,
-                Rate = 1,
                 StartWorkingAt = DateTime.UtcNow,
                 Skills = new List<DbUserSkill>
                 {
@@ -213,7 +212,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 LastName = _dbUser.LastName,
                 Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
-                Rate = _dbUser.Rate,
                 StartWorkingAt = _dbUser.StartWorkingAt.ToString()
             };
 
@@ -300,7 +298,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
             _mapper = _mocker.CreateInstance<UserResponseMapper>();
 
             _mocker
-                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, _avatarInfo, null))
+                .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, null, _avatarInfo, null))
                 .Returns(_userInfo);
 
 /*            _mocker

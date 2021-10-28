@@ -43,5 +43,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     Task<bool> IsUserExistAsync(Guid userId);
 
     Task<List<DbUser>> SearchAsync(string text);
+
+    Task<bool> PendingUserExistAsync(Guid userId);
   }
 }

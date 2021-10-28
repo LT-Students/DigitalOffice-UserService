@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -27,9 +28,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       }
 
       return images.FirstOrDefault(
-          i =>
-              i.ParentId == imageId ||
-              i.Id == imageId);
+        i =>
+          i.ParentId == imageId ||
+          i.Id == imageId);
     }
 
     private List<ImageInfo> GetImages(List<ImageInfo> images, List<Guid> imagesIds)
@@ -43,10 +44,10 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
     }
 
     public UserResponseMapper(
-        IUserInfoMapper userInfoMapper,
-        IUserAchievementInfoMapper userAchievementInfoMapper,
-        ICertificateInfoMapper certificateInfoMapper,
-        IEducationInfoMapper educationInfoMapper)
+      IUserInfoMapper userInfoMapper,
+      IUserAchievementInfoMapper userAchievementInfoMapper,
+      ICertificateInfoMapper certificateInfoMapper,
+      IEducationInfoMapper educationInfoMapper)
     {
       _userInfoMapper = userInfoMapper;
       _userAchievementInfoMapper = userAchievementInfoMapper;
@@ -58,12 +59,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         DbUser dbUser,
         DepartmentInfo department,
         PositionInfo position,
+        PositionUserData positionUserData,
         OfficeInfo office,
         RoleInfo role,
         List<ProjectInfo> projects,
         List<ImageInfo> images,
         ImageInfo avatar,
-        List<Guid> userImagesIds,
+        List<Guid> userImagesIds, // TODO undestand for what is it
         GetUserFilter filter)
     {
       if (dbUser == null)
@@ -73,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
       return new UserResponse
       {
-          User = _userInfoMapper.Map(dbUser, department, position, office, role, avatar, images),
+          User = _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar, images),
           Projects = projects,
           Skills = filter.IncludeSkills
             ? dbUser.Skills.Select(s => s.Skill.Name)

@@ -32,16 +32,13 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.MiddleName),
           nameof(EditUserRequest.LastName),
           nameof(EditUserRequest.Status),
-          nameof(EditUserRequest.Rate),
           nameof(EditUserRequest.City),
           nameof(EditUserRequest.Gender),
           nameof(EditUserRequest.DateOfBirth),
           nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
-          nameof(EditUserRequest.DepartmentId),
           nameof(EditUserRequest.RoleId),
-          nameof(EditUserRequest.PositionId),
           nameof(EditUserRequest.OfficeId),
         });
 
@@ -49,14 +46,11 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.Rate), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.PositionId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
@@ -146,23 +140,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
       #endregion
 
-      #region Rate
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.Rate),
-        x => x == OperationType.Replace,
-        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-        {
-          { x => !string.IsNullOrEmpty(x.value?.ToString()), "Rate must not be empty." },
-          { x => double.TryParse(x.value?.ToString(), out _), "Incorrect rate format."},
-          { x => double.TryParse(x.value?.ToString(), out double rate) ?
-              (rate > 0 && rate <= 1) : false,
-            "The rate must be between 0 and 1."
-          },
-        }, CascadeMode.Stop);
-
-      #endregion
-
       #region DateOfBirth
 
       AddFailureForPropertyIf(
@@ -207,30 +184,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
       #endregion
 
-      #region DepartmentId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.DepartmentId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => Guid.TryParse(x.value?.ToString(), out Guid result), "Department id has incorrect format." }
-        });
-
-      #endregion
-
-      #region PositionId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.PositionId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Position id has incorrect format." }
-        });
-
-      #endregion
-
       #region RoleId
 
       AddFailureForPropertyIf(
@@ -250,7 +203,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
+          { x => x.value == null || Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
         });
 
       #endregion

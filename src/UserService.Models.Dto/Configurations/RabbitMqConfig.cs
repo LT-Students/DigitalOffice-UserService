@@ -2,8 +2,10 @@
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
@@ -49,16 +51,29 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetUserRolesRequest))]
     public string GetUserRolesEndpoint { get; set; }
 
+    // positions
+
+    [AutoInjectRequest(typeof(IGetPositionsRequest))]
+    public string GetPositionsEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(ICreateUserPositionRequest))]
+    public string CreateUserPositionEndpoint { get; set; }
+
+    // department
+
+    [AutoInjectRequest(typeof(IGetDepartmentsRequest))]
+    public string GetDepartmentsEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(ICreateDepartmentEntityRequest))]
+    public string CreateDepartmentEntityEndpoint { get; set; }
+
     // company
 
-    [AutoInjectRequest(typeof(IGetDepartmentUsersRequest))]
-    public string GetDepartmentUsersEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IEditUserOfficeRequest))]
+    public string EditUserOfficeEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IEditCompanyEmployeeRequest))]
-    public string EditCompanyEmployeeEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
-    public string GetCompanyEmployeesEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IGetOfficesRequest))]
+    public string GetOfficesEndpoint { get; set; }
 
     // common
 

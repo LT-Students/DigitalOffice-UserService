@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
+﻿using System.Collections.Generic;
 using FluentValidation;
-using FluentValidation.TestHelper;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json.Serialization;
@@ -14,7 +8,7 @@ using NUnit.Framework;
 
 namespace LT.DigitalOffice.UserService.Validation.UnitTests
 {
-    internal class EditUserRequestValidatorTests
+  internal class EditUserRequestValidatorTests
     {
         private IValidator<JsonPatchDocument<EditUserRequest>> _validator;
         private JsonPatchDocument<EditUserRequest> _editUserRequest;
@@ -60,11 +54,11 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests
                         Content = Properties.Resources.Base64String,
                         Extension = ".jpg"
                     })),*/
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.Rate)}",
-                    "",
-                    1)
+                //new Operation<EditUserRequest>(
+                //    "replace",
+                //    $"/{nameof(EditUserRequest.Rate)}",
+                //    "",
+                //    1)
             }, new CamelCasePropertyNamesContractResolver());
         }
 
