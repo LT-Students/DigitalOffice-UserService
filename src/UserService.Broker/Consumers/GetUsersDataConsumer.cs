@@ -30,12 +30,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<(DbUser user, Guid avatarId)> users = await _userRepository.GetWithAvatarsAsync(request.UserIds);
+      List<(DbUser user, Guid? avatarId)> users = await _userRepository.GetWithAvatarsAsync(request.UserIds);
 
       return users
         .Select(users => new UserData(
           users.user.Id,
-          users.avatarId == default ? null : users.avatarId,
+          users.avatarId.HasValue ? users.avatarId.Value : null,
           users.user.FirstName,
           users.user.MiddleName,
           users.user.LastName,

@@ -134,7 +134,7 @@ namespace LT.DigitalOffice.UserService.Data
         .ToListAsync();
     }
 
-    public async Task<List<(DbUser user, Guid avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds)
+    public async Task<List<(DbUser user, Guid? avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds)
     {
       if (usersIds == null)
       {
@@ -142,20 +142,21 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       return (await
-        (from user in _provider.Users where usersIds.Contains(user.Id)
-         join image in _provider.EntitiesImages on user.Id equals image.EntityId
+        (from user in _provider.Users
+         where usersIds.Contains(user.Id)
+         join images in _provider.EntitiesImages on user.Id equals images.EntityId into userImages
+         from userImage in userImages.DefaultIfEmpty()
          select new
          {
            User = user,
-           EntityImage = image
+           EntityImage = userImage
          }).ToListAsync()).AsEnumerable().GroupBy(r => r.User.Id)
          .Select(x =>
          {
            DbUser user = x.Select(x => x.User).FirstOrDefault();
-           Guid avatarId = x.Select(x => x.EntityImage).Where(x => x.EntityId == user.Id && x.IsCurrentAvatar)
-             .Select(x => x.ImageId).FirstOrDefault();
+           Guid? id = x.Select(x => x.EntityImage).FirstOrDefault(x => x != null && x.EntityId == user.Id && x.IsCurrentAvatar)?.ImageId;
 
-           return (user, avatarId);
+           return (user, id);
          }).ToList();
     }
 

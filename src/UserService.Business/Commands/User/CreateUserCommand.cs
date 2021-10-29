@@ -126,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       const string officeErrorMessage = "Cannot assign office to user. Please try again later.";
-      const string logMessage = "Cannot assign office {officeId} to user with id {UserId}.";
+      const string logMessage = "Cannot assign office to user with id {UserId}.";
 
       try
       {
