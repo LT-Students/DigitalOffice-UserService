@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       return users
         .Select(users => new UserData(
           users.user.Id,
-          users.avatarId.HasValue ? users.avatarId.Value : null,
+          users.avatarId,
           users.user.FirstName,
           users.user.MiddleName,
           users.user.LastName,
