@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
     private static Regex NumberRegex = new(@"\d");
     private static Regex SpecialCharactersRegex = new(@"[$&+,:;=?@#|<>.^*()%!]");
     private static Regex SpaceRegex = new(@"^[^@\s]*$");
-    private static Regex NameRegex = new(@"^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ' ]+[a-zA-Zа-яА-ЯёЁ']?$");
+    private static Regex NameRegex = new(@"^([a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+)$");
 
     public CreateUserRequestValidator(
       ICreateCommunicationRequestValidator communicationValidator,
