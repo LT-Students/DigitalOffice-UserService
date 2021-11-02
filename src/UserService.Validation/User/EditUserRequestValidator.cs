@@ -39,7 +39,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
           nameof(EditUserRequest.RoleId),
-          nameof(EditUserRequest.OfficeId),
         });
 
       AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
@@ -52,7 +51,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
       #endregion
@@ -192,18 +190,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         new()
         {
           { x => Guid.TryParse(x.value.ToString(), out Guid result), "Role id has incorrect format." }
-        });
-
-      #endregion
-
-      #region OfficeId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.OfficeId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => x.value == null || Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
         });
 
       #endregion

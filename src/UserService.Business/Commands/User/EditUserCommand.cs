@@ -12,6 +12,7 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -33,7 +34,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
-    private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
@@ -41,35 +41,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IBus _bus;
 
     #region private method
-
-    private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
-    {
-      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
-      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
-
-      try
-      {
-        IOperationResult<bool> response =
-          (await _rcEditUserOffice.GetResponse<IOperationResult<bool>>(
-            IEditUserOfficeRequest.CreateObj(
-              userId: userId,
-              modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
-              officeId: officeId))).Message;
-
-        if (response.IsSuccess && response.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(officeLogMessage, officeId, userId);
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, officeLogMessage, officeId, userId);
-      }
-
-      errors.Add(officeErrorMessage);
-    }
 
     private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
     {
@@ -110,7 +81,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       ILogger<EditUserCommand> logger,
-      IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
@@ -122,7 +92,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _logger = logger;
-      _rcEditUserOffice = rcEditUserOffice;
       _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
@@ -135,8 +104,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
-      Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
@@ -146,7 +113,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
         && roleOperation == null
-        && officeOperation == null
         && isActiveOperation == null)))
       {
         _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
@@ -154,24 +120,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       OperationResultResponse<bool> response = new();
 
-      List<string> errors = new List<string>();
+      var errors = new List<string>();
 
-      Guid? newOfficeId = null;
       Guid? newRoleId = null;
-
-      if (officeOperation != null)
-      {
-        newOfficeId = officeOperation.value == null ? null : Guid.Parse(officeOperation.value.ToString());
-      }
 
       if (roleOperation != null)
       {
         newRoleId = Guid.Parse(roleOperation.value.ToString());
       }
 
-      await Task.WhenAll(
-        EditUserOfficeAsync(newOfficeId, userId, errors),
-        ChangeUserRoleAsync(newRoleId, userId, errors));
+      await ChangeUserRoleAsync(newRoleId, userId, errors);
 
       if (roleOperation != null)
       {

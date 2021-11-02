@@ -26,8 +26,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
             foreach (Operation<EditUserRequest> item in request.Operations)
             {
-                if (item.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase)
-                    || item.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase))
+                if (item.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
