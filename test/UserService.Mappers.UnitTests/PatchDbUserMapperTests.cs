@@ -121,8 +121,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRequestNull()
         {
-            _request = null;
-            Assert.Throws<ArgumentNullException>(() => _mapper.Map(_request));
+            Assert.Null(_mapper.Map(null));
         }
     }
 }

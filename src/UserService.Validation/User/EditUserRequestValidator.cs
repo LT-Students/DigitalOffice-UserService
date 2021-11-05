@@ -38,7 +38,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
-          nameof(EditUserRequest.RoleId),
           nameof(EditUserRequest.OfficeId),
         });
 
@@ -51,7 +50,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
@@ -180,18 +178,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
           { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format." }
-        });
-
-      #endregion
-
-      #region RoleId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.RoleId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Role id has incorrect format." }
         });
 
       #endregion
