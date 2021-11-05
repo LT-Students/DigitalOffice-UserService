@@ -46,11 +46,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.TryParse(value(item), out DateTime date) ? date : null));
           continue;
         }
-        if (item.path.EndsWith(nameof(EditUserRequest.City), StringComparison.OrdinalIgnoreCase))
-        {
-          result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, value(item)));
-          continue;
-        }
 
         result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
       }
