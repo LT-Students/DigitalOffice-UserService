@@ -6,7 +6,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net.Mail;
 using System.Text;
@@ -46,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       dbUserCredentials = await _credentialsRepository.GetAsync(filter);
 
-      if (dbUserCredentials == null)
+      if (dbUserCredentials is null)
       {
         throw new NotFoundException($"User credentials was not found.");
       }
@@ -94,14 +93,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     }
 
     public UserLoginConsumer(
-      [FromServices] IUserCredentialsRepository credentialsRepository)
+      IUserCredentialsRepository credentialsRepository)
     {
       _credentialsRepository = credentialsRepository;
     }
 
     public async Task Consume(ConsumeContext<IGetUserCredentialsRequest> context)
     {
-      var response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
+      object response = OperationResultWrapper.CreateResponse(GetUserCredentials, context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUserCredentialsResponse>>(response);
     }

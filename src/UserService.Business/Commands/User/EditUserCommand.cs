@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -12,7 +7,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -22,6 +16,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -34,7 +33,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<EditUserCommand> _logger;
     private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
-    private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
     private readonly ICacheNotebook _cacheNotebook;
@@ -71,37 +69,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       errors.Add(officeErrorMessage);
     }
 
-    private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
-    {
-      if (!roleId.HasValue)
-      {
-        return;
-      }
-
-      string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-      const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'.";
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await _rcRole.GetResponse<IOperationResult<bool>>(
-          IChangeUserRoleRequest.CreateObj(
-            roleId.Value, userId, _httpContextAccessor.HttpContext.GetUserId()));
-
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          const string warningMessage = logMessage + "Errors: {Errors}";
-          _logger.LogWarning(warningMessage, roleId, userId, string.Join("\n", response.Message.Errors));
-
-          errors.Add(errorMessage);
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, logMessage, roleId, userId);
-
-        errors.Add(errorMessage);
-      }
-    }
     #endregion
 
     public EditUserCommand(
@@ -111,7 +78,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       ILogger<EditUserCommand> logger,
       IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
-      IRequestClient<IChangeUserRoleRequest> rcRole,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
       ICacheNotebook cacheNotebook,
@@ -123,7 +89,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _logger = logger;
       _rcEditUserOffice = rcEditUserOffice;
-      _rcRole = rcRole;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
       _cacheNotebook = cacheNotebook;
@@ -133,50 +98,37 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
-      Operation<EditUserRequest> roleOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.RoleId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
+      Operation<EditUserRequest> isStartTimeOperation = patch.Operations.FirstOrDefault(
+        o => o.path.EndsWith(nameof(EditUserRequest.StartWorkingAt), StringComparison.OrdinalIgnoreCase));
 
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
-        && roleOperation == null
-        && officeOperation == null
-        && isActiveOperation == null)))
+        && officeOperation is null
+        && isActiveOperation is null
+        && isStartTimeOperation is null)))
       {
-        _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       OperationResultResponse<bool> response = new();
 
-      List<string> errors = new List<string>();
-
-      Guid? newOfficeId = null;
-      Guid? newRoleId = null;
-
       if (officeOperation != null)
       {
-        newOfficeId = officeOperation.value == null ? null : Guid.Parse(officeOperation.value.ToString());
+        await EditUserOfficeAsync(
+          officeOperation.value == null
+            ? null
+            : Guid.Parse(officeOperation.value.ToString()),
+          userId,
+          response.Errors);
       }
 
-      if (roleOperation != null)
-      {
-        newRoleId = Guid.Parse(roleOperation.value.ToString());
-      }
-
-      await Task.WhenAll(
-        EditUserOfficeAsync(newOfficeId, userId, errors),
-        ChangeUserRoleAsync(newRoleId, userId, errors));
-
-      if (roleOperation != null)
-      {
-        await ChangeUserRoleAsync(Guid.Parse(roleOperation.value.ToString() ?? string.Empty), userId, errors);
-      }
 
       if (isActiveOperation != null)
       {
@@ -186,7 +138,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (!switchActiveStatusResult)
         {
-          errors.Add("Can not change is active status.");
+          response.Errors.Add("Can not change is active status.");
         }
         else if (!newValue)
         {
@@ -200,11 +152,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       await _cacheNotebook.RemoveAsync(userId);
 
-      response.Status = errors.Any()
+      response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
         : OperationResultStatusType.FullSuccess;
 
-      response.Errors.AddRange(errors);
+      response.Errors.AddRange(response.Errors);
 
       return response;
     }
