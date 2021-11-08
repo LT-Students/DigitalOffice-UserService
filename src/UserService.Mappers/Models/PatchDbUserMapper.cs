@@ -25,11 +25,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
       foreach (Operation<EditUserRequest> item in request.Operations)
       {
-        if (item.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase))
-        {
-          continue;
-        }
-
         if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
         {
           result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserStatus), item.value.ToString())));

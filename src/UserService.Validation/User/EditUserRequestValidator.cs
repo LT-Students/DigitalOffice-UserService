@@ -1,14 +1,12 @@
 using FluentValidation;
 using FluentValidation.Validators;
 using LT.DigitalOffice.Kernel.Validators;
-using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -16,7 +14,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
   public class EditUserRequestValidator : BaseEditRequestValidator<EditUserRequest>, IEditUserRequestValidator
   {
     private static Regex NameRegex = new(@"\d");
-    private readonly IImageRepository _imageRepository;
 
     private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
     {
@@ -38,7 +35,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
-          nameof(EditUserRequest.OfficeId),
         });
 
       AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
@@ -50,7 +46,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.OfficeId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
       #endregion
@@ -64,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "First name must not be empty." },
           { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers." },
-          { x => x.value.ToString().Trim().Length < 32, "First name is too long." },
+          { x => x.value.ToString().Trim().Length < 45, "First name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -78,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Last name must not be empty." },
           { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers." },
-          { x => x.value.ToString().Trim().Length < 32, "Last name is too long." },
+          { x => x.value.ToString().Trim().Length < 45, "Last name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -92,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (x.value.ToString().Trim().Length < 32), "Middle name is too long."
+            (x.value.ToString().Trim().Length < 45), "Middle name is too long."
           },
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
@@ -181,24 +176,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
         });
 
       #endregion
-
-      #region OfficeId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.OfficeId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => x.value == null || Guid.TryParse(x.value.ToString(), out Guid result), "Office id has incorrect format." }
-        });
-
-      #endregion
     }
 
-    public EditUserRequestValidator(IImageRepository imageRepository)
+    public EditUserRequestValidator()
     {
-      _imageRepository = imageRepository;
-
       RuleForEach(x => x.Operations)
         .Custom(HandleInternalPropertyValidation);
     }

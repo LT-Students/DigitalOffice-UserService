@@ -11,6 +11,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
@@ -43,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
+    private readonly IRequestClient<ICreateUserOfficeRequest> _rcCreateUserOffice;
     private readonly IRequestClient<ICreateUserPositionRequest> _rcCreateUserPosition;
     private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
     private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
@@ -131,11 +132,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         Response<IOperationResult<bool>> response =
-          await _rcEditUserOffice.GetResponse<IOperationResult<bool>>(
-            IEditUserOfficeRequest.CreateObj(
+          await _rcCreateUserOffice.GetResponse<IOperationResult<bool>>(
+            ICreateUserOfficeRequest.CreateObj(
               userId: userId,
               modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
-              officeId: officeId));
+              officeId: officeId.Value));
 
         if (response.Message.IsSuccess && response.Message.Body)
         {
@@ -282,7 +283,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       ILogger<CreateUserCommand> logger,
       IRequestClient<IChangeUserRoleRequest> rcRole,
       IRequestClient<ICreateImagesRequest> rcImage,
-      IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
+      IRequestClient<ICreateUserOfficeRequest> rcCreateUserOffice,
       IRequestClient<ICreateUserPositionRequest> rcCreateUserPosition,
       IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
       IHttpContextAccessor httpContextAccessor,
@@ -300,7 +301,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _logger = logger;
       _rcRole = rcRole;
       _rcImage = rcImage;
-      _rcEditUserOffice = rcEditUserOffice;
+      _rcCreateUserOffice = rcCreateUserOffice;
       _rcCreateUserPosition = rcCreateUserPosition;
       _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
       _rcSendEmail = rcSendEmail;
