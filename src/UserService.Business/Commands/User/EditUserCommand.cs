@@ -1,12 +1,10 @@
 ﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -15,9 +13,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -31,53 +27,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
-    private readonly ILogger<EditUserCommand> _logger;
-    private readonly IRequestClient<IEditUserOfficeRequest> _rcEditUserOffice;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreater _responseCreater;
     private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
 
-    #region private method
-
-    private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
-    {
-      string officeErrorMessage = $"Cannot assign office to user. Please try again later.";
-      const string officeLogMessage = "Cannot assign office {officeId} to user with id {UserId}.";
-
-      try
-      {
-        IOperationResult<bool> response =
-          (await _rcEditUserOffice.GetResponse<IOperationResult<bool>>(
-            IEditUserOfficeRequest.CreateObj(
-              userId: userId,
-              modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
-              officeId: officeId))).Message;
-
-        if (response.IsSuccess && response.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(officeLogMessage, officeId, userId);
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, officeLogMessage, officeId, userId);
-      }
-
-      errors.Add(officeErrorMessage);
-    }
-
-    #endregion
 
     public EditUserCommand(
       IUserRepository userRepository,
       IUserCredentialsRepository credentialsRepository,
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
-      ILogger<EditUserCommand> logger,
-      IRequestClient<IEditUserOfficeRequest> rcEditUserOffice,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreater responseCreater,
       ICacheNotebook cacheNotebook,
@@ -87,8 +47,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _credentialsRepository = credentialsRepository;
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
-      _logger = logger;
-      _rcEditUserOffice = rcEditUserOffice;
       _httpContextAccessor = httpContextAccessor;
       _responseCreater = responseCreater;
       _cacheNotebook = cacheNotebook;
@@ -98,8 +56,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
-      Operation<EditUserRequest> officeOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.OfficeId), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
       Operation<EditUserRequest> isStartTimeOperation = patch.Operations.FirstOrDefault(
@@ -110,25 +66,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
-        && officeOperation is null
-        && isActiveOperation is null
+        && isActiveOperation == null
         && isStartTimeOperation is null)))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       OperationResultResponse<bool> response = new();
-
-      if (officeOperation != null)
-      {
-        await EditUserOfficeAsync(
-          officeOperation.value == null
-            ? null
-            : Guid.Parse(officeOperation.value.ToString()),
-          userId,
-          response.Errors);
-      }
-
 
       if (isActiveOperation != null)
       {
