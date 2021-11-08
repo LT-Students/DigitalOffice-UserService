@@ -62,17 +62,6 @@ namespace LT.DigitalOffice.UserService.Data
                   (c.Type == (int)CommunicationType.Email && c.Value == filter.Email) ||
                   (c.Type == (int)CommunicationType.Phone && c.Value == filter.Phone)));
       }
-      else
-      {
-        throw new BadRequestException("You must specify 'userId' or 'login'.");
-      }
-
-      if (dbUserCredentials == null)
-      {
-        _logger.LogWarning($"Can not find user credentials filter '{filter}'.");
-
-        throw new NotFoundException($"User credentials was not found.");
-      }
 
       return dbUserCredentials;
     }

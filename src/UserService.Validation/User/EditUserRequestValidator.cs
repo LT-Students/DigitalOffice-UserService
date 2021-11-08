@@ -1,14 +1,12 @@
 using FluentValidation;
 using FluentValidation.Validators;
 using LT.DigitalOffice.Kernel.Validators;
-using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -16,7 +14,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
   public class EditUserRequestValidator : BaseEditRequestValidator<EditUserRequest>, IEditUserRequestValidator
   {
     private static Regex NameRegex = new(@"\d");
-    private readonly IImageRepository _imageRepository;
 
     private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
     {
@@ -38,7 +35,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
-          nameof(EditUserRequest.RoleId),
         });
 
       AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
@@ -50,7 +46,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.RoleId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
       #endregion
@@ -181,24 +176,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
         });
 
       #endregion
-
-      #region RoleId
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.RoleId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          { x => Guid.TryParse(x.value.ToString(), out Guid result), "Role id has incorrect format." }
-        });
-
-      #endregion
     }
 
-    public EditUserRequestValidator(IImageRepository imageRepository)
+    public EditUserRequestValidator()
     {
-      _imageRepository = imageRepository;
-
       RuleForEach(x => x.Operations)
         .Custom(HandleInternalPropertyValidation);
     }

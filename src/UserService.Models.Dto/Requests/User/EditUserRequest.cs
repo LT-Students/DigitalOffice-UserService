@@ -5,7 +5,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
 {
   public class EditUserRequest
   {
-    public Guid RoleId { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string MiddleName { get; set; }
