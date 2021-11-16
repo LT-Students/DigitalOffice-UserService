@@ -6,8 +6,8 @@ using System;
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(UserServiceDbContext))]
-  [Migration("20211115205800_AddUserLocationTable")]
-  class AddUserLocationTable : Migration
+  [Migration("20211115205800_AddUsersLocationsTable")]
+  public class AddUserLocationTable : Migration
   {
     protected override void Up(MigrationBuilder builder)
     {
@@ -28,8 +28,13 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         },
         constraints: table =>
         {
-          table.PrimaryKey("PK_UserLocationTable", x => x.Id);
+          table.PrimaryKey("PK_UsersLocations", x => x.Id);
         });
+    }
+    protected override void Down(MigrationBuilder builder)
+    {
+      builder.DropTable(
+          name: DbUserLocation.TableName);
     }
   }
 }

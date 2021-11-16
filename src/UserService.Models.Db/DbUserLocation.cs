@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
   public class DbUserLocation
   {
-    public const string TableName = "UserLocations";
+    public const string TableName = "UsersLocations";
 
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
