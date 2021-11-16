@@ -50,7 +50,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
             .WithMessage("Middle name must not contain numbers.")
             .Must(x => !SpecialCharactersRegex.IsMatch(x))
             .WithMessage("Middle name must not contain special characters.")
+<<<<<<< HEAD
             .MaximumLength(45).WithMessage("Middle name is too long.")
+=======
+            .MaximumLength(45)
+            .WithMessage("Middle name is too long.")
+>>>>>>> change_fullname_length
             .Must(x => NameRegex.IsMatch(x.Trim()))
             .WithMessage("Middle name contains invalid characters."));
 
