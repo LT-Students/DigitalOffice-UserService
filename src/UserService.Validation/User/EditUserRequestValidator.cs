@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "First name must not be empty." },
           { x => !NameRegex.IsMatch(x.value.ToString()), "First name must not contain numbers." },
-          { x => x.value.ToString().Trim().Length < 32, "First name is too long." },
+          { x => x.value.ToString().Trim().Length < 46, "First name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -73,7 +73,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Last name must not be empty." },
           { x => !NameRegex.IsMatch(x.value.ToString()), "Last name must not contain numbers." },
-          { x => x.value.ToString().Trim().Length < 32, "Last name is too long." },
+          { x => x.value.ToString().Trim().Length < 46, "Last name is too long." },
         }, CascadeMode.Stop);
 
       #endregion
@@ -87,7 +87,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         {
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
-            (x.value.ToString().Trim().Length < 32), "Middle name is too long."
+            (x.value.ToString().Trim().Length < 46), "Middle name is too long."
           },
           {
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
