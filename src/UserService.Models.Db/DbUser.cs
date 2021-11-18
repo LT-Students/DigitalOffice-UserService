@@ -106,8 +106,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .WithOne(ul => ul.User);
 
       builder
-       .HasOne(u => u.Genders)
-       .WithOne(ug => ug.User);
+        .HasOne(u => u.Genders)
+        .WithOne(ug => ug.User);
     }
   }
 }
