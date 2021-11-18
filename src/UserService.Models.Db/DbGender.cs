@@ -21,18 +21,18 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public void Configure(EntityTypeBuilder<DbGender> builder)
     {
       builder
-          .ToTable(DbGender.TableName);
+        .ToTable(DbGender.TableName);
 
       builder
-          .HasKey(g => g.Id);
+        .HasKey(g => g.Id);
 
       builder
-          .Property(g => g.Name)
-          .IsRequired();
+        .Property(g => g.Name)
+        .IsRequired();
 
       builder
-          .HasMany(g => g.UserGenders)
-          .WithOne(ug => ug.Gender);
+        .HasMany(g => g.UserGenders)
+        .WithOne(ug => ug.Gender);
     }
   }
 }

@@ -3,8 +3,6 @@
     "UserService": {
       "commandName": "Project",
       "environmentVariables": {
-        "RabbitMqUsername": "guest",
-        "RabbitMqPassword": "guest",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "externalUrlConfiguration": true

@@ -53,9 +53,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     protected override void Down(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.DropTable(
-          name: DbGender.TableName);
+        name: DbGender.TableName);
       migrationBuilder.DropTable(
-          name: DbUserGender.TableName);
+        name: DbUserGender.TableName);
     }
   }
 }

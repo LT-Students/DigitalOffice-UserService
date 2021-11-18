@@ -22,26 +22,26 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public void Configure(EntityTypeBuilder<DbUserGender> builder)
     {
       builder
-          .ToTable(DbUserGender.TableName);
+        .ToTable(DbUserGender.TableName);
 
       builder
-          .HasKey(ug => ug.Id);
+        .HasKey(ug => ug.Id);
 
       builder
-          .Property(ug => ug.UserId)
-          .IsRequired();
+        .Property(ug => ug.UserId)
+        .IsRequired();
 
       builder
-          .Property(ug => ug.GenderId)
-          .IsRequired();
+        .Property(ug => ug.GenderId)
+        .IsRequired();
 
       builder
-          .HasOne(us => us.User)
-          .WithOne(u => u.Genders);
+        .HasOne(us => us.User)
+        .WithOne(u => u.Genders);
 
       builder
-          .HasOne(g => g.Gender)
-          .WithMany(ug => ug.UserGenders);
+        .HasOne(g => g.Gender)
+        .WithMany(ug => ug.UserGenders);
 
     }
   }
