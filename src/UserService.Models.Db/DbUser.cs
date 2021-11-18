@@ -1,4 +1,3 @@
-using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Attributes.ParseEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,11 +17,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string MiddleName { get; set; }
     public int Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
-    public string City { get; set; }
     public int Status { get; set; }
-    public bool IsAdmin { get; set; }
     public DateTime? StartWorkingAt { get; set; }
     public string About { get; set; }
+    public bool IsAdmin { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
