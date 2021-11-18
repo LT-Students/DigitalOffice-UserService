@@ -135,14 +135,14 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
                 .Setup(x => x.HttpContext.Items)
                 .Returns(httpContextItems);
 
-            _command = new ForgotPasswordCommand(
+            /*_command = new ForgotPasswordCommand(
                 _loggerMock.Object,
                 _rcSendEmailMock.Object,
                 _cacheOptions,
                 _httpContextAccessorMock.Object,
                 _validatorMock.Object,
                 _userRepositoryMock.Object,
-                _memoryCache);
+                _memoryCache);*/
         }
 
         [SetUp]
