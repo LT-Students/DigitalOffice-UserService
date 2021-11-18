@@ -25,6 +25,8 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbEntityImage> EntitiesImages { get; set; }
     public DbSet<DbUserLocation> UsersLocations { get; set; }
+    public DbSet<DbUserGender> UserGenders { get; set; }
+    public DbSet<DbGender> Genders { get; set; }
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
       : base(options)
