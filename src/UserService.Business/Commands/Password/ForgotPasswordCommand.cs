@@ -127,7 +127,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       response.Body = await SendEmailAsync(dbUser, userEmail, secret, response.Errors);
       response.Status = response.Body ?
         OperationResultStatusType.FullSuccess :
-        OperationResultStatusType.FullSuccess;
+        OperationResultStatusType.Failed;
 
       return response;
     }
