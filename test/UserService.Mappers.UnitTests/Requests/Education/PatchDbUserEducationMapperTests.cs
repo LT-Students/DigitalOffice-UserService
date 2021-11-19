@@ -1,7 +1,7 @@
 using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Mappers.Models;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Education;
+using LT.DigitalOffice.UserService.Patch.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json.Serialization;
@@ -11,22 +11,22 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
 {
-    class PatchDbUserEducationMapperTests
+  class PatchDbUserEducationMapperTests
+  {
+    private PatchDbUserEducationMapper _mapper;
+
+    private JsonPatchDocument<EditEducationRequest> _request;
+    private JsonPatchDocument<DbUserEducation> _dbRequest;
+
+    [SetUp]
+    public void SetUp()
     {
-        private PatchDbUserEducationMapper _mapper;
+      _mapper = new PatchDbUserEducationMapper();
+      var time = DateTime.UtcNow;
 
-        private JsonPatchDocument<EditEducationRequest> _request;
-        private JsonPatchDocument<DbUserEducation> _dbRequest;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _mapper = new PatchDbUserEducationMapper();
-            var time = DateTime.UtcNow;
-
-            _request = new JsonPatchDocument<EditEducationRequest>(
-                new List<Operation<EditEducationRequest>>
-                    {
+      _request = new JsonPatchDocument<EditEducationRequest>(
+          new List<Operation<EditEducationRequest>>
+              {
                         new Operation<EditEducationRequest>(
                             "replace",
                             $"/{nameof(EditEducationRequest.UniversityName)}",
@@ -52,12 +52,12 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
                             $"/{nameof(EditEducationRequest.FormEducation)}",
                             "",
                             0)
-                    }, new CamelCasePropertyNamesContractResolver()
-                );
+              }, new CamelCasePropertyNamesContractResolver()
+          );
 
-            _dbRequest = new JsonPatchDocument<DbUserEducation>(
-                new List<Operation<DbUserEducation>>
-                    {
+      _dbRequest = new JsonPatchDocument<DbUserEducation>(
+          new List<Operation<DbUserEducation>>
+              {
                         new Operation<DbUserEducation>(
                             "replace",
                             $"/{nameof(DbUserEducation.UniversityName)}",
@@ -83,19 +83,19 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.UnitTests
                             $"/{nameof(DbUserEducation.FormEducation)}",
                             "",
                             0)
-                    }, new CamelCasePropertyNamesContractResolver());
-        }
-
-        [Test]
-        public void ShouldSuccessMap()
-        {
-            SerializerAssert.AreEqual(_dbRequest, _mapper.Map(_request));
-        }
-
-        [Test]
-        public void ShouldThrowNullArqumentException()
-        {
-            Assert.Throws<ArgumentNullException>(() => _mapper.Map(null));
-        }
+              }, new CamelCasePropertyNamesContractResolver());
     }
+
+    [Test]
+    public void ShouldSuccessMap()
+    {
+      SerializerAssert.AreEqual(_dbRequest, _mapper.Map(_request));
+    }
+
+    [Test]
+    public void ShouldThrowNullArqumentException()
+    {
+      Assert.Throws<ArgumentNullException>(() => _mapper.Map(null));
+    }
+  }
 }

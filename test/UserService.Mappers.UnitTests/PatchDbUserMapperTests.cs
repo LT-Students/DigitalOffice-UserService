@@ -1,9 +1,8 @@
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Mappers.Models;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Patch.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Newtonsoft.Json.Serialization;
@@ -13,24 +12,24 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 {
-    public class PatchDbUserMapperTests
+  public class PatchDbUserMapperTests
+  {
+    private IPatchDbUserMapper _mapper;
+
+    private JsonPatchDocument<EditUserRequest> _request;
+    private JsonPatchDocument<DbUser> _result;
+    private string _dateOfBirth = "2000-01-01";
+
+    private Guid? _imageId;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
     {
-        private IPatchDbUserMapper _mapper;
+      _imageId = Guid.NewGuid();
 
-        private JsonPatchDocument<EditUserRequest> _request;
-        private JsonPatchDocument<DbUser> _result;
-        private string _dateOfBirth = "2000-01-01";
+      _mapper = new PatchDbUserMapper();
 
-        private Guid? _imageId;
-
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            _imageId = Guid.NewGuid();
-
-            _mapper = new PatchDbUserMapper();
-
-            _request = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
+      _request = new JsonPatchDocument<EditUserRequest>(new List<Operation<EditUserRequest>>
             {
                 new Operation<EditUserRequest>(
                     "replace",
@@ -59,18 +58,13 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     _dateOfBirth),
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.City)}",
-                    "",
-                    "City"),
-                new Operation<EditUserRequest>(
-                    "replace",
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
                     UserStatus.Vacation)
 
             }, new CamelCasePropertyNamesContractResolver());
 
-            _result = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
+      _result = new JsonPatchDocument<DbUser>(new List<Operation<DbUser>>
             {
                 new Operation<DbUser>(
                     "replace",
@@ -99,29 +93,24 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     DateTime.Parse(_dateOfBirth)),
                 new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUser.City)}",
-                    "",
-                    "City"),
-                new Operation<DbUser>(
-                    "replace",
                     $"/{nameof(DbUser.Status)}",
                     "",
                     (int)UserStatus.Vacation)
             }, new CamelCasePropertyNamesContractResolver());
-        }
-
-        /*[Test]
-        public void ShouldReturnCorrectResponse()
-        {
-            var dbUserPatch = _mapper.Map(_request);
-
-            SerializerAssert.AreEqual(_result, dbUserPatch);
-        }*/
-
-        [Test]
-        public void ShouldThrowExceptionWhenRequestNull()
-        {
-            Assert.Null(_mapper.Map(null));
-        }
     }
+
+    /*[Test]
+    public void ShouldReturnCorrectResponse()
+    {
+        var dbUserPatch = _mapper.Map(_request);
+
+        SerializerAssert.AreEqual(_result, dbUserPatch);
+    }*/
+
+    /*[Test]
+    public void ShouldThrowExceptionWhenRequestNull()
+    {
+      Assert.Null(_mapper.Map(null));
+    }*/
+  }
 }
