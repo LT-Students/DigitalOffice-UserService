@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 {
   public class DbEntityImageMapper : IDbEntityImageMapper
   {
-    public List<DbEntityImage> Map(List<Guid> imagesIds, CreateImageRequest request)
+    public List<DbUserAvatar> Map(List<Guid> imagesIds, CreateImageRequest request)
     {
       if (imagesIds == null || !imagesIds.Any() || request == null)
       {
@@ -18,20 +18,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
       Guid entityId = request.EntityId;
 
-      return imagesIds.Select(x => new DbEntityImage
+      return imagesIds.Select(x => new DbUserAvatar
       {
         Id = Guid.NewGuid(),
-        EntityId = entityId,
+        UserId = entityId,
         ImageId = x
       }).ToList();
     }
 
-    public DbEntityImage Map(Guid imageId, Guid entityId, bool isCurrentAvatar = false)
+    public DbUserAvatar Map(Guid imageId, Guid entityId, bool isCurrentAvatar = false)
     {
-      return new DbEntityImage
+      return new DbUserAvatar
       {
         Id = Guid.NewGuid(),
-        EntityId = entityId,
+        UserId = entityId,
         ImageId = imageId,
         IsCurrentAvatar = isCurrentAvatar
       };

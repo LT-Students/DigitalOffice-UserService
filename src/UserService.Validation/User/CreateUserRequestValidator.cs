@@ -39,9 +39,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .Must(x => NameRegex.IsMatch(x.Trim()))
         .WithMessage("Last name contains invalid characters.");
 
-      RuleFor(user => user.PositionId)
-        .NotEmpty();
-
       When(
         user => !string.IsNullOrEmpty(user.MiddleName),
         () =>
@@ -55,24 +52,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
             .WithMessage("Middle name contains invalid characters."));
 
       When(
-        user => !string.IsNullOrEmpty(user.City),
-        () =>
-          RuleFor(user => user.City)
-            .Must(x => !NumberRegex.IsMatch(x))
-            .WithMessage("City name must not contain numbers.")
-            .Must(x => !SpecialCharactersRegex.IsMatch(x))
-            .WithMessage("City name must not contain special characters.")
-            .MaximumLength(32)
-            .WithMessage("City name is too long.")
-            .Must(x => NameRegex.IsMatch(x.Trim()))
-            .WithMessage("City name contains invalid characters."));
-
-      When(
         user => (user.AvatarImage != null),
         () =>
           RuleFor(user => user.AvatarImage)
-            .SetValidator(imageValidator)
-        );
+            .SetValidator(imageValidator));
 
       RuleFor(user => user.Gender)
         .IsInEnum().WithMessage("Wrong gender value.");
@@ -80,15 +63,18 @@ namespace LT.DigitalOffice.UserService.Validation.User
       RuleFor(user => user.Status)
         .IsInEnum().WithMessage("Wrong status value.");
 
+      When(
+        u => u.Rate is not null,
+        () =>
+          RuleFor(user => user.Rate)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(1));
+
       RuleFor(user => user.Communications)
         .NotEmpty();
 
       RuleForEach(user => user.Communications)
         .SetValidator(communicationValidator);
-
-      RuleFor(user => user.Rate)
-        .GreaterThan(0)
-        .LessThanOrEqualTo(1);
 
       When(user => user.Password != null && user.Password.Trim().Any(), () =>
       {

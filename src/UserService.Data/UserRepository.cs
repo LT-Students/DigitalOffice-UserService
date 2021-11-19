@@ -116,7 +116,7 @@ namespace LT.DigitalOffice.UserService.Data
         return null;
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable().Include(u => u.Location);
 
       return await CreateGetPredicates(filter, dbUsers)
         .FirstOrDefaultAsync();
@@ -144,7 +144,7 @@ namespace LT.DigitalOffice.UserService.Data
       return (await
         (from user in _provider.Users
          where usersIds.Contains(user.Id)
-         join images in _provider.EntitiesImages on user.Id equals images.EntityId into userImages
+         join images in _provider.UsersAvatars on user.Id equals images.UserId into userImages
          from userImage in userImages.DefaultIfEmpty()
          select new
          {
@@ -154,7 +154,7 @@ namespace LT.DigitalOffice.UserService.Data
          .Select(x =>
          {
            DbUser user = x.Select(x => x.User).FirstOrDefault();
-           Guid? id = x.Select(x => x.EntityImage).FirstOrDefault(x => x != null && x.EntityId == user.Id && x.IsCurrentAvatar)?.ImageId;
+           Guid? id = x.Select(x => x.EntityImage).FirstOrDefault(x => x != null && x.UserId == user.Id && x.IsCurrentAvatar)?.ImageId;
 
            return (user, id);
          }).ToList();

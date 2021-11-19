@@ -19,11 +19,11 @@ namespace LT.DigitalOffice.UserService.Validation.Helpers
 
     public async Task<bool> CheckAffiliationAsync(List<Guid> imagesIds, Guid entityId)
     {
-      List<DbEntityImage> dbEntityImages = await _imageRepository.GetAsync(imagesIds);
+      List<DbUserAvatar> dbEntityImages = await _imageRepository.GetAsync(imagesIds);
 
-      foreach(DbEntityImage dbEntityImage in dbEntityImages)
+      foreach(DbUserAvatar dbEntityImage in dbEntityImages)
       {
-        if (dbEntityImage.EntityId != entityId)
+        if (dbEntityImage.UserId != entityId)
         {
           return false;
         }

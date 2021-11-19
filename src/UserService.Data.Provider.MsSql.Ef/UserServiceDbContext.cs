@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
     public DbSet<DbUserEducation> UserEducations { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
-    public DbSet<DbEntityImage> EntitiesImages { get; set; }
+    public DbSet<DbUserAvatar> UsersAvatars { get; set; }
     public DbSet<DbUserLocation> UsersLocations { get; set; }
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)

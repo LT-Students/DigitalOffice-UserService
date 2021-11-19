@@ -9,19 +9,19 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IImageRepository
   {
-    Task<Guid?> CreateAsync(DbEntityImage dbEntityImage);
+    Task<Guid?> CreateAsync(DbUserAvatar dbEntityImage);
 
     Task<List<Guid>> GetImagesIdsByEntityIdAsync(Guid entityId);
 
-    Task<List<DbEntityImage>> GetAsync(List<Guid> imagesIds);
+    Task<List<DbUserAvatar>> GetAsync(List<Guid> imagesIds);
 
-    Task<List<DbEntityImage>> GetAvatarsAsync(List<Guid> usersIds);
+    Task<List<DbUserAvatar>> GetAvatarsAsync(List<Guid> usersIds);
 
-    Task<DbEntityImage> GetAvatarAsync(Guid userId);
+    Task<DbUserAvatar> GetAvatarAsync(Guid userId);
 
     Task<Guid?> UpdateAvatarAsync(Guid userId, Guid imageId);
 
-    Task<Guid?> UpdateAvatarAsync(DbEntityImage avatarImage);
+    Task<Guid?> UpdateAvatarAsync(DbUserAvatar avatarImage);
 
     Task<bool> RemoveAsync(List<Guid> imagesIds);
   }

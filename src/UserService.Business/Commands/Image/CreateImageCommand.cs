@@ -135,7 +135,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
 
       if (response.Body != null)
       {
-        DbEntityImage dbEntityImage = _dbEntityImageMapper.Map(response.Body.Value, request.EntityId, request.IsCurrentAvatar);
+        DbUserAvatar dbEntityImage = _dbEntityImageMapper.Map(response.Body.Value, request.EntityId, request.IsCurrentAvatar);
 
         await _imageRepository.CreateAsync(dbEntityImage);
 

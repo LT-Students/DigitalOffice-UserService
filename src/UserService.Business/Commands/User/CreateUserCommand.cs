@@ -91,17 +91,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       errors.Add("Unable to enroll a user in the department. Please try again later.");
     }
 
-    private async Task CreateUserPositionAsync(Guid positionId, Guid userId, double rate, List<string> errors)
+    private async Task CreateUserPositionAsync(Guid? positionId, Guid userId, double? rate, List<string> errors)
     {
+      if (positionId is null)
+      {
+        return;
+      }
+
       string logMessage = "Cannot assing position '{positionId}' to user '{userId}'";
 
       try
       {
         Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
           ICreateUserPositionRequest.CreateObj(
-            positionId: positionId,
+            positionId: positionId.Value,
             createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            rate: rate,
+            rate: rate ?? 1,
             userId: userId));
 
         if (response.Message.IsSuccess && response.Message.Body)

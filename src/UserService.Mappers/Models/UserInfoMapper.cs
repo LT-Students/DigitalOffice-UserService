@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       ImageInfo avatarImage,
       List<ImageInfo> images = null)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return null;
       }
@@ -32,13 +32,16 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         MiddleName = dbUser.MiddleName,
         Gender = (UserGender)dbUser.Gender,
         DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
-        City = dbUser.City,
         StartWorkingAt = dbUser.StartWorkingAt?.ToShortDateString(),
         IsAdmin = dbUser.IsAdmin,
         About = dbUser.About,
         IsActive = dbUser.IsActive,
         Status = (UserStatus)dbUser.Status,
         Rate = positionUserData?.Rate,
+        Latitude = dbUser.Location?.Latitude,
+        Longitude = dbUser.Location?.Latitude,
+        BusinessHoursFromUtc = dbUser.Location?.BusinessHoursFromUtc,
+        BusinessHoursToUtc = dbUser.Location?.BusinessHoursToUtc,
         Department = department,
         Position = position,
         Office = office,

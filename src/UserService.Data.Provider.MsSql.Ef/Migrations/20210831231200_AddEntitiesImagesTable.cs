@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.UserService.Models.Db;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
@@ -12,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     protected override void Up(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.CreateTable(
-        name: DbEntityImage.TableName,
+        name: "EntitiesImages",
         columns: table => new
         {
           Id = table.Column<Guid>(nullable: false),

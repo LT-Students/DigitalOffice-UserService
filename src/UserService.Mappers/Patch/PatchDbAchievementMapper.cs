@@ -1,10 +1,10 @@
-﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 
-namespace LT.DigitalOffice.UserService.Mappers.Models
+namespace LT.DigitalOffice.UserService.Patch.Models
 {
   public class PatchDbAchievementMapper : IPatchDbAchievementMapper
   {

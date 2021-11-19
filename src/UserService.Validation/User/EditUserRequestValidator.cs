@@ -20,33 +20,41 @@ namespace LT.DigitalOffice.UserService.Validation.User
       Context = context;
       RequestedOperation = requestedOperation;
 
-      #region paths
+    #region paths
 
-      AddСorrectPaths(
-        new List<string>
-        {
-          nameof(EditUserRequest.FirstName),
-          nameof(EditUserRequest.MiddleName),
-          nameof(EditUserRequest.LastName),
-          nameof(EditUserRequest.Status),
-          nameof(EditUserRequest.City),
-          nameof(EditUserRequest.Gender),
-          nameof(EditUserRequest.DateOfBirth),
-          nameof(EditUserRequest.StartWorkingAt),
-          nameof(EditUserRequest.About),
-          nameof(EditUserRequest.IsActive),
-        });
+    AddСorrectPaths(
+      new List<string>
+      {
+        nameof(EditUserRequest.FirstName),
+        nameof(EditUserRequest.LastName),
+        nameof(EditUserRequest.MiddleName),
+        nameof(EditUserRequest.About),
+        nameof(EditUserRequest.Gender),
+        nameof(EditUserRequest.Status),
+        nameof(EditUserRequest.DateOfBirth),
+        nameof(EditUserRequest.StartWorkingAt),
+        nameof(EditUserRequest.BusinessHoursFromUtc),
+        nameof(EditUserRequest.BusinessHoursToUtc),
+        nameof(EditUserRequest.Latitude),
+        nameof(EditUserRequest.Longitude),
+        nameof(EditUserRequest.IsAdmin),
+        nameof(EditUserRequest.IsActive),
+      });
 
       AddСorrectOperations(nameof(EditUserRequest.FirstName), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.MiddleName), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.BusinessHoursFromUtc), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.BusinessHoursToUtc), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.Latitude), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.Longitude), new List<OperationType> { OperationType.Replace });
+      AddСorrectOperations(nameof(EditUserRequest.IsAdmin), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
       #endregion
 
@@ -93,18 +101,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
             (!NameRegex.IsMatch(x.value.ToString())), "Middle name must not contain numbers."
           },
-        });
-
-      #endregion
-
-      #region City
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.City),
-        x => x == OperationType.Replace,
-        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-        {
-          { x => string.IsNullOrEmpty(x.value?.ToString())? true : (x.value.ToString().Trim().Length < 32), "City name is too long." },
         });
 
       #endregion
@@ -161,6 +157,82 @@ namespace LT.DigitalOffice.UserService.Validation.User
               DateTime.TryParse(x.value.ToString(), out DateTime result),
             "Start working at has incorrect format."
           },
+        });
+
+      #endregion
+
+      #region BusinessHoursFromUtc
+
+      AddFailureForPropertyIf(
+        nameof(EditUserRequest.BusinessHoursFromUtc),
+        x => x == OperationType.Replace,
+        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+        {
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+              DateTime.TryParse(x.value.ToString(), out DateTime result),
+            "Business hours from has incorrect format."
+          },
+        });
+
+      #endregion
+
+      #region BusinessHoursToUtc
+
+      AddFailureForPropertyIf(
+        nameof(EditUserRequest.BusinessHoursToUtc),
+        x => x == OperationType.Replace,
+        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+        {
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+              DateTime.TryParse(x.value.ToString(), out DateTime result),
+            "Business hours to has incorrect format."
+          },
+        });
+
+      #endregion
+
+      #region Latitude
+
+      AddFailureForPropertyIf(
+        nameof(EditUserRequest.Latitude),
+        x => x == OperationType.Replace,
+        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+        {
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+              Double.TryParse(x.value.ToString(), out double result),
+            "Latitude has incorrect format."
+          },
+        });
+
+      #endregion
+
+      #region Longitude
+
+      AddFailureForPropertyIf(
+        nameof(EditUserRequest.Longitude),
+        x => x == OperationType.Replace,
+        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+        {
+          {
+            x => string.IsNullOrEmpty(x.value?.ToString())? true :
+              Double.TryParse(x.value.ToString(), out double result),
+            "Longitude has incorrect format."
+          },
+        });
+
+      #endregion
+
+      #region IsAdmin
+
+      AddFailureForPropertyIf(
+        nameof(EditUserRequest.IsAdmin),
+        x => x == OperationType.Replace,
+        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
+        {
+          { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is admin format." }
         });
 
       #endregion

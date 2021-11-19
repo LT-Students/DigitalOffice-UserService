@@ -422,7 +422,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> imagesIds = new();
       List<Guid> userImagesIds = new();
-      DbEntityImage userAvatar = await _imageRepository.GetAvatarAsync(dbUser.Id);
+      DbUserAvatar userAvatar = await _imageRepository.GetAvatarAsync(dbUser.Id);
 
       if (filter.IncludeImages)
       {

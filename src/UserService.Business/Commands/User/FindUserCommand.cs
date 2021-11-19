@@ -368,7 +368,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       List<DbUser> dbUsers = null;
-      List<DbEntityImage> usersImages = null;
+      List<DbUserAvatar> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
       response.Body = new();
@@ -427,7 +427,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
               roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeAvatar
             ? _imageInfoMapper.Map(images?.FirstOrDefault(
-              x => x.ImageId == usersImages.Where(dbImage => (dbImage.EntityId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
+              x => x.ImageId == usersImages.Where(dbImage => (dbImage.UserId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
             : null)));
 
       response.Status = response.Errors.Any()
