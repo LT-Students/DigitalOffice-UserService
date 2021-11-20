@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
   public class DbUserGender
   {
-    public const string TableName = "UserGenders";
+    public const string TableName = "UsersGenders";
 
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

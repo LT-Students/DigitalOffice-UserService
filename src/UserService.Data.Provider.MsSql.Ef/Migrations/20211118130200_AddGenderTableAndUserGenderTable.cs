@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         },
         constraints: table =>
         {
-          table.PrimaryKey("PR_UserGenders", x => x.Id);
+          table.PrimaryKey("PR_UsersGenders", x => x.Id);
         });
     }
 

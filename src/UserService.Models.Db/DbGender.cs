@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserGender> UserGenders { get; set; }
   }
 
-  public class GenderConfiguretion : IEntityTypeConfiguration<DbGender>
+  public class GenderConfiguration : IEntityTypeConfiguration<DbGender>
   {
     public void Configure(EntityTypeBuilder<DbGender> builder)
     {
