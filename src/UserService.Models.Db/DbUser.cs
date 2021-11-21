@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserSkill> Skills { get; set; }
     [IgnoreParse]
     public DbUserLocation Location { get; set; }
-    public DbUserGender Genders { get; set; }
+    public DbUserGender Gender { get; set; }
 
     public DbUser()
     {

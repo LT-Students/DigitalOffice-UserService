@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string Name { get; set; }
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
-    public ICollection<DbUserGender> UserGenders { get; set; }
+    public ICollection<DbUserGender> UsersGenders { get; set; }
   }
 
   public class GenderConfiguration : IEntityTypeConfiguration<DbGender>
