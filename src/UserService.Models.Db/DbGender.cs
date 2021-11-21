@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .IsRequired();
 
       builder
-        .HasMany(g => g.UserGenders)
+        .HasMany(g => g.UsersGenders)
         .WithOne(ug => ug.Gender);
     }
   }

@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserSkill> Skills { get; set; }
     [IgnoreParse]
     public DbUserLocation Location { get; set; }
-    public DbUserGender Gender { get; set; }
+    public DbUserGender UserGender { get; set; }
 
     public DbUser()
     {
@@ -106,7 +106,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .WithOne(ul => ul.User);
 
       builder
-        .HasOne(u => u.Genders)
+        .HasOne(u => u.UserGender)
         .WithOne(ug => ug.User);
     }
   }
