@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
@@ -9,15 +9,12 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
-using LT.DigitalOffice.UserService.Validation.Email.Interfaces;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -27,17 +24,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
   /// <inheritdoc/>
   public class ForgotPasswordCommand : IForgotPasswordCommand
   {
+    private readonly IGeneratePasswordCommand _generatePassword;
     private readonly ILogger<ForgotPasswordCommand> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly IOptions<MemoryCacheConfig> _cacheOptions;
-    private readonly IEmailValidator _validator;
     private readonly IUserRepository _repository;
     private readonly IMemoryCache _cache;
+    private readonly IResponseCreater _responseCreator;
 
-    private Guid SetGuidInCache(Guid userId)
+    private string SetGuidInCache(Guid userId)
     {
-      var secret = Guid.NewGuid();
+      string secret = _generatePassword.Execute();
 
       _cache.Set(secret, userId, new MemoryCacheEntryOptions
       {
@@ -50,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     private async Task<bool> SendEmailAsync(
       DbUser dbUser,
       string email,
-      Guid secret,
+      string secret,
       List<string> errors)
     {
       //TODO: fix add specific template language
@@ -61,7 +58,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         Dictionary<string, string> templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
           userFirstName: dbUser.FirstName,
           userId: dbUser.Id.ToString(),
-          secret: secret.ToString());
+          secret: secret);
 
         Response<IOperationResult<bool>> response =
           await _rcSendEmail
@@ -94,63 +91,43 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     }
 
     public ForgotPasswordCommand(
+      IGeneratePasswordCommand generatePassword,
       ILogger<ForgotPasswordCommand> logger,
       IRequestClient<ISendEmailRequest> rcSendEmail,
       IOptions<MemoryCacheConfig> cacheOptions,
-      IHttpContextAccessor httpContextAccessor,
-      IEmailValidator validator,
       IUserRepository repository,
-      IMemoryCache cache)
+      IMemoryCache cache,
+      IResponseCreater responseCreator)
     {
+      _generatePassword = generatePassword;
       _logger = logger;
       _rcSendEmail = rcSendEmail;
-      _httpContextAccessor = httpContextAccessor;
       _repository = repository;
-      _validator = validator;
       _cacheOptions = cacheOptions;
       _cache = cache;
+      _responseCreator = responseCreator;
     }
 
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(string userEmail)
     {
-      if (!_validator.ValidateCustom(userEmail, out List<string> errors))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+      DbUser dbUser = string.IsNullOrEmpty(userEmail) ?
+        null :
+        await _repository.GetAsync(new GetUserFilter() { Email = userEmail, IncludeCommunications = true });
 
-        return new()
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = errors
-        };
+      if (dbUser is null)
+      {
+        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
-      GetUserFilter filter = new()
-      {
-        Email = userEmail,
-        IncludeCommunications = true
-      };
-
-      DbUser dbUser = await _repository.GetAsync(filter);
-
-      if (dbUser == null)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-        return new()
-        {
-          Status = OperationResultStatusType.Failed
-        };
-      }
-
-      Guid secret = SetGuidInCache(dbUser.Id);
+      string secret = SetGuidInCache(dbUser.Id);
 
       OperationResultResponse<bool> response = new();
 
       response.Body = await SendEmailAsync(dbUser, userEmail, secret, response.Errors);
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.Failed
-        : OperationResultStatusType.FullSuccess;
+      response.Status = response.Body ?
+        OperationResultStatusType.FullSuccess :
+        OperationResultStatusType.Failed;
 
       return response;
     }
