@@ -26,11 +26,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
       builder
         .HasKey(ug => ug.Id);
-
-      builder
-        .Property(ug => ug.UserId)
-        .IsRequired();
-
     }
   }
 }
