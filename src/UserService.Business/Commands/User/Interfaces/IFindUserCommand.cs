@@ -2,21 +2,20 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
-using System;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
+  /// <summary>
+  /// Represents interface for a command in command pattern.
+  /// Provides method for getting list of user models with pagination and filter by full name.
+  /// </summary>
+  [AutoInject]
+  public interface IFindUserCommand
+  {
     /// <summary>
-    /// Represents interface for a command in command pattern.
-    /// Provides method for getting list of user models with pagination and filter by full name.
+    /// Returns the list of user models using pagination and filter by full name.
     /// </summary>
-    [AutoInject]
-    public interface IFindUserCommand
-    {
-        /// <summary>
-        /// Returns the list of user models using pagination and filter by full name.
-        /// </summary>
-        Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter);
-    }
+    Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter);
+  }
 }

@@ -1,35 +1,18 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
-using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.File;
-using LT.DigitalOffice.Models.Broker.Responses.File;
-using LT.DigitalOffice.UnitTestKernel;
-using LT.DigitalOffice.UserService.Business.Commands.Certificate;
+﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
-using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
 using Moq.AutoMock;
-using Newtonsoft.Json.Serialization;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTests
 {
-    class EditCertificateCommandTests
+  class EditCertificateCommandTests
     {
         private IEditCertificateCommand _command;
         private AutoMocker _mocker;
@@ -55,15 +38,15 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                .SetupGet(x => x.Message)
                .Returns(_operationResultAddImageMock.Object);
 
-            _mocker
-                .Setup<IRequestClient<IAddImageRequest>, Task>(
-                    x => x.GetResponse<IOperationResult<Guid>>(
-                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-                .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
+            //_mocker
+            //    .Setup<IRequestClient<IAddImageRequest>, Task>(
+            //        x => x.GetResponse<IOperationResult<Guid>>(
+            //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
+            //    .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
         }
 
 
-        [SetUp]
+        /*[SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
@@ -196,15 +179,15 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 .Returns(_dbRequest);
 
             _mocker
-                .Setup<ICertificateRepository, bool>(x => x.Edit(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
-                .Returns(true);
+                .Setup<ICertificateRepository, Task<bool>>(x => x.EditAsync(It.IsAny<DbUserCertificate>(), It.IsAny<JsonPatchDocument<DbUserCertificate>>()))
+                .Returns(Task.FromResult(true));
 
             _mocker
                 .Setup<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId))
                 .Returns(_dbUserCertificate);
 
             _mocker
-                .Setup<IUserRepository, DbUser>(x => x.Get(_dbUser.Id))
+                .Setup<IUserRepository, DbUser>(x => x.GetAsync(_dbUser.Id))
                 .Returns(_dbUser);
 
             RequestClientMock();

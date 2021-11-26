@@ -4,6 +4,8 @@ using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.Broker.Consumer;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using LT.DigitalOffice.UserService.Broker.Consumers;
@@ -103,20 +105,48 @@ namespace LT.DigitalOffice.UserService
 
     #region configure masstransit
 
+    private (string username, string password) GetRabbitMqCredentials()
+    {
+      static string GetString(string envVar, string formAppsettings, string generated, string fieldName)
+      {
+        string str = Environment.GetEnvironmentVariable(envVar);
+        if (string.IsNullOrEmpty(str))
+        {
+          str = formAppsettings ?? generated;
+
+          Log.Information(
+            formAppsettings == null
+              ? $"Default RabbitMq {fieldName} was used."
+              : $"RabbitMq {fieldName} from appsetings.json was used.");
+        }
+        else
+        {
+          Log.Information($"RabbitMq {fieldName} from environment was used.");
+        }
+
+        return str;
+      }
+
+      return (GetString("RabbitMqUsername", _rabbitMqConfig.Username, $"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}", "Username"),
+        GetString("RabbitMqPassword", _rabbitMqConfig.Password, _serviceInfoConfig.Id, "Password"));
+    }
+
     private void ConfigureMassTransit(IServiceCollection services)
     {
+      (string username, string password) = GetRabbitMqCredentials();
+
       services.AddMassTransit(busConfigurator =>
       {
         busConfigurator.UsingRabbitMq((context, cfg) =>
+          {
+            cfg.Host(_rabbitMqConfig.Host, "/", host =>
               {
-                cfg.Host(_rabbitMqConfig.Host, "/", host =>
-                      {
-                        host.Username($"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}");
-                        host.Password(_serviceInfoConfig.Id);
-                      });
-
-                ConfigureEndpoints(context, cfg, _rabbitMqConfig);
+                host.Username(username);
+                host.Password(password);
               });
+
+            ConfigureEndpoints(context, cfg, _rabbitMqConfig);
+          });
 
         ConfigureConsumers(busConfigurator);
 
@@ -203,7 +233,7 @@ namespace LT.DigitalOffice.UserService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.4.0.0";
+      Version = "1.4.0.3";
       Description = "UserService is an API that intended to work with users.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
@@ -289,6 +319,7 @@ namespace LT.DigitalOffice.UserService
 
       services.AddMemoryCache();
       services.AddBusinessObjects();
+      services.AddTransient<IRedisHelper, RedisHelper>();
 
       ConfigureMassTransit(services);
 
@@ -300,6 +331,8 @@ namespace LT.DigitalOffice.UserService
       services.AddScoped<IValidator<JsonPatchDocument<EditCertificateRequest>>, EditCertificateRequestValidator>();
       services.AddScoped<IValidator<CreateCertificateRequest>, CreateCertificateRequestValidator>();
       services.AddScoped<IValidator<CreateSkillRequest>, CreateSkillRequestValidator>();
+
+      services.AddTransient<ICacheNotebook, CacheNotebook>();
 
       string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))

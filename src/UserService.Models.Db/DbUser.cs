@@ -19,10 +19,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public int Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string City { get; set; }
-    public Guid? AvatarFileId { get; set; }
     public int Status { get; set; }
     public bool IsAdmin { get; set; }
-    public double Rate { get; set; }
     public DateTime? StartWorkingAt { get; set; }
     public string About { get; set; }
     public bool IsActive { get; set; }
@@ -43,6 +41,9 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserAchievement> Achievements { get; set; }
     [IgnoreParse]
     public ICollection<DbUserSkill> Skills { get; set; }
+    [IgnoreParse]
+    public DbUserLocation Location { get; set; }
+    public DbUserGender UserGender { get; set; }
 
     public DbUser()
     {
@@ -99,6 +100,14 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasMany(u => u.Skills)
         .WithOne(us => us.User);
+
+      builder
+        .HasOne(u => u.Location)
+        .WithOne(ul => ul.User);
+
+      builder
+        .HasOne(u => u.UserGender)
+        .WithOne(ug => ug.User);
     }
   }
 }

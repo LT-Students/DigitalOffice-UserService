@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 namespace LT.DigitalOffice.UserService.Business.Commands.Image.Interfaces
 {
   [AutoInject]
-  public interface IAddImagesCommand
+  public interface ICreateImageCommand
   {
-    Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request);
+    Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateImageRequest request);
   }
 }

@@ -1,8 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
-using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -19,7 +17,7 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests
 {
-    class CreateCredentialsCommandTests
+  class CreateCredentialsCommandTests
     {
         private Mock<ILogger<CreateCredentialsCommand>> _loggerMock;
         private AutoMocker _mocker;
@@ -33,93 +31,93 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         private string _password = "password";
         private CredentialsResponse _response;
 
-        [SetUp]
-        public void SetUp()
-        {
-            _dbPendingUser = new()
-            {
-                UserId = _userId,
-                Password = _password
-            };
+        //[SetUp]
+        //public void SetUp()
+        //{
+        //    _dbPendingUser = new()
+        //    {
+        //        UserId = _userId,
+        //        Password = _password
+        //    };
 
-            _request = new CreateCredentialsRequest()
-            {
-                UserId = _userId,
-                Login = "login",
-                Password = _password
-            };
+        //    _request = new CreateCredentialsRequest()
+        //    {
+        //        UserId = _userId,
+        //        Login = "login",
+        //        Password = _password
+        //    };
 
-            _userAccessToken = "Access";
-            _userRefreshToken = "Refresh";
+        //    _userAccessToken = "Access";
+        //    _userRefreshToken = "Refresh";
 
-            _response = new()
-            {
-                UserId = _userId,
-                AccessToken = _userAccessToken,
-                RefreshToken = _userRefreshToken,
-                AccessTokenExpiresIn = 100,
-                RefreshTokenExpiresIn = 250
-            };
+        //    _response = new()
+        //    {
+        //        UserId = _userId,
+        //        AccessToken = _userAccessToken,
+        //        RefreshToken = _userRefreshToken,
+        //        AccessTokenExpiresIn = 100,
+        //        RefreshTokenExpiresIn = 250
+        //    };
 
-            _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
+        //    _loggerMock = new Mock<ILogger<CreateCredentialsCommand>>();
 
-            _mocker = new AutoMocker();
+        //    _mocker = new AutoMocker();
 
-            _mocker
-                .Setup<IUserRepository, DbPendingUser>(
-                    x => x.GetPendingUser(_userId))
-                .Returns(_dbPendingUser);
+        //    _mocker
+        //        .Setup<IUserRepository, DbPendingUser>(
+        //            x => x.GetPendingUser(_userId))
+        //        .Returns(_dbPendingUser);
 
-            _mocker
-                .Setup<IUserRepository>(
-                    x => x.DeletePendingUser(It.IsAny<Guid>()));
+        //    _mocker
+        //        .Setup<IUserRepository>(
+        //            x => x.DeletePendingUser(It.IsAny<Guid>()));
 
-            _mocker
-                .Setup<IUserRepository, bool>(
-                    x => x.SwitchActiveStatus(It.IsAny<Guid>(), true))
-                .Returns(true);
+        //    _mocker
+        //        .Setup<IUserRepository, bool>(
+        //            x => x.SwitchActiveStatus(It.IsAny<Guid>(), true))
+        //        .Returns(true);
 
-            _mocker
-                .Setup<IDbUserCredentialsMapper, DbUserCredentials>(
-                    x => x.Map(It.IsAny<CreateCredentialsRequest>(),
-                        It.IsAny<string>(),
-                        It.IsAny<string>()))
-                .Returns(new DbUserCredentials());
+        //    _mocker
+        //        .Setup<IDbUserCredentialsMapper, DbUserCredentials>(
+        //            x => x.Map(It.IsAny<CreateCredentialsRequest>(),
+        //                It.IsAny<string>(),
+        //                It.IsAny<string>()))
+        //        .Returns(new DbUserCredentials());
 
-            _mocker
-                .Setup<IUserCredentialsRepository, Guid>(
-                    x => x.Create(It.IsAny<DbUserCredentials>()))
-                .Returns(new Guid());
+        //    _mocker
+        //        .Setup<IUserCredentialsRepository, Guid>(
+        //            x => x.Create(It.IsAny<DbUserCredentials>()))
+        //        .Returns(new Guid());
 
-            var getTokenResponseMock = new Mock<IGetTokenResponse>();
-            getTokenResponseMock.Setup(x => x.AccessToken).Returns("Access");
-            getTokenResponseMock.Setup(x => x.RefreshToken).Returns("Refresh");
-            getTokenResponseMock.Setup(x => x.AccessTokenExpiresIn).Returns(100);
-            getTokenResponseMock.Setup(x => x.RefreshTokenExpiresIn).Returns(250);
+        //    var getTokenResponseMock = new Mock<IGetTokenResponse>();
+        //    getTokenResponseMock.Setup(x => x.AccessToken).Returns("Access");
+        //    getTokenResponseMock.Setup(x => x.RefreshToken).Returns("Refresh");
+        //    getTokenResponseMock.Setup(x => x.AccessTokenExpiresIn).Returns(100);
+        //    getTokenResponseMock.Setup(x => x.RefreshTokenExpiresIn).Returns(250);
 
-            _mocker
-                .Setup<IOperationResult<IGetTokenResponse>, IGetTokenResponse>(x => x.Body)
-                .Returns(getTokenResponseMock.Object);
-            _mocker
-                .Setup<IOperationResult<IGetTokenResponse>, bool>(x => x.IsSuccess)
-                .Returns(true);
-            _mocker
-                .Setup<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
-                    x => x.GetResponse<IOperationResult<IGetTokenResponse>>(
-                        IGetTokenRequest.CreateObj(_userId),
-                        default,
-                        default)
-                    .Result.Message)
-                .Returns(_mocker.GetMock<IOperationResult<IGetTokenResponse>>().Object);
+        //    _mocker
+        //        .Setup<IOperationResult<IGetTokenResponse>, IGetTokenResponse>(x => x.Body)
+        //        .Returns(getTokenResponseMock.Object);
+        //    _mocker
+        //        .Setup<IOperationResult<IGetTokenResponse>, bool>(x => x.IsSuccess)
+        //        .Returns(true);
+        //    _mocker
+        //        .Setup<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
+        //            x => x.GetResponse<IOperationResult<IGetTokenResponse>>(
+        //                IGetTokenRequest.CreateObj(_userId),
+        //                default,
+        //                default)
+        //            .Result.Message)
+        //        .Returns(_mocker.GetMock<IOperationResult<IGetTokenResponse>>().Object);
 
-            ////needs to DI ILoginValidator in CreateCredentialsCommand
-            /*_command = new CreateCredentialsCommand(
-                _mocker.GetMock<IDbUserCredentialsMapper>().Object,
-                _mocker.GetMock<IUserRepository>().Object,
-                _mocker.GetMock<IUserCredentialsRepository>().Object,
-                _mocker.GetMock<IRequestClient<IGetTokenRequest>>().Object,
-                _loggerMock.Object);*/
-        }
+        //    ////needs to DI ILoginValidator in CreateCredentialsCommand
+        //    /*_command = new CreateCredentialsCommand(
+        //        _mocker.GetMock<IDbUserCredentialsMapper>().Object,
+        //        _mocker.GetMock<IUserRepository>().Object,
+        //        _mocker.GetMock<IUserCredentialsRepository>().Object,
+        //        _mocker.GetMock<IRequestClient<IGetTokenRequest>>().Object,
+        //        _loggerMock.Object);*/
+        //}
 
         //test fails due to DI ILoginValidator in CreateCredentialsCommand
         /*[Test]

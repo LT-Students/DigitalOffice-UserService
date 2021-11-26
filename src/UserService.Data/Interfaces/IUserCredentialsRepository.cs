@@ -2,34 +2,23 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using System;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
-    /// <summary>
-    /// Represents interface of repository in repository pattern.
-    /// Provides methods for working with the database of UserService.
-    /// </summary>
-    [AutoInject]
-    public interface IUserCredentialsRepository
-    {
-        /// <summary>
-        /// Returns the user credentials.
-        /// </summary>
-        DbUserCredentials Get(GetCredentialsFilter filter);
+  [AutoInject]
+  public interface IUserCredentialsRepository
+  {
+    Task<DbUserCredentials> GetAsync(GetCredentialsFilter filter);
 
-        Guid Create(DbUserCredentials dbUserCredentials);
+    Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials);
 
-        void SwitchActiveStatus(Guid userId, bool isActiveStatus);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus);
 
-        /// <summary>
-        /// Edit existing user credentials. Returns whether it was successful to edit.
-        /// </summary>
-        /// <param name="userCredentials">User credentials to edit.</param>
-        /// <returns>Whether it was successful to edit.</returns>
-        bool Edit(DbUserCredentials userCredentials);
+    Task<bool> EditAsync(DbUserCredentials userCredentials);
 
-        bool IsLoginExist(string login);
+    Task<bool> LoginExistAsync(string login);
 
-        bool IsCredentialsExist(Guid userId);
-    }
+    Task<bool> CredentialsExistAsync(Guid userId);
+  }
 }

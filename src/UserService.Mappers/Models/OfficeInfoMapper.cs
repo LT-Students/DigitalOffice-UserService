@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Company;
+﻿using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 
@@ -18,7 +18,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Id = office.Id,
         Name = office.Name,
         Address = office.Address,
-        City = office.City
+        City = office.City,
+        Longitude = office.Longitude,
+        Latitude = office.Latitude
       };
     }
   }

@@ -1,9 +1,10 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
@@ -14,7 +15,6 @@ using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Images;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using MassTransit;
@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Image
 {
-  public class AddImagesCommand : IAddImagesCommand
+  public class CreateImageCommand : ICreateImageCommand
   {
     private readonly IImageRepository _imageRepository;
     private readonly ICertificateRepository _certificateRepository;
@@ -39,42 +39,37 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
-    private readonly ILogger<AddImagesCommand> _logger;
+    private readonly ILogger<CreateImageCommand> _logger;
+    private readonly IResponseCreater _responseCreator;
 
-    private async Task<List<Guid>> AddImages(List<AddImageRequest> request, List<string> errors)
+    private async Task<Guid?> CreateImageAsync(string name, string content, string extension, List<string> errors)
     {
-      if (request == null || !request.Any())
-      {
-        return null;
-      }
-
-      const string errorMessage = "Can not add images. Please try again later.";
       const string logMessage = "Errors while adding images.";
 
       try
       {
         Response<IOperationResult<ICreateImagesResponse>> createResponse = await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
           ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(request),
+            _createImageDataMapper.Map(name, content, extension),
             ImageSource.User));
 
-        if (createResponse.Message.IsSuccess)
+        if (createResponse.Message.IsSuccess
+          && createResponse.Message.Body != null
+          && createResponse.Message.Body.ImagesIds != null)
         {
-          return createResponse.Message.Body.ImagesIds;
+          return createResponse.Message.Body.ImagesIds.FirstOrDefault();
         }
 
         _logger.LogWarning(
           logMessage + " Errors: {Errors}",
           string.Join('\n', createResponse.Message.Errors));
-
-        errors.Add(errorMessage);
       }
       catch (Exception e)
       {
         _logger.LogError(e, logMessage);
-
-        errors.Add(errorMessage);
       }
+
+      errors.Add("Can not add images. Please try again later.");
 
       return null;
     }
@@ -90,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       };
     }
 
-    public AddImagesCommand(
+    public CreateImageCommand(
       IImageRepository imageRepository,
       ICertificateRepository certificateRepository,
       IEducationRepository educationRepository,
@@ -100,7 +95,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       ICreateImageDataMapper createImageDataMapper,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
-      ILogger<AddImagesCommand> logger)
+      ILogger<CreateImageCommand> logger,
+      IResponseCreater responseCreator)
     {
       _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;
@@ -112,40 +108,41 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       _httpContextAccessor = httpContextAccessor;
       _rcCreateImage = rcCreateImage;
       _logger = logger;
+      _responseCreator = responseCreator;
     }
 
-    public async Task<OperationResultResponse<List<Guid>>> Execute(AddImagesRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateImageRequest request)
     {
-      OperationResultResponse<List<Guid>> response = new();
+      OperationResultResponse<Guid?> response = new();
 
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!_accessValidator.HasRights(senderId, Rights.AddEditRemoveUsers)
-        && senderId != GetUserIdFromEntity(request.EntityId, request.EntityType))
+      if (senderId != GetUserIdFromEntity(request.EntityId, request.EntityType)
+        && !await _accessValidator.HasRightsAsync(senderId, Rights.AddEditRemoveUsers))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("Not enough rights.");
-
-        return response;
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }
 
-      if (!_requestValidator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _requestValidator.ValidateAsync(request);
+      if (!validationResult.IsValid)
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.AddRange(errors);
-
-        return response;
+        return _responseCreator.CreateFailureResponse<Guid?>(
+          HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(validationFailure => validationFailure.ErrorMessage).ToList());
       }
 
-      response.Body = await AddImages(request.Images, response.Errors);
+      response.Body = await CreateImageAsync(request.Name, request.Content, request.Extension, response.Errors);
 
       if (response.Body != null)
       {
-        List<DbEntityImage> dbEntityImages = _dbEntityImageMapper.Map(response.Body, request.EntityId);
+        DbEntityImage dbEntityImage = _dbEntityImageMapper.Map(response.Body.Value, request.EntityId, request.IsCurrentAvatar);
 
-        _imageRepository.Create(dbEntityImages);
+        await _imageRepository.CreateAsync(dbEntityImage);
+
+        if (request.EntityType == EntityType.User && request.IsCurrentAvatar)
+        {
+          await _imageRepository.UpdateAvatarAsync(request.EntityId, dbEntityImage.ImageId);
+        }
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 

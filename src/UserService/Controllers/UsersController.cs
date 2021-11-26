@@ -18,36 +18,36 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class UsersController : ControllerBase
   {
     [HttpPost("create")]
-    public OperationResultResponse<Guid> Create(
+    public async Task<OperationResultResponse<Guid>> CreateAsync(
       [FromServices] ICreateUserCommand command,
       [FromBody] CreateUserRequest request)
     {
-      return command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpPatch("edit")]
-    public OperationResultResponse<bool> Edit(
+    public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditUserCommand command,
       [FromQuery] Guid userId,
       [FromBody] JsonPatchDocument<EditUserRequest> request)
     {
-      return command.Execute(userId, request);
+      return await command.ExecuteAsync(userId, request);
     }
 
     [HttpGet("get")]
-    public async Task<OperationResultResponse<UserResponse>> Get(
+    public async Task<OperationResultResponse<UserResponse>> GetAsync(
       [FromServices] IGetUserCommand command,
       [FromQuery] GetUserFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
 
     [HttpGet("find")]
-    public async Task<FindResultResponse<UserInfo>> Find(
+    public async Task<FindResultResponse<UserInfo>> FindAsync(
       [FromServices] IFindUserCommand command,
       [FromQuery] FindUsersFilter filter)
     {
-      return await command.Execute(filter);
+      return await command.ExecuteAsync(filter);
     }
   }
 }

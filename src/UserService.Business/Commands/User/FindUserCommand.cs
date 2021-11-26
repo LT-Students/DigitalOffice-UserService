@@ -1,19 +1,25 @@
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Models.Department;
+using LT.DigitalOffice.Models.Broker.Models.Office;
+using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
+using LT.DigitalOffice.Models.Broker.Requests.Office;
+using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Responses.Department;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
+using LT.DigitalOffice.Models.Broker.Responses.Office;
+using LT.DigitalOffice.Models.Broker.Responses.Position;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -24,8 +30,9 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -34,22 +41,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class FindUserCommand : IFindUserCommand
   {
     /// <inheritdoc/>
+    private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IUserInfoMapper _mapper;
     private readonly IImageInfoMapper _imageInfoMapper;
     private readonly IOfficeInfoMapper _officeInfoMapper;
     private readonly IRoleInfoMapper _roleInfoMapper;
     private readonly IDepartmentInfoMapper _departmentInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepository;
+    private readonly IImageRepository _imageRepository;
     private readonly ILogger<FindUserCommand> _logger;
-    private readonly IRequestClient<IGetDepartmentUsersRequest> _rcGetDepartmentUsers;
-    private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetCompanyEmployees;
+    private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
+    private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
+    private readonly IRequestClient<IGetOfficesRequest> _rcGetOffices;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConnectionMultiplexer _cache;
+    private readonly IRedisHelper _redisHelper;
 
-    private List<ImageData> GetImages(List<Guid> imageIds, List<string> errors)
+    #region private methods
+
+    private async Task<List<ImageData>> GetImagesAsync(List<Guid> imageIds, List<string> errors)
     {
       if (imageIds == null || !imageIds.Any())
       {
@@ -61,18 +73,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-            IGetImagesRequest.CreateObj(imageIds, ImageSource.User)).Result.Message;
+        Response<IOperationResult<IGetImagesResponse>> response =
+          await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+            IGetImagesRequest.CreateObj(imageIds, ImageSource.User));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return response.Body.ImagesData;
+          return response.Message.Body.ImagesData;
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
         _logger.LogWarning(warningMessage,
-            string.Join(", ", imageIds),
-            string.Join("\n", response.Errors));
+          string.Join(", ", imageIds),
+          string.Join("\n", response.Message.Errors));
       }
       catch (Exception exc)
       {
@@ -84,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private List<RoleData> GetRoles(List<Guid> userIds, List<string> errors)
+    private async Task<List<RoleData>> GetRolesAsync(List<Guid> userIds, string locale, List<string> errors)
     {
       if (userIds == null || !userIds.Any())
       {
@@ -96,18 +109,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       try
       {
-        var response = _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(userIds)).Result.Message;
+        Response<IOperationResult<IGetUserRolesResponse>> response =
+          await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
+            IGetUserRolesRequest.CreateObj(userIds, locale));
 
-        if (response.IsSuccess)
+        if (response.Message.IsSuccess)
         {
-          return response.Body.Roles;
+          return response.Message.Body.Roles;
         }
 
         const string warningMessage = logMessage + "Reason: {Errors}";
         _logger.LogWarning(warningMessage,
-            string.Join(", ", userIds),
-            string.Join("\n", response.Errors));
+          string.Join(", ", userIds),
+          string.Join("\n", response.Message.Errors));
       }
       catch (Exception exc)
       {
@@ -119,163 +133,54 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private IGetDepartmentUsersResponse GetUserIdsByDepartment(Guid departmentId, int skipCount, int takeCount, List<string> errors)
-    {
-      try
-      {
-        var request = IGetDepartmentUsersRequest.CreateObj(departmentId, skipCount, takeCount);
-        var response = _rcGetDepartmentUsers.GetResponse<IOperationResult<IGetDepartmentUsersResponse>>(request, timeout: RequestTimeout.Default).Result;
-
-        if (response.Message.IsSuccess)
-        {
-          return response.Message.Body;
-        }
-        else
-        {
-          _logger.LogWarning(
-            "Errors while getting department users with department id {DepartmentId}. Reason: {Errors}",
-            departmentId,
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Can not get department users with department id {DepartmentId}", departmentId);
-      }
-
-      errors.Add($"Can not get department users with department id {departmentId}. Please try again later.");
-      return null;
-    }
-
-    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployess(
+    private async Task<List<OfficeData>> GetOfficesAsync(
       List<Guid> usersIds,
-      bool includeDepartments,
-      bool includePositions,
-      bool includeOffices,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
-      {
-        return default;
-      }
-
-      (List<DepartmentData>  departments, List<PositionData> positions, List<OfficeData> offices) =
-        await GetCompanyEmployessFromCache(usersIds, includeDepartments, includePositions, includeOffices);
-
-      IGetCompanyEmployeesResponse brokerResponse = await GetCompanyEmployessThroughBroker(
-        usersIds,
-        includeDepartments && departments == null,
-        includePositions && positions == null,
-        includeOffices && offices == null,
-        errors);
-
-      return (departments ?? brokerResponse?.Departments,
-        positions ?? brokerResponse?.Positions,
-        offices ?? brokerResponse?.Offices);
-    }
-
-    private async Task<(List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices)> GetCompanyEmployessFromCache(
-      List<Guid> usersIds,
-      bool includeDepartments,
-      bool includePositions,
-      bool includeOffices)
-    {
-      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
-      {
-        return default;
-      }
-
-      List<DepartmentData> departments = null;
-      List<PositionData> positions = null;
-      List<OfficeData> offices = null;
-
-      Task<RedisValue> departmentsFromCacheTask = null;
-      Task<RedisValue> positionsFromCacheTask = null;
-      Task<RedisValue> officesFromCacheTask = null;
-
-      string key = usersIds.GetRedisCacheHashCode();
-
-      if (includeDepartments)
-      {
-        departmentsFromCacheTask = _cache.GetDatabase(Cache.Departments).StringGetAsync(key);
-      }
-
-      if (includePositions)
-      {
-        positionsFromCacheTask = _cache.GetDatabase(Cache.Positions).StringGetAsync(key);
-      }
-
-      if (includeOffices)
-      {
-        officesFromCacheTask = _cache.GetDatabase(Cache.Offices).StringGetAsync(key);
-      }
-
-      if (departmentsFromCacheTask != null)
-      {
-        RedisValue departmentsFromCache = await departmentsFromCacheTask;
-        if (departmentsFromCache.HasValue)
-        {
-          departments = JsonConvert.DeserializeObject<List<DepartmentData>>(departmentsFromCache);
-        }
-      }
-
-      if (positionsFromCacheTask != null)
-      {
-        RedisValue positionsFromCache = await positionsFromCacheTask;
-        if (positionsFromCache.HasValue)
-        {
-          positions = JsonConvert.DeserializeObject<List<PositionData>>(positionsFromCache);
-        }
-      }
-
-      if (officesFromCacheTask != null)
-      {
-        RedisValue officesFromCache = await officesFromCacheTask;
-        if (officesFromCache.HasValue)
-        {
-          offices = JsonConvert.DeserializeObject<List<OfficeData>>(officesFromCache);
-        }
-      }
-
-      _logger.LogInformation("CompanyEmployees were taken from the cache. Employees ids: {usersIds}", string.Join(", ", usersIds));
-
-      return (departments, positions, offices);
-    }
-
-    private async Task<IGetCompanyEmployeesResponse> GetCompanyEmployessThroughBroker(
-      List<Guid> usersIds,
-      bool includeDepartments,
-      bool includePositions,
-      bool includeOffices,
-      List<string> errors)
-    {
-      if (usersIds == null || !usersIds.Any() || (!includeDepartments && !includePositions && !includeOffices))
+      if (usersIds == null || !usersIds.Any())
       {
         return null;
       }
 
-      const string errorMessage = "Can not get company employees info. Please try again later.";
+      List<OfficeData> offices = await _redisHelper.GetAsync<List<OfficeData>>(Cache.Offices, usersIds.GetRedisCacheHashCode());
+
+      if (offices != null)
+      {
+        _logger.LogInformation("Offices for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+        return offices;
+      }
+
+      return await GetOfficesThroughBrokerAsync(usersIds, errors);
+    }
+
+    private async Task<List<OfficeData>> GetOfficesThroughBrokerAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      const string errorMessage = "Can not get offices info. Please try again later.";
 
       try
       {
-        Response<IOperationResult<IGetCompanyEmployeesResponse>> response = await _rcGetCompanyEmployees
-          .GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
-            IGetCompanyEmployeesRequest.CreateObj(
-            usersIds,
-            includeDepartments,
-            includePositions,
-            includeOffices));
+        Response<IOperationResult<IGetOfficesResponse>> response = await _rcGetOffices
+          .GetResponse<IOperationResult<IGetOfficesResponse>>(
+            IGetOfficesRequest.CreateObj(usersIds));
 
         if (response.Message.IsSuccess)
         {
-          _logger.LogInformation("CompanyEmployees were taken from the service. Employees ids: {usersIds}", string.Join(", ", usersIds));
+          _logger.LogInformation("Offices were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
 
-          return response.Message.Body;
+          return response.Message.Body.Offices;
         }
         else
         {
-          _logger.LogWarning("Errors while getting company employees info. Reason: {Errors}",
-              string.Join('\n', response.Message.Errors));
+          _logger.LogWarning("Errors while getting offices info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
         }
       }
       catch (Exception exc)
@@ -288,8 +193,132 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
+    private async Task<List<PositionData>> GetPositionsAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      List<PositionData> positions = await _redisHelper.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheHashCode());
+
+      if (positions != null)
+      {
+        _logger.LogInformation("Positions for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+        return positions;
+      }
+
+      return await GetPositionsThroughBrokerAsync(usersIds, errors);
+    }
+
+    private async Task<List<PositionData>> GetPositionsThroughBrokerAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      const string errorMessage = "Can not get positions info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetPositionsResponse>> response = await _rcGetPositions
+          .GetResponse<IOperationResult<IGetPositionsResponse>>(
+            IGetPositionsRequest.CreateObj(usersIds));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Positions were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+          return response.Message.Body.Positions;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting positions info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
+
+    private async Task<List<DepartmentData>> GetDepartmentsAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      List<DepartmentData> departments = await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
+
+      if (departments != null)
+      {
+        _logger.LogInformation("Departments for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+        return departments;
+      }
+
+      return await GetDepartmensThroughBrokerAsync(usersIds, errors);
+    }
+
+    private async Task<List<DepartmentData>> GetDepartmensThroughBrokerAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      const string errorMessage = "Can not get departments info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetDepartmentsResponse>> response = await _rcGetDepartments
+          .GetResponse<IOperationResult<IGetDepartmentsResponse>>(
+            IGetDepartmentsRequest.CreateObj(usersIds: usersIds));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Departments were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+          return response.Message.Body.Departments;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting departments info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
+
+    #endregion
+
     public FindUserCommand(
-      IUserRepository repository,
+      IBaseFindFilterValidator baseFindValidator,
+      IUserRepository userRepository,
+      IImageRepository imageRepository,
       IUserInfoMapper mapper,
       IImageInfoMapper imageInfoMapper,
       IOfficeInfoMapper officeInfoMapper,
@@ -297,13 +326,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IDepartmentInfoMapper departmentInfoMapper,
       IPositionInfoMapper positionInfoMapper,
       ILogger<FindUserCommand> logger,
-      IRequestClient<IGetDepartmentUsersRequest> rcGetDepartmentUser,
-      IRequestClient<IGetCompanyEmployeesRequest> rcGetCompanyEmployees,
+      IRequestClient<IGetDepartmentsRequest> rcGetDepartments,
+      IRequestClient<IGetPositionsRequest> rcGetPositions,
+      IRequestClient<IGetOfficesRequest> rcGetOffices,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetImagesRequest> rcGetImages,
       IHttpContextAccessor httpContextAccessor,
-      IConnectionMultiplexer cache)
+      IRedisHelper redisHelper)
     {
+      _baseFindValidator = baseFindValidator;
       _logger = logger;
       _mapper = mapper;
       _imageInfoMapper = imageInfoMapper;
@@ -311,83 +342,93 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _roleInfoMapper = roleInfoMapper;
       _departmentInfoMapper = departmentInfoMapper;
       _positionInfoMapper = positionInfoMapper;
-      _repository = repository;
-      _rcGetDepartmentUsers = rcGetDepartmentUser;
-      _rcGetCompanyEmployees = rcGetCompanyEmployees;
+      _userRepository = userRepository;
+      _imageRepository = imageRepository;
+      _rcGetDepartments = rcGetDepartments;
+      _rcGetPositions = rcGetPositions;
+      _rcGetOffices = rcGetOffices;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetImages = rcGetImages;
       _httpContextAccessor = httpContextAccessor;
-      _cache = cache;
+      _redisHelper = redisHelper;
     }
 
     /// <inheritdoc/>
-    public async Task<FindResultResponse<UserInfo>> Execute(FindUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter)
     {
+      if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        return new()
+        {
+          Status = OperationResultStatusType.Failed,
+          Errors = errors
+        };
+      }
+
       List<DbUser> dbUsers = null;
+      List<DbEntityImage> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
       response.Body = new();
 
-      if (filter.DepartmentId.HasValue)
-      {
-        IGetDepartmentUsersResponse departmentUsers = GetUserIdsByDepartment(
-          filter.DepartmentId.Value,
-          filter.SkipCount,
-          filter.TakeCount,
-          response.Errors);
+      (List<DbUser> dbUsers, int totalCount) findUsersResponse =
+        await _userRepository.FindAsync(filter);
 
-        if (departmentUsers != null)
-        {
-          dbUsers = _repository.Get(departmentUsers.UserIds);
-
-          response.TotalCount = departmentUsers.TotalCount;
-        }
-        else
-        {
-          _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-          response.Status = OperationResultStatusType.Failed;
-          return response;
-        }
-      }
-      else
-      {
-        (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-          _repository.Find(filter);
-
-        dbUsers = findUsersResponse.dbUsers;
-        response.TotalCount = findUsersResponse.totalCount;
-      }
+      dbUsers = findUsersResponse.dbUsers;
+      response.TotalCount = findUsersResponse.totalCount;
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
-      (List<DepartmentData> departments, List<PositionData> positions, List<OfficeData> offices) companyEmployeesData =
-        await GetCompanyEmployess(
-          usersIds,
-          filter.IncludeDepartment,
-          filter.IncludePosition,
-          filter.IncludeOffice,
-          response.Errors);
+      if (filter.IncludeAvatar)
+      {
+        usersImages = await _imageRepository.GetAvatarsAsync(usersIds);
+      }
 
-      List<RoleData> roles = filter.IncludeRole ? GetRoles(usersIds, response.Errors) : null;
+      Task<List<OfficeData>> officesTask = filter.IncludeOffice
+        ? GetOfficesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<OfficeData>);
+      Task<List<PositionData>> positionsTask = filter.IncludePosition
+        ? GetPositionsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<PositionData>);
+      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
+        ? GetDepartmentsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<DepartmentData>);
+      Task<List<RoleData>> rolesTask = filter.IncludeRole
+        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
+        : Task.FromResult(null as List<RoleData>);
+      Task<List<ImageData>> imagesTask = filter.IncludeAvatar
+        ? GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors)
+        : Task.FromResult(null as List<ImageData>);
 
-      List<ImageData> images = filter.IncludeAvatar ? GetImages(dbUsers.Where(x =>
-        x.AvatarFileId.HasValue).Select(x => x.AvatarFileId.Value).ToList(), response.Errors) : null;
+      await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
+
+      List<OfficeData> offices = await officesTask;
+      List<PositionData> positions = await positionsTask;
+      List<DepartmentData> departments = await departmentsTask;
+      List<RoleData> roles = await rolesTask;
+      List<ImageData> images = await imagesTask;
+
+      List<PositionUserData> positionUserDatas = positions?.SelectMany(p => p.Users).ToList();
 
       response.Body
         .AddRange(dbUsers.Select(dbUser =>
           _mapper.Map(
             dbUser,
             filter.IncludeDepartment ? _departmentInfoMapper.Map(
-              companyEmployeesData.departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludePosition ? _positionInfoMapper.Map(
-              companyEmployeesData.positions?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              positions?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))) : null,
+            positionUserDatas?.FirstOrDefault(pud => pud.UserId == dbUser.Id),
             filter.IncludeOffice ? _officeInfoMapper.Map(
-              companyEmployeesData.offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+              offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(
-              roles?.FirstOrDefault(x => x.UserIds.Contains(dbUser.Id))) : null,
-            filter.IncludeAvatar ? _imageInfoMapper.Map(
-              images?.FirstOrDefault(x => x.ImageId == dbUser.AvatarFileId)) : null)));
+              roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+            filter.IncludeAvatar
+            ? _imageInfoMapper.Map(images?.FirstOrDefault(
+              x => x.ImageId == usersImages.Where(dbImage => (dbImage.EntityId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
+            : null)));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

@@ -14,29 +14,38 @@ namespace LT.DigitalOffice.UserService.Controllers
   [ApiController]
   public class ImageController : ControllerBase
   {
-    [HttpPost("add")]
-    public async Task<OperationResultResponse<List<Guid>>> Add(
-      [FromServices] IAddImagesCommand command,
-      [FromBody] AddImagesRequest request)
+    [HttpPost("create")]
+    public async Task<OperationResultResponse<Guid?>> CreateAsync(
+      [FromServices] ICreateImageCommand command,
+      [FromBody] CreateImageRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
     }
 
     [HttpGet("get")]
-    public async Task<OperationResultResponse<ImagesResponse>> Get(
+    public async Task<OperationResultResponse<ImagesResponse>> GetAsync(
       [FromServices] IGetImagesCommand command,
       [FromQuery] Guid entityId,
       [FromQuery] EntityType entityType)
     {
-      return await command.Execute(entityId, entityType);
+      return await command.ExecuteAsync(entityId, entityType);
     }
 
     [HttpPost("remove")]
-    public async Task<OperationResultResponse<bool>> Remove(
+    public async Task<OperationResultResponse<bool>> RemoveAsync(
       [FromServices] IRemoveImagesCommand command,
       [FromBody] RemoveImagesRequest request)
     {
-      return await command.Execute(request);
+      return await command.ExecuteAsync(request);
+    }
+
+    [HttpGet("editavatar")]
+    public async Task<OperationResultResponse<Guid?>> EditAvatarAsync(
+      [FromServices] IEditAvatarCommand command,
+      [FromQuery] Guid userId,
+      [FromQuery] Guid imageId)
+    {
+      return await command.ExecuteAsync(userId, imageId);
     }
   }
 }

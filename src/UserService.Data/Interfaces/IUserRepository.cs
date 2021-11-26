@@ -5,69 +5,45 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
-  /// <summary>
-  /// Represents interface of repository in repository pattern.
-  /// Provides methods for working with the database of UserService.
-  /// </summary>
   [AutoInject]
   public interface IUserRepository
   {
-    DbUser Get(GetUserFilter filter);
+    Task<DbUser> GetAsync(GetUserFilter filter);
 
-    DbUser Get(Guid id);
+    Task<DbUser> GetAsync(Guid id);
 
-    List<DbUser> Get(IEnumerable<Guid> userIds);
+    Task<List<DbUser>> GetAsync(List<Guid> usersIds);
 
-    List<Guid> AreExistingIds(List<Guid> userIds);
+    Task<List<(DbUser user, Guid? avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds);
 
-    (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter);
+    Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 
-    DbPendingUser GetPendingUser(Guid userId);
+    Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter);
 
-    void DeletePendingUser(Guid userId);
+    Task<DbPendingUser> GetPendingUserAsync(Guid userId);
 
-    /// <summary>
-    /// Adds new dbUser to the database. Returns whether it was successful to add.
-    /// </summary>
-    Guid Create(DbUser dbUser);
+    Task DeletePendingUserAsync(Guid userId);
 
-    void CreatePending(DbPendingUser dbPendingUser);
+    Task<Guid> CreateAsync(DbUser dbUser);
 
-    /// <summary>
-    /// Edit existing dbUser. Returns whether it was successful to edit.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="userPatch"></param>
-    /// <returns>Whether it was successful to edit.</returns>
-    bool EditUser(Guid id, JsonPatchDocument<DbUser> userPatch);
+    Task CreatePendingAsync(DbPendingUser dbPendingUser);
 
-    /// <summary>
-    /// Return DbSkill if it exist in database, else return null.
-    /// </summary>
-    /// <param name="name">Skill name.</param>
+    Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
+
     DbSkill FindSkillByName(string name);
 
-    /// <summary>
-    /// Adds new skill to Database. Returns Id of new DbSkill if it was successful to add.
-    /// </summary>
-    /// <param name="name">Skill name.</param>
-    /// <returns> Guid of created DbSkill.</returns>
-    Guid CreateSkill(string name);
+    Task<Guid> CreateSkillAsync(string name);
 
-    /// <summary>
-    /// Disable user.
-    /// </summary>
-    bool SwitchActiveStatus(Guid userId, bool status);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
 
-    bool IsUserExist(Guid userId);
+    Task<bool> IsUserExistAsync(Guid userId);
 
-    bool IsCommunicationValueExist(List<string> value);
+    Task<List<DbUser>> SearchAsync(string text);
 
-    List<DbUser> Search(string text);
-
-    bool RemoveAvatar(Guid userId);
+    Task<bool> PendingUserExistAsync(Guid userId);
   }
 }

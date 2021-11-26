@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
             //_repository = new CertificateRepository(_provider);
 
             _provider.UserCertificates.Add(_dbUserCertificate);
-            _provider.Save();
+            await _provider.SaveAsync()
         }
 
         [TearDown]

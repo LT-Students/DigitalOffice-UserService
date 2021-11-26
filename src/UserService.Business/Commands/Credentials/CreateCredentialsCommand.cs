@@ -1,7 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
@@ -9,15 +9,16 @@ using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
@@ -29,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
     private readonly ICreateCredentialsRequestValidator _validator;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreator;
 
     public CreateCredentialsCommand(
       IDbUserCredentialsMapper mapper,
@@ -38,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
       ICreateCredentialsRequestValidator validator,
-      IHttpContextAccessor httpContextAccessor)
+      IResponseCreater responseCreator)
     {
       _mapper = mapper;
       _userRepository = userRepository;
@@ -46,102 +47,71 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _rcToken = rcToken;
       _logger = logger;
       _validator = validator;
-      _httpContextAccessor = httpContextAccessor;
+      _responseCreator = responseCreator;
     }
 
-    public OperationResultResponse<CredentialsResponse> Execute(CreateCredentialsRequest request)
+    public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(CreateCredentialsRequest request)
     {
-      if (request == null)
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
-        throw new BadRequestException();
-      }
-
-      _validator.ValidateAndThrowCustom(request);
-
-      OperationResultResponse<CredentialsResponse> response = new();
-      DbPendingUser dbPendingUser = _userRepository.GetPendingUser(request.UserId);
-
-      if (dbPendingUser == null)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add($"Pending user with ID '{request.UserId}' was not found.");
-
-        return response;
-      }
-
-      if (_userCredentialsRepository.IsLoginExist(request.Login))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("The login already exist");
-
-        return response;
-      }
-
-      if (_userCredentialsRepository.IsCredentialsExist(request.UserId))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("The credentials already exist");
-
-        return response;
-      }
-
-      if (request.Password != dbPendingUser.Password)
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("Wrong password");
-
-        return response;
+        return _responseCreator.CreateFailureResponse<CredentialsResponse>(
+          HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
       try
       {
-        IOperationResult<IGetTokenResponse> tokenResponse = _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
-                        IGetTokenRequest.CreateObj(request.UserId)).Result.Message;
+        Response<IOperationResult<IGetTokenResponse>> tokenResponse =
+          await _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
+            IGetTokenRequest.CreateObj(request.UserId));
 
-        if (tokenResponse.IsSuccess &&
-          !string.IsNullOrEmpty(tokenResponse.Body.AccessToken) &&
-          !string.IsNullOrEmpty(tokenResponse.Body.RefreshToken))
+        if (tokenResponse.Message.IsSuccess &&
+          !string.IsNullOrEmpty(tokenResponse.Message.Body.AccessToken) &&
+          !string.IsNullOrEmpty(tokenResponse.Message.Body.RefreshToken))
         {
           string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
           string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
-          _userCredentialsRepository.Create(_mapper.Map(request, salt, passwordHash));
-          _userRepository.DeletePendingUser(request.UserId);
-          _userRepository.SwitchActiveStatus(request.UserId, true);
+          await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
+          await _userRepository.DeletePendingUserAsync(request.UserId);
+          await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
 
-          response.Body = new CredentialsResponse
+          return new()
           {
-            UserId = request.UserId,
-            AccessToken = tokenResponse.Body.AccessToken,
-            RefreshToken = tokenResponse.Body.RefreshToken,
-            AccessTokenExpiresIn = tokenResponse.Body.AccessTokenExpiresIn,
-            RefreshTokenExpiresIn = tokenResponse.Body.RefreshTokenExpiresIn
+            Body = new CredentialsResponse
+            {
+              UserId = request.UserId,
+              AccessToken = tokenResponse.Message.Body.AccessToken,
+              RefreshToken = tokenResponse.Message.Body.RefreshToken,
+              AccessTokenExpiresIn = tokenResponse.Message.Body.AccessTokenExpiresIn,
+              RefreshTokenExpiresIn = tokenResponse.Message.Body.RefreshTokenExpiresIn
+            },
+            Status = OperationResultStatusType.FullSuccess
           };
-
-          return response;
         }
         else
         {
           _logger.LogWarning(
-              "Can not get token for pending user '{UserId}' reason:\n{Errors}",
-              request.UserId,
-              string.Join('\n', response.Errors));
+            "Can not get token for pending user '{UserId}' reason:\n{Errors}",
+            request.UserId,
+            string.Join('\n', tokenResponse.Message.Errors));
         }
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, "Something went wrong while we were creating the user credentials");
+        _logger.LogError(
+          exc,
+          "Execpion while creating credentials for user id {UserId}",
+          request.UserId);
       }
 
-      throw new BadRequestException("Something is wrong, please try again later");
+      return new()
+      {
+        Status = OperationResultStatusType.Failed,
+        Errors = new List<string>() { "Something is wrong, please try again later." }
+      };
     }
   }
 }

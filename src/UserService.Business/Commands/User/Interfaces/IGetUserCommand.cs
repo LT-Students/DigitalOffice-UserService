@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
 {
+  /// <summary>
+  /// Represents interface for a command in command pattern.
+  /// Provides method for getting user information.
+  /// </summary>
+  [AutoInject]
+  public interface IGetUserCommand
+  {
     /// <summary>
-    /// Represents interface for a command in command pattern.
-    /// Provides method for getting user information.
+    /// Returns the user information.
     /// </summary>
-    [AutoInject]
-    public interface IGetUserCommand
-    {
-        /// <summary>
-        /// Returns the user information.
-        /// </summary>
-        Task<OperationResultResponse<UserResponse>> Execute(GetUserFilter filter);
-    }
+    Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter);
+  }
 }

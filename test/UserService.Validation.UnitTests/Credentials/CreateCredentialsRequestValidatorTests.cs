@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
         private CreateCredentialsRequestValidator _validator;
         private CreateCredentialsRequest _request;
 
-        [SetUp]
+        /*[SetUp]
         public void SetUp()
         {
             _validator = new CreateCredentialsRequestValidator();
@@ -75,6 +75,6 @@ namespace LT.DigitalOffice.UserService.Validation.UnitTests.Credentials
             _request.Login = new string("Logi:n");
 
             _validator.TestValidate(_request).ShouldHaveValidationErrorFor(x => x.Login);
-        }
+        }*/
     }
 }

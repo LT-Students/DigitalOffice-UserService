@@ -10,10 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  /// <inheritdoc />
   public class UserCredentialsRepository : IUserCredentialsRepository
   {
     private readonly HttpContext _httpContext;
@@ -32,29 +32,29 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public DbUserCredentials Get(GetCredentialsFilter filter)
+    public async Task<DbUserCredentials> GetAsync(GetCredentialsFilter filter)
     {
       DbUserCredentials dbUserCredentials = null;
       if (filter.UserId.HasValue)
       {
-        dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
+        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
           uc =>
             uc.UserId == filter.UserId.Value &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
-        dbUserCredentials = _provider.UserCredentials.FirstOrDefault(
+        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
           uc =>
             uc.Login == filter.Login &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Email) || !string.IsNullOrEmpty(filter.Phone))
       {
-        dbUserCredentials = _provider.UserCredentials
+        dbUserCredentials = await _provider.UserCredentials
           .Include(uc => uc.User)
           .ThenInclude(u => u.Communications)
-          .FirstOrDefault(
+          .FirstOrDefaultAsync(
             uc =>
               uc.IsActive &&
               uc.User.Communications.Any(
@@ -62,73 +62,48 @@ namespace LT.DigitalOffice.UserService.Data
                   (c.Type == (int)CommunicationType.Email && c.Value == filter.Email) ||
                   (c.Type == (int)CommunicationType.Phone && c.Value == filter.Phone)));
       }
-      else
-      {
-        throw new BadRequestException("You must specify 'userId' or 'login'.");
-      }
-
-      if (dbUserCredentials == null)
-      {
-        _logger.LogWarning($"Can not find user credentials filter '{filter}'.");
-
-        throw new NotFoundException($"User credentials was not found.");
-      }
 
       return dbUserCredentials;
     }
 
-    public bool Edit(DbUserCredentials userCredentials)
+    public async Task<bool> EditAsync(DbUserCredentials dbUserCredentials)
     {
-      if (userCredentials == null)
+      if (dbUserCredentials == null)
       {
-        throw new ArgumentNullException(nameof(userCredentials));
+        return false;
       }
 
       _logger.LogInformation(
-        $"Updating user credentials for user '{userCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
+        $"Updating user credentials for user '{dbUserCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
 
-      if (!_provider.UserCredentials.Any(uc => uc.UserId == userCredentials.UserId))
-      {
-        throw new NotFoundException("User credentials was not found.");
-      }
-
-      try
-      {
-        _provider.UserCredentials.Update(userCredentials);
-        userCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-        userCredentials.ModifiedAtUtc = DateTime.UtcNow;
-        _provider.Save();
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, $"Failed to update user credentials for user '{userCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
-
-        return false;
-      }
+      _provider.UserCredentials.Update(dbUserCredentials);
+      dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
+      await _provider.SaveAsync();
 
       return true;
     }
 
-    public Guid Create(DbUserCredentials dbUserCredentials)
+    public async Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials)
     {
       if (dbUserCredentials == null)
       {
-        throw new ArgumentNullException(nameof(dbUserCredentials));
+        return null;
       }
 
       _provider.UserCredentials.Add(dbUserCredentials);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbUserCredentials.Id;
     }
 
-    public void SwitchActiveStatus(Guid userId, bool isActiveStatus)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
     {
-      DbUserCredentials dbUserCredentials = _provider.UserCredentials.FirstOrDefault(c => c.UserId == userId);
+      DbUserCredentials dbUserCredentials = await _provider.UserCredentials
+        .FirstOrDefaultAsync(c => c.UserId == userId);
 
       if (dbUserCredentials == null)
       {
-        throw new NotFoundException($"User credentials with user ID '{userId}' was not found.");
+        return false;
       }
 
       dbUserCredentials.IsActive = isActiveStatus;
@@ -136,17 +111,19 @@ namespace LT.DigitalOffice.UserService.Data
       _provider.UserCredentials.Update(dbUserCredentials);
       dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
+
+      return true;
     }
 
-    public bool IsLoginExist(string login)
+    public async Task<bool> LoginExistAsync(string login)
     {
-      return _provider.UserCredentials.Any(uc => uc.Login == login);
+      return await _provider.UserCredentials.AnyAsync(uc => uc.Login == login);
     }
 
-    public bool IsCredentialsExist(Guid userId)
+    public async Task<bool> CredentialsExistAsync(Guid userId)
     {
-      return _provider.UserCredentials.Any(uc => uc.UserId == userId);
+      return await _provider.UserCredentials.AnyAsync(uc => uc.UserId == userId);
     }
   }
 }

@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public DbUser Map(CreateUserRequest request, Guid? avatarImageId)
+        public DbUser Map(CreateUserRequest request)
         {
             if (request == null)
             {
@@ -29,6 +29,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             }
 
             Guid userId = Guid.NewGuid();
+            Guid createdBy = _httpContextAccessor.HttpContext.GetUserId();
+            DateTime createdAtUtc = DateTime.UtcNow;
 
             DbUser dbUser = new()
             {
@@ -38,21 +40,21 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Gender = (int)request.Gender,
                 City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
-                AvatarFileId = avatarImageId,
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
                 IsActive = false,
-                Rate = request.Rate,
                 StartWorkingAt = request.StartWorkingAt,
                 DateOfBirth = request.DateOfBirth,
-                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-                CreatedAtUtc = DateTime.UtcNow,
+                CreatedBy = createdBy,
+                CreatedAtUtc = createdAtUtc,
                 Communications = request.Communications?.Select(x => new DbUserCommunication
                 {
                     Id = Guid.NewGuid(),
                     Type = (int)x.Type,
                     Value = x.Value,
-                    UserId = userId
+                    UserId = userId,
+                    CreatedBy = createdBy,
+                    CreatedAtUtc = createdAtUtc
                 }).ToList()
             };
 
@@ -67,6 +69,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             }
 
             Guid userId = Guid.NewGuid();
+            DateTime createdAtUtc = DateTime.UtcNow;
 
             return new DbUser
             {
@@ -75,19 +78,19 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 LastName = request.LastName,
                 MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
                 Status = (int)UserStatus.WorkFromOffice,
-                AvatarFileId = null,
                 IsActive = true,
                 IsAdmin = true,
-                Rate = 1,
                 CreatedBy = userId,
-                CreatedAtUtc = DateTime.UtcNow,
+                CreatedAtUtc = createdAtUtc,
                 Communications = new List<DbUserCommunication> {
                     new DbUserCommunication
                     {
                         Id = Guid.NewGuid(),
                         Type = (int)CommunicationType.Email,
                         Value = request.Email,
-                        UserId = userId
+                        UserId = userId,
+                        CreatedBy = userId,
+                        CreatedAtUtc = createdAtUtc
                     }
                 }
             };

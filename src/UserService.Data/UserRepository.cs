@@ -1,6 +1,5 @@
 using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -13,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
@@ -23,8 +23,8 @@ namespace LT.DigitalOffice.UserService.Data
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     private IQueryable<DbUser> CreateGetPredicates(
-        GetUserFilter filter,
-        IQueryable<DbUser> dbUsers)
+      GetUserFilter filter,
+      IQueryable<DbUser> dbUsers)
     {
       if (filter.UserId.HasValue)
       {
@@ -33,7 +33,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (!string.IsNullOrEmpty(filter.Name?.Trim()))
       {
-        dbUsers = dbUsers.Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
+        dbUsers = dbUsers
+          .Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
       }
 
       if (filter.IncludeCommunications)
@@ -42,9 +43,9 @@ namespace LT.DigitalOffice.UserService.Data
 
         if (!string.IsNullOrEmpty(filter.Email?.Trim()))
         {
-          dbUsers = dbUsers.Where(u => u.Communications
-              .Any(c => c.Type == (int)CommunicationType.Email &&
-                        c.Value == filter.Email));
+          dbUsers = dbUsers
+            .Where(u => u.Communications
+              .Any(c => c.Type == (int)CommunicationType.Email && c.Value == filter.Email));
         }
       }
 
@@ -72,107 +73,137 @@ namespace LT.DigitalOffice.UserService.Data
     }
 
     public UserRepository(
-        IDataProvider provider,
-        IHttpContextAccessor httpContextAccessor)
+      IDataProvider provider,
+      IHttpContextAccessor httpContextAccessor)
     {
       _provider = provider;
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid Create(DbUser dbUser)
+    public async Task<Guid> CreateAsync(DbUser dbUser)
     {
       if (dbUser == null)
       {
-        throw new ArgumentNullException(nameof(dbUser));
+        return default;
       }
 
       _provider.Users.Add(dbUser);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return dbUser.Id;
     }
 
-    public void CreatePending(DbPendingUser dbPendingUser)
+    public async Task CreatePendingAsync(DbPendingUser dbPendingUser)
     {
-      if (dbPendingUser == null)
-      {
-        throw new ArgumentNullException(nameof(dbPendingUser));
-      }
-
-      if (_provider.PendingUsers.FirstOrDefault(p => p.UserId == dbPendingUser.UserId) != null)
-      {
-        throw new BadRequestException($"Pending user with Id:{dbPendingUser.UserId} already exists");
-      }
-
       _provider.PendingUsers.Add(dbPendingUser);
-      _provider.Save();
+      await _provider.SaveAsync();
     }
 
-    public DbUser Get(Guid id)
+    public async Task<DbUser> GetAsync(Guid id)
     {
       GetUserFilter filter = new()
       {
         UserId = id
       };
 
-      return Get(filter);
+      return await GetAsync(filter);
     }
 
-    public DbUser Get(GetUserFilter filter)
+    public async Task<DbUser> GetAsync(GetUserFilter filter)
     {
       if (filter == null)
       {
-        throw new ArgumentNullException(nameof(filter));
+        return null;
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users
-          .AsSingleQuery()
-          .AsQueryable();
+      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
 
-      return CreateGetPredicates(filter, dbUsers).FirstOrDefault();
+      return await CreateGetPredicates(filter, dbUsers)
+        .FirstOrDefaultAsync();
     }
 
-    public List<DbUser> Get(IEnumerable<Guid> userIds)
+    public async Task<List<DbUser>> GetAsync(List<Guid> userIds)
     {
       if (userIds == null)
       {
         return null;
       }
 
-      return _provider.Users.Where(x => userIds.Contains(x.Id)).ToList();
+      return await _provider.Users
+        .Where(x => userIds.Contains(x.Id))
+        .ToListAsync();
     }
 
-    public List<Guid> AreExistingIds(List<Guid> userIds)
+    public async Task<List<(DbUser user, Guid? avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds)
     {
-      return _provider.Users
-          .Where(u => userIds.Contains(u.Id) && u.IsActive)
-          .Select(u => u.Id).ToList();
-    }
-
-    public bool EditUser(Guid userId, JsonPatchDocument<DbUser> userPatch)
-    {
-      if (userPatch == null)
+      if (usersIds == null)
       {
-        throw new ArgumentNullException(nameof(userPatch));
+        return null;
       }
 
-      DbUser dbUser = _provider.Users.FirstOrDefault(x => x.Id == userId) ??
-                      throw new NotFoundException($"User with ID '{userId}' was not found.");
+      return (await
+        (from user in _provider.Users
+         where usersIds.Contains(user.Id)
+         join images in _provider.EntitiesImages on user.Id equals images.EntityId into userImages
+         from userImage in userImages.DefaultIfEmpty()
+         select new
+         {
+           User = user,
+           EntityImage = userImage
+         }).ToListAsync()).AsEnumerable().GroupBy(r => r.User.Id)
+         .Select(x =>
+         {
+           DbUser user = x.Select(x => x.User).FirstOrDefault();
+           Guid? id = x.Select(x => x.EntityImage).FirstOrDefault(x => x != null && x.EntityId == user.Id && x.IsCurrentAvatar)?.ImageId;
 
-      userPatch.ApplyTo(dbUser);
+           return (user, id);
+         }).ToList();
+    }
+
+    public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
+    {
+      if (usersIds == null)
+      {
+        return null;
+      }
+
+      return await _provider.Users
+        .Where(u => usersIds.Contains(u.Id) && u.IsActive)
+        .Select(u => u.Id)
+        .ToListAsync();
+    }
+
+    public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)
+    {
+      if (patch == null)
+      {
+        return false;
+      }
+
+      DbUser dbUser = await _provider.Users
+        .FirstOrDefaultAsync(x => x.Id == userId);
+
+      if (dbUser == default)
+      {
+        return false;
+      }
+
+      patch.ApplyTo(dbUser);
       dbUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }
 
+    //remove to education service
     public DbSkill FindSkillByName(string name)
     {
       return _provider.Skills.FirstOrDefault(s => s.Name == name);
     }
 
-    public Guid CreateSkill(string name)
+    //remove to education service
+    public async Task<Guid> CreateSkillAsync(string name)
     {
       if (string.IsNullOrEmpty(name))
       {
@@ -193,18 +224,20 @@ namespace LT.DigitalOffice.UserService.Data
       };
 
       _provider.Skills.Add(skill);
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return skill.Id;
     }
 
     /// <inheritdoc />
-    public bool SwitchActiveStatus(Guid userId, bool status)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
     {
-      DbUser dbUser = _provider.Users.FirstOrDefault(u => u.Id == userId);
+      DbUser dbUser = await _provider.Users
+        .FirstOrDefaultAsync(u => u.Id == userId);
+
       if (dbUser == null)
       {
-        throw new NotFoundException($"User with ID '{userId}' was not found.");
+        return false;
       }
 
       dbUser.IsActive = status;
@@ -214,73 +247,65 @@ namespace LT.DigitalOffice.UserService.Data
           _httpContextAccessor.HttpContext.GetUserId() :
           null;
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
-      _provider.Save();
+      await _provider.SaveAsync();
 
       return true;
     }
 
-    public (List<DbUser> dbUsers, int totalCount) Find(FindUsersFilter filter)
+    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter)
     {
-      if (filter.SkipCount < 0)
+      if (filter == null)
       {
-        throw new BadRequestException("Skip count can't be less than 0.");
+        return (null, default);
       }
 
-      if (filter.TakeCount < 1)
+      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+
+      if (!filter.IncludeDeactivated)
       {
-        throw new BadRequestException("Take count can't be less than 1.");
+        dbUsers = dbUsers.Where(u => u.IsActive);
       }
 
       return (
-        filter.IncludeDeactivated ?
-          _provider.Users.Skip(filter.SkipCount).Take(filter.TakeCount).ToList() :
-          _provider.Users.Where(x => x.IsActive).Skip(filter.SkipCount).Take(filter.TakeCount).ToList(),
-
-        _provider.Users.Count());
+        await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+        await dbUsers.CountAsync());
     }
 
-    public DbPendingUser GetPendingUser(Guid userId)
+    public async Task<DbPendingUser> GetPendingUserAsync(Guid userId)
     {
-      return _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
+      return await _provider.PendingUsers
+        .FirstOrDefaultAsync(pu => pu.UserId == userId);
     }
 
-    public void DeletePendingUser(Guid userId)
+    public async Task DeletePendingUserAsync(Guid userId)
     {
-      DbPendingUser dbPendingUser = _provider.PendingUsers.FirstOrDefault(pu => pu.UserId == userId);
+      DbPendingUser dbPendingUser = await _provider.PendingUsers
+        .FirstOrDefaultAsync(pu => pu.UserId == userId);
 
-      _provider.PendingUsers.Remove(dbPendingUser);
-      _provider.Save();
-    }
-
-    public bool IsUserExist(Guid userId)
-    {
-      return _provider.Users.FirstOrDefault(u => u.Id == userId) != null;
-    }
-
-    public bool IsCommunicationValueExist(List<string> value)
-    {
-      return _provider.UserCommunications.Any(v => value.Contains(v.Value));
-    }
-
-    public List<DbUser> Search(string text)
-    {
-      return _provider.Users.Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName).Contains(text)).ToList();
-    }
-
-    public bool RemoveAvatar(Guid userId)
-    {
-      DbUser dbUser = Get(userId);
-
-      if (dbUser == null)
+      if (dbPendingUser != null)
       {
-        return false;
+        _provider.PendingUsers.Remove(dbPendingUser);
+        await _provider.SaveAsync();
       }
+    }
 
-      dbUser.AvatarFileId = null;
+    public async Task<bool> IsUserExistAsync(Guid userId)
+    {
+      return await _provider.Users
+        .FirstOrDefaultAsync(u => u.Id == userId) != null;
+    }
 
-      _provider.Save();
+    public async Task<List<DbUser>> SearchAsync(string text)
+    {
+      return await _provider.Users
+        .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName)
+        .Contains(text))
+        .ToListAsync();
+    }
 
-      return true;
+    public async Task<bool> PendingUserExistAsync(Guid userId)
+    {
+      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
     }
   }
 }

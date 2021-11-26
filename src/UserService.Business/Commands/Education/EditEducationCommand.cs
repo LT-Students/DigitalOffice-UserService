@@ -4,6 +4,7 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Education.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -14,58 +15,58 @@ using LT.DigitalOffice.UserService.Validation.Education.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Education
 {
-    public class EditEducationCommand : IEditEducationCommand
+  public class EditEducationCommand : IEditEducationCommand
+  {
+    private readonly IAccessValidator _accessValidator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IEducationRepository _educationRepository;
+    private readonly IPatchDbUserEducationMapper _mapper;
+    private readonly IEditEducationRequestValidator _validator;
+    private readonly IResponseCreater _responseCreater;
+
+    public EditEducationCommand(
+      IAccessValidator accessValidator,
+      IHttpContextAccessor httpContextAccessor,
+      IEducationRepository educationRepository,
+      IPatchDbUserEducationMapper mapper,
+      IEditEducationRequestValidator validator,
+      IResponseCreater responseCreater)
     {
-        private readonly IAccessValidator _accessValidator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _userRepository;
-        private readonly IEducationRepository _educationRepository;
-        private readonly IPatchDbUserEducationMapper _mapper;
-        private readonly IEditEducationRequestValidator _validator;
-
-        public EditEducationCommand(
-            IAccessValidator accessValidator,
-            IHttpContextAccessor httpContextAccessor,
-            IUserRepository userRepository,
-            IEducationRepository educationRepository,
-            IPatchDbUserEducationMapper mapper,
-            IEditEducationRequestValidator validator)
-        {
-            _accessValidator = accessValidator;
-            _httpContextAccessor = httpContextAccessor;
-            _userRepository = userRepository;
-            _educationRepository = educationRepository;
-            _mapper = mapper;
-            _validator = validator;
-        }
-
-        public OperationResultResponse<bool> Execute(Guid educationId, JsonPatchDocument<EditEducationRequest> request)
-        {
-            var senderId = _httpContextAccessor.HttpContext.GetUserId();
-            var dbUser = _userRepository.Get(senderId);
-            DbUserEducation userEducation = _educationRepository.Get(educationId);
-
-            if (!(dbUser.IsAdmin ||
-                  _accessValidator.HasRights(Rights.AddEditRemoveUsers))
-                  && senderId != userEducation.UserId)
-            {
-                throw new ForbiddenException("Not enough rights.");
-            }
-
-            _validator.ValidateAndThrowCustom(request);
-
-            JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
-
-            bool result = _educationRepository.Edit(userEducation, dbRequest);
-
-            return new OperationResultResponse<bool>
-            {
-                Status = OperationResultStatusType.FullSuccess,
-                Body = result
-            };
-        }
+      _accessValidator = accessValidator;
+      _httpContextAccessor = httpContextAccessor;
+      _educationRepository = educationRepository;
+      _mapper = mapper;
+      _validator = validator;
+      _responseCreater = responseCreater;
     }
+
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid educationId, JsonPatchDocument<EditEducationRequest> request)
+    {
+      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
+      DbUserEducation userEducation = _educationRepository.Get(educationId);
+
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
+        && senderId != userEducation.UserId)
+      {
+        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+      }
+
+      _validator.ValidateAndThrowCustom(request);
+
+      JsonPatchDocument<DbUserEducation> dbRequest = _mapper.Map(request);
+
+      bool result = await _educationRepository.EditAsync(userEducation, dbRequest);
+
+      return new OperationResultResponse<bool>
+      {
+        Status = OperationResultStatusType.FullSuccess,
+        Body = result
+      };
+    }
+  }
 }

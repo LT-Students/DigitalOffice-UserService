@@ -66,12 +66,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "replace",
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
-                    UserStatus.Vacation),
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.AvatarFileId)}",
-                    "",
-                    new AddImageRequest())
+                    UserStatus.Vacation)
 
             }, new CamelCasePropertyNamesContractResolver());
 
@@ -111,12 +106,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "replace",
                     $"/{nameof(DbUser.Status)}",
                     "",
-                    (int)UserStatus.Vacation),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.AvatarFileId)}",
-                    "",
-                    _imageId)
+                    (int)UserStatus.Vacation)
             }, new CamelCasePropertyNamesContractResolver());
         }
 
@@ -131,8 +121,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         [Test]
         public void ShouldThrowExceptionWhenRequestNull()
         {
-            _request = null;
-            Assert.Throws<ArgumentNullException>(() => _mapper.Map(_request));
+            Assert.Null(_mapper.Map(null));
         }
     }
 }

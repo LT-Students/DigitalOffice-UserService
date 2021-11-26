@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using System;
@@ -8,18 +9,15 @@ namespace LT.DigitalOffice.UserService.Validation.Image
 {
   public class AddImageRequestValidator : AbstractValidator<AddImageRequest>, IAddImageRequestValidator
   {
-    private readonly List<string> imageFormats = new()
-    {
-      ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tga"
-    };
-
-    public AddImageRequestValidator()
+    public AddImageRequestValidator(
+      IImageContentValidator imageContentValidator,
+      IImageExtensionValidator imageExtensionValidator)
     {
       RuleFor(x => x.Content)
-        .NotEmpty().WithMessage("Content can't be empty.");
+        .SetValidator(imageContentValidator);
 
       RuleFor(x => x.Extension)
-        .Must(x => imageFormats.Contains(x)).WithMessage("Wrong extension.");
+        .SetValidator(imageExtensionValidator);
     }
   }
 }

@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
@@ -10,8 +11,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,50 +23,57 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
-    private readonly IUserRepository _repository;
-    private readonly IConnectionMultiplexer _cache;
+    private readonly IUserRepository _userRepository;
     private readonly IOptions<RedisConfig> _redisConfig;
+    private readonly IRedisHelper _redisHelper;
+    private readonly ICacheNotebook _cacheNotebook;
 
-    private List<UserData> GetUserInfo(IGetUsersDataRequest request)
+    private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = _repository.Get(request.UserIds);
+      List<(DbUser user, Guid? avatarId)> usersData = await _userRepository.GetWithAvatarsAsync(request.UserIds);
 
-      return dbUsers
-        .Select(dbUser => new UserData(
-          dbUser.Id,
-          dbUser.AvatarFileId,
-          dbUser.FirstName,
-          dbUser.MiddleName,
-          dbUser.LastName,
-          ((UserStatus)dbUser.Status).ToString(),
-          (float)dbUser.Rate,
-          dbUser.IsActive))
+      return usersData
+        .Select(userData => new UserData(
+          userData.user.Id,
+          userData.avatarId,
+          userData.user.FirstName,
+          userData.user.MiddleName,
+          userData.user.LastName,
+          ((UserStatus)userData.user.Status).ToString(),
+          userData.user.IsActive))
         .ToList();
     }
 
     public GetUsersDataConsumer(
-      IUserRepository repository,
-      IConnectionMultiplexer cache,
-      IOptions<RedisConfig> redisConfig)
+      IUserRepository userRepository,
+      IOptions<RedisConfig> redisConfig,
+      IRedisHelper redisHelper,
+      ICacheNotebook cacheNotebook)
     {
-      _repository = repository;
-      _cache = cache;
+      _userRepository = userRepository;
       _redisConfig = redisConfig;
+      _redisHelper = redisHelper;
+      _cacheNotebook = cacheNotebook;
     }
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
     {
-      List<UserData> users = GetUserInfo(context.Message);
+      List<UserData> users = await GetUserInfoAsync(context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
 
       if (users != null)
       {
-        await _cache.GetDatabase(Cache.Users).StringSetAsync(
-          context.Message.UserIds.GetRedisCacheHashCode(),
-          JsonConvert.SerializeObject(users),
+        string key = context.Message.UserIds.GetRedisCacheHashCode();
+
+        await _redisHelper.CreateAsync(
+          Cache.Users,
+          key,
+          users,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+
+        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
       }
     }
   }

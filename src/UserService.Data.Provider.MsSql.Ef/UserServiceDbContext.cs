@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Database;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
 {
@@ -23,6 +24,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUserEducation> UserEducations { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbEntityImage> EntitiesImages { get; set; }
+    public DbSet<DbUserLocation> UsersLocations { get; set; }
+    public DbSet<DbUserGender> UsersGenders { get; set; }
+    public DbSet<DbGender> Genders { get; set; }
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
       : base(options)
@@ -39,6 +43,11 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     {
       Entry(obj).State = EntityState.Detached;
       return Entry(obj).State;
+    }
+
+    async Task IBaseDataProvider.SaveAsync()
+    {
+      await SaveChangesAsync();
     }
 
     void IBaseDataProvider.Save()
