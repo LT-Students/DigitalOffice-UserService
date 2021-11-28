@@ -31,18 +31,18 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public void Configure(EntityTypeBuilder<DbSkill> builder)
     {
       builder
-          .ToTable(DbSkill.TableName);
+        .ToTable(DbSkill.TableName);
 
       builder
-          .HasKey(s => s.Id);
+        .HasKey(s => s.Id);
 
       builder
-          .Property(s => s.Name)
-          .IsRequired();
+        .Property(s => s.Name)
+        .IsRequired();
 
       builder
-          .HasMany(s => s.UserSkills)
-          .WithOne(us => us.Skill);
+        .HasMany(s => s.UserSkills)
+        .WithOne(us => us.Skill);
     }
   }
 }
