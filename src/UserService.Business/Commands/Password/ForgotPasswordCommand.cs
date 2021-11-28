@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     private readonly IOptions<MemoryCacheConfig> _cacheOptions;
     private readonly IUserRepository _repository;
     private readonly IMemoryCache _cache;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     private string SetGuidInCache(Guid userId)
     {
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       IOptions<MemoryCacheConfig> cacheOptions,
       IUserRepository repository,
       IMemoryCache cache,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _generatePassword = generatePassword;
       _logger = logger;
