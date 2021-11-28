@@ -32,7 +32,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.City),
           nameof(EditUserRequest.Gender),
           nameof(EditUserRequest.DateOfBirth),
-          nameof(EditUserRequest.StartWorkingAt),
           nameof(EditUserRequest.About),
           nameof(EditUserRequest.IsActive),
         });
@@ -44,7 +43,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.Gender), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.City), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.StartWorkingAt), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
 
@@ -144,22 +142,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
             x => string.IsNullOrEmpty(x.value?.ToString())? true :
               DateTime.TryParse(x.value.ToString(), out DateTime result),
             "Date of birth has incorrect format."
-          },
-        });
-
-      #endregion
-
-      #region StartWorkingAt
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.StartWorkingAt),
-        x => x == OperationType.Replace,
-        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-        {
-          {
-            x => string.IsNullOrEmpty(x.value?.ToString())? true :
-              DateTime.TryParse(x.value.ToString(), out DateTime result),
-            "Start working at has incorrect format."
           },
         });
 

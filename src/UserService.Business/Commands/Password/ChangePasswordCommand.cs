@@ -20,12 +20,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
   {
     private readonly IChangePassordRequestValidator _validator;
     private readonly IUserCredentialsRepository _repository;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public ChangePasswordCommand(
       IChangePassordRequestValidator validator,
       IUserCredentialsRepository repository,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _validator = validator;
       _repository = repository;

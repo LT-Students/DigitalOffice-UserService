@@ -1,5 +1,4 @@
-using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Kernel.Attributes.ParseEntity;
+using LT.DigitalOffice.Kernel.BrokerSupport.Attributes.ParseEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -21,7 +20,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string City { get; set; }
     public int Status { get; set; }
     public bool IsAdmin { get; set; }
-    public DateTime? StartWorkingAt { get; set; }
     public string About { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }

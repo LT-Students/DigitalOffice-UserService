@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -58,8 +58,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
     public UserResponse Map(
         DbUser dbUser,
         DepartmentInfo department,
+        CompanyInfo company,
+        CompanyUserData companyUserData,
         PositionInfo position,
-        PositionUserData positionUserData,
         OfficeInfo office,
         RoleInfo role,
         List<ProjectInfo> projects,
@@ -76,30 +77,45 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       return new UserResponse
       {
         User = filter.IncludeUserImages
-          ? _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar, GetImages(images, userImagesIds))
-          : _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar),
+          ? _userInfoMapper.Map(dbUser,
+            department,
+            company,
+            companyUserData,
+            position,
+            office,
+            role,
+            avatar,
+            GetImages(images, userImagesIds))
+          : _userInfoMapper.Map(dbUser,
+            department,
+            company,
+            companyUserData,
+            position,
+            office,
+            role,
+            avatar),
         Projects = projects,
-          Skills = filter.IncludeSkills
+        Skills = filter.IncludeSkills
             ? dbUser.Skills.Select(s => s.Skill.Name)
             : null,
-          Achievements = filter.IncludeAchievements
+        Achievements = filter.IncludeAchievements
               ? dbUser.Achievements.Select(ua => _userAchievementInfoMapper.Map(ua))
               : null,
-          Certificates = filter.IncludeCertificates
+        Certificates = filter.IncludeCertificates
               ? dbUser.Certificates.Select(
                   c =>
                       _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
               : null,
-          Communications = filter.IncludeCommunications
+        Communications = filter.IncludeCommunications
               ? dbUser.Communications.Select(
                   c => new CommunicationInfo
                   {
-                      Id = c.Id,
-                      Type = (CommunicationType)c.Type,
-                      Value = c.Value
+                    Id = c.Id,
+                    Type = (CommunicationType)c.Type,
+                    Value = c.Value
                   })
               : null,
-          Educations = filter.IncludeEducations
+        Educations = filter.IncludeEducations
               ? dbUser.Educations.Select(
                   e => _educationInfoMapper.Map(e))
               : null

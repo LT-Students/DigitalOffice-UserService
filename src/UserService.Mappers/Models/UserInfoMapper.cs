@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -12,8 +12,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
     public UserInfo Map(
       DbUser dbUser,
       DepartmentInfo department,
+      CompanyInfo company,
+      CompanyUserData companyUserData,
       PositionInfo position,
-      PositionUserData positionUserData,
       OfficeInfo office,
       RoleInfo role,
       ImageInfo avatarImage,
@@ -33,12 +34,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Gender = (UserGender)dbUser.Gender,
         DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
         City = dbUser.City,
-        StartWorkingAt = dbUser.StartWorkingAt?.ToShortDateString(),
+        StartWorkingAt = companyUserData.StartWorkingAt?.ToShortDateString(),
         IsAdmin = dbUser.IsAdmin,
         About = dbUser.About,
         IsActive = dbUser.IsActive,
         Status = (UserStatus)dbUser.Status,
-        Rate = positionUserData?.Rate,
+        Rate = companyUserData?.Rate,
+        Company = company,
         Department = department,
         Position = position,
         Office = office,

@@ -1,4 +1,4 @@
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -19,13 +19,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IEducationRepository _educationRepository;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
 
     public RemoveEducationCommand(
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IEducationRepository educationRepository,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreater)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
