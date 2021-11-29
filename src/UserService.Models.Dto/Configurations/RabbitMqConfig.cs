@@ -70,9 +70,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
     // company
 
-    [AutoInjectRequest(typeof(ICreateUserOfficeRequest))]
-    public string CreateUserOfficeEndpoint { get; set; }
-
     [AutoInjectRequest(typeof(IGetCompaniesRequest))]
     public string GetCompaniesEndpoint { get; set; }
 
@@ -80,6 +77,9 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string CreateCompanyUserEndpoint { get; set; }
 
     // Office
+
+    [AutoInjectRequest(typeof(ICreateUserOfficeRequest))]
+    public string CreateUserOfficeEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetOfficesRequest))]
     public string GetOfficesEndpoint { get; set; }
