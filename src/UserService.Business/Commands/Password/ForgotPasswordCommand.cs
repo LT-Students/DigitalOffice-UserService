@@ -117,7 +117,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       if (dbUser is null)
       {
-        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
       string secret = SetGuidInCache(dbUser.Id);
