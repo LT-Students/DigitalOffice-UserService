@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Models.Broker.Requests.User;
+﻿using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;

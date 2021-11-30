@@ -1,13 +1,16 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
-using LT.DigitalOffice.Kernel.Broker.Consumer;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
+using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
+using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
+using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.Helpers;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
-using LT.DigitalOffice.Kernel.Middlewares.Token;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto;
@@ -32,12 +35,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Serilog;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService
@@ -354,8 +357,8 @@ namespace LT.DigitalOffice.UserService
         {
           options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
         }) // TODO check enum serialization from request without .AddJsonOptions()
-            //this will be used when all validation takes place on the pipeline
-            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
+           //this will be used when all validation takes place on the pipeline
+           //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
         .AddFluentValidation()
         .AddJsonOptions(options =>
         {

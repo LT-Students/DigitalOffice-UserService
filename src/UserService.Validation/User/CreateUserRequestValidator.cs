@@ -42,6 +42,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
       RuleFor(user => user.PositionId)
         .NotEmpty();
 
+      RuleFor(user => user.CompanyId)
+        .NotEmpty();
+
       When(
         user => !string.IsNullOrEmpty(user.MiddleName),
         () =>

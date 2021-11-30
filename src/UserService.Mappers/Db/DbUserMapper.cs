@@ -43,7 +43,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
                 Status = (int)request.Status,
                 IsAdmin = request.IsAdmin ?? false,
                 IsActive = false,
-                StartWorkingAt = request.StartWorkingAt,
                 DateOfBirth = request.DateOfBirth,
                 CreatedBy = createdBy,
                 CreatedAtUtc = createdAtUtc,

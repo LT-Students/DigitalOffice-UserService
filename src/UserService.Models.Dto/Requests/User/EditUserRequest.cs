@@ -13,7 +13,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
     public DateTime? DateOfBirth { get; set; }
     public string City { get; set; }
     public UserStatus Status { get; set; }
-    public DateTime? StartWorkingAt { get; set; }
     public bool IsActive { get; set; }
   }
 }

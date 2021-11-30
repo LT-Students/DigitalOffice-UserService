@@ -1,4 +1,4 @@
-using LT.DigitalOffice.UnitTestKernel;
+/*using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
 
             #region achivment models
 
-/*            _imageAchievement = new ImageInfo
+*//*            _imageAchievement = new ImageInfo
             {
                 Id = Guid.NewGuid(),
                 Content = "Content",
@@ -111,7 +111,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 ReceivedAt = _dbUserAchievement.ReceivedAt,
                 Image = _imageAchievement,
                 Name = _dbUserAchievement.Achievement.Name
-            };*/
+            };*//*
 
             #endregion
 
@@ -175,7 +175,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 Status = 0,
                 IsActive = true,
                 IsAdmin = false,
-                StartWorkingAt = DateTime.UtcNow,
                 Skills = new List<DbUserSkill>
                 {
                     new DbUserSkill
@@ -212,7 +211,6 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 LastName = _dbUser.LastName,
                 Status = (UserStatus)_dbUser.Status,
                 IsAdmin = _dbUser.IsAdmin,
-                StartWorkingAt = _dbUser.StartWorkingAt.ToString()
             };
 
             _departmentInfo = new DepartmentInfo
@@ -301,10 +299,10 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 .Setup<IUserInfoMapper, UserInfo>(x => x.Map(_dbUser, _departmentInfo, _positionInfo, null, null, null, _avatarInfo, null))
                 .Returns(_userInfo);
 
-/*            _mocker
+*//*            _mocker
                 .Setup<IUserAchievementInfoMapper, UserAchievementInfo>(x =>
                     x.Map(_dbUserAchievement, It.IsAny<ImageConsist>()))
-                .Returns(_achievementInfo);*/
+                .Returns(_achievementInfo);*//*
 
             _mocker
                 .Setup<ICertificateInfoMapper, CertificateInfo>(x =>
@@ -317,7 +315,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                 .Returns(_educationInfo);
         }
 
-        /*[Test]
+        *//*[Test]
         public void ShouldReturnFullCorrectResponse()
         {
             SerializerAssert.AreEqual(
@@ -331,7 +329,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     _projects,
                     _images,
                     _filter));
-        }*/
+        }*//*
 
         //[Test]
         //public void ShouldReturnCorrectResponseWithoutOptionalFields()
@@ -366,7 +364,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
         //            _errors));
         //}
 
-        /*[Test]
+        *//*[Test]
         public void ShouldThrowArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => _mapper.Map(
@@ -378,6 +376,7 @@ namespace LT.DigitalOffice.UserService.Mappers.ResponsesMappers.UnitTests
                     _projects,
                     _images,
                     _filter));
-        }*/
+        }*//*
     }
 }
+*/

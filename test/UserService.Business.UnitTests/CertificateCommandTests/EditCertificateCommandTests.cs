@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿/*using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
@@ -46,7 +46,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         }
 
 
-        /*[SetUp]
+        *//*[SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
@@ -396,6 +396,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
                 Times.Once);
             _mocker.Verify<IUserRepository, DbUser>(x => x.Get(_dbUser.Id),
                 Times.Once);
-        }*/
+        }*//*
     }
 }
+*/

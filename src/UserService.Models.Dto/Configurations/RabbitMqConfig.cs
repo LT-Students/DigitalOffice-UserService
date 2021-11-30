@@ -1,6 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Kernel.Configurations;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
+using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Models.Broker.Common;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
@@ -68,6 +69,14 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string CreateDepartmentEntityEndpoint { get; set; }
 
     // company
+
+    [AutoInjectRequest(typeof(IGetCompaniesRequest))]
+    public string GetCompaniesEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(ICreateCompanyUserRequest))]
+    public string CreateCompanyUserEndpoint { get; set; }
+
+    // Office
 
     [AutoInjectRequest(typeof(ICreateUserOfficeRequest))]
     public string CreateUserOfficeEndpoint { get; set; }

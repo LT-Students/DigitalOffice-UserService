@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿/*using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.UserService.Business.Commands.Certificate.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             //    .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
         }
 
-        /*[SetUp]
+        *//*[SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
@@ -203,6 +203,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             _mocker.Verify<IRequestClient<IAddImageRequest>>(
                 x => x.GetResponse<IOperationResult<Guid>>(
                        It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        }*/
+        }*//*
     }
 }
+*/

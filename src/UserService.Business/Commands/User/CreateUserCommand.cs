@@ -1,5 +1,5 @@
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -55,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     #region private methods
 
@@ -91,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       errors.Add("Unable to enroll a user in the department. Please try again later.");
     }
 
-    private async Task CreateUserPositionAsync(Guid positionId, Guid userId, double rate, List<string> errors)
+    private async Task CreateUserPositionAsync(Guid positionId, Guid userId, List<string> errors)
     {
       string logMessage = "Cannot assing position '{positionId}' to user '{userId}'";
 
@@ -101,7 +101,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           ICreateUserPositionRequest.CreateObj(
             positionId: positionId,
             createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            rate: rate,
             userId: userId));
 
         if (response.Message.IsSuccess && response.Message.Body)
@@ -117,6 +116,35 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       errors.Add("Cannot assign position to user. Please try again later.");
+    }
+
+    private async Task CreateUserCompanyAsync(Guid companyId, Guid userId, double? rate, DateTime? startWorkingAt, List<string> errors)
+    {
+      string logMessage = "Cannot assing company '{companyId}' to user '{userId}'";
+
+      try
+      {
+        Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
+          ICreateCompanyUserRequest.CreateObj(
+            companyId: companyId,
+            userId: userId,
+            rate: rate,
+            startWorkingAt: startWorkingAt,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId()));
+
+        if (response.Message.IsSuccess && response.Message.Body)
+        {
+          return;
+        }
+
+        _logger.LogWarning(logMessage, companyId, userId);
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, logMessage, companyId, userId);
+      }
+
+      errors.Add("Cannot assign company to user. Please try again later.");
     }
 
     private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
@@ -296,7 +324,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
       IImageRepository imageRepository,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _logger = logger;
       _rcRole = rcRole;
@@ -352,7 +380,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         EditUserOfficeAsync(request.OfficeId, userId, response.Errors),
         ChangeUserRoleAsync(request.RoleId, userId, response.Errors),
         CreateDepartmentEntityAsync(request.DepartmentId, userId, response.Errors),
-        CreateUserPositionAsync(request.PositionId, userId, request.Rate, response.Errors));
+        CreateUserPositionAsync(request.PositionId, userId, response.Errors),
+        CreateUserCompanyAsync(request.CompanyId, userId, request.Rate, request.StartWorkingAt, response.Errors));
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;
