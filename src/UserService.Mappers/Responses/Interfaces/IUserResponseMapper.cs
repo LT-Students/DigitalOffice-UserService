@@ -1,5 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
@@ -19,8 +19,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
     UserResponse Map(
       DbUser dbUser,
       DepartmentInfo department,
+      CompanyInfo company,
+      CompanyUserData companyUserData,
       PositionInfo position,
-      PositionUserData positionUserData,
       OfficeInfo office,
       RoleInfo role,
       List<ProjectInfo> projects,

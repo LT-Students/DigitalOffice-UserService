@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿/*using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Exceptions.Models;
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         private DbUser _dbUser;
         private DbUserCertificate _dbUserCertificate;
 
-        /*[SetUp]
+        *//*[SetUp]
         public void SetUp()
         {
             _mocker = new AutoMocker();
@@ -68,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             _mocker
                 .Setup<ICertificateRepository, DbUserCertificate>(x => x.Get(_certificateId))
                 .Returns(_dbUserCertificate);
-        }*/
+        }*//*
 
         //[Test]
         //public void ShouldThrowForbiddenExceptionWhenUserHasNotRight()
@@ -109,7 +109,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
         //    _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Never);
         //}
 
-        /*[Test]
+        *//*[Test]
         public async Task ShouldRemoveCertificateSuccesfull()
         {
             var expectedResponse = new OperationResultResponse<bool>
@@ -121,6 +121,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.CertificateCommandTest
             SerializerAssert.AreEqual(expectedResponse, await _command.ExecuteAsync(_certificateId));
             _mocker.Verify<ICertificateRepository, Task<bool>>(x => x.RemoveAsync(_dbUserCertificate), Times.Once);
             _mocker.Verify<ICertificateRepository>(x => x.Get(_certificateId), Times.Once);
-        }*/
+        }*//*
     }
 }
+*/

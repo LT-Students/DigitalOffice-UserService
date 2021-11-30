@@ -18,7 +18,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto
         public UserStatus Status { get; set; }
         public bool? IsAdmin { get; set; }
         public DateTime? StartWorkingAt { get; set; }
-        public double Rate { get; set; }
+        public double? Rate { get; set; }
+        public Guid CompanyId { get; set; }
         public Guid PositionId { get; set; }
         public Guid OfficeId { get; set; }
         public Guid? RoleId { get; set; }

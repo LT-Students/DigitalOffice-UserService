@@ -21,6 +21,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
         public bool IsActive { get; set; }
 
         public DepartmentInfo Department { get; set; }
+        public CompanyInfo Company { get; set; }
         public PositionInfo Position { get; set; }
         public ImageInfo Avatar { get; set; }
         public RoleInfo Role { get; set; }

@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -21,13 +21,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ICommunicationRepository _repository;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public RemoveCommunicationCommand(
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       ICommunicationRepository communicationRepository,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;

@@ -1,7 +1,6 @@
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -27,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
     private readonly IEducationRepository _educationRepository;
     private readonly IPatchDbUserEducationMapper _mapper;
     private readonly IEditEducationRequestValidator _validator;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
 
     public EditEducationCommand(
       IAccessValidator accessValidator,
@@ -35,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Education
       IEducationRepository educationRepository,
       IPatchDbUserEducationMapper mapper,
       IEditEducationRequestValidator validator,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreater)
     {
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;

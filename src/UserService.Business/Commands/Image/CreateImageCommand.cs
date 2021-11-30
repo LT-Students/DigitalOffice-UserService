@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
     private readonly ILogger<CreateImageCommand> _logger;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     private async Task<Guid?> CreateImageAsync(string name, string content, string extension, List<string> errors)
     {
@@ -96,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
       ILogger<CreateImageCommand> logger,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _imageRepository = imageRepository;
       _certificateRepository = certificateRepository;

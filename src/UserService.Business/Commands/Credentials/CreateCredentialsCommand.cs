@@ -1,5 +1,5 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
     private readonly ICreateCredentialsRequestValidator _validator;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public CreateCredentialsCommand(
       IDbUserCredentialsMapper mapper,
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
       ICreateCredentialsRequestValidator validator,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _mapper = mapper;
       _userRepository = userRepository;

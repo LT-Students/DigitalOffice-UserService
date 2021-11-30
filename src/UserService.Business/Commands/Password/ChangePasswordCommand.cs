@@ -22,13 +22,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IPasswordValidator _validator;
     private readonly IUserCredentialsRepository _repository;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public ChangePasswordCommand(
       IHttpContextAccessor httpContextAccessor,
       IPasswordValidator validator,
       IUserCredentialsRepository repository,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
       _validator = validator;

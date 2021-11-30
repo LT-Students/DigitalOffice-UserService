@@ -1,21 +1,24 @@
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
+using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Department;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Office;
@@ -47,11 +50,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IOfficeInfoMapper _officeInfoMapper;
     private readonly IRoleInfoMapper _roleInfoMapper;
     private readonly IDepartmentInfoMapper _departmentInfoMapper;
+    private readonly ICompanyInfoMapper _companyInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
     private readonly IUserRepository _userRepository;
     private readonly IImageRepository _imageRepository;
     private readonly ILogger<FindUserCommand> _logger;
     private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
+    private readonly IRequestClient<IGetCompaniesRequest> _rcGetCompanies;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IRequestClient<IGetOfficesRequest> _rcGetOffices;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
@@ -60,6 +65,66 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRedisHelper _redisHelper;
 
     #region private methods
+
+    private async Task<List<CompanyData>> GetCompaniesAsync(
+     List<Guid> usersIds,
+     List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      List<CompanyData> companies = await _redisHelper.GetAsync<List<CompanyData>>(Cache.Companies, usersIds.GetRedisCacheHashCode());
+
+      if (companies != null)
+      {
+        _logger.LogInformation("Comapnies for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+        return companies;
+      }
+
+      return await GetCompaniesThroughBrokerAsync(usersIds, errors);
+    }
+
+    private async Task<List<CompanyData>> GetCompaniesThroughBrokerAsync(
+      List<Guid> usersIds,
+      List<string> errors)
+    {
+      if (usersIds == null || !usersIds.Any())
+      {
+        return null;
+      }
+
+      const string errorMessage = "Can not get companies info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetCompaniesResponse>> response = await _rcGetCompanies
+          .GetResponse<IOperationResult<IGetCompaniesResponse>>(
+            IGetCompaniesRequest.CreateObj(usersIds));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Companies were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
+
+          return response.Message.Body.Companies;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting companies info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
 
     private async Task<List<ImageData>> GetImagesAsync(List<Guid> imageIds, List<string> errors)
     {
@@ -324,6 +389,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IOfficeInfoMapper officeInfoMapper,
       IRoleInfoMapper roleInfoMapper,
       IDepartmentInfoMapper departmentInfoMapper,
+      ICompanyInfoMapper companyInfoMapper,
       IPositionInfoMapper positionInfoMapper,
       ILogger<FindUserCommand> logger,
       IRequestClient<IGetDepartmentsRequest> rcGetDepartments,
@@ -331,6 +397,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetOfficesRequest> rcGetOffices,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetImagesRequest> rcGetImages,
+      IRequestClient<IGetCompaniesRequest> rcGetCompanies,
       IHttpContextAccessor httpContextAccessor,
       IRedisHelper redisHelper)
     {
@@ -341,10 +408,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _officeInfoMapper = officeInfoMapper;
       _roleInfoMapper = roleInfoMapper;
       _departmentInfoMapper = departmentInfoMapper;
+      _companyInfoMapper = companyInfoMapper;
       _positionInfoMapper = positionInfoMapper;
       _userRepository = userRepository;
       _imageRepository = imageRepository;
       _rcGetDepartments = rcGetDepartments;
+      _rcGetCompanies = rcGetCompanies;
       _rcGetPositions = rcGetPositions;
       _rcGetOffices = rcGetOffices;
       _rcGetUserRoles = rcGetUserRoles;
@@ -401,16 +470,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Task<List<ImageData>> imagesTask = filter.IncludeAvatar
         ? GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors)
         : Task.FromResult(null as List<ImageData>);
+      Task<List<CompanyData>> companiesTask = GetCompaniesAsync(usersIds, response.Errors);
 
       await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
 
       List<OfficeData> offices = await officesTask;
       List<PositionData> positions = await positionsTask;
       List<DepartmentData> departments = await departmentsTask;
+      List<CompanyData> companies = await companiesTask;
       List<RoleData> roles = await rolesTask;
       List<ImageData> images = await imagesTask;
 
-      List<PositionUserData> positionUserDatas = positions?.SelectMany(p => p.Users).ToList();
+      List<CompanyUserData> companyUserDatas = companies?.SelectMany(p => p.Users).ToList();
 
       response.Body
         .AddRange(dbUsers.Select(dbUser =>
@@ -418,9 +489,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             dbUser,
             filter.IncludeDepartment ? _departmentInfoMapper.Map(
               departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
+            _companyInfoMapper.Map(companies?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))),
+            companyUserDatas?.FirstOrDefault(cud => cud.UserId == dbUser.Id),
             filter.IncludePosition ? _positionInfoMapper.Map(
               positions?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))) : null,
-            positionUserDatas?.FirstOrDefault(pud => pud.UserId == dbUser.Id),
             filter.IncludeOffice ? _officeInfoMapper.Map(
               offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
             filter.IncludeRole ? _roleInfoMapper.Map(

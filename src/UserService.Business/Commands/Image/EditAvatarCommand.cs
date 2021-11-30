@@ -1,5 +1,5 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -23,13 +23,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Image
     private readonly IAccessValidator _accessValidator;
     private readonly IEditAvatarRequestValidator _requestValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public EditAvatarCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
       IEditAvatarRequestValidator requestValidator,
-      IResponseCreater responseCreator,
+      IResponseCreator responseCreator,
       IImageRepository imageRepository)
     {
       _httpContextAccessor = httpContextAccessor;
