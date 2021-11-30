@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;

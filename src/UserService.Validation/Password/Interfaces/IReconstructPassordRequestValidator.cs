@@ -5,7 +5,7 @@ using LT.DigitalOffice.UserService.Models.Dto;
 namespace LT.DigitalOffice.UserService.Validation.Password.Interfaces
 {
   [AutoInject]
-  public interface IChangePassordRequestValidator : IValidator<ChangePasswordRequest>
+  public interface IReconstructPassordRequestValidator : IValidator<ReconstructPasswordRequest>
   {
   }
 }

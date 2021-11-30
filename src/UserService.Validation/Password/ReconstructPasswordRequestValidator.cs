@@ -6,10 +6,11 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Validation.Password
 {
-  public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>, IChangePassordRequestValidator
+  public class ReconstructPasswordRequestValidator : AbstractValidator<ReconstructPasswordRequest>, IReconstructPassordRequestValidator
   {
-    public ChangePasswordRequestValidator(
-      IMemoryCache cache)
+    public ReconstructPasswordRequestValidator(
+      IMemoryCache cache,
+      IPasswordValidator passwordValidator)
     {
       RuleFor(r => r.UserId)
         .NotEmpty().WithMessage("User id must not be empty.");
@@ -21,7 +22,9 @@ namespace LT.DigitalOffice.UserService.Validation.Password
         .NotEmpty().WithMessage("Login must not be empty.");
 
       RuleFor(r => r.NewPassword)
-        .NotEmpty().WithMessage("Pussword must not be empty.");
+        .Cascade(CascadeMode.Stop)
+        .NotEmpty().WithMessage("New password must not be empty.")
+        .SetValidator(passwordValidator);
 
       RuleFor(r => r)
         .Must(r => cache.TryGetValue(r.Secret, out Guid savedUserId) && savedUserId == r.UserId)
