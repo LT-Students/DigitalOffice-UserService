@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Gender = (UserGender)dbUser.Gender,
         DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
         City = dbUser.City,
-        StartWorkingAt = companyUserData.StartWorkingAt?.ToShortDateString(),
+        StartWorkingAt = companyUserData?.StartWorkingAt?.ToShortDateString(),
         IsAdmin = dbUser.IsAdmin,
         About = dbUser.About,
         IsActive = dbUser.IsActive,
