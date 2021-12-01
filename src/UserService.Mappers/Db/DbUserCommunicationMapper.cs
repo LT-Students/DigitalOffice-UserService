@@ -7,31 +7,31 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
-    public class DbUserCommunicationMapper : IDbUserCommunicationMapper
+  public class DbUserCommunicationMapper : IDbUserCommunicationMapper
+  {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public DbUserCommunicationMapper(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public DbUserCommunicationMapper(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-        public DbUserCommunication Map(CreateCommunicationRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            return new DbUserCommunication
-            {
-                Id = Guid.NewGuid(),
-                Type = (int)request.Type,
-                UserId = request.UserId.Value,
-                Value = request.Value,
-                CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-                CreatedAtUtc = DateTime.UtcNow,
-            };
-        }
+      _httpContextAccessor = httpContextAccessor;
     }
+
+    public DbUserCommunication Map(CreateCommunicationRequest request)
+    {
+      if (request == null)
+      {
+        return null;
+      }
+
+      return new DbUserCommunication
+      {
+        Id = Guid.NewGuid(),
+        Type = (int)request.Type,
+        UserId = request.UserId.Value,
+        Value = request.Value,
+        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+        CreatedAtUtc = DateTime.UtcNow,
+      };
+    }
+  }
 }

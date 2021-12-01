@@ -24,6 +24,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -40,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class CreateUserCommand : ICreateUserCommand
   {
     private readonly IUserRepository _userRepository;
-    private readonly IImageRepository _imageRepository;
+    private readonly IAvatarRepository _imageRepository;
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -51,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ICreateUserRequestValidator _validator;
     private readonly IDbUserMapper _mapperUser;
-    private readonly IDbEntityImageMapper _dbEntityImageMapper;
+    private readonly IDbUserAvatarMapper _dbEntityImageMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
@@ -262,7 +263,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
     }
 
-    private async Task<Guid?> GetAvatarImageIdAsync(AddImageRequest avatarRequest, List<string> errors)
+    private async Task<Guid?> GetAvatarImageIdAsync(CreateAvatarRequest avatarRequest, List<string> errors)
     {
       if (avatarRequest == null)
       {
@@ -279,7 +280,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         Response<IOperationResult<ICreateImagesResponse>> createResponse =
           await _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
             ICreateImagesRequest.CreateObj(
-              _createImageDataMapper.Map(new List<AddImageRequest>() { avatarRequest }),
+              _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
               ImageSource.User));
 
         if (createResponse.Message.IsSuccess
@@ -319,11 +320,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IUserRepository userRepository,
       ICreateUserRequestValidator validator,
       IDbUserMapper mapperUser,
-      IDbEntityImageMapper dbEntityImageMapper,
+      IDbUserAvatarMapper dbEntityImageMapper,
       ICreateImageDataMapper createImageDataMapper,
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
-      IImageRepository imageRepository,
+      IAvatarRepository imageRepository,
       IResponseCreator responseCreator)
     {
       _logger = logger;

@@ -13,6 +13,7 @@ using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
+using LT.DigitalOffice.Models.Broker.Requests.Education;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
@@ -20,6 +21,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Department;
+using LT.DigitalOffice.Models.Broker.Responses.Education;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Office;
 using LT.DigitalOffice.Models.Broker.Responses.Position;
@@ -30,7 +32,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using MassTransit;
@@ -47,8 +48,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   {
     private readonly ILogger<GetUserCommand> _logger;
     private readonly IUserRepository _repository;
-    private readonly IImageRepository _imageRepository;
     private readonly IUserResponseMapper _mapper;
+    private readonly IEducationInfoMapper _educationMapper;
+    private readonly ICertificateInfoMapper _certificateMapper;
     private readonly IOfficeInfoMapper _officeMapper;
     private readonly IDepartmentInfoMapper _departmentMapper;
     private readonly ICompanyInfoMapper _companyMapper;
@@ -56,6 +58,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRoleInfoMapper _roleMapper;
     private readonly IImageInfoMapper _imageMapper;
     private readonly IProjectInfoMapper _projectMapper;
+    private readonly IRequestClient<IGetUserEducationsRequest> _rcGetEducations;
     private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IRequestClient<IGetOfficesRequest> _rcGetOffices;
@@ -67,6 +70,40 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IResponseCreator _responseCreator;
 
     #region private methods
+
+    private async Task<IGetUserEducationsResponse> GetEducationsAsync(
+      Guid userId,
+      List<string> errors)
+    {
+      const string errorMessage = "Can not get educations info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetUserEducationsResponse>> response = await _rcGetEducations
+          .GetResponse<IOperationResult<IGetUserEducationsResponse>>(
+            IGetUserEducationsRequest.CreateObj(userId: userId));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Educations were taken from the service. User id: {UserId}", string.Join(", ", userId));
+
+          return response.Message.Body;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting companies info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
 
     private async Task<List<CompanyData>> GetCompaniesAsync(
       List<Guid> usersIds,
@@ -308,10 +345,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
-    private async Task<RoleInfo> GetRolesAsync(List<Guid> usersIds, string locale, List<string> errors)
+    private async Task<List<RoleData>> GetRolesAsync(List<Guid> usersIds, string locale, List<string> errors)
     {
-      string errorMessage = "Can not get role. Please try again later.";
-      const string logMessage = "Can not get role for user with id: {Id}";
+      if (usersIds is null || !usersIds.Any())
+      {
+        return null;
+      }
 
       try
       {
@@ -321,18 +360,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (response.Message.IsSuccess)
         {
-          return _roleMapper.Map(response.Message.Body.Roles.FirstOrDefault());
+          return response.Message.Body.Roles;
         }
 
-        const string warningMessage = logMessage + "Reason: {Errors}";
-        _logger.LogWarning(warningMessage, usersIds.First(), string.Join("\n", response.Message.Errors));
+        _logger.LogWarning(
+          "Error while getting role for user id: {UserId}.\nErrors: {Errors}",
+          usersIds.First(),
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, usersIds.First());
+        _logger.LogError(
+          exc,
+          "Can not get role for user id: { UserId}.",
+          usersIds.First());
       }
 
-      errors.Add(errorMessage);
+      errors.Add("Can not get role. Please try again later.");
 
       return new();
     }
@@ -358,75 +402,65 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         {
           return response.Message.Body.Projects;
         }
-        else
-        {
-          _logger.LogWarning(
-            "Errors while getting projects list:\n{Errors}",
-            string.Join('\n', response.Message.Errors));
-
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          "Errors while getting projects for user id: {UserId}.\nErrors: {Errors}",
+          userId,
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, "Can not get projects list for user '{UserId}'. Please try again later", userId);
-
-        errors.Add(errorMessage);
+        _logger.LogError(
+          exc,
+          "Cannot get projects for user id: {UserId}.",
+          userId);
       }
+      errors.Add("Can not get projects. Please try again later.");
 
       return null;
     }
 
-    private async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imageIds, List<string> errors)
+    private async Task<List<ImageData>> GetImagesAsync(List<Guid> imagesIds, List<string> errors)
     {
-      if (imageIds == null || !imageIds.Any())
+      if (imagesIds == null || !imagesIds.Any())
       {
         return new();
       }
 
-      string errorMessage = "Can not get images. Please try again later.";
-      const string logMessage = "Errors while getting images with ids: {Ids}.";
-
       try
       {
         IOperationResult<IGetImagesResponse> response = (await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds, ImageSource.User))).Message;
+          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User))).Message;
 
         if (response.IsSuccess)
         {
-          return response.Body.ImagesData.Select(_imageMapper.Map).ToList();
+          return response.Body.ImagesData;
         }
-        else
-        {
-          const string warningMessage = logMessage + "Errors: {Errors}";
-          _logger.LogWarning(
-            warningMessage,
-            string.Join(", ", imageIds),
-            string.Join('\n', response.Errors));
 
-          errors.Add(errorMessage);
-        }
+        _logger.LogWarning(
+          "Errors while getting images with ids: {ImageId}.\nErrors: {Errors}",
+          string.Join(", ", imagesIds),
+          string.Join('\n', response.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, string.Join(", ", imageIds));
-
-        errors.Add(errorMessage);
+        _logger.LogError(
+          exc,
+          "Cannot get images with ids: {ImageId}.",
+          string.Join(", ", imagesIds));
       }
+      errors.Add("Can not get images. Please try again later.");
 
       return null;
     }
 
     #endregion
 
-    /// <summary>
-    /// Initialize new instance of <see cref="GetUserCommand"/> class with specified repository.
-    /// </summary>
     public GetUserCommand(
       ILogger<GetUserCommand> logger,
       IUserRepository repository,
-      IImageRepository imageRepository,
       IUserResponseMapper mapper,
+      IEducationInfoMapper educationMapper,
+      ICertificateInfoMapper certificateMapper,
       IRoleInfoMapper roleMapper,
       IDepartmentInfoMapper departmentMapper,
       ICompanyInfoMapper companyMapper,
@@ -434,6 +468,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IOfficeInfoMapper officeMapper,
       IImageInfoMapper imageMapper,
       IProjectInfoMapper projectMapper,
+      IRequestClient<IGetUserEducationsRequest> rcGetEducations,
       IRequestClient<IGetDepartmentsRequest> rcGetDepartments,
       IRequestClient<IGetPositionsRequest> rcGetPositions,
       IRequestClient<IGetOfficesRequest> rcGetOffices,
@@ -446,8 +481,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       _logger = logger;
       _repository = repository;
-      _imageRepository = imageRepository;
       _mapper = mapper;
+      _educationMapper = educationMapper;
+      _certificateMapper = certificateMapper;
       _roleMapper = roleMapper;
       _departmentMapper = departmentMapper;
       _companyMapper = companyMapper;
@@ -455,6 +491,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _officeMapper = officeMapper;
       _imageMapper = imageMapper;
       _projectMapper = projectMapper;
+      _rcGetEducations = rcGetEducations;
       _rcGetDepartments = rcGetDepartments;
       _rcGetPositions = rcGetPositions;
       _rcGetOffices = rcGetOffices;
@@ -486,76 +523,67 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (dbUser == null)
       {
         return _responseCreator.CreateFailureResponse<UserResponse>(
-          HttpStatusCode.NotFound,
-          new List<string> { "User was not found." });
-      }
-
-      List<Guid> imagesIds = new();
-      List<Guid> userImagesIds = new();
-      DbEntityImage userAvatar = await _imageRepository.GetAvatarAsync(dbUser.Id);
-
-      if (filter.IncludeImages)
-      {
-        if (filter.IncludeCertificates)
-        {
-          foreach (DbUserCertificate dbUserCertificate in dbUser.Certificates)
-          {
-            imagesIds.Add(dbUserCertificate.ImageId);
-          }
-        }
-      }
-
-      if (filter.IncludeUserImages)
-      {
-        userImagesIds.AddRange(await _imageRepository.GetImagesIdsByEntityIdAsync(dbUser.Id));
-        imagesIds.AddRange(userImagesIds);
+          HttpStatusCode.NotFound);
       }
 
       List<Guid> usersIds = new() { dbUser.Id };
 
-      Task<List<OfficeData>> officesTask = filter.IncludeOffice
-        ? GetOfficesAsync(usersIds, response.Errors)
-        : Task.FromResult(null as List<OfficeData>);
-      Task<List<PositionData>> positionsTask = filter.IncludePosition
-        ? GetPositionsAsync(usersIds, response.Errors)
-        : Task.FromResult(null as List<PositionData>);
+      Task<IGetUserEducationsResponse> educationsTask = filter.IncludeEducations
+        ? GetEducationsAsync(dbUser.Id, response.Errors)
+        : Task.FromResult(null as IGetUserEducationsResponse);
+
+      Task<List<CompanyData>> companiesTask = filter.IncludeCompany
+        ? GetCompaniesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<CompanyData>);
+
       Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
         ? GetDepartmentsAsync(usersIds, response.Errors)
         : Task.FromResult(null as List<DepartmentData>);
-      Task<RoleInfo> rolesTask = filter.IncludeRole
-        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
-        : Task.FromResult(null as RoleInfo);
-      Task<List<ImageInfo>> imagesTask = filter.IncludeImages || filter.IncludeUserImages
-        ? GetImagesAsync(imagesIds, response.Errors)
-        : Task.FromResult(null as List<ImageInfo>);
+
+      Task<List<ImageData>> imagesTask = filter.IncludeAvatars || filter.IncludeCurrentAvatar
+        ? GetImagesAsync(dbUser.Avatars?.Select(ua => ua.AvatarId).ToList(), response.Errors)
+        : Task.FromResult(null as List<ImageData>);
+
+      Task<List<OfficeData>> officesTask = filter.IncludeOffice
+        ? GetOfficesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<OfficeData>);
+
+      Task<List<PositionData>> positionsTask = filter.IncludePosition
+        ? GetPositionsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<PositionData>);
+
       Task<List<ProjectData>> projectsTask = filter.IncludeProjects
         ? (GetProjectsAsync(dbUser.Id, response.Errors))
         : Task.FromResult(null as List<ProjectData>);
-      Task<List<CompanyData>> companiesTask = GetCompaniesAsync(usersIds, response.Errors);
 
-      await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask, projectsTask, companiesTask);
+      Task<List<RoleData>> rolesTask = filter.IncludeRole
+        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
+        : Task.FromResult(null as List<RoleData>);
 
+      await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask);
+
+      IGetUserEducationsResponse educations = await educationsTask;
+      List<CompanyData> companies = await companiesTask;
+      List<DepartmentData> departments = await departmentsTask;
+      List<ImageData> images = await imagesTask;
       List<OfficeData> offices = await officesTask;
       List<PositionData> positions = await positionsTask;
-      List<DepartmentData> departments = await departmentsTask;
-      RoleInfo role = await rolesTask;
-      List<ImageInfo> images = await imagesTask;
-      List<ProjectInfo> projects = (await projectsTask)?.Select(_projectMapper.Map).ToList();
-      List<CompanyData> companies = await companiesTask;
+      List<ProjectData> projects = await projectsTask;
+      List<RoleData> roles = await rolesTask;
 
       response.Body = _mapper.Map(
         dbUser,
-        _departmentMapper.Map(departments?.FirstOrDefault()),
-        _companyMapper.Map(companies?.FirstOrDefault()),
         companies?.FirstOrDefault()?.Users.FirstOrDefault(),
-        _positionMapper.Map(positions?.FirstOrDefault()),
+        _imageMapper.Map(images?.FirstOrDefault(i => i.ImageId == dbUser.Avatars.FirstOrDefault(ua => ua.IsCurrentAvatar).AvatarId)),
+        educations?.Certificates?.Select(_certificateMapper.Map).ToList(),
+        _companyMapper.Map(companies?.FirstOrDefault()),
+        _departmentMapper.Map(departments?.FirstOrDefault()),
+        educations?.Educations?.Select(_educationMapper.Map).ToList(),
+        images?.Select(_imageMapper.Map).ToList(),
         _officeMapper.Map(offices?.FirstOrDefault()),
-        role,
-        projects,
-        images,
-        filter.IncludeUserImages ? images.FirstOrDefault(x => x.Id == userAvatar.ImageId) : null,
-        userImagesIds,
-        filter);
+        _positionMapper.Map(positions?.FirstOrDefault()),
+        projects?.Select(_projectMapper.Map).ToList(),
+        _roleMapper.Map(roles?.FirstOrDefault()));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

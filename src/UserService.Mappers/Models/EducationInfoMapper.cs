@@ -1,29 +1,27 @@
+using LT.DigitalOffice.Models.Broker.Models.Education;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using System;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
-    public class EducationInfoMapper : IEducationInfoMapper
+  public class EducationInfoMapper : IEducationInfoMapper
+  {
+    public EducationInfo Map(EducationData educationData)
     {
-        public EducationInfo Map(DbUserEducation dbUserEducation)
-        {
-            if (dbUserEducation == null)
-            {
-                throw new ArgumentNullException(nameof(dbUserEducation));
-            }
+      if (educationData is null)
+      {
+        return null;
+      }
 
-            return new EducationInfo
-            {
-                Id = dbUserEducation.Id,
-                UniversityName = dbUserEducation.UniversityName,
-                QualificationName = dbUserEducation.QualificationName,
-                FormEducation = (FormEducation)dbUserEducation.FormEducation,
-                AdmissionAt = dbUserEducation.AdmissionAt,
-                IssueAt = dbUserEducation.IssueAt
-            };
-        }
+      return new EducationInfo
+      {
+        Id = educationData.Id,
+        UniversityName = educationData.UniversityName,
+        QualificationName = educationData.QualificationName,
+        FormEducation = educationData.FormEducation,
+        AdmissionAt = educationData.AdmissionAt,
+        IssueAt = educationData.IssueAt
+      };
     }
+  }
 }

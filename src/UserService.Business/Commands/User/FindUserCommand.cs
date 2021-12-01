@@ -1,6 +1,7 @@
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -53,7 +54,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICompanyInfoMapper _companyInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
     private readonly IUserRepository _userRepository;
-    private readonly IImageRepository _imageRepository;
     private readonly ILogger<FindUserCommand> _logger;
     private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
     private readonly IRequestClient<IGetCompaniesRequest> _rcGetCompanies;
@@ -61,8 +61,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetOfficesRequest> _rcGetOffices;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRedisHelper _redisHelper;
+    private readonly IResponseCreator _responseCreator;
 
     #region private methods
 
@@ -383,7 +383,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public FindUserCommand(
       IBaseFindFilterValidator baseFindValidator,
       IUserRepository userRepository,
-      IImageRepository imageRepository,
       IUserInfoMapper mapper,
       IImageInfoMapper imageInfoMapper,
       IOfficeInfoMapper officeInfoMapper,
@@ -398,8 +397,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetCompaniesRequest> rcGetCompanies,
-      IHttpContextAccessor httpContextAccessor,
-      IRedisHelper redisHelper)
+      IRedisHelper redisHelper,
+      IResponseCreator responseCreator)
     {
       _baseFindValidator = baseFindValidator;
       _logger = logger;
@@ -411,15 +410,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _companyInfoMapper = companyInfoMapper;
       _positionInfoMapper = positionInfoMapper;
       _userRepository = userRepository;
-      _imageRepository = imageRepository;
       _rcGetDepartments = rcGetDepartments;
       _rcGetCompanies = rcGetCompanies;
       _rcGetPositions = rcGetPositions;
       _rcGetOffices = rcGetOffices;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetImages = rcGetImages;
-      _httpContextAccessor = httpContextAccessor;
       _redisHelper = redisHelper;
+      _responseCreator = responseCreator;
     }
 
     /// <inheritdoc/>
@@ -427,80 +425,68 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
-        return new()
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = errors
-        };
+        return _responseCreator.CreateFailureFindResponse<UserInfo>(HttpStatusCode.BadRequest, errors);
       }
-
-      List<DbUser> dbUsers = null;
-      List<DbEntityImage> usersImages = null;
 
       FindResultResponse<UserInfo> response = new();
       response.Body = new();
 
-      (List<DbUser> dbUsers, int totalCount) findUsersResponse =
-        await _userRepository.FindAsync(filter);
+      (List<DbUser> dbUsers, int totalCount) = await _userRepository.FindAsync(filter);
 
-      dbUsers = findUsersResponse.dbUsers;
-      response.TotalCount = findUsersResponse.totalCount;
+      response.TotalCount = totalCount;
 
       List<Guid> usersIds = dbUsers.Select(x => x.Id).ToList();
 
-      if (filter.IncludeAvatar)
-      {
-        usersImages = await _imageRepository.GetAvatarsAsync(usersIds);
-      }
+      Task<List<CompanyData>> companiesTask = filter.IncludeCompany
+        ? GetCompaniesAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<CompanyData>);
+
+      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
+        ? GetDepartmentsAsync(usersIds, response.Errors)
+        : Task.FromResult(null as List<DepartmentData>);
+
+      Task<List<ImageData>> imagesTask = filter.IncludeCurrentAvatar
+        ? GetImagesAsync(dbUsers.Select(u => u.Avatars?.FirstOrDefault())?.Select(ua => ua.AvatarId).ToList(), response.Errors)
+        : Task.FromResult(null as List<ImageData>);
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
         ? GetOfficesAsync(usersIds, response.Errors)
         : Task.FromResult(null as List<OfficeData>);
+
       Task<List<PositionData>> positionsTask = filter.IncludePosition
         ? GetPositionsAsync(usersIds, response.Errors)
         : Task.FromResult(null as List<PositionData>);
-      Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
-        ? GetDepartmentsAsync(usersIds, response.Errors)
-        : Task.FromResult(null as List<DepartmentData>);
+
       Task<List<RoleData>> rolesTask = filter.IncludeRole
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
-      Task<List<ImageData>> imagesTask = filter.IncludeAvatar
-        ? GetImagesAsync(usersImages.Select(x => x.ImageId).ToList(), response.Errors)
-        : Task.FromResult(null as List<ImageData>);
-      Task<List<CompanyData>> companiesTask = GetCompaniesAsync(usersIds, response.Errors);
 
-      await Task.WhenAll(officesTask, positionsTask, departmentsTask, rolesTask, imagesTask);
+      await Task.WhenAll(companiesTask, departmentsTask, imagesTask, officesTask, positionsTask,  rolesTask);
 
+      List<CompanyData> companies = await companiesTask;
+      List<DepartmentData> departments = await departmentsTask;
+      List<ImageData> images = await imagesTask;
       List<OfficeData> offices = await officesTask;
       List<PositionData> positions = await positionsTask;
-      List<DepartmentData> departments = await departmentsTask;
-      List<CompanyData> companies = await companiesTask;
       List<RoleData> roles = await rolesTask;
-      List<ImageData> images = await imagesTask;
 
-      List<CompanyUserData> companyUserDatas = companies?.SelectMany(p => p.Users).ToList();
+      CompanyData companyInfo;
 
       response.Body
         .AddRange(dbUsers.Select(dbUser =>
-          _mapper.Map(
+        {
+          companyInfo = companies?.FirstOrDefault(c => c.Users.Select(cu => cu.UserId).Contains(dbUser.Id));
+
+          return _mapper.Map(
             dbUser,
-            filter.IncludeDepartment ? _departmentInfoMapper.Map(
-              departments?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-            _companyInfoMapper.Map(companies?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))),
-            companyUserDatas?.FirstOrDefault(cud => cud.UserId == dbUser.Id),
-            filter.IncludePosition ? _positionInfoMapper.Map(
-              positions?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))) : null,
-            filter.IncludeOffice ? _officeInfoMapper.Map(
-              offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-            filter.IncludeRole ? _roleInfoMapper.Map(
-              roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))) : null,
-            filter.IncludeAvatar
-            ? _imageInfoMapper.Map(images?.FirstOrDefault(
-              x => x.ImageId == usersImages.Where(dbImage => (dbImage.EntityId == dbUser.Id)).Select(dbImage => dbImage.ImageId).FirstOrDefault()))
-            : null)));
+            companyInfo?.Users.FirstOrDefault(cu => cu.UserId == dbUser.Id),
+            _imageInfoMapper.Map(images?.FirstOrDefault(i => i.ImageId == dbUser.Avatars?.FirstOrDefault().AvatarId)),
+            _companyInfoMapper.Map(companyInfo),
+            _departmentInfoMapper.Map(departments?.FirstOrDefault(d => d.UsersIds.Contains(dbUser.Id))),
+            _officeInfoMapper.Map(offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
+            _positionInfoMapper.Map(positions?.FirstOrDefault(x => x.Users.Any(u => u.UserId == dbUser.Id))),
+            _roleInfoMapper.Map(roles?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))));
+        }));
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

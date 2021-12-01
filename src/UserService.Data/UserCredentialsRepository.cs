@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
+using LT.DigitalOffice.Kernel.Exceptions.Models;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -36,21 +37,21 @@ namespace LT.DigitalOffice.UserService.Data
       DbUserCredentials dbUserCredentials = null;
       if (filter.UserId.HasValue)
       {
-        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
+        dbUserCredentials = await _provider.UsersCredentials.FirstOrDefaultAsync(
           uc =>
             uc.UserId == filter.UserId.Value &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
-        dbUserCredentials = await _provider.UserCredentials.FirstOrDefaultAsync(
+        dbUserCredentials = await _provider.UsersCredentials.FirstOrDefaultAsync(
           uc =>
             uc.Login == filter.Login &&
             uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Email) || !string.IsNullOrEmpty(filter.Phone))
       {
-        dbUserCredentials = await _provider.UserCredentials
+        dbUserCredentials = await _provider.UsersCredentials
           .Include(uc => uc.User)
           .ThenInclude(u => u.Communications)
           .FirstOrDefaultAsync(
@@ -75,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Data
       _logger.LogInformation(
         $"Updating user credentials for user '{dbUserCredentials.UserId}'. Request came from IP '{_httpContext.Connection.RemoteIpAddress}'.");
 
-      _provider.UserCredentials.Update(dbUserCredentials);
+      _provider.UsersCredentials.Update(dbUserCredentials);
       dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
 
@@ -89,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Data
         return null;
       }
 
-      _provider.UserCredentials.Add(dbUserCredentials);
+      _provider.UsersCredentials.Add(dbUserCredentials);
       await _provider.SaveAsync();
 
       return dbUserCredentials.Id;
@@ -97,7 +98,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
     {
-      DbUserCredentials dbUserCredentials = await _provider.UserCredentials
+      DbUserCredentials dbUserCredentials = await _provider.UsersCredentials
         .FirstOrDefaultAsync(c => c.UserId == userId);
 
       if (dbUserCredentials == null)
@@ -107,7 +108,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       dbUserCredentials.IsActive = isActiveStatus;
 
-      _provider.UserCredentials.Update(dbUserCredentials);
+      _provider.UsersCredentials.Update(dbUserCredentials);
       dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
@@ -117,12 +118,12 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> LoginExistAsync(string login)
     {
-      return await _provider.UserCredentials.AnyAsync(uc => uc.Login == login);
+      return await _provider.UsersCredentials.AnyAsync(uc => uc.Login == login);
     }
 
     public async Task<bool> CredentialsExistAsync(Guid userId)
     {
-      return await _provider.UserCredentials.AnyAsync(uc => uc.UserId == userId);
+      return await _provider.UsersCredentials.AnyAsync(uc => uc.UserId == userId);
     }
   }
 }
