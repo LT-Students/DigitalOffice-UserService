@@ -9,7 +9,6 @@ using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System;

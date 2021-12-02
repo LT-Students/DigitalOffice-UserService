@@ -372,7 +372,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         _logger.LogError(
           exc,
-          "Can not get role for user id: { UserId}.",
+          "Can not get role for user id: {UserId}.",
           usersIds.First());
       }
 
