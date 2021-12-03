@@ -23,9 +23,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 {
   public class GetAvatarsCommand : IGetAvatarsCommand
   {
-    private readonly IAvatarRepository _imageRepository;
+    private readonly IAvatarRepository _avatarRepository;
     private readonly IImagesResponseMapper _imagesResponseMapper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly ILogger<GetAvatarsCommand> _logger;
     private readonly IResponseCreator _responseCreator;
@@ -64,16 +63,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     }
 
     public GetAvatarsCommand(
-      IAvatarRepository imageRepository,
+      IAvatarRepository avatarRepository,
       IImagesResponseMapper imagesResponseMapper,
-      IHttpContextAccessor httpContextAccessor,
       IRequestClient<IGetImagesRequest> rcGetImages,
       ILogger<GetAvatarsCommand> logger,
       IResponseCreator responseCreator)
     {
-      _imageRepository = imageRepository;
+      _avatarRepository = avatarRepository;
       _imagesResponseMapper = imagesResponseMapper;
-      _httpContextAccessor = httpContextAccessor;
       _rcGetImages = rcGetImages;
       _logger = logger;
       _responseCreator = responseCreator;
@@ -81,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
     public async Task<OperationResultResponse<ImagesResponse>> ExecuteAsync(Guid userId)
     {
-      List<Guid> dbImagesIds = await _imageRepository.GetAvatarsByUserId(userId);
+      List<Guid> dbImagesIds = await _avatarRepository.GetAvatarsByUserId(userId);
 
       if (dbImagesIds == null || !dbImagesIds.Any())
       {
