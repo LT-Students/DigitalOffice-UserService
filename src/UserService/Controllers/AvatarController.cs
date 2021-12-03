@@ -36,8 +36,8 @@ namespace LT.DigitalOffice.UserService.Controllers
       return await command.ExecuteAsync(request);
     }
 
-    [HttpGet("editcurrentavatar")]
-    public async Task<OperationResultResponse<bool>> EditCurrentAvatarAsync(
+    [HttpGet("editcurrent")]
+    public async Task<OperationResultResponse<bool>> EditCurrentAsync(
       [FromServices] IEditAvatarCommand command,
       [FromQuery] Guid userId,
       [FromQuery] Guid avatarId)
