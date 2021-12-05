@@ -5,7 +5,7 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement;
 using LT.DigitalOffice.UserService.Validation.Achievement.Interfaces;
 using Microsoft.AspNetCore.Http;

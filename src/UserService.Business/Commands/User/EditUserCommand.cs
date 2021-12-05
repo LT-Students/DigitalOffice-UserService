@@ -8,7 +8,7 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;

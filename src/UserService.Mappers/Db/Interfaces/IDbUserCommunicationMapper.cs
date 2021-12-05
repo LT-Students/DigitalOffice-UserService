@@ -4,9 +4,9 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
 {
-    [AutoInject]
-    public interface IDbUserCommunicationMapper
-    {
-        DbUserCommunication Map(CreateCommunicationRequest request);
-    }
+  [AutoInject]
+  public interface IDbUserCommunicationMapper
+  {
+    DbUserCommunication Map(CreateCommunicationRequest request);
+  }
 }

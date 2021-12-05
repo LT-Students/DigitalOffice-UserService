@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Data.UnitTests
           _mocker.GetMock<IHttpContextAccessor>().Object,
           _provider);
 
-      _provider.UserCredentials.Add(_dbUserCredentials);
+      _provider.UsersCredentials.Add(_dbUserCredentials);
       await _provider.SaveAsync();
     }
 
