@@ -23,7 +23,6 @@ using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using MassTransit;
@@ -60,14 +59,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     #region private methods
 
-    private async Task CreateDepartmentEntityAsync(Guid? departmentId, Guid userId, List<string> errors)
+    private async Task CreateDepartmentUserAsync(Guid? departmentId, Guid userId, List<string> errors)
     {
-      if (!departmentId.HasValue)
+      if (!departmentId.HasValue || departmentId.Value == Guid.Empty)
       {
         return;
       }
-
-      string logMessage = "Unable to enroll a user {userId} in the department {departmentId}";
 
       try
       {
@@ -82,25 +79,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        _logger.LogWarning(logMessage, userId, departmentId);
+        _logger.LogWarning(
+          "Error while adding user id {UserId} to the department id {DepartmentId}.\nErrors: {Errors}",
+          userId,
+          departmentId,
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, userId, departmentId);
+        _logger.LogError(
+          exc,
+          "Cannot add user id {UserId} to the department id {DepartmentId}",
+          userId,
+          departmentId);
       }
 
       errors.Add("Unable to enroll a user in the department. Please try again later.");
     }
 
-    private async Task CreateUserPositionAsync(Guid positionId, Guid userId, List<string> errors)
+    private async Task CreateUserPositionAsync(Guid? positionId, Guid userId, List<string> errors)
     {
-      string logMessage = "Cannot assing position '{positionId}' to user '{userId}'";
+      if (!positionId.HasValue || positionId.Value == Guid.Empty)
+      {
+        return;
+      }
 
       try
       {
         Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
           ICreateUserPositionRequest.CreateObj(
-            positionId: positionId,
+            positionId: positionId.Value,
             createdBy: _httpContextAccessor.HttpContext.GetUserId(),
             userId: userId));
 
@@ -109,25 +117,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        _logger.LogWarning(logMessage, positionId, userId);
+        _logger.LogWarning(
+          "Error while adding user id {UserId} to the position id {PositionId}.\nErrors: {Errors}",
+          userId,
+          positionId,
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, positionId, userId);
+        _logger.LogError(
+          exc,
+          "Cannot add user id {UserId} to the position id {PositionId}.",
+          userId,
+          positionId);
       }
 
       errors.Add("Cannot assign position to user. Please try again later.");
     }
 
-    private async Task CreateUserCompanyAsync(Guid companyId, Guid userId, double? rate, DateTime? startWorkingAt, List<string> errors)
+    private async Task CreateUserCompanyAsync(Guid? companyId, Guid userId, double? rate, DateTime? startWorkingAt, List<string> errors)
     {
-      string logMessage = "Cannot assing company '{companyId}' to user '{userId}'";
+      if (!companyId.HasValue || companyId.Value == Guid.Empty)
+      {
+        return;
+      }
 
       try
       {
         Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
           ICreateCompanyUserRequest.CreateObj(
-            companyId: companyId,
+            companyId: companyId.Value,
             userId: userId,
             rate: rate,
             startWorkingAt: startWorkingAt,
@@ -138,25 +157,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        _logger.LogWarning(logMessage, companyId, userId);
+        _logger.LogWarning(
+          "Error while adding user id {UserId} to the company id {CompanyId}.\nErrors: {Errors}",
+          userId,
+          companyId,
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, companyId, userId);
+        _logger.LogError(
+          exc,
+          "Cannot add user id {UserId} to the company id {CompanyId}.",
+          userId,
+          companyId);
       }
 
       errors.Add("Cannot assign company to user. Please try again later.");
     }
 
-    private async Task EditUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
+    private async Task CreateUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
     {
-      if (!officeId.HasValue)
+      if (!officeId.HasValue || officeId.Value == Guid.Empty)
       {
         return;
       }
-
-      const string officeErrorMessage = "Cannot assign office to user. Please try again later.";
-      const string logMessage = "Cannot assign office to user with id {UserId}.";
 
       try
       {
@@ -172,25 +196,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return;
         }
 
-        _logger.LogWarning(logMessage, userId);
+        _logger.LogWarning(
+          "Error while adding user id {UserId} to the office id {OfficeId}.\nErrors: {Errors}",
+          userId,
+          officeId, 
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, userId);
+        _logger.LogError(
+          exc,
+          "Cannot add user id {UserId} to the office id {OfficeId}.",
+          userId,
+          officeId);
       }
 
-      errors.Add(officeErrorMessage);
+      errors.Add("Cannot assign office to user. Please try again later.");
     }
 
     private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
     {
-      if (!roleId.HasValue)
+      if (!roleId.HasValue || roleId.Value == Guid.Empty)
       {
         return;
       }
-
-      string errorMessage = $"Can't assign role '{roleId}' to the user '{userId}'. Please try again later.";
-      const string logMessage = "Can't assign role '{RoleId}' to the user '{UserId}'";
 
       try
       {
@@ -201,17 +230,23 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         if (!response.Message.IsSuccess || !response.Message.Body)
         {
-          _logger.LogWarning(logMessage, roleId, userId);
-
-          errors.Add(errorMessage);
+          _logger.LogWarning(
+            "Error while adding user id {UserId} to the role id {RoleId}.\nErrors: {Errors}",
+            userId,
+            roleId,
+            string.Join('\n', response.Message.Errors));
         }
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, roleId, userId);
-
-        errors.Add(errorMessage);
+        _logger.LogError(
+          exc,
+          "Cannot add user id {UserId} to the role id {RoleId}.",
+          userId,
+          roleId);
       }
+
+      errors.Add("Cannot assign role to user. Please try again later.");
     }
 
     private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
@@ -378,9 +413,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       await Task.WhenAll(
         SendEmailAsync(dbUser, password, response.Errors),
-        EditUserOfficeAsync(request.OfficeId, userId, response.Errors),
+        CreateUserOfficeAsync(request.OfficeId, userId, response.Errors),
         ChangeUserRoleAsync(request.RoleId, userId, response.Errors),
-        CreateDepartmentEntityAsync(request.DepartmentId, userId, response.Errors),
+        CreateDepartmentUserAsync(request.DepartmentId, userId, response.Errors),
         CreateUserPositionAsync(request.PositionId, userId, response.Errors),
         CreateUserCompanyAsync(request.CompanyId, userId, request.Rate, request.StartWorkingAt, response.Errors));
 

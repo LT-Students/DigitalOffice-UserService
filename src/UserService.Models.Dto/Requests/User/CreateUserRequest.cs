@@ -19,11 +19,11 @@ namespace LT.DigitalOffice.UserService.Models.Dto
     public bool? IsAdmin { get; set; }
     public DateTime? StartWorkingAt { get; set; }
     public double? Rate { get; set; }
-    public Guid CompanyId { get; set; }
-    public Guid PositionId { get; set; }
-    public Guid OfficeId { get; set; }
-    public Guid? RoleId { get; set; }
+    public Guid? CompanyId { get; set; }
     public Guid? DepartmentId { get; set; }
+    public Guid? OfficeId { get; set; }
+    public Guid? PositionId { get; set; }
+    public Guid? RoleId { get; set; }
     public string Password { get; set; }
     public IEnumerable<CreateCommunicationRequest> Communications { get; set; }
   }
