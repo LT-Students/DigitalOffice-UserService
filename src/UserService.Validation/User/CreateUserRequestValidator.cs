@@ -40,12 +40,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .Must(x => NameRegex.IsMatch(x.Trim()))
         .WithMessage("Last name contains invalid characters.");
 
-      RuleFor(user => user.PositionId)
-        .NotEmpty();
-
-      RuleFor(user => user.CompanyId)
-        .NotEmpty();
-
       When(
         user => !string.IsNullOrEmpty(user.MiddleName),
         () =>
