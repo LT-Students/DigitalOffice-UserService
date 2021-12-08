@@ -8,7 +8,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IGenderRepository
   {
-    Task<Guid?> AddAsync(DbGender gender);
+    Task<Guid?> CreateAsync(DbGender gender);
 
     bool DoesGenderAlreadyExist(string genderName);
   }

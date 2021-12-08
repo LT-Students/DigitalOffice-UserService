@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<Guid?> AddAsync(DbGender gender)
+    public async Task<Guid?> CreateAsync(DbGender gender)
     {
       _provider.Genders.Add(gender);
       await _provider.SaveAsync();
@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public bool DoesGenderAlreadyExist(string genderName)
     {
-      return _provider.Genders.Any(s => s.Name == genderName);
+      return _provider.Genders.Any(s => s.Name.ToLower() == genderName.ToLower());
     }
   }
 }
