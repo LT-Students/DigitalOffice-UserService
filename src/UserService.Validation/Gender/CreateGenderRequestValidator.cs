@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Validation.Gender
     {
       RuleFor(s => s.Name.Trim())
         .NotEmpty().WithMessage("Gender must not be empty.")
-        .MustAsync(async (name, _) => await genderRepository.DoesGenderAlreadyExistAsync(name) != true)
+        .MustAsync(async (name, _) => !await genderRepository.DoesGenderAlreadyExistAsync(name))
         .WithMessage("Gender with this name already exists.");
     }
   }

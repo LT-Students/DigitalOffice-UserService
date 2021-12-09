@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -11,6 +12,7 @@ using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -42,9 +44,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       OperationResultResponse<Guid?> response = new();
 
-      if (!_validator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
-        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, errors);
+        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
 
         return response;
       }
@@ -57,8 +62,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (response.Body == default)
       {
         response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
-
-        return response;
       }
 
       return response;
