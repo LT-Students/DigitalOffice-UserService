@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,9 +25,9 @@ namespace LT.DigitalOffice.UserService.Data
       return gender.Id;
     }
 
-    public bool DoesGenderAlreadyExist(string genderName)
+    public async Task<bool> DoesGenderAlreadyExistAsync(string genderName)
     {
-      return _provider.Genders.Any(s => s.Name.ToLower() == genderName.ToLower());
+      return await _provider.Genders.AnyAsync(s => s.Name.ToLower() == genderName.ToLower());
     }
   }
 }

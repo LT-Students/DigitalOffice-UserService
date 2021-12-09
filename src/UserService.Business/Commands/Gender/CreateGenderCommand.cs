@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -22,7 +21,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IDbGenderMapper _mapper;
     private readonly IGenderRepository _genderRepository;
-    private readonly IAccessValidator _accessValidator;
     private readonly ICreateGenderRequestValidator _validator;
     private readonly IResponseCreator _responseCreator;
 
@@ -30,14 +28,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IHttpContextAccessor httpContextAccessor,
       IDbGenderMapper mapper,
       IGenderRepository genderRepository,
-      IAccessValidator accessValidator,
       ICreateGenderRequestValidator validator,
       IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
       _mapper = mapper;
       _genderRepository = genderRepository;
-      _accessValidator = accessValidator;
       _validator = validator;
       _responseCreator = responseCreator;
     }
@@ -46,14 +42,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       OperationResultResponse<Guid?> response = new();
 
-      if (request.UserId != _httpContextAccessor.HttpContext.GetUserId())
-      {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
-      }
-
       if (!_validator.ValidateCustom(request, out List<string> errors))
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, errors);
+        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, errors);
+
+        return response;
       }
 
       response.Body = await _genderRepository.CreateAsync(_mapper.Map(request));
@@ -63,7 +56,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (response.Body == default)
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
+        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
+
+        return response;
       }
 
       return response;

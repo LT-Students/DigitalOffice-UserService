@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbGender gender);
 
-    bool DoesGenderAlreadyExist(string genderName);
+    Task<bool> DoesGenderAlreadyExistAsync(string genderName);
   }
 }
