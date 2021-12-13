@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public List<CreateImageData> Map(List<AddImageRequest> request)
+    public List<CreateImageData> Map(List<CreateAvatarRequest> request)
     {
       Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
 

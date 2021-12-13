@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
     public CreateUserRequestValidator(
       ICreateCommunicationRequestValidator communicationValidator,
-      IAddImageRequestValidator imageValidator,
+      ICreateAvatarRequestValidator imageValidator,
       IPasswordValidator passwordValidator)
     {
       RuleFor(user => user.FirstName)
