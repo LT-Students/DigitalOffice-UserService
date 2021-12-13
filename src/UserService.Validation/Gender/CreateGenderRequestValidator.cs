@@ -9,7 +9,8 @@ namespace LT.DigitalOffice.UserService.Validation.Gender
   {
     public CreateGenderRequestValidator(IGenderRepository genderRepository)
     {
-      RuleFor(s => s.Name.Trim())
+      RuleFor(gender => gender.Name)
+        .Cascade(CascadeMode.Stop)
         .NotEmpty().WithMessage("Gender must not be empty.")
         .MustAsync(async (name, _) => !await genderRepository.DoesGenderAlreadyExistAsync(name))
         .WithMessage("Gender with this name already exists.");
