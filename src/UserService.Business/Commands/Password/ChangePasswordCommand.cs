@@ -38,18 +38,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(ChangePasswordRequest request)
     {
-      if (request.UserId != _httpContextAccessor.HttpContext.GetUserId())
-      {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
-      }
-
       if (!_validator.ValidateCustom(request.NewPassword, out List<string> errors))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest, errors);
       }
 
       DbUserCredentials dbUserCredentials = await _repository
-        .GetAsync(new GetCredentialsFilter() { UserId = request.UserId });
+        .GetAsync(new GetCredentialsFilter() { UserId = _httpContextAccessor.HttpContext.GetUserId() });
 
       if (dbUserCredentials is null)
       {
@@ -58,7 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
           new List<string> { "The user credentials was not found." });
       }
 
-      if (dbUserCredentials.PasswordHash 
+      if (dbUserCredentials.PasswordHash
         != UserPasswordHash.GetPasswordHash(dbUserCredentials.Login, dbUserCredentials.Salt, request.Password))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
