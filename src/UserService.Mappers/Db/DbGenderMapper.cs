@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       return new DbGender
       {
         Id = Guid.NewGuid(),
-        Name = request.Name.Trim(),
+        Name = request.Name,
         CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
         CreatedAtUtc = DateTime.UtcNow,
       };
