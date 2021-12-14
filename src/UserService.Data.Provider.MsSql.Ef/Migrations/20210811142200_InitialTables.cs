@@ -107,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             builder.CreateTable(
-                name: DbUserCertificate.TableName,
+                name: "UserCertificates",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -176,7 +176,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 column: nameof(DbUserCredentials.Login));
 
             builder.CreateTable(
-                name: DbUserEducation.TableName,
+                name: "UserEducations",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),

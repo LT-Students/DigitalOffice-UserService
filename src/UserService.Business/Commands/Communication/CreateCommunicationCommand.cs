@@ -1,5 +1,5 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly ICommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public CreateCommunicationCommand(
       ICreateCommunicationRequestValidator validator,
@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       ICommunicationRepository repository,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _validator = validator;
       _mapper = mapper;

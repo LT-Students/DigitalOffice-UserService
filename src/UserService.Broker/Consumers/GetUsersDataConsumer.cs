@@ -1,13 +1,13 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -30,17 +30,18 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<(DbUser user, Guid? avatarId)> usersData = await _userRepository.GetWithAvatarsAsync(request.UserIds);
+      List<DbUser> dbUsers = await _userRepository
+        .GetAsync(request.UserIds, true);
 
-      return usersData
-        .Select(userData => new UserData(
-          userData.user.Id,
-          userData.avatarId,
-          userData.user.FirstName,
-          userData.user.MiddleName,
-          userData.user.LastName,
-          ((UserStatus)userData.user.Status).ToString(),
-          userData.user.IsActive))
+      return dbUsers.Select(
+        u => new UserData(
+          u.Id,
+          u.Avatars?.FirstOrDefault(ua => ua.IsCurrentAvatar)?.AvatarId,
+          u.FirstName,
+          u.MiddleName,
+          u.LastName,
+          ((UserStatus)u.Status).ToString(),
+          u.IsActive))
         .ToList();
     }
 

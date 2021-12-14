@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Models.Broker.Models;
+﻿using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.Search;
 using LT.DigitalOffice.UnitTestKernel;

@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -12,61 +12,39 @@ using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses
 {
-  /// <inheritdoc />
   public class UserResponseMapper : IUserResponseMapper
   {
     private readonly IUserInfoMapper _userInfoMapper;
     private readonly IUserAchievementInfoMapper _userAchievementInfoMapper;
-    private readonly ICertificateInfoMapper _certificateInfoMapper;
-    private readonly IEducationInfoMapper _educationInfoMapper;
-
-    private ImageInfo GetImage(List<ImageInfo> images, Guid? imageId)
-    {
-      if (images == null || !images.Any() || !imageId.HasValue)
-      {
-        return null;
-      }
-
-      return images.FirstOrDefault(
-        i =>
-          i.ParentId == imageId ||
-          i.Id == imageId);
-    }
-
-    private List<ImageInfo> GetImages(List<ImageInfo> images, List<Guid> imagesIds)
-    {
-      if (images == null || !images.Any() || imagesIds == null || !imagesIds.Any())
-      {
-        return null;
-      }
-
-      return images.Where(x => imagesIds.Contains(x.Id.Value)).ToList();
-    }
+    //private readonly ICertificateInfoMapper _certificateInfoMapper;
+    //private readonly IEducationInfoMapper _educationInfoMapper;
 
     public UserResponseMapper(
       IUserInfoMapper userInfoMapper,
-      IUserAchievementInfoMapper userAchievementInfoMapper,
-      ICertificateInfoMapper certificateInfoMapper,
-      IEducationInfoMapper educationInfoMapper)
+      IUserAchievementInfoMapper userAchievementInfoMapper)
+      //ICertificateInfoMapper certificateInfoMapper,
+      //IEducationInfoMapper educationInfoMapper
+      //)
     {
       _userInfoMapper = userInfoMapper;
       _userAchievementInfoMapper = userAchievementInfoMapper;
-      _certificateInfoMapper = certificateInfoMapper;
-      _educationInfoMapper = educationInfoMapper;
+      //_certificateInfoMapper = certificateInfoMapper;
+      //_educationInfoMapper = educationInfoMapper;
     }
 
     public UserResponse Map(
-        DbUser dbUser,
-        DepartmentInfo department,
-        PositionInfo position,
-        PositionUserData positionUserData,
-        OfficeInfo office,
-        RoleInfo role,
-        List<ProjectInfo> projects,
-        List<ImageInfo> images,
-        ImageInfo avatar,
-        List<Guid> userImagesIds,
-        GetUserFilter filter)
+      DbUser dbUser,
+      CompanyUserData companyUserData,
+      ImageInfo avatar,
+      List<CertificateInfo> certificates,
+      CompanyInfo company,
+      DepartmentInfo department,
+      List<EducationInfo> educations,
+      List<ImageInfo> images,
+      OfficeInfo office,
+      PositionInfo position,
+      List<ProjectInfo> projects,
+      RoleInfo role)
     {
       if (dbUser == null)
       {
@@ -75,34 +53,28 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
       return new UserResponse
       {
-        User = filter.IncludeUserImages
-          ? _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar, GetImages(images, userImagesIds))
-          : _userInfoMapper.Map(dbUser, department, position, positionUserData, office, role, avatar),
+        User = _userInfoMapper.Map(
+          dbUser,
+          companyUserData,
+          avatar,
+          company,
+          department,
+          office,
+          position,
+          role),
+        Images = images,
+        Achievements = dbUser.Achievements?.Select(ua => _userAchievementInfoMapper.Map(ua)),
+        Certificates = certificates,
+        Communications = dbUser.Communications?.Select(
+          c => new CommunicationInfo
+          {
+            Id = c.Id,
+            Type = (CommunicationType)c.Type,
+            Value = c.Value
+          }),
+        Educations = educations,
         Projects = projects,
-          Skills = filter.IncludeSkills
-            ? dbUser.Skills.Select(s => s.Skill.Name)
-            : null,
-          Achievements = filter.IncludeAchievements
-              ? dbUser.Achievements.Select(ua => _userAchievementInfoMapper.Map(ua))
-              : null,
-          Certificates = filter.IncludeCertificates
-              ? dbUser.Certificates.Select(
-                  c =>
-                      _certificateInfoMapper.Map(c, GetImage(images, c.ImageId)))
-              : null,
-          Communications = filter.IncludeCommunications
-              ? dbUser.Communications.Select(
-                  c => new CommunicationInfo
-                  {
-                      Id = c.Id,
-                      Type = (CommunicationType)c.Type,
-                      Value = c.Value
-                  })
-              : null,
-          Educations = filter.IncludeEducations
-              ? dbUser.Educations.Select(
-                  e => _educationInfoMapper.Map(e))
-              : null
+        Skills = dbUser.Skills.Select(s => s.Skill.Name)
       };
     }
   }

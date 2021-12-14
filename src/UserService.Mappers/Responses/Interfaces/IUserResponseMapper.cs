@@ -1,5 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
@@ -9,24 +9,21 @@ using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
 {
-  /// <summary>
-  /// Represents mapper. Provides methods for converting an object of <see cref="DbUser"/>
-  /// type into an object of <see cref="UserResponse"/> type according to some rule.
-  /// </summary>
   [AutoInject]
   public interface IUserResponseMapper
   {
     UserResponse Map(
       DbUser dbUser,
-      DepartmentInfo department,
-      PositionInfo position,
-      PositionUserData positionUserData,
-      OfficeInfo office,
-      RoleInfo role,
-      List<ProjectInfo> projects,
-      List<ImageInfo> images,
+      CompanyUserData companyUserData,
       ImageInfo avatar,
-      List<Guid> userImagesIds,
-      GetUserFilter filter);
+      List<CertificateInfo> certificates,
+      CompanyInfo company,
+      DepartmentInfo department,
+      List<EducationInfo> educations,
+      List<ImageInfo> images,
+      OfficeInfo office,
+      PositionInfo position,
+      List<ProjectInfo> projects,
+      RoleInfo role);
   }
 }

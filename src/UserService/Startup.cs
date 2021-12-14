@@ -1,20 +1,21 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
-using LT.DigitalOffice.Kernel.Broker.Consumer;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
+using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
+using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
+using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.Helpers;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
-using LT.DigitalOffice.Kernel.Middlewares.Token;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Certificates;
-using LT.DigitalOffice.UserService.Validation.Certificates;
 using LT.DigitalOffice.UserService.Validation.Skill;
 using LT.DigitalOffice.UserService.Validation.User;
 using MassTransit;
@@ -32,12 +33,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Serilog;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService
@@ -233,7 +234,7 @@ namespace LT.DigitalOffice.UserService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.4.0.3";
+      Version = "1.4.1.0";
       Description = "UserService is an API that intended to work with users.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
@@ -328,8 +329,6 @@ namespace LT.DigitalOffice.UserService
       //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
-      services.AddScoped<IValidator<JsonPatchDocument<EditCertificateRequest>>, EditCertificateRequestValidator>();
-      services.AddScoped<IValidator<CreateCertificateRequest>, CreateCertificateRequestValidator>();
       services.AddScoped<IValidator<CreateSkillRequest>, CreateSkillRequestValidator>();
 
       services.AddTransient<ICacheNotebook, CacheNotebook>();
@@ -354,8 +353,8 @@ namespace LT.DigitalOffice.UserService
         {
           options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
         }) // TODO check enum serialization from request without .AddJsonOptions()
-            //this will be used when all validation takes place on the pipeline
-            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
+           //this will be used when all validation takes place on the pipeline
+           //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
         .AddFluentValidation()
         .AddJsonOptions(options =>
         {

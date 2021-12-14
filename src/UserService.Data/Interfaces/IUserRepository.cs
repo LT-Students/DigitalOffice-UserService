@@ -16,9 +16,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<DbUser> GetAsync(Guid id);
 
-    Task<List<DbUser>> GetAsync(List<Guid> usersIds);
-
-    Task<List<(DbUser user, Guid? avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds);
+    Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false);
 
     Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 

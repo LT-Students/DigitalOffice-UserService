@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -6,10 +7,10 @@ using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Password;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
-using System;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,15 +19,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 {
   public class ChangePasswordCommand : IChangePasswordCommand
   {
-    private readonly IChangePassordRequestValidator _validator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPasswordValidator _validator;
     private readonly IUserCredentialsRepository _repository;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public ChangePasswordCommand(
-      IChangePassordRequestValidator validator,
+      IHttpContextAccessor httpContextAccessor,
+      IPasswordValidator validator,
       IUserCredentialsRepository repository,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
+      _httpContextAccessor = httpContextAccessor;
       _validator = validator;
       _repository = repository;
       _responseCreator = responseCreator;
@@ -34,12 +38,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(ChangePasswordRequest request)
     {
-      if (!_validator.ValidateCustom(request, out List<string> errors))
+      if (!_validator.ValidateCustom(request.NewPassword, out List<string> errors))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest, errors);
       }
 
-      DbUserCredentials dbUserCredentials = await _repository.GetAsync(new GetCredentialsFilter() { UserId = request.UserId });
+      DbUserCredentials dbUserCredentials = await _repository
+        .GetAsync(new GetCredentialsFilter() { UserId = _httpContextAccessor.HttpContext.GetUserId() });
 
       if (dbUserCredentials is null)
       {
@@ -48,9 +53,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
           new List<string> { "The user credentials was not found." });
       }
 
-      dbUserCredentials.Salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
+      if (dbUserCredentials.PasswordHash
+        != UserPasswordHash.GetPasswordHash(dbUserCredentials.Login, dbUserCredentials.Salt, request.Password))
+      {
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+      }
+
       dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
-        request.Login,
+        dbUserCredentials.Login,
         dbUserCredentials.Salt,
         request.NewPassword);
 

@@ -1,5 +1,5 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -7,7 +7,7 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
@@ -27,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly IPatchDbUserCommunicationMapper _mapper;
     private readonly IEditCommunicationRequestValidator _validator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     public EditCommunicationCommand(
       ICommunicationRepository repository,
@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       IPatchDbUserCommunicationMapper mapper,
       IEditCommunicationRequestValidator validator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _repository = repository;
       _accessValidator = accessValidator;

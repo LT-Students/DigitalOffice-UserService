@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Broker;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     private readonly IOptions<MemoryCacheConfig> _cacheOptions;
     private readonly IUserRepository _repository;
     private readonly IMemoryCache _cache;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     private string SetGuidInCache(Guid userId)
     {
@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       IOptions<MemoryCacheConfig> cacheOptions,
       IUserRepository repository,
       IMemoryCache cache,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _generatePassword = generatePassword;
       _logger = logger;
@@ -117,7 +117,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       if (dbUser is null)
       {
-        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
       string secret = SetGuidInCache(dbUser.Id);

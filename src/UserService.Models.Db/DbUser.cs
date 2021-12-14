@@ -1,5 +1,4 @@
-using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Kernel.Attributes.ParseEntity;
+using LT.DigitalOffice.Kernel.BrokerSupport.Attributes.ParseEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -21,7 +20,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string City { get; set; }
     public int Status { get; set; }
     public bool IsAdmin { get; set; }
-    public DateTime? StartWorkingAt { get; set; }
     public string About { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
@@ -32,23 +30,20 @@ namespace LT.DigitalOffice.UserService.Models.Db
     [IgnoreParse]
     public DbUserCredentials Credentials { get; set; }
     [IgnoreParse]
-    public ICollection<DbUserEducation> Educations { get; set; }
+    public DbUserLocation Location { get; set; }
+    public DbUserGender UserGender { get; set; }
     [IgnoreParse]
-    public ICollection<DbUserCertificate> Certificates { get; set; }
+    public ICollection<DbUserAvatar> Avatars { get; set; }
     [IgnoreParse]
     public ICollection<DbUserCommunication> Communications { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAchievement> Achievements { get; set; }
     [IgnoreParse]
     public ICollection<DbUserSkill> Skills { get; set; }
-    [IgnoreParse]
-    public DbUserLocation Location { get; set; }
-    public DbUserGender UserGender { get; set; }
 
     public DbUser()
     {
-      Educations = new HashSet<DbUserEducation>();
-      Certificates = new HashSet<DbUserCertificate>();
+      Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
       Achievements = new HashSet<DbUserAchievement>();
       Skills = new HashSet<DbUserSkill>();
@@ -74,20 +69,12 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .IsRequired();
 
       builder
-        .Property(p => p.IsActive)
-        .IsRequired();
+        .HasMany(u => u.Avatars)
+        .WithOne(ua => ua.User);
 
       builder
         .HasOne(u => u.Credentials)
         .WithOne(uc => uc.User);
-
-      builder
-        .HasMany(u => u.Educations)
-        .WithOne(ue => ue.User);
-
-      builder
-        .HasMany(u => u.Certificates)
-        .WithOne(c => c.User);
 
       builder
         .HasMany(u => u.Communications)

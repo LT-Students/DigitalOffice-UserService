@@ -1,11 +1,11 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Achievement.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Achievement;
 using LT.DigitalOffice.UserService.Validation.Achievement.Interfaces;
 using Microsoft.AspNetCore.Http;

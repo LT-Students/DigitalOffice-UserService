@@ -49,16 +49,6 @@ namespace LT.DigitalOffice.UserService.Data
         }
       }
 
-      if (filter.IncludeCertificates)
-      {
-        dbUsers = dbUsers.Include(u => u.Certificates);
-      }
-
-      if (filter.IncludeEducations)
-      {
-        dbUsers = dbUsers.Include(u => u.Educations.Where(e => e.IsActive));
-      }
-
       if (filter.IncludeAchievements)
       {
         dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
@@ -67,6 +57,15 @@ namespace LT.DigitalOffice.UserService.Data
       if (filter.IncludeSkills)
       {
         dbUsers = dbUsers.Include(u => u.Skills).ThenInclude(s => s.Skill);
+      }
+
+      if (filter.IncludeAvatars)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars);
+      }
+      else if (filter.IncludeCurrentAvatar)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
       return dbUsers;
@@ -101,12 +100,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<DbUser> GetAsync(Guid id)
     {
-      GetUserFilter filter = new()
-      {
-        UserId = id
-      };
-
-      return await GetAsync(filter);
+      return await GetAsync(new GetUserFilter() { UserId = id });
     }
 
     public async Task<DbUser> GetAsync(GetUserFilter filter)
@@ -122,42 +116,23 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync();
     }
 
-    public async Task<List<DbUser>> GetAsync(List<Guid> userIds)
+    public async Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false)
     {
-      if (userIds == null)
+      if (usersIds is null)
       {
         return null;
       }
 
-      return await _provider.Users
-        .Where(x => userIds.Contains(x.Id))
+      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+
+      if (includeAvatars)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars);
+      }
+
+      return await dbUsers
+        .Where(x => usersIds.Contains(x.Id))
         .ToListAsync();
-    }
-
-    public async Task<List<(DbUser user, Guid? avatarId)>> GetWithAvatarsAsync(List<Guid> usersIds)
-    {
-      if (usersIds == null)
-      {
-        return null;
-      }
-
-      return (await
-        (from user in _provider.Users
-         where usersIds.Contains(user.Id)
-         join images in _provider.EntitiesImages on user.Id equals images.EntityId into userImages
-         from userImage in userImages.DefaultIfEmpty()
-         select new
-         {
-           User = user,
-           EntityImage = userImage
-         }).ToListAsync()).AsEnumerable().GroupBy(r => r.User.Id)
-         .Select(x =>
-         {
-           DbUser user = x.Select(x => x.User).FirstOrDefault();
-           Guid? id = x.Select(x => x.EntityImage).FirstOrDefault(x => x != null && x.EntityId == user.Id && x.IsCurrentAvatar)?.ImageId;
-
-           return (user, id);
-         }).ToList();
     }
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
@@ -264,6 +239,11 @@ namespace LT.DigitalOffice.UserService.Data
       if (!filter.IncludeDeactivated)
       {
         dbUsers = dbUsers.Where(u => u.IsActive);
+      }
+
+      if (!filter.IncludeCurrentAvatar)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
       return (

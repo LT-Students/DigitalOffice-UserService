@@ -2,8 +2,8 @@
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -17,7 +17,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
     public CreateUserRequestValidator(
       ICreateCommunicationRequestValidator communicationValidator,
-      IAddImageRequestValidator imageValidator)
+      ICreateAvatarRequestValidator imageValidator,
+      IPasswordValidator passwordValidator)
     {
       RuleFor(user => user.FirstName)
         .NotEmpty().WithMessage("First name cannot be empty.")
@@ -38,9 +39,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .MaximumLength(45).WithMessage("Last name is too long.")
         .Must(x => NameRegex.IsMatch(x.Trim()))
         .WithMessage("Last name contains invalid characters.");
-
-      RuleFor(user => user.PositionId)
-        .NotEmpty();
 
       When(
         user => !string.IsNullOrEmpty(user.MiddleName),
@@ -90,12 +88,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .GreaterThan(0)
         .LessThanOrEqualTo(1);
 
-      When(user => user.Password != null && user.Password.Trim().Any(), () =>
-      {
-        RuleFor(user => user.Password.Trim())
-          .MinimumLength(5).WithMessage("Password is too short.")
-          .Must(x => SpaceRegex.IsMatch(x)).WithMessage("Password must not contain space.");
-      });
+      When(
+        user => (!string.IsNullOrEmpty(user.Password)),
+        () =>
+          RuleFor(user => user.Password)
+            .SetValidator(passwordValidator)
+        );
     }
   }
 }

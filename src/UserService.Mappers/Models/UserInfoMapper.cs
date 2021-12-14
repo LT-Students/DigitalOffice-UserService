@@ -1,9 +1,8 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Position;
+﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -11,13 +10,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public UserInfo Map(
       DbUser dbUser,
+      CompanyUserData companyUserData,
+      ImageInfo avatar,
+      CompanyInfo company,
       DepartmentInfo department,
-      PositionInfo position,
-      PositionUserData positionUserData,
       OfficeInfo office,
-      RoleInfo role,
-      ImageInfo avatarImage,
-      List<ImageInfo> images = null)
+      PositionInfo position,
+      RoleInfo role)
     {
       if (dbUser == null)
       {
@@ -32,19 +31,19 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         MiddleName = dbUser.MiddleName,
         Gender = (UserGender)dbUser.Gender,
         DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
-        City = dbUser.City,
-        StartWorkingAt = dbUser.StartWorkingAt?.ToShortDateString(),
-        IsAdmin = dbUser.IsAdmin,
+        City = dbUser.City,    
         About = dbUser.About,
-        IsActive = dbUser.IsActive,
         Status = (UserStatus)dbUser.Status,
-        Rate = positionUserData?.Rate,
+        Rate = companyUserData?.Rate,
+        StartWorkingAt = companyUserData?.StartWorkingAt?.ToShortDateString(),
+        IsAdmin = dbUser.IsAdmin,
+        IsActive = dbUser.IsActive,
+        Avatar = avatar,
+        Company = company,
         Department = department,
-        Position = position,
         Office = office,
+        Position = position,
         Role = role,
-        Avatar = avatarImage,
-        Images = images
       };
     }
   }

@@ -16,14 +16,12 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUser> Users { get; set; }
     public DbSet<DbAchievement> Achievements { get; set; }
     public DbSet<DbSkill> Skills { get; set; }
-    public DbSet<DbUserCredentials> UserCredentials { get; set; }
+    public DbSet<DbUserCredentials> UsersCredentials { get; set; }
     public DbSet<DbUserSkill> UserSkills { get; set; }
     public DbSet<DbUserAchievement> UserAchievements { get; set; }
-    public DbSet<DbUserCertificate> UserCertificates { get; set; }
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
-    public DbSet<DbUserEducation> UserEducations { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
-    public DbSet<DbEntityImage> EntitiesImages { get; set; }
+    public DbSet<DbUserAvatar> UsersAvatars { get; set; }
     public DbSet<DbUserLocation> UsersLocations { get; set; }
     public DbSet<DbUserGender> UsersGenders { get; set; }
     public DbSet<DbGender> Genders { get; set; }

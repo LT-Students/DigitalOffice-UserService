@@ -1,13 +1,14 @@
-﻿using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -28,10 +29,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
     private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
-
 
     public EditUserCommand(
       IUserRepository userRepository,
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreater responseCreater,
+      IResponseCreator responseCreater,
       ICacheNotebook cacheNotebook,
       IBus bus)
     {
@@ -58,16 +58,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
-      Operation<EditUserRequest> isStartTimeOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.StartWorkingAt), StringComparison.OrdinalIgnoreCase));
 
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
       if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
         await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
         (userId == requestSenderId
-        && isActiveOperation == null
-        && isStartTimeOperation is null)))
+        && isActiveOperation == null)))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
