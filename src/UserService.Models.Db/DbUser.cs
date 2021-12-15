@@ -15,12 +15,9 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public int Gender { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string City { get; set; }
+    public int Gender { get; set; }  
     public int Status { get; set; }
-    public bool IsAdmin { get; set; }
-    public string About { get; set; }
+    public bool IsAdmin { get; set; } 
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
@@ -29,8 +26,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
     [IgnoreParse]
     public DbUserCredentials Credentials { get; set; }
-    [IgnoreParse]
-    public DbUserLocation Location { get; set; }
     public DbUserGender UserGender { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAvatar> Avatars { get; set; }
@@ -87,10 +82,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasMany(u => u.Skills)
         .WithOne(us => us.User);
-
-      builder
-        .HasOne(u => u.Location)
-        .WithOne(ul => ul.User);
 
       builder
         .HasOne(u => u.UserGender)

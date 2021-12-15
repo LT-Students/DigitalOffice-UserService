@@ -22,9 +22,9 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbUserAvatar> UsersAvatars { get; set; }
-    public DbSet<DbUserLocation> UsersLocations { get; set; }
     public DbSet<DbUserGender> UsersGenders { get; set; }
     public DbSet<DbGender> Genders { get; set; }
+    public DbSet<DbUserAddition> UsersAdditions { get; set; }
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
       : base(options)

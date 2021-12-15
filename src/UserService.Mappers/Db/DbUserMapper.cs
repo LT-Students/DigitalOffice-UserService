@@ -38,11 +38,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         LastName = request.LastName.Trim(),
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
         Gender = (int)request.Gender,
-        City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
         Status = (int)request.Status,
         IsAdmin = request.IsAdmin ?? false,
         IsActive = false,
-        DateOfBirth = request.DateOfBirth,
         CreatedBy = createdBy,
         CreatedAtUtc = createdAtUtc,
         Communications = request.Communications?.Select(x => new DbUserCommunication
