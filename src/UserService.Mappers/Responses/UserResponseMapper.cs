@@ -44,7 +44,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       OfficeInfo office,
       PositionInfo position,
       List<ProjectInfo> projects,
-      RoleInfo role)
+      RoleInfo role,
+      List<UserSkillInfo> skills)
     {
       if (dbUser == null)
       {
@@ -74,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           }),
         Educations = educations,
         Projects = projects,
-        Skills = dbUser.Skills.Select(s => s.Skill.Name)
+        Skills = skills
       };
     }
   }

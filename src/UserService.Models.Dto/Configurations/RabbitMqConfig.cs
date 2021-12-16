@@ -10,6 +10,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
+using LT.DigitalOffice.Models.Broker.Requests.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
@@ -34,6 +35,9 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
     [AutoInjectRequest(typeof(IGetUserEducationsRequest))]
     public string GetUserEducationsEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IGetUserSkillsRequest))]
+    public string GetUserSkillsEndpoint { get; set; }
 
     // project
 

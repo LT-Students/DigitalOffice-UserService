@@ -32,10 +32,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
 
-    DbSkill FindSkillByName(string name);
-
-    Task<Guid> CreateSkillAsync(string name);
-
     Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
 
     Task<bool> IsUserExistAsync(Guid userId);
