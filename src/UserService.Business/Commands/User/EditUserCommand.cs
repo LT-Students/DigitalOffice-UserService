@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreator _responseCreater;
+    private readonly IResponseCreator _responseCreator;
     private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
 
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreator responseCreater,
+      IResponseCreator responseCreator,
       ICacheNotebook cacheNotebook,
       IBus bus)
     {
@@ -48,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
       _cacheNotebook = cacheNotebook;
       _bus = bus;
     }
@@ -56,17 +56,30 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
+      Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+
+      bool isAdmin = await _accessValidator.IsAdminAsync(userId);
+      bool isAddEditRemoveUsers = await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers);
+
+      if (!isAddEditRemoveUsers && userId != requestSenderId)
+      {
+        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+      }
+
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
-      Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+      Operation<EditUserRequest> isAdminOperation = patch.Operations.FirstOrDefault(
+        o => o.path.EndsWith(nameof(EditUserRequest.IsAdmin), StringComparison.OrdinalIgnoreCase));
 
-      if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
-        await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
-        (userId == requestSenderId
-        && isActiveOperation == null)))
+      Operation<EditUserRequest> isGenderOperation = patch.Operations.FirstOrDefault(
+        o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
+
+      if ((isActiveOperation is not null && !isAddEditRemoveUsers) || 
+        (isAdminOperation is not null && !isAdmin) || 
+        (isGenderOperation is not null && userId != requestSenderId))
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       OperationResultResponse<bool> response = new();

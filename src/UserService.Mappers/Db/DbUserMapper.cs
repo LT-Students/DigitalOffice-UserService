@@ -37,7 +37,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         FirstName = request.FirstName.Trim(),
         LastName = request.LastName.Trim(),
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
-        Gender = (int)request.Gender,
         Status = (int)request.Status,
         IsAdmin = request.IsAdmin ?? false,
         IsActive = false,

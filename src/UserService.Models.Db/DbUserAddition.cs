@@ -10,7 +10,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string? About { get; set; }
+    public Guid? GenderId { get; set; } 
+    public string About { get; set; } 
     public DateTime? DateOfBirth { get; set; }
     public double? Latitude { get; set; } 
     public double? Longitude { get; set; } 

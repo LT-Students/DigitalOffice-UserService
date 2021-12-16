@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
     public JsonPatchDocument<DbUser> Map(
       JsonPatchDocument<EditUserRequest> request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }
@@ -28,16 +28,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
         if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
         {
           result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserStatus), item.value.ToString())));
-          continue;
-        }
-        if (item.path.EndsWith(nameof(EditUserRequest.Gender), StringComparison.OrdinalIgnoreCase))
-        {
-          result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserGender), item.value.ToString())));
-          continue;
-        }
-        if (item.path.EndsWith(nameof(EditUserRequest.DateOfBirth), StringComparison.OrdinalIgnoreCase))
-        {
-          result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, DateTime.TryParse(value(item), out DateTime date) ? date : null));
           continue;
         }
 

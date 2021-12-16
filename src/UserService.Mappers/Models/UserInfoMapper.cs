@@ -29,7 +29,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         FirstName = dbUser.FirstName,
         LastName = dbUser.LastName,
         MiddleName = dbUser.MiddleName,
-        Gender = (UserGender)dbUser.Gender,
         
         Status = (UserStatus)dbUser.Status,
         Rate = companyUserData?.Rate,
