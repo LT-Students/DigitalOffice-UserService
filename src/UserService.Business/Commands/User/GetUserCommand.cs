@@ -11,6 +11,7 @@ using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Education;
@@ -74,40 +75,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IResponseCreator _responseCreator;
 
     #region private methods
-
-    private async Task<IGetUserSkillsResponse> GetSkillsAsync(
-      Guid userId,
-      List<string> errors)
-    {
-      const string errorMessage = "Can not get skills info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetUserSkillsResponse>> response = await _rcGetSkills
-          .GetResponse<IOperationResult<IGetUserSkillsResponse>>(
-            IGetUserSkillsRequest.CreateObj(userId: userId));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Skills were taken from the service. User id: {UserId}", string.Join(", ", userId));
-
-          return response.Message.Body;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting skills info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
-    }
 
     private async Task<IGetUserEducationsResponse> GetEducationsAsync(
       Guid userId,
@@ -491,6 +458,38 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
+    private async Task<List<UserSkillData>> GetSkillsAsync(Guid userId, List<string> errors)
+    {
+      const string errorMessage = "Can not get skills info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetUserSkillsResponse>> response = await _rcGetSkills
+          .GetResponse<IOperationResult<IGetUserSkillsResponse>>(
+            IGetUserSkillsRequest.CreateObj(userId: userId));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Skills were taken from the service. User id: {UserId}", string.Join(", ", userId));
+
+          return response.Message.Body.Skills;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting skills info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
+
     #endregion
 
     public GetUserCommand(
@@ -570,10 +569,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       List<Guid> usersIds = new() { dbUser.Id };
 
-      Task<IGetUserSkillsResponse> skillsTask = filter.IncludeSkills
-        ? GetSkillsAsync(dbUser.Id, response.Errors)
-        : Task.FromResult(null as IGetUserSkillsResponse);
-
       Task<IGetUserEducationsResponse> educationsTask = filter.IncludeEducations
         ? GetEducationsAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as IGetUserEducationsResponse);
@@ -606,7 +601,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
 
-      await Task.WhenAll(skillsTask, educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask);
+      Task<List<UserSkillData>> skillsTask = filter.IncludeSkills
+        ? GetSkillsAsync(dbUser.Id, response.Errors)
+        : Task.FromResult(null as List<UserSkillData>);
+
+      await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask, skillsTask);
 
       IGetUserEducationsResponse educations = await educationsTask;
       List<CompanyData> companies = await companiesTask;
@@ -616,7 +615,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<PositionData> positions = await positionsTask;
       List<ProjectData> projects = await projectsTask;
       List<RoleData> roles = await rolesTask;
-      IGetUserSkillsResponse skills = await skillsTask;
+      List<UserSkillData> skills = await skillsTask;
 
       response.Body = _mapper.Map(
         dbUser,
@@ -631,7 +630,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _positionMapper.Map(positions?.FirstOrDefault()),
         projects?.Select(_projectMapper.Map).ToList(),
         _roleMapper.Map(roles?.FirstOrDefault()),
-        skills?.Skills?.Select(_skillMapper.Map).ToList());
+        skills?.Select(_skillMapper.Map).ToList());
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess
