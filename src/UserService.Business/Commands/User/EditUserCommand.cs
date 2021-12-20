@@ -61,10 +61,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
-        await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
-        (userId == requestSenderId
-        && isActiveOperation == null)))
+      if ((!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) && userId != requestSenderId) ||
+        (isActiveOperation != null && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
