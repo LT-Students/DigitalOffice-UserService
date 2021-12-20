@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
     public DbUser Map(CreateUserRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }
@@ -50,7 +50,21 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           UserId = userId,
           CreatedBy = createdBy,
           CreatedAtUtc = createdAtUtc
-        }).ToList()
+        }).ToList(),
+        Addition = new DbUserAddition
+        {
+          Id = Guid.NewGuid(),
+          UserId = userId,
+          GenderId = null,
+          About = request.About,
+          DateOfBirth = request.DateOfBirth,
+          Latitude = request.Latitude,
+          Longitude = request.Longitude,
+          BusinessHoursFromUtc = request.BusinessHoursFromUtc,
+          BusinessHoursToUtc = request.BusinessHoursToUtc,
+          ModifiedBy = createdBy,
+          ModifiedAtUtc = createdAtUtc
+        }
       };
 
       return dbUser;
@@ -87,6 +101,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             CreatedBy = userId,
             CreatedAtUtc = createdAtUtc
           }
+        },
+        Addition = new DbUserAddition
+        {
+          Id = Guid.NewGuid(),
+          UserId = userId,
+          GenderId = null,
+          About = null,
+          DateOfBirth = null,
+          Latitude = null,
+          Longitude = null,
+          BusinessHoursFromUtc = null,
+          BusinessHoursToUtc = null,
+          ModifiedBy = userId,
+          ModifiedAtUtc = createdAtUtc
         }
       };
     }

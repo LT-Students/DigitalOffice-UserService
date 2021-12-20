@@ -24,6 +24,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DateTime? ModifiedAtUtc { get; set; }
 
     [IgnoreParse]
+    public DbUserAddition Addition { get; set; }
+    [IgnoreParse]
     public DbUserCredentials Credentials { get; set; }
     public DbUserGender UserGender { get; set; }
     [IgnoreParse]
@@ -37,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 
     public DbUser()
     {
+      Addition = new DbUserAddition();
       Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
       Achievements = new HashSet<DbUserAchievement>();
@@ -85,6 +88,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasOne(u => u.UserGender)
         .WithOne(ug => ug.User);
+
+      builder
+        .HasOne(u => u.Addition)
+        .WithOne(ua => ua.User);
     }
   }
 }

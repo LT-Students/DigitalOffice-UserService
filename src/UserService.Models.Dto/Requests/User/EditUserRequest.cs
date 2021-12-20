@@ -11,12 +11,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User
     public bool IsAdmin { get; set; }
     public string About { get; set; }
     public Guid? GenderId { get; set; }
-    public DateTime? DateOfBirth { get; set; } 
-    public UserStatus Status { get; set; }     
+    public DateTime? DateOfBirth { get; set; }
+    public UserStatus Status { get; set; }
     public bool IsActive { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    public DateTime? BusinessHoursFromUtc { get; set; } 
-    public DateTime? BusinessHoursToUtc { get; set; }   
+    public DateTime? BusinessHoursFromUtc { get; set; }
+    public DateTime? BusinessHoursToUtc { get; set; }
   }
 }

@@ -9,6 +9,7 @@ using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -75,7 +76,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> isGenderOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
 
-      if ((isActiveOperation is not null && !isAddEditRemoveUsers) || 
+      if ((!isAddEditRemoveUsers && userId != requestSenderId) ||
+        (isActiveOperation is not null && !isAddEditRemoveUsers) || 
         (isAdminOperation is not null && !isAdmin) || 
         (isGenderOperation is not null && userId != requestSenderId))
       {
@@ -102,7 +104,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      response.Body = await _userRepository.EditUserAsync(userId, _mapperUser.Map(patch));
+      (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) = _mapperUser.Map(patch);
+
+      if (dbUserPatch.Operations.Any())
+      {
+        response.Body = await _userRepository.EditUserAsync(userId, dbUserPatch);
+
+        if (!response.Body)
+        {
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        }
+      }
+
+      if (dbUserAdditionPatch.Operations.Any())
+      {
+        response.Body = await _userRepository.EditUserAdditionAsync(userId, dbUserAdditionPatch);
+
+        if (!response.Body)
+        {
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        }
+      }
 
       await _cacheNotebook.RemoveAsync(userId);
 

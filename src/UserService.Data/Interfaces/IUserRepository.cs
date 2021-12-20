@@ -30,6 +30,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task CreatePendingAsync(DbPendingUser dbPendingUser);
 
+    Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch);
+
     Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
 
     DbSkill FindSkillByName(string name);

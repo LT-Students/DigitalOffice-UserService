@@ -81,7 +81,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<Guid> CreateAsync(DbUser dbUser)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return default;
       }
@@ -146,6 +146,28 @@ namespace LT.DigitalOffice.UserService.Data
         .Where(u => usersIds.Contains(u.Id) && u.IsActive)
         .Select(u => u.Id)
         .ToListAsync();
+    }
+
+    public async Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch)
+    {
+      if (patch is null)
+      {
+        return false;
+      }
+
+      DbUserAddition dbUserAddition = await _provider.UsersAdditions
+        .FirstOrDefaultAsync(x => x.UserId == userId);
+
+      if (dbUserAddition == default)
+      {
+        return false;
+      }
+
+      patch.ApplyTo(dbUserAddition);
+      dbUserAddition.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+      dbUserAddition.ModifiedAtUtc = DateTime.UtcNow;
+      await _provider.SaveAsync();
+      return true;
     }
 
     public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)

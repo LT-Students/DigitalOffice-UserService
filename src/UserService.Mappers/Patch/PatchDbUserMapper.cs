@@ -10,31 +10,43 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
 {
   public class PatchDbUserMapper : IPatchDbUserMapper
   {
-    public JsonPatchDocument<DbUser> Map(
-      JsonPatchDocument<EditUserRequest> request)
+    public (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) Map(
+     JsonPatchDocument<EditUserRequest> request)
     {
+
       if (request is null)
       {
-        return null;
+        return (null, null);
       }
 
-      var result = new JsonPatchDocument<DbUser>();
+      JsonPatchDocument<DbUser> dbUserPatch = new();
+      JsonPatchDocument<DbUserAddition> dbUserAdditionPatch = new();
 
       Func<Operation<EditUserRequest>, string> value = item => !string.IsNullOrEmpty(item.value?.ToString().Trim())
           ? item.value.ToString().Trim() : null;
 
       foreach (Operation<EditUserRequest> item in request.Operations)
       {
-        if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
+        if (item.path.EndsWith(nameof(EditUserRequest.FirstName)) ||
+         item.path.EndsWith(nameof(EditUserRequest.LastName)) ||
+         item.path.EndsWith(nameof(EditUserRequest.MiddleName)) ||
+         item.path.EndsWith(nameof(EditUserRequest.IsActive)) ||
+         item.path.EndsWith(nameof(EditUserRequest.IsAdmin)))
         {
-          result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserStatus), item.value.ToString())));
+          dbUserPatch.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
           continue;
         }
 
-        result.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));
+        if (item.path.EndsWith(nameof(EditUserRequest.Status), StringComparison.OrdinalIgnoreCase))
+        {
+          dbUserPatch.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, (int)Enum.Parse(typeof(UserStatus), item.value.ToString())));
+          continue;
+        }      
+
+        dbUserAdditionPatch.Operations.Add(new Operation<DbUserAddition>(item.op, item.path, item.from, String.IsNullOrEmpty(item.value?.ToString())? null : item.value));
       }
 
-      return result;
+      return (dbUserPatch, dbUserAdditionPatch);
     }
   }
 }

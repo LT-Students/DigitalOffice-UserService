@@ -11,9 +11,12 @@ namespace LT.DigitalOffice.UserService.Models.Dto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public UserGender Gender { get; set; }
+    public string About { get; set; } 
     public DateTime? DateOfBirth { get; set; }
-    public string City { get; set; }
+    public double? Latitude { get; set; } 
+    public double? Longitude { get; set; }
+    public DateTime? BusinessHoursFromUtc { get; set; }
+    public DateTime? BusinessHoursToUtc { get; set; }
     public CreateAvatarRequest AvatarImage { get; set; }
     public UserStatus Status { get; set; }
     public bool? IsAdmin { get; set; }

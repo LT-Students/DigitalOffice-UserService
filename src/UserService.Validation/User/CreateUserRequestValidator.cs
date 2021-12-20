@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using System;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -53,30 +54,34 @@ namespace LT.DigitalOffice.UserService.Validation.User
             .WithMessage("Middle name contains invalid characters."));
 
       When(
-        user => !string.IsNullOrEmpty(user.City),
-        () =>
-          RuleFor(user => user.City)
-            .Must(x => !NumberRegex.IsMatch(x))
-            .WithMessage("City name must not contain numbers.")
-            .Must(x => !SpecialCharactersRegex.IsMatch(x))
-            .WithMessage("City name must not contain special characters.")
-            .MaximumLength(32)
-            .WithMessage("City name is too long.")
-            .Must(x => NameRegex.IsMatch(x.Trim()))
-            .WithMessage("City name contains invalid characters."));
-
-      When(
         user => (user.AvatarImage != null),
         () =>
           RuleFor(user => user.AvatarImage)
             .SetValidator(imageValidator)
         );
 
-      RuleFor(user => user.Gender)
-        .IsInEnum().WithMessage("Wrong gender value.");
-
       RuleFor(user => user.Status)
         .IsInEnum().WithMessage("Wrong status value.");
+
+      When(user => user.About != null, () =>
+      {
+        RuleFor(user => user.About)
+          .MaximumLength(150).WithMessage("About is too long.");
+      });
+
+      When(user => user.BusinessHoursFromUtc != null, () =>
+      {
+        RuleFor(user => user.BusinessHoursFromUtc)
+          .Must(x => DateTime.TryParse("hh:mm tt", out DateTime result))
+          .WithMessage("Incorrect time format.");
+      });
+
+      When(user => user.BusinessHoursToUtc != null, () =>
+      {
+        RuleFor(user => user.BusinessHoursToUtc)
+          .Must(x => DateTime.TryParse("hh:mm tt", out DateTime result))
+          .WithMessage("Incorrect time format.");
+      });
 
       RuleFor(user => user.Communications)
         .NotEmpty();
