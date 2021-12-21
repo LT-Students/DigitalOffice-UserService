@@ -396,7 +396,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         Response<IOperationResult<IGetProjectsResponse>> response = await _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
-          IGetProjectsRequest.CreateObj(userId: userId));
+          IGetProjectsRequest.CreateObj(userId: userId, includeUsers: true));
 
         if (response.Message.IsSuccess)
         {
@@ -582,7 +582,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         images?.Select(_imageMapper.Map).ToList(),
         _officeMapper.Map(offices?.FirstOrDefault()),
         _positionMapper.Map(positions?.FirstOrDefault()),
-        projects?.Select(_projectMapper.Map).ToList(),
+        projects?.Where(p => p.Users.FirstOrDefault(pu => pu.UserId == dbUser.Id && pu.IsActive) != default).Select(_projectMapper.Map).ToList(),
         _roleMapper.Map(roles?.FirstOrDefault()));
 
       response.Status = response.Errors.Any()
