@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       return new DbUserCredentials
       {
         Id = Guid.NewGuid(),
-        Login = request.Login,
+        Login = request.Login.Trim(),
         Salt = salt,
         UserId = request.UserId,
         PasswordHash = passwordHash,
