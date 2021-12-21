@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
       IUserRepository userRepository,
       IUserCredentialsRepository credentialsRepository)
     {
-      RuleFor(request => request.Login)
+      RuleFor(request => request.Login.Trim())
         .Cascade(CascadeMode.Stop)
         .NotEmpty().WithMessage("Login can't be empty.")
         .Must(login => char.IsLetter(login[0])).WithMessage("Login must start with letter.")
