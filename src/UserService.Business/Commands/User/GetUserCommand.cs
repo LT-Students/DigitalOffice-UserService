@@ -385,9 +385,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       (List<ProjectData> projects, int _) = await _redisHelper.GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
 
-      return //projects
-        //??
-        await GetProjectsThroughBroker(userId, errors);
+      return projects
+        ?? await GetProjectsThroughBroker(userId, errors);
     }
 
     private async Task<List<ProjectData>> GetProjectsThroughBroker(Guid userId, List<string> errors)
