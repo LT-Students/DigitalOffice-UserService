@@ -48,19 +48,9 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "Lastname"),
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.Gender)}",
-                    "",
-                    UserGender.NotSelected),
-                new Operation<EditUserRequest>(
-                    "replace",
                     $"/{nameof(EditUserRequest.DateOfBirth)}",
                     "",
                     _dateOfBirth),
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.City)}",
-                    "",
-                    "City"),
                 new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.Status)}",
@@ -88,19 +78,9 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "Lastname"),
                 new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUser.Gender)}",
-                    "",
-                    (int)UserGender.NotSelected),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.DateOfBirth)}",
+                    $"/{nameof(DbUserAddition.DateOfBirth)}",
                     "",
                     DateTime.Parse(_dateOfBirth)),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.City)}",
-                    "",
-                    "City"),
                 new Operation<DbUser>(
                     "replace",
                     $"/{nameof(DbUser.Status)}",
