@@ -78,11 +78,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "Lastname"),
                 new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUserAddition.DateOfBirth)}",
-                    "",
-                    DateTime.Parse(_dateOfBirth)),
-                new Operation<DbUser>(
-                    "replace",
                     $"/{nameof(DbUser.Status)}",
                     "",
                     (int)UserStatus.Vacation)
