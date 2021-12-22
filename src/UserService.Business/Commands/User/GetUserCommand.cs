@@ -294,7 +294,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      List<DepartmentData> departments = await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
+      //to do implement update cache
+      List<DepartmentData> departments = null;//await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
 
       if (departments != null)
       {
