@@ -18,7 +18,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
     private JsonPatchDocument<EditUserRequest> _request;
     private JsonPatchDocument<DbUser> _result;
-    private string _dateOfBirth = "2000-01-01";
 
     private Guid? _imageId;
 
@@ -46,11 +45,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     $"/{nameof(EditUserRequest.LastName)}",
                     "",
                     "Lastname"),
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.DateOfBirth)}",
-                    "",
-                    _dateOfBirth),
                 new Operation<EditUserRequest>(
                     "replace",
                     $"/{nameof(EditUserRequest.Status)}",
@@ -92,10 +86,10 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         SerializerAssert.AreEqual(_result, dbUserPatch);
     }*/
 
-    [Test]
-    public void ShouldThrowExceptionWhenRequestNull()
-    {
-      Assert.Null(_mapper.Map(null));
-    }
+    //[Test]
+    //public void ShouldThrowExceptionWhenRequestNull()
+    //{
+    //  Assert.Null(_mapper.Map(null));
+    //}
   }
 }
