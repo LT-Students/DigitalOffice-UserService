@@ -154,10 +154,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
           DateTime.TryParse(x.value.ToString(), out DateTime result),
         "Incorrect format of BusinessHoursFromUtc."
         },
-        {
-          x => DateTime.TryParse("hh:mm tt", out DateTime result),
-          "Incorrect format of BusinessHoursFromUtc."
-        }
+        //{       
+        //  x => DateTime.TryParse("hh:mm tt", out DateTime result),
+        //  "Incorrect format of BusinessHoursFromUtc."
+        //}
       });
 
       #endregion
@@ -171,12 +171,13 @@ namespace LT.DigitalOffice.UserService.Validation.User
       {
         { x => string.IsNullOrEmpty(x.value?.ToString())? true :
           DateTime.TryParse(x.value.ToString(), out DateTime result),
-        "Incorrect format of BusinessHoursToUtc."
+         "Incorrect format of BusinessHoursToUtc."
         },
-        {
-          x => DateTime.TryParse("hh:mm tt", out DateTime result),
-          "Incorrect format of BusinessHoursToUtc."
-        }
+        //{
+        //  x => string.IsNullOrEmpty(x.value?.ToString())? true :
+        //  DateTime.TryParse("hh:mm tt", out DateTime result),
+        //  "Incorrect format of BusinessHoursToUtc."
+        //}
       });
 
       #endregion
@@ -212,7 +213,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => Guid.TryParse(x.value?.ToString(), out Guid _) || String.IsNullOrEmpty(x.value.ToString()), "Incorrect format of GenderId." }, //проверить на null
+          { x => Guid.TryParse(x.value?.ToString(), out Guid _) || String.IsNullOrEmpty(x.value?.ToString()), "Incorrect format of GenderId." },
         });
 
       #endregion

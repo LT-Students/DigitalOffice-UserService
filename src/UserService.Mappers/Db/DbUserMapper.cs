@@ -34,8 +34,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       DbUser dbUser = new()
       {
         Id = userId,
-        FirstName = request.FirstName.Trim(),
-        LastName = request.LastName.Trim(),
+        FirstName = request.FirstName,
+        LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
         Status = (int)request.Status,
         IsAdmin = request.IsAdmin ?? false,
@@ -85,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         Id = userId,
         FirstName = request.FirstName,
         LastName = request.LastName,
-        MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
+        MiddleName = !string.IsNullOrEmpty(request.MiddleName) ? request.MiddleName : null,
         Status = (int)UserStatus.WorkFromOffice,
         IsActive = true,
         IsAdmin = true,

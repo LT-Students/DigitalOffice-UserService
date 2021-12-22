@@ -62,11 +62,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       bool isAdmin = await _accessValidator.IsAdminAsync(userId);
       bool isAddEditRemoveUsers = await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers);
 
-      if (!isAddEditRemoveUsers && userId != requestSenderId)
-      {
-        _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
-      }
-
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
@@ -77,7 +72,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
 
       if ((!isAddEditRemoveUsers && userId != requestSenderId) ||
-        (isActiveOperation is not null && !isAddEditRemoveUsers) || 
+        (isActiveOperation is not null && (!isAddEditRemoveUsers || !isAdmin)) || 
         (isAdminOperation is not null && !isAdmin) || 
         (isGenderOperation is not null && userId != requestSenderId))
       {
@@ -91,17 +86,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         bool newValue = bool.Parse(isActiveOperation.value.ToString());
 
         bool switchActiveStatusResult = await _credentialsRepository.SwitchActiveStatusAsync(userId, newValue);
-
-        if (!switchActiveStatusResult)
-        {
-          response.Errors.Add("Can not change is active status.");
-        }
-        else if (!newValue)
-        {
-          await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
-            userId,
-            requestSenderId));
-        }
       }
 
       (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) = _mapperUser.Map(patch);

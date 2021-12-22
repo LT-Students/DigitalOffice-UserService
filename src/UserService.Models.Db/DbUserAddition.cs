@@ -22,15 +22,19 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DbUser User { get; set; }
   }
 
-  public class UserAdditionConfiguration : IEntityTypeConfiguration<DbUserAddition>
+  public class DbUserAdditionConfiguration : IEntityTypeConfiguration<DbUserAddition>
   {
     public void Configure(EntityTypeBuilder<DbUserAddition> builder)
-    {
+    { 
+      builder
+        .ToTable(DbUserAddition.TableName);
+
       builder
         .HasKey(x => x.Id);
 
       builder
-        .ToTable(DbUserAddition.TableName);
+        .HasOne(ua => ua.User)
+        .WithOne(u => u.Addition);
     }
   }
 }
