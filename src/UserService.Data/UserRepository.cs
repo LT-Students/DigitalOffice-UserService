@@ -241,7 +241,7 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Where(u => u.IsActive);
       }
 
-      if (!filter.IncludeCurrentAvatar)
+      if (filter.IncludeCurrentAvatar)
       {
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
