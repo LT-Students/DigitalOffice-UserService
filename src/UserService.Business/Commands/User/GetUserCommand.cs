@@ -630,8 +630,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _officeMapper.Map(offices?.FirstOrDefault()),
         _positionMapper.Map(positions?.FirstOrDefault()),
         projects?.Where(p => p.Users.FirstOrDefault(pu => pu.UserId == dbUser.Id && pu.IsActive) != default).Select(_projectMapper.Map).ToList(),
-        _roleMapper.Map(roles?.FirstOrDefault()));
-        projects?.Select(_projectMapper.Map).ToList(),
         _roleMapper.Map(roles?.FirstOrDefault()),
         skills?.Select(_skillMapper.Map).ToList());
 
