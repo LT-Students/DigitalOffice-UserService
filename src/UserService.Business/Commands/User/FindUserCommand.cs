@@ -480,7 +480,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return _mapper.Map(
             dbUser,
             companyInfo?.Users.FirstOrDefault(cu => cu.UserId == dbUser.Id),
-            _imageInfoMapper.Map(images?.FirstOrDefault(i => i.ImageId == dbUser.Avatars?.FirstOrDefault().AvatarId)),
+            _imageInfoMapper.Map(images?.FirstOrDefault(i => i.ImageId == dbUser.Avatars.FirstOrDefault()?.AvatarId)),
             _companyInfoMapper.Map(companyInfo),
             _departmentInfoMapper.Map(departments?.FirstOrDefault(d => d.UsersIds.Contains(dbUser.Id))),
             _officeInfoMapper.Map(offices?.FirstOrDefault(x => x.UsersIds.Contains(dbUser.Id))),
