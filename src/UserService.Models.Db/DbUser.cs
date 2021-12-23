@@ -38,15 +38,12 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserCommunication> Communications { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAchievement> Achievements { get; set; }
-    [IgnoreParse]
-    public ICollection<DbUserSkill> Skills { get; set; }
 
     public DbUser()
     {
       Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
       Achievements = new HashSet<DbUserAchievement>();
-      Skills = new HashSet<DbUserSkill>();
     }
   }
 
@@ -83,10 +80,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasMany(u => u.Achievements)
         .WithOne(ua => ua.User);
-
-      builder
-        .HasMany(u => u.Skills)
-        .WithOne(us => us.User);
 
       builder
         .HasOne(u => u.Location)

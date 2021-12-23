@@ -2,9 +2,7 @@
 using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
-using System;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
@@ -24,6 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
       OfficeInfo office,
       PositionInfo position,
       List<ProjectInfo> projects,
-      RoleInfo role);
+      RoleInfo role,
+      List<UserSkillInfo> skills);
   }
 }

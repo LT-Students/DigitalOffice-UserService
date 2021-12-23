@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             builder.CreateTable(
-                name: DbSkill.TableName,
+                name: "Skills",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -198,7 +198,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             builder.CreateTable(
-                name: DbUserSkill.TableName,
+                name: "UserSkills",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),

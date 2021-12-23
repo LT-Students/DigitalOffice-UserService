@@ -13,10 +13,8 @@ using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.Skill;
 using LT.DigitalOffice.UserService.Validation.User;
 using MassTransit;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
@@ -234,7 +232,7 @@ namespace LT.DigitalOffice.UserService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.4.1.0";
+      Version = "1.4.2.0";
       Description = "UserService is an API that intended to work with users.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
@@ -329,7 +327,6 @@ namespace LT.DigitalOffice.UserService
       //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
-      services.AddScoped<IValidator<CreateSkillRequest>, CreateSkillRequestValidator>();
 
       services.AddTransient<ICacheNotebook, CacheNotebook>();
 
