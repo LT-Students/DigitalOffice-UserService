@@ -446,7 +446,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         : Task.FromResult(null as List<DepartmentData>);
 
       Task<List<ImageData>> imagesTask = filter.IncludeCurrentAvatar
-        ? GetImagesAsync(dbUsers.Select(u => u.Avatars?.FirstOrDefault())?.Select(ua => ua.AvatarId).ToList(), response.Errors)
+        ? GetImagesAsync(dbUsers.Where(u => u.Avatars.Any()).Select(u => u.Avatars.FirstOrDefault()).Select(ua => ua.AvatarId).ToList(), response.Errors)
         : Task.FromResult(null as List<ImageData>);
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
