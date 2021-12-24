@@ -153,11 +153,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         { x => string.IsNullOrEmpty(x.value?.ToString())? true :
           DateTime.TryParse(x.value.ToString(), out DateTime result),
         "Incorrect format of BusinessHoursFromUtc."
-        },
-        //{       
-        //  x => DateTime.TryParse("hh:mm tt", out DateTime result),
-        //  "Incorrect format of BusinessHoursFromUtc."
-        //}
+        }
       });
 
       #endregion
@@ -172,12 +168,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         { x => string.IsNullOrEmpty(x.value?.ToString())? true :
           DateTime.TryParse(x.value.ToString(), out DateTime result),
          "Incorrect format of BusinessHoursToUtc."
-        },
-        //{
-        //  x => string.IsNullOrEmpty(x.value?.ToString())? true :
-        //  DateTime.TryParse("hh:mm tt", out DateTime result),
-        //  "Incorrect format of BusinessHoursToUtc."
-        //}
+        }
       });
 
       #endregion

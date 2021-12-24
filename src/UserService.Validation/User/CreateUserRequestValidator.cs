@@ -69,20 +69,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           .MaximumLength(150).WithMessage("About is too long.");
       });
 
-      When(user => user.BusinessHoursFromUtc != null, () =>
-      {
-        RuleFor(user => user.BusinessHoursFromUtc)
-          .Must(x => DateTime.TryParse("hh:mm tt", out DateTime result))
-          .WithMessage("Incorrect time format.");
-      });
-
-      When(user => user.BusinessHoursToUtc != null, () =>
-      {
-        RuleFor(user => user.BusinessHoursToUtc)
-          .Must(x => DateTime.TryParse("hh:mm tt", out DateTime result))
-          .WithMessage("Incorrect time format.");
-      });
-
       RuleFor(user => user.Communications)
         .NotEmpty();
 
