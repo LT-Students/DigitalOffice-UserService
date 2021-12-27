@@ -220,7 +220,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
 
-      if (filter.IncludeDeactivated)
+      if (!filter.IncludeDeactivated)
       {
         dbUsers = dbUsers.Where(u => u.IsActive);
       }
