@@ -79,10 +79,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .WithOne(ua => ua.User);
 
       builder
-        .HasMany(u => u.Skills)
-        .WithOne(us => us.User);
-
-      builder
         .HasOne(u => u.UserGender)
         .WithOne(ug => ug.User);
 
