@@ -204,7 +204,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => Guid.TryParse(x.value?.ToString(), out Guid _) || String.IsNullOrEmpty(x.value?.ToString()), "Incorrect format of GenderId." },
+          { x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            Guid.TryParse(x.value.ToString(), out Guid result), 
+            "Incorrect format of GenderId." },
         });
 
       #endregion
@@ -216,7 +218,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          { x => double.TryParse(x.value?.ToString(), out double _) || String.IsNullOrEmpty(x.value.ToString()), "Incorrect format of Latitude." },
+          { x => string.IsNullOrEmpty(x.value?.ToString())? true :
+            Guid.TryParse(x.value.ToString(), out Guid result),
+            "Incorrect format of Latitude." },
         });
 
       #endregion
@@ -228,7 +232,9 @@ namespace LT.DigitalOffice.UserService.Validation.User
        x => x == OperationType.Replace,
        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
        {
-          { x => double.TryParse(x.value?.ToString(), out double _) || String.IsNullOrEmpty(x.value.ToString()), "Incorrect format of Longitude." },
+         { x => string.IsNullOrEmpty(x.value?.ToString())? true :
+           Guid.TryParse(x.value.ToString(), out Guid result),
+           "Incorrect format of Longitude." },
        });
 
       #endregion
