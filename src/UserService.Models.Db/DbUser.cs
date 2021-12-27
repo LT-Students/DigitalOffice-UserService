@@ -34,8 +34,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public ICollection<DbUserCommunication> Communications { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAchievement> Achievements { get; set; }
-    [IgnoreParse]
-    public ICollection<DbUserSkill> Skills { get; set; }
 
     public DbUser()
     {
@@ -43,7 +41,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
       Achievements = new HashSet<DbUserAchievement>();
-      Skills = new HashSet<DbUserSkill>();
     }
   }
 

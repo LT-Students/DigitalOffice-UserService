@@ -11,6 +11,7 @@ using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Education;
@@ -19,6 +20,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
+using LT.DigitalOffice.Models.Broker.Requests.Skill;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Department;
 using LT.DigitalOffice.Models.Broker.Responses.Education;
@@ -27,6 +29,7 @@ using LT.DigitalOffice.Models.Broker.Responses.Office;
 using LT.DigitalOffice.Models.Broker.Responses.Position;
 using LT.DigitalOffice.Models.Broker.Responses.Project;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
+using LT.DigitalOffice.Models.Broker.Responses.Skill;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
@@ -49,6 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ILogger<GetUserCommand> _logger;
     private readonly IUserRepository _repository;
     private readonly IUserResponseMapper _mapper;
+    private readonly IUserSkillInfoMapper _skillMapper;
     private readonly IEducationInfoMapper _educationMapper;
     private readonly ICertificateInfoMapper _certificateMapper;
     private readonly IOfficeInfoMapper _officeMapper;
@@ -58,6 +62,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRoleInfoMapper _roleMapper;
     private readonly IImageInfoMapper _imageMapper;
     private readonly IProjectInfoMapper _projectMapper;
+    private readonly IRequestClient<IGetUserSkillsRequest> _rcGetSkills;
     private readonly IRequestClient<IGetUserEducationsRequest> _rcGetEducations;
     private readonly IRequestClient<IGetDepartmentsRequest> _rcGetDepartments;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
@@ -91,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
         else
         {
-          _logger.LogWarning("Errors while getting companies info. Reason: {Errors}",
+          _logger.LogWarning("Errors while getting educations info. Reason: {Errors}",
             string.Join('\n', response.Message.Errors));
         }
       }
@@ -294,7 +299,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      List<DepartmentData> departments = await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
+      //to do implement update cache
+      List<DepartmentData> departments = null;//await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
 
       if (departments != null)
       {
@@ -453,12 +459,45 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       return null;
     }
 
+    private async Task<List<UserSkillData>> GetSkillsAsync(Guid userId, List<string> errors)
+    {
+      const string errorMessage = "Can not get skills info. Please try again later.";
+
+      try
+      {
+        Response<IOperationResult<IGetUserSkillsResponse>> response = await _rcGetSkills
+          .GetResponse<IOperationResult<IGetUserSkillsResponse>>(
+            IGetUserSkillsRequest.CreateObj(userId: userId));
+
+        if (response.Message.IsSuccess)
+        {
+          _logger.LogInformation("Skills were taken from the service. User id: {UserId}", string.Join(", ", userId));
+
+          return response.Message.Body.Skills;
+        }
+        else
+        {
+          _logger.LogWarning("Errors while getting skills info. Reason: {Errors}",
+            string.Join('\n', response.Message.Errors));
+        }
+      }
+      catch (Exception exc)
+      {
+        _logger.LogError(exc, errorMessage);
+      }
+
+      errors.Add(errorMessage);
+
+      return null;
+    }
+
     #endregion
 
     public GetUserCommand(
       ILogger<GetUserCommand> logger,
       IUserRepository repository,
       IUserResponseMapper mapper,
+      IUserSkillInfoMapper skillMapper,
       IEducationInfoMapper educationMapper,
       ICertificateInfoMapper certificateMapper,
       IRoleInfoMapper roleMapper,
@@ -468,6 +507,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IOfficeInfoMapper officeMapper,
       IImageInfoMapper imageMapper,
       IProjectInfoMapper projectMapper,
+      IRequestClient<IGetUserSkillsRequest> rcGetSkills,
       IRequestClient<IGetUserEducationsRequest> rcGetEducations,
       IRequestClient<IGetDepartmentsRequest> rcGetDepartments,
       IRequestClient<IGetPositionsRequest> rcGetPositions,
@@ -482,6 +522,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _logger = logger;
       _repository = repository;
       _mapper = mapper;
+      _skillMapper = skillMapper;
       _educationMapper = educationMapper;
       _certificateMapper = certificateMapper;
       _roleMapper = roleMapper;
@@ -491,6 +532,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _officeMapper = officeMapper;
       _imageMapper = imageMapper;
       _projectMapper = projectMapper;
+      _rcGetSkills = rcGetSkills;
       _rcGetEducations = rcGetEducations;
       _rcGetDepartments = rcGetDepartments;
       _rcGetPositions = rcGetPositions;
@@ -560,7 +602,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
 
-      await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask);
+      Task<List<UserSkillData>> skillsTask = filter.IncludeSkills
+        ? GetSkillsAsync(dbUser.Id, response.Errors)
+        : Task.FromResult(null as List<UserSkillData>);
+
+      await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask, skillsTask);
 
       IGetUserEducationsResponse educations = await educationsTask;
       List<CompanyData> companies = await companiesTask;
@@ -570,6 +616,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<PositionData> positions = await positionsTask;
       List<ProjectData> projects = await projectsTask;
       List<RoleData> roles = await rolesTask;
+      List<UserSkillData> skills = await skillsTask;
 
       response.Body = _mapper.Map(
         dbUser,
@@ -583,7 +630,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _officeMapper.Map(offices?.FirstOrDefault()),
         _positionMapper.Map(positions?.FirstOrDefault()),
         projects?.Where(p => p.Users.FirstOrDefault(pu => pu.UserId == dbUser.Id && pu.IsActive) != default).Select(_projectMapper.Map).ToList(),
-        _roleMapper.Map(roles?.FirstOrDefault()));
+        _roleMapper.Map(roles?.FirstOrDefault()),
+        skills?.Select(_skillMapper.Map).ToList());
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

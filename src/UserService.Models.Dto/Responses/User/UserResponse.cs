@@ -12,6 +12,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
     public IEnumerable<CommunicationInfo> Communications { get; set; }
     public IEnumerable<EducationInfo> Educations { get; set; }
     public IEnumerable<ProjectInfo> Projects { get; set; }
-    public IEnumerable<string> Skills { get; set; }
+    public IEnumerable<UserSkillInfo> Skills { get; set; }
   }
 }

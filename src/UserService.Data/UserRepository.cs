@@ -54,11 +54,6 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
       }
 
-      if (filter.IncludeSkills)
-      {
-        dbUsers = dbUsers.Include(u => u.Skills).ThenInclude(s => s.Skill);
-      }
-
       if (filter.IncludeAvatars)
       {
         dbUsers = dbUsers.Include(u => u.Avatars);
@@ -193,39 +188,6 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    //remove to education service
-    public DbSkill FindSkillByName(string name)
-    {
-      return _provider.Skills.FirstOrDefault(s => s.Name == name);
-    }
-
-    //remove to education service
-    public async Task<Guid> CreateSkillAsync(string name)
-    {
-      if (string.IsNullOrEmpty(name))
-      {
-        throw new ArgumentNullException(nameof(name));
-      }
-
-      DbSkill dbSkill = _provider.Skills.FirstOrDefault(s => s.Name == name);
-
-      if (dbSkill != null)
-      {
-        return dbSkill.Id;
-      }
-
-      DbSkill skill = new DbSkill
-      {
-        Id = Guid.NewGuid(),
-        Name = name
-      };
-
-      _provider.Skills.Add(skill);
-      await _provider.SaveAsync();
-
-      return skill.Id;
-    }
-
     /// <inheritdoc />
     public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
     {
@@ -263,7 +225,7 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Where(u => u.IsActive);
       }
 
-      if (!filter.IncludeCurrentAvatar)
+      if (filter.IncludeCurrentAvatar)
       {
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
