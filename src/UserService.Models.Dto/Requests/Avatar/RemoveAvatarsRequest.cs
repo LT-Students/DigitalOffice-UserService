@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar
+namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar
 {
   public record RemoveAvatarsRequest
   {

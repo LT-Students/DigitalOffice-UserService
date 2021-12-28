@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using Microsoft.AspNetCore.Http;
 using System;
 

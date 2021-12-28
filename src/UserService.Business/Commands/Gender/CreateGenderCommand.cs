@@ -5,7 +5,7 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;

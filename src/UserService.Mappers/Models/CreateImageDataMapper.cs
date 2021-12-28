@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
