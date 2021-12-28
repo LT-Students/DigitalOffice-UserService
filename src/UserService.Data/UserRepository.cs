@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  /// <inheritdoc/>
   public class UserRepository : IUserRepository
   {
     private readonly IDataProvider _provider;
@@ -49,11 +48,6 @@ namespace LT.DigitalOffice.UserService.Data
         }
       }
 
-      if (filter.IncludeAchievements)
-      {
-        dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
-      }
-
       if (filter.IncludeAvatars)
       {
         dbUsers = dbUsers.Include(u => u.Avatars);
@@ -62,6 +56,8 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
+
+      dbUsers = dbUsers.Include(u => u.Addition).ThenInclude(ua => ua.Gender);
 
       return dbUsers;
     }
@@ -100,7 +96,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<DbUser> GetAsync(GetUserFilter filter)
     {
-      if (filter == null)
+      if (filter is null)
       {
         return null;
       }
@@ -162,12 +158,13 @@ namespace LT.DigitalOffice.UserService.Data
       dbUserAddition.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserAddition.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
+
       return true;
     }
 
     public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)
     {
-      if (patch == null)
+      if (patch is null)
       {
         return false;
       }
@@ -203,8 +200,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       _provider.Users.Update(dbUser);
       dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
-          _httpContextAccessor.HttpContext.GetUserId() :
-          null;
+        _httpContextAccessor.HttpContext.GetUserId() :
+        null;
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
 

@@ -4,9 +4,7 @@ using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,21 +13,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
   public class UserResponseMapper : IUserResponseMapper
   {
     private readonly IUserInfoMapper _userInfoMapper;
-    private readonly IUserAchievementInfoMapper _userAchievementInfoMapper;
-    //private readonly ICertificateInfoMapper _certificateInfoMapper;
-    //private readonly IEducationInfoMapper _educationInfoMapper;
 
     public UserResponseMapper(
-      IUserInfoMapper userInfoMapper,
-      IUserAchievementInfoMapper userAchievementInfoMapper)
-      //ICertificateInfoMapper certificateInfoMapper,
-      //IEducationInfoMapper educationInfoMapper
-      //)
+      IUserInfoMapper userInfoMapper)
     {
       _userInfoMapper = userInfoMapper;
-      _userAchievementInfoMapper = userAchievementInfoMapper;
-      //_certificateInfoMapper = certificateInfoMapper;
-      //_educationInfoMapper = educationInfoMapper;
     }
 
     public UserResponse Map(
@@ -47,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       RoleInfo role,
       List<UserSkillInfo> skills)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return null;
       }
@@ -63,8 +51,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           office,
           position,
           role),
+        UserAddition = dbUser.Addition is null ? null : new()
+        {
+          GenderName = dbUser.Addition.Gender?.Name,
+          About = dbUser.Addition.About,
+          DateOfBirth = dbUser.Addition.DateOfBirth,
+          Latitude = dbUser.Addition.Latitude,
+          Longitude = dbUser.Addition.Latitude,
+          BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
+          BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
+        },
         Images = images,
-        Achievements = dbUser.Achievements?.Select(ua => _userAchievementInfoMapper.Map(ua)),
         Certificates = certificates,
         Communications = dbUser.Communications?.Select(
           c => new CommunicationInfo

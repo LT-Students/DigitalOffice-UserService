@@ -14,6 +14,15 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
       builder.DropTable(
         name: "UsersLocations");
 
+      builder.DropTable(
+        name: "Achievements");
+
+      builder.DropTable(
+        name: "UserAchievements");
+
+      builder.DropTable(
+        name: "UsersGenders");
+
       builder.DropColumn(
         name: "DateOfBirth",
         table: DbUser.TableName);
@@ -39,10 +48,10 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
           GenderId = table.Column<Guid>(nullable: true),
           DateOfBirth = table.Column<DateTime>(nullable: true),
           About = table.Column<string>(nullable: true),
-          Latitude = table.Column<double>(nullable: true),
-          Longitude = table.Column<double>(nullable: true),
           BusinessHoursFromUtc = table.Column<DateTime>(nullable: true),
           BusinessHoursToUtc = table.Column<DateTime>(nullable: true),
+          Latitude = table.Column<double>(nullable: true),
+          Longitude = table.Column<double>(nullable: true),
           ModifiedBy = table.Column<Guid>(nullable: false),
           ModifiedAtUtc = table.Column<DateTime>(nullable: false)
         },

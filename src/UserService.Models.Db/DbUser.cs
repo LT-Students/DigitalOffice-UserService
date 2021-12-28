@@ -27,20 +27,16 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public DbUserAddition Addition { get; set; }
     [IgnoreParse]
     public DbUserCredentials Credentials { get; set; }
-    public DbUserGender UserGender { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAvatar> Avatars { get; set; }
     [IgnoreParse]
     public ICollection<DbUserCommunication> Communications { get; set; }
-    [IgnoreParse]
-    public ICollection<DbUserAchievement> Achievements { get; set; }
 
     public DbUser()
     {
       Addition = new DbUserAddition();
       Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
-      Achievements = new HashSet<DbUserAchievement>();
     }
   }
 
@@ -63,6 +59,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .IsRequired();
 
       builder
+        .HasOne(u => u.Addition)
+        .WithOne(ua => ua.User);
+
+      builder
         .HasMany(u => u.Avatars)
         .WithOne(ua => ua.User);
 
@@ -73,18 +73,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasMany(u => u.Communications)
         .WithOne(uc => uc.User);
-
-      builder
-        .HasMany(u => u.Achievements)
-        .WithOne(ua => ua.User);
-
-      builder
-        .HasOne(u => u.UserGender)
-        .WithOne(ug => ug.User);
-
-      builder
-        .HasOne(u => u.Addition)
-        .WithOne(ua => ua.User);
     }
   }
 }

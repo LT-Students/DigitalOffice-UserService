@@ -14,15 +14,13 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
   public class UserServiceDbContext : DbContext, IDataProvider
   {
     public DbSet<DbUser> Users { get; set; }
-    public DbSet<DbAchievement> Achievements { get; set; }
+    public DbSet<DbUserAddition> UsersAdditions { get; set; }
     public DbSet<DbUserCredentials> UsersCredentials { get; set; }
-    public DbSet<DbUserAchievement> UserAchievements { get; set; }
     public DbSet<DbUserCommunication> UserCommunications { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbUserAvatar> UsersAvatars { get; set; }
-    public DbSet<DbUserGender> UsersGenders { get; set; }
     public DbSet<DbGender> Genders { get; set; }
-    public DbSet<DbUserAddition> UsersAdditions { get; set; }
+
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
       : base(options)

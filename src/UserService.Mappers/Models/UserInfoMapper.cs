@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       PositionInfo position,
       RoleInfo role)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return null;
       }

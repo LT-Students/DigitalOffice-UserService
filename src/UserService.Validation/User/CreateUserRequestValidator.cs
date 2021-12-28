@@ -4,7 +4,6 @@ using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
-using System;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -13,7 +12,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
   {
     private static Regex NumberRegex = new(@"\d");
     private static Regex SpecialCharactersRegex = new(@"[$&+,:;=?@#|<>.^*()%!]");
-    private static Regex SpaceRegex = new(@"^[^@\s]*$");
     private static Regex NameRegex = new(@"^([a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+)$");
 
     public CreateUserRequestValidator(
