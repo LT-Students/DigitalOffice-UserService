@@ -79,7 +79,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-
       OperationResultResponse<bool> response = new();
 
       if (isActiveOperation != null)
@@ -123,10 +122,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       await _cacheNotebook.RemoveAsync(userId);
-
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
 
       return response;
     }
