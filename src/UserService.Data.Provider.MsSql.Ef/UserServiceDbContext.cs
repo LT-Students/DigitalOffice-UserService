@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
 {
-  /// <summary>
-  /// A class that defines the tables and its properties in the database.
-  /// For this particular case, it defines the database for the UserService.
-  /// </summary>
   public class UserServiceDbContext : DbContext, IDataProvider
   {
     public DbSet<DbUser> Users { get; set; }
@@ -20,7 +16,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbUserAvatar> UsersAvatars { get; set; }
     public DbSet<DbGender> Genders { get; set; }
-
 
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
       : base(options)
