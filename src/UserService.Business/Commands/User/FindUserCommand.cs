@@ -32,7 +32,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -461,7 +460,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
 
-      await Task.WhenAll(companiesTask, departmentsTask, imagesTask, officesTask, positionsTask,  rolesTask);
+      await Task.WhenAll(companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, rolesTask);
 
       List<CompanyData> companies = await companiesTask;
       List<DepartmentData> departments = await departmentsTask;

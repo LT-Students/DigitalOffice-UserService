@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
     public DbUser Map(CreateUserRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }
@@ -34,15 +34,12 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       DbUser dbUser = new()
       {
         Id = userId,
-        FirstName = request.FirstName.Trim(),
-        LastName = request.LastName.Trim(),
+        FirstName = request.FirstName,
+        LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
-        Gender = (int)request.Gender,
-        City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
         Status = (int)request.Status,
         IsAdmin = request.IsAdmin ?? false,
         IsActive = false,
-        DateOfBirth = request.DateOfBirth,
         CreatedBy = createdBy,
         CreatedAtUtc = createdAtUtc,
         Communications = request.Communications?.Select(x => new DbUserCommunication
@@ -53,7 +50,21 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           UserId = userId,
           CreatedBy = createdBy,
           CreatedAtUtc = createdAtUtc
-        }).ToList()
+        }).ToList(),
+        Addition = new DbUserAddition
+        {
+          Id = Guid.NewGuid(),
+          UserId = userId,
+          GenderId = null,
+          About = request.About,
+          DateOfBirth = request.DateOfBirth,
+          Latitude = request.Latitude,
+          Longitude = request.Longitude,
+          BusinessHoursFromUtc = request.BusinessHoursFromUtc,
+          BusinessHoursToUtc = request.BusinessHoursToUtc,
+          ModifiedBy = createdBy,
+          ModifiedAtUtc = createdAtUtc
+        }
       };
 
       return dbUser;
@@ -74,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         Id = userId,
         FirstName = request.FirstName,
         LastName = request.LastName,
-        MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
+        MiddleName = !string.IsNullOrEmpty(request.MiddleName) ? request.MiddleName : null,
         Status = (int)UserStatus.WorkFromOffice,
         IsActive = true,
         IsAdmin = true,
@@ -90,6 +101,20 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
             CreatedBy = userId,
             CreatedAtUtc = createdAtUtc
           }
+        },
+        Addition = new DbUserAddition
+        {
+          Id = Guid.NewGuid(),
+          UserId = userId,
+          GenderId = null,
+          About = null,
+          DateOfBirth = null,
+          Latitude = null,
+          Longitude = null,
+          BusinessHoursFromUtc = null,
+          BusinessHoursToUtc = null,
+          ModifiedBy = userId,
+          ModifiedAtUtc = createdAtUtc
         }
       };
     }

@@ -92,7 +92,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         FirstName = "Ivan",
         LastName = "Ivanov",
         MiddleName = "Ivanovich",
-        Gender = UserGender.Male,
         PositionId = Guid.NewGuid(),
         Status = UserStatus.Vacation,
         IsAdmin = false
@@ -112,7 +111,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         FirstName = _createUserRequest.FirstName,
         LastName = _createUserRequest.LastName,
         MiddleName = _createUserRequest.MiddleName,
-        Gender = (int)_createUserRequest.Gender,
         Status = (int)_createUserRequest.Status,
         IsAdmin = (bool)_createUserRequest.IsAdmin,
         IsActive = true,

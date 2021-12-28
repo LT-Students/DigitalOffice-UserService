@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     public void CreateUserGenderTable(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.CreateTable(
-        name: DbUserGender.TableName,
+        name: "UsersGenders",
         columns: table => new
         {
           Id = table.Column<Guid>(nullable: false),
@@ -54,8 +54,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     {
       migrationBuilder.DropTable(
         name: DbGender.TableName);
-      migrationBuilder.DropTable(
-        name: DbUserGender.TableName);
     }
   }
 }

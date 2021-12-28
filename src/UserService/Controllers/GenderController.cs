@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;

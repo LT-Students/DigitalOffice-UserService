@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       PositionInfo position,
       RoleInfo role)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return null;
       }
@@ -28,11 +28,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Id = dbUser.Id,
         FirstName = dbUser.FirstName,
         LastName = dbUser.LastName,
-        MiddleName = dbUser.MiddleName,
-        Gender = (UserGender)dbUser.Gender,
-        DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
-        City = dbUser.City,    
-        About = dbUser.About,
+        MiddleName = dbUser.MiddleName,       
         Status = (UserStatus)dbUser.Status,
         Rate = companyUserData?.Rate,
         StartWorkingAt = companyUserData?.StartWorkingAt?.ToShortDateString(),

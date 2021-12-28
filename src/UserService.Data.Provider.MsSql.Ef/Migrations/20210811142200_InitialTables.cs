@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
         protected override void Up(MigrationBuilder builder)
         {
             builder.CreateTable(
-                name: DbAchievement.TableName,
+                name: "Achievements",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
                 });
 
             builder.CreateTable(
-                name: DbUserAchievement.TableName,
+                name: "UserAchievements",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),

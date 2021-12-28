@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar
+namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar
 {
   public record CreateAvatarRequest
   {

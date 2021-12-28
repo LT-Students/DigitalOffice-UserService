@@ -12,7 +12,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
   {
     private static Regex NumberRegex = new(@"\d");
     private static Regex SpecialCharactersRegex = new(@"[$&+,:;=?@#|<>.^*()%!]");
-    private static Regex SpaceRegex = new(@"^[^@\s]*$");
     private static Regex NameRegex = new(@"^([a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+|[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+[-|']?[a-zA-Zа-яА-ЯёЁ]+)$");
 
     public CreateUserRequestValidator(
@@ -53,30 +52,20 @@ namespace LT.DigitalOffice.UserService.Validation.User
             .WithMessage("Middle name contains invalid characters."));
 
       When(
-        user => !string.IsNullOrEmpty(user.City),
-        () =>
-          RuleFor(user => user.City)
-            .Must(x => !NumberRegex.IsMatch(x))
-            .WithMessage("City name must not contain numbers.")
-            .Must(x => !SpecialCharactersRegex.IsMatch(x))
-            .WithMessage("City name must not contain special characters.")
-            .MaximumLength(32)
-            .WithMessage("City name is too long.")
-            .Must(x => NameRegex.IsMatch(x.Trim()))
-            .WithMessage("City name contains invalid characters."));
-
-      When(
         user => (user.AvatarImage != null),
         () =>
           RuleFor(user => user.AvatarImage)
             .SetValidator(imageValidator)
         );
 
-      RuleFor(user => user.Gender)
-        .IsInEnum().WithMessage("Wrong gender value.");
-
       RuleFor(user => user.Status)
         .IsInEnum().WithMessage("Wrong status value.");
+
+      When(user => user.About != null, () =>
+      {
+        RuleFor(user => user.About)
+          .MaximumLength(150).WithMessage("About is too long.");
+      });
 
       RuleFor(user => user.Communications)
         .NotEmpty();

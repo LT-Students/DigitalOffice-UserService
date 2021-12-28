@@ -108,7 +108,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       _responseCreator = responseCreator;
     }
 
-    /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(string userEmail)
     {
       DbUser dbUser = string.IsNullOrEmpty(userEmail) ?

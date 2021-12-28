@@ -12,38 +12,31 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public const string TableName = "Users";
 
     public Guid Id { get; set; }
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } 
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public int Gender { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string City { get; set; }
     public int Status { get; set; }
-    public bool IsAdmin { get; set; }
-    public string About { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsAdmin { get; set; } 
+    public bool IsActive { get; set; } 
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }
 
     [IgnoreParse]
-    public DbUserCredentials Credentials { get; set; }
+    public DbUserAddition Addition { get; set; }
     [IgnoreParse]
-    public DbUserLocation Location { get; set; }
-    public DbUserGender UserGender { get; set; }
+    public DbUserCredentials Credentials { get; set; }
     [IgnoreParse]
     public ICollection<DbUserAvatar> Avatars { get; set; }
     [IgnoreParse]
     public ICollection<DbUserCommunication> Communications { get; set; }
-    [IgnoreParse]
-    public ICollection<DbUserAchievement> Achievements { get; set; }
 
     public DbUser()
     {
+      Addition = new DbUserAddition();
       Avatars = new HashSet<DbUserAvatar>();
       Communications = new HashSet<DbUserCommunication>();
-      Achievements = new HashSet<DbUserAchievement>();
     }
   }
 
@@ -66,6 +59,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .IsRequired();
 
       builder
+        .HasOne(u => u.Addition)
+        .WithOne(ua => ua.User);
+
+      builder
         .HasMany(u => u.Avatars)
         .WithOne(ua => ua.User);
 
@@ -76,18 +73,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
       builder
         .HasMany(u => u.Communications)
         .WithOne(uc => uc.User);
-
-      builder
-        .HasMany(u => u.Achievements)
-        .WithOne(ua => ua.User);
-
-      builder
-        .HasOne(u => u.Location)
-        .WithOne(ul => ul.User);
-
-      builder
-        .HasOne(u => u.UserGender)
-        .WithOne(ug => ug.User);
     }
   }
 }

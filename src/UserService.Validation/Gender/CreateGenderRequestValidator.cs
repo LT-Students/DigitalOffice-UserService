@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Validation.Gender

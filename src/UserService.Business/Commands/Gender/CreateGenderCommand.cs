@@ -1,17 +1,14 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -48,10 +45,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (!validationResult.IsValid)
       {
-        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
-
-        return response;
       }
 
       response.Body = await _genderRepository.CreateAsync(_mapper.Map(request));

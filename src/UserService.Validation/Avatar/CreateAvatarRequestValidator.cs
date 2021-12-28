@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 
 namespace LT.DigitalOffice.UserService.Validation.Avatars

@@ -43,9 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       if (dbUserCredentials is null)
       {
-        _responseCreator.CreateFailureResponse<bool>(
-          HttpStatusCode.BadRequest,
-          new List<string> { "The user credentials was not found." });
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
       dbUserCredentials.Salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";

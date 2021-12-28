@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     protected override void Up(MigrationBuilder builder)
     {
       builder.CreateTable(
-        name: DbUserLocation.TableName,
+        name: "UsersLocations",
         columns: table => new
         {
           Id = table.Column<Guid>(nullable: false),
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
     protected override void Down(MigrationBuilder builder)
     {
       builder.DropTable(
-        name: DbUserLocation.TableName);
+        name: "UsersLocations");
     }
   }
 }

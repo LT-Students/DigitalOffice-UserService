@@ -18,7 +18,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
 
     private JsonPatchDocument<EditUserRequest> _request;
     private JsonPatchDocument<DbUser> _result;
-    private string _dateOfBirth = "2000-01-01";
 
     private Guid? _imageId;
 
@@ -48,21 +47,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "Lastname"),
                 new Operation<EditUserRequest>(
                     "replace",
-                    $"/{nameof(EditUserRequest.Gender)}",
-                    "",
-                    UserGender.NotSelected),
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.DateOfBirth)}",
-                    "",
-                    _dateOfBirth),
-                new Operation<EditUserRequest>(
-                    "replace",
-                    $"/{nameof(EditUserRequest.City)}",
-                    "",
-                    "City"),
-                new Operation<EditUserRequest>(
-                    "replace",
                     $"/{nameof(EditUserRequest.Status)}",
                     "",
                     UserStatus.Vacation)
@@ -88,21 +72,6 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "Lastname"),
                 new Operation<DbUser>(
                     "replace",
-                    $"/{nameof(DbUser.Gender)}",
-                    "",
-                    (int)UserGender.NotSelected),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.DateOfBirth)}",
-                    "",
-                    DateTime.Parse(_dateOfBirth)),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.City)}",
-                    "",
-                    "City"),
-                new Operation<DbUser>(
-                    "replace",
                     $"/{nameof(DbUser.Status)}",
                     "",
                     (int)UserStatus.Vacation)
@@ -117,10 +86,10 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
         SerializerAssert.AreEqual(_result, dbUserPatch);
     }*/
 
-    [Test]
-    public void ShouldThrowExceptionWhenRequestNull()
-    {
-      Assert.Null(_mapper.Map(null));
-    }
+    //[Test]
+    //public void ShouldThrowExceptionWhenRequestNull()
+    //{
+    //  Assert.Null(_mapper.Map(null));
+    //}
   }
 }

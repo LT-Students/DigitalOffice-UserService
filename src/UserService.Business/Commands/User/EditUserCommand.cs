@@ -9,6 +9,7 @@ using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreator _responseCreater;
+    private readonly IResponseCreator _responseCreator;
     private readonly ICacheNotebook _cacheNotebook;
     private readonly IBus _bus;
 
@@ -39,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreator responseCreater,
+      IResponseCreator responseCreator,
       ICacheNotebook cacheNotebook,
       IBus bus)
     {
@@ -48,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
       _cacheNotebook = cacheNotebook;
       _bus = bus;
     }
@@ -56,17 +57,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
+      Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+
+      bool isAdmin = await _accessValidator.IsAdminAsync(userId);
+      bool isAddEditRemoveUsers = await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers);
+
       Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
 
-      Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
+      Operation<EditUserRequest> isAdminOperation = patch.Operations.FirstOrDefault(
+        o => o.path.EndsWith(nameof(EditUserRequest.IsAdmin), StringComparison.OrdinalIgnoreCase));
 
-      if (!((await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId())).IsAdmin ||
-        await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) ||
-        (userId == requestSenderId
-        && isActiveOperation == null)))
+      Operation<EditUserRequest> isGenderOperation = patch.Operations.FirstOrDefault(
+        o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
+
+      if ((!isAddEditRemoveUsers && userId != requestSenderId && !isAdmin) ||
+        (isActiveOperation is not null && !(isAddEditRemoveUsers || isAdmin)) || 
+        (isAdminOperation is not null && !isAdmin) || 
+        (isGenderOperation is not null && userId != requestSenderId))
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       OperationResultResponse<bool> response = new();
@@ -89,15 +99,29 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
       }
 
-      response.Body = await _userRepository.EditUserAsync(userId, _mapperUser.Map(patch));
+      (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) = _mapperUser.Map(patch);
+
+      if (dbUserPatch.Operations.Any())
+      {
+        response.Body = await _userRepository.EditUserAsync(userId, dbUserPatch);
+
+        if (!response.Body)
+        {
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        }
+      }
+
+      if (dbUserAdditionPatch.Operations.Any())
+      {
+        response.Body = await _userRepository.EditUserAdditionAsync(userId, dbUserAdditionPatch);
+
+        if (!response.Body)
+        {
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        }
+      }
 
       await _cacheNotebook.RemoveAsync(userId);
-
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
-
-      response.Errors.AddRange(response.Errors);
 
       return response;
     }
