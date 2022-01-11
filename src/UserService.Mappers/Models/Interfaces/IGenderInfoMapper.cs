@@ -8,6 +8,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
   [AutoInject]
   public interface IGenderInfoMapper
   {
-    List<GenderInfo> Map(List<DbGender> dbGender);
+    List<GenderInfo> Map(List<DbGender> dbGenders);
   }
 }

@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Data
       return await _provider.Genders.AnyAsync(s => s.Name.ToLower() == genderName.ToLower());
     }
 
-    public async Task<(List<DbGender> dbGender, int totalCount)> FindGendersAsync(FindGendersFilter filter)
+    public async Task<(List<DbGender> dbGenders, int totalCount)> FindGendersAsync(FindGendersFilter filter)
     {
       if (filter == null)
       {

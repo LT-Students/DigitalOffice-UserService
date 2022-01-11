@@ -8,14 +8,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class GenderInfoMapper : IGenderInfoMapper
   {
-    public List<GenderInfo> Map(List<DbGender> dbGender)
+    public List<GenderInfo> Map(List<DbGender> dbGenders)
     {
-      if (dbGender is null)
+      if (dbGenders is null)
       {
         return null;
       }
 
-      return dbGender.Select(x => new GenderInfo { Name = x.Name }).ToList();
+      return dbGenders.Select(x => new GenderInfo { Name = x.Name }).ToList();
     }
   }
 }

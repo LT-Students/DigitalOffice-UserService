@@ -14,6 +14,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> DoesGenderAlreadyExistAsync(string genderName);
 
-    Task<(List<DbGender> dbGender, int totalCount)> FindGendersAsync(FindGendersFilter filter);
+    Task<(List<DbGender> dbGenders, int totalCount)> FindGendersAsync(FindGendersFilter filter);
   }
 }
