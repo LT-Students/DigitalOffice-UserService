@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace LT.DigitalOffice.UserService.Models.Dto.Models
+﻿namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
   public record GenderInfo
   {

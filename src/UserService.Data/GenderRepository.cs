@@ -39,8 +39,9 @@ namespace LT.DigitalOffice.UserService.Data
         return (null, default);
       }
 
-      IQueryable<DbGender> dbGenders = _provider.Genders.Where(g => g.Name
-        .Contains(filter.Name)).AsQueryable();
+      IQueryable<DbGender> dbGenders = _provider.Genders
+        .Where(g => g.Name.Contains(filter.Name))
+        .AsQueryable();
 
       return ( 
         await dbGenders.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
