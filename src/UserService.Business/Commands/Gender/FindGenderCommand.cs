@@ -48,10 +48,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Gender
 
       response.Body = _mapper.Map(dbGenders);
 
-      response.Status = response.Errors.Any()
-       ? OperationResultStatusType.PartialSuccess
-       : OperationResultStatusType.FullSuccess;
-
       return response;
     }
   }
