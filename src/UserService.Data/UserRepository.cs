@@ -21,6 +21,8 @@ namespace LT.DigitalOffice.UserService.Data
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    #region Predicates
+
     private IQueryable<DbUser> CreateGetPredicates(
       GetUserFilter filter,
       IQueryable<DbUser> dbUsers)
@@ -28,12 +30,6 @@ namespace LT.DigitalOffice.UserService.Data
       if (filter.UserId.HasValue)
       {
         dbUsers = dbUsers.Where(u => u.Id == filter.UserId);
-      }
-
-      if (!string.IsNullOrEmpty(filter.Name?.Trim()))
-      {
-        dbUsers = dbUsers
-          .Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
       }
 
       if (filter.IncludeCommunications)
@@ -62,6 +58,41 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUsers;
     }
 
+    private IQueryable<DbUser> CreateFindPredicates(
+      FindUsersFilter filter,
+      IQueryable<DbUser> dbUsers)
+    {
+      if (!filter.IncludeDeactivated)
+      {
+        dbUsers = dbUsers.Where(u => u.IsActive);
+      }
+
+      if (filter.IncludeCurrentAvatar)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
+      }
+
+      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
+      {
+        dbUsers = dbUsers.Where(
+          u =>
+            u.FirstName.Contains(filter.FullNameIncludeSubstring)
+            || u.LastName.Contains(filter.FullNameIncludeSubstring)
+            || u.MiddleName.Contains(filter.FullNameIncludeSubstring));
+      }
+
+      if (filter.AscendingSort.HasValue)
+      {
+        dbUsers = filter.AscendingSort.Value ?
+          dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName) :
+          dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
+      }
+
+      return dbUsers;
+    }
+
+    #endregion
+
     public UserRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
@@ -81,12 +112,6 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
 
       return dbUser.Id;
-    }
-
-    public async Task CreatePendingAsync(DbPendingUser dbPendingUser)
-    {
-      _provider.PendingUsers.Add(dbPendingUser);
-      await _provider.SaveAsync();
     }
 
     public async Task<DbUser> GetAsync(Guid id)
@@ -128,7 +153,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
     {
-      if (usersIds == null)
+      if (usersIds is null)
       {
         return null;
       }
@@ -185,13 +210,12 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    /// <inheritdoc />
     public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
     {
       DbUser dbUser = await _provider.Users
         .FirstOrDefaultAsync(u => u.Id == userId);
 
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return false;
       }
@@ -210,47 +234,21 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter)
     {
-      if (filter == null)
+      if (filter is null)
       {
         return (null, default);
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
-
-      if (!filter.IncludeDeactivated)
-      {
-        dbUsers = dbUsers.Where(u => u.IsActive);
-      }
-
-      if (filter.IncludeCurrentAvatar)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
-      }
+      IQueryable<DbUser> dbUsers = CreateFindPredicates(
+        filter,
+        _provider.Users.AsQueryable());
 
       return (
         await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
         await dbUsers.CountAsync());
     }
 
-    public async Task<DbPendingUser> GetPendingUserAsync(Guid userId)
-    {
-      return await _provider.PendingUsers
-        .FirstOrDefaultAsync(pu => pu.UserId == userId);
-    }
-
-    public async Task DeletePendingUserAsync(Guid userId)
-    {
-      DbPendingUser dbPendingUser = await _provider.PendingUsers
-        .FirstOrDefaultAsync(pu => pu.UserId == userId);
-
-      if (dbPendingUser != null)
-      {
-        _provider.PendingUsers.Remove(dbPendingUser);
-        await _provider.SaveAsync();
-      }
-    }
-
-    public async Task<bool> IsUserExistAsync(Guid userId)
+    public async Task<bool> DoesExistAsync(Guid userId)
     {
       return await _provider.Users
         .FirstOrDefaultAsync(u => u.Id == userId) != null;
@@ -262,11 +260,6 @@ namespace LT.DigitalOffice.UserService.Data
         .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName)
         .Contains(text))
         .ToListAsync();
-    }
-
-    public async Task<bool> PendingUserExistAsync(Guid userId)
-    {
-      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
     }
   }
 }

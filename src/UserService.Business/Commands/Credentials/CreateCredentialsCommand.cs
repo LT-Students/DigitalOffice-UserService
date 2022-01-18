@@ -26,6 +26,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
   {
     private readonly IDbUserCredentialsMapper _mapper;
     private readonly IUserRepository _userRepository;
+    private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
@@ -35,6 +36,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     public CreateCredentialsCommand(
       IDbUserCredentialsMapper mapper,
       IUserRepository userRepository,
+      IPendingUserRepository pendingUserRepository,
       IUserCredentialsRepository userCredentialsRepository,
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
@@ -43,6 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     {
       _mapper = mapper;
       _userRepository = userRepository;
+      _pendingUserRepository = pendingUserRepository;
       _userCredentialsRepository = userCredentialsRepository;
       _rcToken = rcToken;
       _logger = logger;
@@ -75,7 +78,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
 
           await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
-          await _userRepository.DeletePendingUserAsync(request.UserId);
+          await _pendingUserRepository.RemoveAsync(request.UserId);
           await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
 
           return new()

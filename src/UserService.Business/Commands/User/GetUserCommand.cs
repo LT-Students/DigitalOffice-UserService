@@ -552,12 +552,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (filter == null ||
         (filter.UserId == null &&
-          string.IsNullOrEmpty(filter.Name) &&
           string.IsNullOrEmpty(filter.Email)))
       {
         return _responseCreator.CreateFailureResponse<UserResponse>(
           HttpStatusCode.BadRequest,
-          new List<string> { "You must specify 'userId' or|and 'name' or|and 'email'." });
+          new List<string> { "You must specify 'userId' or|and 'email'." });
       }
 
       DbUser dbUser = await _repository.GetAsync(filter);
