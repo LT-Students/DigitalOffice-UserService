@@ -83,9 +83,9 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (filter.AscendingSort.HasValue)
       {
-        dbUsers = filter.AscendingSort.Value ?
-          dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName) :
-          dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
+        dbUsers = filter.AscendingSort.Value
+          ? dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName)
+          : dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
       }
 
       return dbUsers;
