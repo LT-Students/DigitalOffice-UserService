@@ -22,13 +22,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter);
 
-    Task<DbPendingUser> GetPendingUserAsync(Guid userId);
-
-    Task DeletePendingUserAsync(Guid userId);
-
     Task<Guid> CreateAsync(DbUser dbUser);
-
-    Task CreatePendingAsync(DbPendingUser dbPendingUser);
 
     Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch);
 
@@ -36,10 +30,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
 
-    Task<bool> IsUserExistAsync(Guid userId);
+    Task<bool> DoesExistAsync(Guid userId);
 
     Task<List<DbUser>> SearchAsync(string text);
-
-    Task<bool> PendingUserExistAsync(Guid userId);
   }
 }

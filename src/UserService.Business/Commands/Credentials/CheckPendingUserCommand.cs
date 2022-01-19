@@ -9,9 +9,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
   public class CheckPendingUserCommand : ICheckPendingUserCommand
   {
-    private readonly IUserRepository _repository;
+    private readonly IPendingUserRepository _repository;
 
-    public CheckPendingUserCommand(IUserRepository repository)
+    public CheckPendingUserCommand(IPendingUserRepository repository)
     {
       _repository = repository;
     }
@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     {
       return new()
       {
-        Body = await _repository.PendingUserExistAsync(userId),
+        Body = await _repository.DoesExistAsync(userId),
         Status = OperationResultStatusType.FullSuccess
       };
     }

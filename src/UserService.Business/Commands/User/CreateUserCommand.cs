@@ -40,6 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class CreateUserCommand : ICreateUserCommand
   {
     private readonly IUserRepository _userRepository;
+    private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IAvatarRepository _imageRepository;
     private readonly ILogger<CreateUserCommand> _logger;
     private readonly IRequestClient<ICreateImagesRequest> _rcImage;
@@ -353,6 +354,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ISendEmailRequest> rcSendEmail,
       IUserRepository userRepository,
+      IPendingUserRepository pendingUserRepository,
       ICreateUserRequestValidator validator,
       IDbUserMapper mapperUser,
       IDbUserAvatarMapper dbEntityImageMapper,
@@ -372,6 +374,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
+      _pendingUserRepository = pendingUserRepository;
       _mapperUser = mapperUser;
       _dbEntityImageMapper = dbEntityImageMapper;
       _createImageDataMapper = createImageDataMapper;
@@ -403,7 +406,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      await _userRepository.CreatePendingAsync(new DbPendingUser() { UserId = userId, Password = password });
+      await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
 
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)

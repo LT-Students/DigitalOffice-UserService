@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
   public class CreateCredentialsRequestValidator : AbstractValidator<CreateCredentialsRequest>, ICreateCredentialsRequestValidator
   {
     public CreateCredentialsRequestValidator(
-      IUserRepository userRepository,
+      IPendingUserRepository repository,
       IUserCredentialsRepository credentialsRepository)
     {
       RuleFor(request => request.Login.Trim() )
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         .MustAsync(async (r, _) => !await credentialsRepository.LoginExistAsync(r.Login))
         .WithMessage("The login already exist.")
         .MustAsync(async (r, _) =>
-          (await userRepository.GetPendingUserAsync(r.UserId))?.Password == r.Password)
+          (await repository.GetAsync(r.UserId))?.Password == r.Password)
         .WithMessage("The wrong password.");
     }
   }
