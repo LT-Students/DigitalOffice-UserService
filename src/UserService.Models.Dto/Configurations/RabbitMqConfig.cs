@@ -94,11 +94,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetOfficesRequest))]
     public string GetOfficesEndpoint { get; set; }
 
-    // common
-
-    [AutoInjectRequest(typeof(IDisactivateUserRequest))]
-    public string DisactivateUserEndpoint { get; set; }
-
     // image
 
     [AutoInjectRequest(typeof(ICreateImagesRequest))]

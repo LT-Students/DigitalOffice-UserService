@@ -54,7 +54,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _bus = bus;
     }
 
-    /// <inheritdoc/>
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
     {
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
