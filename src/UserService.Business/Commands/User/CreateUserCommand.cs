@@ -423,9 +423,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
 
-      Guid userId = dbUser.Id;//await _userRepository.CreateAsync(dbUser);
+      Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      //await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
+      await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
 
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)

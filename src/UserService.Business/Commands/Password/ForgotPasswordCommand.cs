@@ -86,13 +86,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
               textTemplateResponse.Message.Body.Subject,
               parsedText));
 
-        if (sendEmailResponse.Message.IsSuccess || sendEmailResponse.Message.Body)
+        if (sendEmailResponse.Message.IsSuccess && sendEmailResponse.Message.Body)
         {
           return true;
         }
 
         _logger.LogWarning(
-          "Errors while sending email to '{Email}':\n {Errors}",
+          "Errors while sending email to '{Email}':\n{Errors}",
           email,
           string.Join(Environment.NewLine, sendEmailResponse.Message.Errors));
       }
