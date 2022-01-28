@@ -1,9 +1,12 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Email;
+using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
+using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
@@ -20,16 +23,16 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Password
 {
-  // TODO this command does not have any consumers on MessageService side
-  /// <inheritdoc/>
   public class ForgotPasswordCommand : IForgotPasswordCommand
   {
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly ILogger<ForgotPasswordCommand> _logger;
+    private readonly IRequestClient<IGetTextTemplateRequest> _rcGetTextTemplate;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly IOptions<MemoryCacheConfig> _cacheOptions;
     private readonly IUserRepository _repository;
     private readonly IMemoryCache _cache;
+    private readonly ITextTemplateParser _parser;
     private readonly IResponseCreator _responseCreator;
 
     private string SetGuidInCache(Guid userId)
@@ -50,42 +53,54 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       string secret,
       List<string> errors)
     {
-      //TODO: fix add specific template language
-      string templateLanguage = "en";
-      EmailTemplateType templateType = EmailTemplateType.Warning;
       try
       {
-        Dictionary<string, string> templateValues = ISendEmailRequest.CreateTemplateValuesDictionary(
-          userFirstName: dbUser.FirstName,
-          userId: dbUser.Id.ToString(),
-          secret: secret);
+        Response<IOperationResult<IGetTextTemplateResponse>> textTemplateResponse =
+          await _rcGetTextTemplate.GetResponse<IOperationResult<IGetTextTemplateResponse>>(
+            IGetTextTemplateRequest.CreateObj(
+              endpointId: Guid.Empty,
+              //ToDo add template types
+              templateType: TemplateType.Notification,
+              locale: "en"));
 
-        Response<IOperationResult<bool>> response =
-          await _rcSendEmail
-            .GetResponse<IOperationResult<bool>>(ISendEmailRequest.CreateObj(
-              null,
-              dbUser.Id,
-              email,
-              templateLanguage,
-              templateType,
-              templateValues));
-
-        if (response.Message.IsSuccess)
+        if (!textTemplateResponse.Message.IsSuccess || textTemplateResponse.Message.Body is null)
         {
-          return response.Message.Body;
+          _logger.LogWarning(
+            "Errors while getting text template':\n {Errors}",
+            string.Join(Environment.NewLine, textTemplateResponse.Message.Errors));
+
+          errors.Add("Email template not found");
+          return false;
+        }
+
+        string parsedText = _parser.Parse(
+          new Dictionary<string, string> { { "Password", secret } },
+          _parser.ParseModel<DbUser>(dbUser, textTemplateResponse.Message.Body.Text));
+
+        Response<IOperationResult<bool>> sendEmailResponse =
+          await _rcSendEmail.GetResponse<IOperationResult<bool>>(
+            ISendEmailRequest.CreateObj(
+              //ToDo fix model
+              Guid.Empty,
+              email,
+              textTemplateResponse.Message.Body.Subject,
+              parsedText));
+
+        if (sendEmailResponse.Message.IsSuccess || sendEmailResponse.Message.Body)
+        {
+          return true;
         }
 
         _logger.LogWarning(
-          "Errors while sending email to '{Email}':\n{Errors}",
+          "Errors while sending email to '{Email}':\n {Errors}",
           email,
-          string.Join('\n', response.Message.Errors));
+          string.Join(Environment.NewLine, sendEmailResponse.Message.Errors));
       }
       catch (Exception exc)
       {
         _logger.LogError(exc, "Can not send email to '{Email}'", email);
       }
-
-      errors.Add("Can not send email. Please try again latter.");
+      errors.Add($"Can not send email to '{email}'. Email placed in resend queue and will be resent in 1 hour.");
 
       return false;
     }
@@ -93,18 +108,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     public ForgotPasswordCommand(
       IGeneratePasswordCommand generatePassword,
       ILogger<ForgotPasswordCommand> logger,
+      IRequestClient<IGetTextTemplateRequest> rcGetTextTemplate,
       IRequestClient<ISendEmailRequest> rcSendEmail,
       IOptions<MemoryCacheConfig> cacheOptions,
       IUserRepository repository,
       IMemoryCache cache,
+      ITextTemplateParser parser,
       IResponseCreator responseCreator)
     {
       _generatePassword = generatePassword;
       _logger = logger;
+      _rcGetTextTemplate = rcGetTextTemplate;
       _rcSendEmail = rcSendEmail;
       _repository = repository;
       _cacheOptions = cacheOptions;
       _cache = cache;
+      _parser = parser;
       _responseCreator = responseCreator;
     }
 

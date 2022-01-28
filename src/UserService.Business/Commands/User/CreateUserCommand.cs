@@ -5,16 +5,19 @@ using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
+using LT.DigitalOffice.Models.Broker.Requests.Email;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
+using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
+using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -39,24 +42,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   /// <inheritdoc/>
   public class CreateUserCommand : ICreateUserCommand
   {
+    private readonly ICreateUserRequestValidator _validator;
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IAvatarRepository _imageRepository;
-    private readonly ILogger<CreateUserCommand> _logger;
-    private readonly IRequestClient<ICreateImagesRequest> _rcImage;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IRequestClient<ICreateUserOfficeRequest> _rcCreateUserOffice;
-    private readonly IRequestClient<ICreateUserPositionRequest> _rcCreateUserPosition;
-    private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
-    private readonly IRequestClient<IChangeUserRoleRequest> _rcRole;
-    private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
-    private readonly ICreateUserRequestValidator _validator;
-    private readonly IDbUserMapper _mapperUser;
-    private readonly IDbUserAvatarMapper _dbEntityImageMapper;
+    private readonly IDbUserMapper _dbUserMapper;
+    private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly IResponseCreator _responseCreator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ITextTemplateParser _parser;
+    private readonly ILogger<CreateUserCommand> _logger;
+    private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
+    private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
+    private readonly IRequestClient<ICreateUserOfficeRequest> _rcCreateUserOffice;
+    private readonly IRequestClient<ICreateUserPositionRequest> _rcCreateUserPosition;
+    private readonly IRequestClient<IChangeUserRoleRequest> _rcCreateUserRole;
+    private readonly IRequestClient<IGetTextTemplateRequest> _rcGetTextTemplate;
+    private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
 
     #region private methods
 
@@ -200,7 +205,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _logger.LogWarning(
           "Error while adding user id {UserId} to the office id {OfficeId}.\nErrors: {Errors}",
           userId,
-          officeId, 
+          officeId,
           string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
@@ -225,7 +230,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         Response<IOperationResult<bool>> response =
-          await _rcRole.GetResponse<IOperationResult<bool>>(
+          await _rcCreateUserRole.GetResponse<IOperationResult<bool>>(
             IChangeUserRoleRequest.CreateObj(
               roleId.Value, userId, _httpContextAccessor.HttpContext.GetUserId()));
 
@@ -254,48 +259,59 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       DbUserCommunication email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
 
-      if (email == null)
+      if (email is null)
       {
         errors.Add("User does not have any linked email.");
 
         return;
       }
 
-      string errorMessage = $"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.";
-
-      //TODO: fix add specific template language
-      string templateLanguage = "en";
-      var senderId = _httpContextAccessor.HttpContext.GetUserId();
-      EmailTemplateType templateType = EmailTemplateType.Greeting;
       try
       {
-        Dictionary<string, string> templateValues =
-          ISendEmailRequest.CreateTemplateValuesDictionary(
-            userFirstName: dbUser.FirstName,
-            userEmail: email.Value,
-            userId: dbUser.Id.ToString(),
-            userPassword: password);
+        Response<IOperationResult<IGetTextTemplateResponse>> textTemplateResponse =
+          await _rcGetTextTemplate.GetResponse<IOperationResult<IGetTextTemplateResponse>>(
+            IGetTextTemplateRequest.CreateObj(
+              endpointId: Guid.Empty,
+              templateType: TemplateType.Greeting,
+              locale: "en"));
 
-        object emailRequest = ISendEmailRequest.CreateObj(null, senderId, email.Value, templateLanguage, templateType, templateValues);
+        if (!textTemplateResponse.Message.IsSuccess || textTemplateResponse.Message.Body is null)
+        {
+          _logger.LogWarning(
+            "Errors while getting text template':\n {Errors}",
+            string.Join(Environment.NewLine, textTemplateResponse.Message.Errors));
 
-        IOperationResult<bool> rcSendEmailResponse = (await _rcSendEmail
-          .GetResponse<IOperationResult<bool>>(emailRequest)).Message;
+          errors.Add("Email template not found");
+          return;
+        }
 
-        if (!(rcSendEmailResponse.IsSuccess && rcSendEmailResponse.Body))
+        string parsedText = _parser.Parse(
+          new Dictionary<string, string> { { "Password", password } },
+          _parser.ParseModel<DbUser>(dbUser, textTemplateResponse.Message.Body.Text));
+
+        Response<IOperationResult<bool>> sendEmailResponse =
+          await _rcSendEmail.GetResponse<IOperationResult<bool>>(
+            ISendEmailRequest.CreateObj(
+              _httpContextAccessor.HttpContext.GetUserId(),
+              email.Value,
+              textTemplateResponse.Message.Body.Subject,
+              parsedText));
+
+        if (!sendEmailResponse.Message.IsSuccess || !sendEmailResponse.Message.Body)
         {
           _logger.LogWarning(
             "Errors while sending email to '{Email}':\n {Errors}",
             email.Value,
-            string.Join(Environment.NewLine, rcSendEmailResponse.Errors));
+            string.Join(Environment.NewLine, sendEmailResponse.Message.Errors));
 
-          errors.Add(errorMessage);
+          errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
         }
       }
       catch (Exception exc)
       {
         _logger.LogError(exc, "Can not send email to '{Email}'", email.Value);
 
-        errors.Add(errorMessage);
+        errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
       }
     }
 
@@ -314,7 +330,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       try
       {
         Response<IOperationResult<ICreateImagesResponse>> createResponse =
-          await _rcImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
+          await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
             ICreateImagesRequest.CreateObj(
               _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
               ImageSource.User));
@@ -345,46 +361,49 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     #endregion
 
     public CreateUserCommand(
-      ILogger<CreateUserCommand> logger,
-      IRequestClient<IChangeUserRoleRequest> rcRole,
-      IRequestClient<ICreateImagesRequest> rcImage,
-      IRequestClient<ICreateUserOfficeRequest> rcCreateUserOffice,
-      IRequestClient<ICreateUserPositionRequest> rcCreateUserPosition,
-      IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
-      IHttpContextAccessor httpContextAccessor,
-      IRequestClient<ISendEmailRequest> rcSendEmail,
+      ICreateUserRequestValidator validator,
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
-      ICreateUserRequestValidator validator,
-      IDbUserMapper mapperUser,
-      IDbUserAvatarMapper dbEntityImageMapper,
+      IAvatarRepository imageRepository,
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserMapper dbUserMapper,
+      IDbUserAvatarMapper dbUserAvatarMapper,
       ICreateImageDataMapper createImageDataMapper,
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
-      IAvatarRepository imageRepository,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      ITextTemplateParser parser,
+      ILogger<CreateUserCommand> logger,
+      IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
+      IRequestClient<ICreateImagesRequest> rcCreateImage,
+      IRequestClient<IChangeUserRoleRequest> rcCreateUserRole,
+      IRequestClient<ICreateUserOfficeRequest> rcCreateUserOffice,
+      IRequestClient<ICreateUserPositionRequest> rcCreateUserPosition,
+      IRequestClient<IGetTextTemplateRequest> rcGetTextTemplate,
+      IRequestClient<ISendEmailRequest> rcSendEmail)
     {
-      _logger = logger;
-      _rcRole = rcRole;
-      _rcImage = rcImage;
-      _rcCreateUserOffice = rcCreateUserOffice;
-      _rcCreateUserPosition = rcCreateUserPosition;
-      _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
-      _rcSendEmail = rcSendEmail;
       _validator = validator;
-      _httpContextAccessor = httpContextAccessor;
       _userRepository = userRepository;
       _pendingUserRepository = pendingUserRepository;
-      _mapperUser = mapperUser;
-      _dbEntityImageMapper = dbEntityImageMapper;
+      _imageRepository = imageRepository;
+      _dbUserMapper = dbUserMapper;
+      _dbUserAvatarMapper = dbUserAvatarMapper;
       _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
-      _imageRepository = imageRepository;
+      _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
+      _parser = parser;
+      _logger = logger;
+      _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
+      _rcCreateImage = rcCreateImage;
+      _rcCreateUserRole = rcCreateUserRole;
+      _rcCreateUserOffice = rcCreateUserOffice;
+      _rcCreateUserPosition = rcCreateUserPosition;
+      _rcGetTextTemplate = rcGetTextTemplate;
+      _rcSendEmail = rcSendEmail;
     }
 
-    /// <inheritdoc/>
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateUserRequest request)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
@@ -399,19 +418,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       OperationResultResponse<Guid> response = new();
 
-      DbUser dbUser = _mapperUser.Map(request);
+      DbUser dbUser = _dbUserMapper.Map(request);
 
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
 
-      Guid userId = await _userRepository.CreateAsync(dbUser);
+      Guid userId = dbUser.Id;//await _userRepository.CreateAsync(dbUser);
 
-      await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
+      //await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
 
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)
       {
-        await _imageRepository.CreateAsync(_dbEntityImageMapper.Map(avatarImageId.Value, userId, true));
+        await _imageRepository.CreateAsync(_dbUserAvatarMapper.Map(avatarImageId.Value, userId, true));
       }
 
       await Task.WhenAll(
