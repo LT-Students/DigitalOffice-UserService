@@ -1,16 +1,17 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
-using LT.DigitalOffice.Models.Broker.Common;
+using LT.DigitalOffice.Models.Broker.Requests.Admin;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Education;
+using LT.DigitalOffice.Models.Broker.Requests.Email;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Requests.Skill;
+using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
 using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
@@ -26,12 +27,29 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string FindParseEntitiesEndpoint { get; set; }
     public string CheckUsersExistenceEndpoint { get; set; }
 
-    // auth
+    // Admin
+    [AutoInjectRequest(typeof(ICreateServiceEndpointsRequest))]
+    public string CreateServiceEndpointsEndpoint { get; set; }
+
+    //TextTemplate
+
+    [AutoInjectRequest(typeof(IGetTextTemplateRequest))]
+    public string GetTextTemplateEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(ICreateKeywordsRequest))]
+    public string CreateKeywordsEndpoint { get; set; }
+
+    //Email
+
+    [AutoInjectRequest(typeof(ISendEmailRequest))]
+    public string SendEmailEndpoint { get; set; }
+
+    //Auth
 
     [AutoInjectRequest(typeof(IGetTokenRequest))]
     public string GetTokenEndpoint { get; set; }
 
-    //education
+    //Education
 
     [AutoInjectRequest(typeof(IGetUserEducationsRequest))]
     public string GetUserEducationsEndpoint { get; set; }
@@ -39,22 +57,17 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetUserSkillsRequest))]
     public string GetUserSkillsEndpoint { get; set; }
 
-    // project
+    //Project
 
     [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
 
-    // message
-
-    [AutoInjectRequest(typeof(ISendEmailRequest))]
-    public string SendEmailEndpoint { get; set; }
-
-    // search
+    //Search
 
     [AutoInjectRequest(typeof(ISearchUsersRequest))]
     public string SearchUsersEndpoint { get; set; }
 
-    // rights
+    //Rights
 
     [AutoInjectRequest(typeof(IChangeUserRoleRequest))]
     public string ChangeUserRoleEndpoint { get; set; }
@@ -62,7 +75,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetUserRolesRequest))]
     public string GetUserRolesEndpoint { get; set; }
 
-    // positions
+    //Position
 
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
@@ -70,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(ICreateUserPositionRequest))]
     public string CreateUserPositionEndpoint { get; set; }
 
-    // department
+    //Department
 
     [AutoInjectRequest(typeof(IGetDepartmentsRequest))]
     public string GetDepartmentsEndpoint { get; set; }
@@ -78,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(ICreateDepartmentEntityRequest))]
     public string CreateDepartmentEntityEndpoint { get; set; }
 
-    // company
+    //Company
 
     [AutoInjectRequest(typeof(IGetCompaniesRequest))]
     public string GetCompaniesEndpoint { get; set; }
@@ -86,7 +99,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(ICreateCompanyUserRequest))]
     public string CreateCompanyUserEndpoint { get; set; }
 
-    // Office
+    //Office
 
     [AutoInjectRequest(typeof(ICreateUserOfficeRequest))]
     public string CreateUserOfficeEndpoint { get; set; }
@@ -94,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetOfficesRequest))]
     public string GetOfficesEndpoint { get; set; }
 
-    // image
+    //Image
 
     [AutoInjectRequest(typeof(ICreateImagesRequest))]
     public string CreateImagesEndpoint { get; set; }

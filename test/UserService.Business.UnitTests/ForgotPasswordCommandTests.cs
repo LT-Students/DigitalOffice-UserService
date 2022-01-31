@@ -1,6 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Requests.Email;
 using LT.DigitalOffice.Models.Broker.Requests.Message;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;

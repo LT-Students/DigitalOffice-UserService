@@ -7,6 +7,7 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
@@ -26,6 +27,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -37,7 +39,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService
 {
@@ -77,29 +78,6 @@ namespace LT.DigitalOffice.UserService
         .InputFormatters
         .OfType<NewtonsoftJsonPatchInputFormatter>()
         .First();
-    }
-
-    private string HidePassord(string line)
-    {
-      string password = "Password";
-
-      int index = line.IndexOf(password, 0, StringComparison.OrdinalIgnoreCase);
-
-      if (index != -1)
-      {
-        string[] words = Regex.Split(line, @"[=,; ]");
-
-        for (int i = 0; i < words.Length; i++)
-        {
-          if (string.Equals(password, words[i], StringComparison.OrdinalIgnoreCase))
-          {
-            line = line.Replace(words[i + 1], "****");
-            break;
-          }
-        }
-      }
-
-      return line;
     }
 
     #region configure masstransit
@@ -265,11 +243,11 @@ namespace LT.DigitalOffice.UserService
       {
         connStr = Configuration.GetConnectionString("SQLConnectionString");
 
-        Log.Information($"SQL connection string from appsettings.json was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from appsettings.json was used. Value '{PasswordHider.Hide(connStr)}'.");
       }
       else
       {
-        Log.Information($"SQL connection string from environment was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from environment was used. Value '{PasswordHider.Hide(connStr)}'.");
       }
 
       services.AddHttpContextAccessor();
@@ -335,11 +313,11 @@ namespace LT.DigitalOffice.UserService
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
 
-        Log.Information($"Redis connection string from appsettings.json was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from appsettings.json was used. Value '{PasswordHider.Hide(redisConnStr)}'");
       }
       else
       {
-        Log.Information($"Redis connection string from environment was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from environment was used. Value '{PasswordHider.Hide(redisConnStr)}'");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
