@@ -13,7 +13,6 @@ using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
@@ -34,7 +33,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IAccessValidator _accessValidator;
     private readonly ICreateAvatarRequestValidator _requestValidator;
     private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
-    private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
     private readonly ILogger<CreateAvatarCommand> _logger;
@@ -80,7 +78,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IAccessValidator accessValidator,
       ICreateAvatarRequestValidator requestValidator,
       IDbUserAvatarMapper dbEntityImageMapper,
-      ICreateImageDataMapper createImageDataMapper,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
       ILogger<CreateAvatarCommand> logger,
@@ -90,7 +87,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _accessValidator = accessValidator;
       _requestValidator = requestValidator;
       _dbUserAvatarMapper = dbEntityImageMapper;
-      _createImageDataMapper = createImageDataMapper;
       _httpContextAccessor = httpContextAccessor;
       _rcCreateImage = rcCreateImage;
       _logger = logger;
