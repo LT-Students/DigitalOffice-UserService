@@ -188,7 +188,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       {
         _logger.LogError(
           "Invitation letter not sent to email '{Email}'",
-          email);
+          email.Value);
 
         errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
       }
