@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
@@ -80,415 +80,178 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId,
       List<string> errors)
     {
-      const string errorMessage = "Can not get educations info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetUserEducationsResponse>> response = await _rcGetEducations
-          .GetResponse<IOperationResult<IGetUserEducationsResponse>>(
-            IGetUserEducationsRequest.CreateObj(userId: userId));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Educations were taken from the service. User id: {UserId}", string.Join(", ", userId));
-
-          return response.Message.Body;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting educations info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
+      return (await RequestHandler.ProcessRequest<IGetUserEducationsRequest, IGetUserEducationsResponse>(
+        _rcGetEducations,
+        IGetUserEducationsRequest.CreateObj(userId: userId),
+        errors,
+        _logger));
     }
 
     private async Task<List<CompanyData>> GetCompaniesAsync(
-      List<Guid> usersIds,
+      Guid userId,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      List<CompanyData> companies = await _redisHelper
+        .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheHashCode());
+
+      if (companies is not null)
       {
-        return null;
+        _logger.LogInformation(
+          "Companies for user id '{UserId}' were taken from cache.",
+          userId);
+      }
+      else
+      {
+        companies = (await RequestHandler.ProcessRequest<IGetCompaniesRequest, IGetCompaniesResponse>(
+            _rcGetCompanies,
+            IGetCompaniesRequest.CreateObj(usersIds: new() { userId }),
+            errors,
+            _logger))
+          ?.Companies;
       }
 
-      List<CompanyData> companies = await _redisHelper.GetAsync<List<CompanyData>>(Cache.Companies, usersIds.GetRedisCacheHashCode());
-
-      if (companies != null)
-      {
-        _logger.LogInformation("Companies for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-        return companies;
-      }
-
-      return await GetCompaniesThroughBrokerAsync(usersIds, errors);
-    }
-
-    private async Task<List<CompanyData>> GetCompaniesThroughBrokerAsync(
-      List<Guid> usersIds,
-      List<string> errors)
-    {
-      if (usersIds == null || !usersIds.Any())
-      {
-        return null;
-      }
-
-      const string errorMessage = "Can not get companies info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetCompaniesResponse>> response = await _rcGetCompanies
-          .GetResponse<IOperationResult<IGetCompaniesResponse>>(
-            IGetCompaniesRequest.CreateObj(usersIds: usersIds));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Companies were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-          return response.Message.Body.Companies;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting companies info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
+      return companies;
     }
 
     private async Task<List<OfficeData>> GetOfficesAsync(
-      List<Guid> usersIds,
+      Guid userId,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      List<OfficeData> offices = await _redisHelper
+        .GetAsync<List<OfficeData>>(Cache.Offices, userId.GetRedisCacheHashCode());
+
+      if (offices is not null)
       {
-        return null;
+        _logger.LogInformation(
+          "Offices for user id '{UserId}' were taken from cache.",
+          userId);
+      }
+      else
+      {
+        offices = (await RequestHandler.ProcessRequest<IGetOfficesRequest, IGetOfficesResponse>(
+            _rcGetOffices,
+            IGetOfficesRequest.CreateObj(usersIds: new() { userId }),
+            errors,
+            _logger))
+          ?.Offices;
       }
 
-      List<OfficeData> offices = await _redisHelper.GetAsync<List<OfficeData>>(Cache.Offices, usersIds.GetRedisCacheHashCode());
-
-      if (offices != null)
-      {
-        _logger.LogInformation("Offices for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-        return offices;
-      }
-
-      return await GetOfficesThroughBrokerAsync(usersIds, errors);
-    }
-
-    private async Task<List<OfficeData>> GetOfficesThroughBrokerAsync(
-      List<Guid> usersIds,
-      List<string> errors)
-    {
-      if (usersIds == null || !usersIds.Any())
-      {
-        return null;
-      }
-
-      const string errorMessage = "Can not get offices info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetOfficesResponse>> response = await _rcGetOffices
-          .GetResponse<IOperationResult<IGetOfficesResponse>>(
-            IGetOfficesRequest.CreateObj(usersIds));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Offices were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-          return response.Message.Body.Offices;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting offices info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
+      return offices;
     }
 
     private async Task<List<PositionData>> GetPositionsAsync(
-      List<Guid> usersIds,
+      Guid userId,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      List<PositionData> positions = await _redisHelper
+        .GetAsync<List<PositionData>>(Cache.Positions, userId.GetRedisCacheHashCode());
+
+      if (positions is not null)
       {
-        return null;
+        _logger.LogInformation(
+          "Positions for user id '{UserId}' were taken from cache.",
+          userId);
+      }
+      else
+      {
+        positions = (await RequestHandler.ProcessRequest<IGetPositionsRequest, IGetPositionsResponse>(
+            _rcGetPositions,
+            IGetPositionsRequest.CreateObj(usersIds: new() { userId }),
+            errors,
+            _logger))
+          ?.Positions;
       }
 
-      List<PositionData> positions = await _redisHelper.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheHashCode());
-
-      if (positions != null)
-      {
-        _logger.LogInformation("Positions for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-        return positions;
-      }
-
-      return await GetPositionsThroughBrokerAsync(usersIds, errors);
-    }
-
-    private async Task<List<PositionData>> GetPositionsThroughBrokerAsync(
-      List<Guid> usersIds,
-      List<string> errors)
-    {
-      if (usersIds == null || !usersIds.Any())
-      {
-        return null;
-      }
-
-      const string errorMessage = "Can not get positions info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetPositionsResponse>> response = await _rcGetPositions
-          .GetResponse<IOperationResult<IGetPositionsResponse>>(
-            IGetPositionsRequest.CreateObj(usersIds));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Positions were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-          return response.Message.Body.Positions;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting positions info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
+      return positions;
     }
 
     private async Task<List<DepartmentData>> GetDepartmentsAsync(
-      List<Guid> usersIds,
+      Guid userId,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
-      {
-        return null;
-      }
-
       //to do implement update cache
       List<DepartmentData> departments = null;//await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
 
-      if (departments != null)
+      if (departments is not null)
       {
-        _logger.LogInformation("Departments for users were taken from cache. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-        return departments;
+        _logger.LogInformation(
+          "Departments for user id {UserId} were taken from cache.",
+          userId);
+      }
+      else
+      {
+        departments = (await RequestHandler.ProcessRequest<IGetDepartmentsRequest, IGetDepartmentsResponse>(
+            _rcGetDepartments,
+            IGetDepartmentsRequest.CreateObj(usersIds: new() { userId }),
+            errors,
+            _logger))
+          ?.Departments;
       }
 
-      return await GetDepartmensThroughBrokerAsync(usersIds, errors);
+      return departments;
     }
 
-    private async Task<List<DepartmentData>> GetDepartmensThroughBrokerAsync(
-      List<Guid> usersIds,
+    private async Task<List<RoleData>> GetRolesAsync(
+      Guid userId,
+      string locale,
       List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
-      {
-        return null;
-      }
-
-      const string errorMessage = "Can not get departments info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetDepartmentsResponse>> response = await _rcGetDepartments
-          .GetResponse<IOperationResult<IGetDepartmentsResponse>>(
-            IGetDepartmentsRequest.CreateObj(usersIds: usersIds));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Departments were taken from the service. Users ids: {usersIds}", string.Join(", ", usersIds));
-
-          return response.Message.Body.Departments;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting departments info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
-    }
-
-    private async Task<List<RoleData>> GetRolesAsync(List<Guid> usersIds, string locale, List<string> errors)
-    {
-      if (usersIds is null || !usersIds.Any())
-      {
-        return null;
-      }
-
-      try
-      {
-        Response<IOperationResult<IGetUserRolesResponse>> response =
-          await _rcGetUserRoles.GetResponse<IOperationResult<IGetUserRolesResponse>>(
-            IGetUserRolesRequest.CreateObj(usersIds, locale));
-
-        if (response.Message.IsSuccess)
-        {
-          return response.Message.Body.Roles;
-        }
-
-        _logger.LogWarning(
-          "Error while getting role for user id: {UserId}.\nErrors: {Errors}",
-          usersIds.First(),
-          string.Join('\n', response.Message.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Can not get role for user id: {UserId}.",
-          usersIds.First());
-      }
-
-      errors.Add("Can not get role. Please try again later.");
-
-      return new();
+      //TO DO add cache
+      return (await RequestHandler.ProcessRequest<IGetUserRolesRequest, IGetUserRolesResponse>(
+          _rcGetUserRoles,
+          IGetUserRolesRequest.CreateObj(userIds: new() { userId }, locale: locale),
+          errors,
+          _logger))
+        ?.Roles;
     }
 
     private async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors)
     {
-      (List<ProjectData> projects, int _) = await _redisHelper.GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
+      (List<ProjectData> projects, int _) = await _redisHelper
+        .GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
 
-      return projects
-        ?? await GetProjectsThroughBroker(userId, errors);
-    }
-
-    private async Task<List<ProjectData>> GetProjectsThroughBroker(Guid userId, List<string> errors)
-    {
-      string errorMessage = $"Can not get projects list for user '{userId}'. Please try again later.";
-
-      try
+      if (projects is not null)
       {
-        Response<IOperationResult<IGetProjectsResponse>> response = await _rcGetProjects.GetResponse<IOperationResult<IGetProjectsResponse>>(
-          IGetProjectsRequest.CreateObj(userId: userId, includeUsers: true));
-
-        if (response.Message.IsSuccess)
-        {
-          return response.Message.Body.Projects;
-        }
-        _logger.LogWarning(
-          "Errors while getting projects for user id: {UserId}.\nErrors: {Errors}",
-          userId,
-          string.Join('\n', response.Message.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot get projects for user id: {UserId}.",
+        _logger.LogInformation(
+          "Project for user id '{UserId}' were taken from cache.",
           userId);
       }
-      errors.Add("Can not get projects. Please try again later.");
+      else
+      {
+        projects = (await RequestHandler.ProcessRequest<IGetProjectsRequest, IGetProjectsResponse>(
+            _rcGetProjects,
+            IGetProjectsRequest.CreateObj(userId: userId, includeUsers: true),
+            errors,
+            _logger))
+          ?.Projects;
+      }
 
-      return null;
+      return projects;
     }
 
     private async Task<List<ImageData>> GetImagesAsync(List<Guid> imagesIds, List<string> errors)
     {
-      if (imagesIds == null || !imagesIds.Any())
+      if (imagesIds is null || !imagesIds.Any())
       {
-        return new();
+        return default;
       }
 
-      try
-      {
-        IOperationResult<IGetImagesResponse> response = (await _rcGetImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imagesIds, ImageSource.User))).Message;
-
-        if (response.IsSuccess)
-        {
-          return response.Body.ImagesData;
-        }
-
-        _logger.LogWarning(
-          "Errors while getting images with ids: {ImageId}.\nErrors: {Errors}",
-          string.Join(", ", imagesIds),
-          string.Join('\n', response.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot get images with ids: {ImageId}.",
-          string.Join(", ", imagesIds));
-      }
-      errors.Add("Can not get images. Please try again later.");
-
-      return null;
+      return (await RequestHandler.ProcessRequest<IGetImagesRequest, IGetImagesResponse>(
+          _rcGetImages,
+          IGetImagesRequest.CreateObj(imagesIds: imagesIds, imageSource: ImageSource.User),
+          errors,
+          _logger))
+        ?.ImagesData;
     }
 
     private async Task<List<UserSkillData>> GetSkillsAsync(Guid userId, List<string> errors)
     {
-      const string errorMessage = "Can not get skills info. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<IGetUserSkillsResponse>> response = await _rcGetSkills
-          .GetResponse<IOperationResult<IGetUserSkillsResponse>>(
-            IGetUserSkillsRequest.CreateObj(userId: userId));
-
-        if (response.Message.IsSuccess)
-        {
-          _logger.LogInformation("Skills were taken from the service. User id: {UserId}", string.Join(", ", userId));
-
-          return response.Message.Body.Skills;
-        }
-        else
-        {
-          _logger.LogWarning("Errors while getting skills info. Reason: {Errors}",
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, errorMessage);
-      }
-
-      errors.Add(errorMessage);
-
-      return null;
+      return (await RequestHandler.ProcessRequest<IGetUserSkillsRequest, IGetUserSkillsResponse>(
+          _rcGetSkills,
+          IGetUserSkillsRequest.CreateObj(userId: userId),
+          errors,
+          _logger))
+        ?.Skills;
     }
 
     #endregion
@@ -545,13 +308,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _responseCreator = responseCreator;
     }
 
-    /// <inheritdoc />
     public async Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter)
     {
       OperationResultResponse<UserResponse> response = new();
 
-      if (filter == null ||
-        (filter.UserId == null &&
+      if (filter is null ||
+        (filter.UserId is null &&
           string.IsNullOrEmpty(filter.Email)))
       {
         return _responseCreator.CreateFailureResponse<UserResponse>(
@@ -561,24 +323,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       DbUser dbUser = await _repository.GetAsync(filter);
 
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return _responseCreator.CreateFailureResponse<UserResponse>(
           HttpStatusCode.NotFound);
       }
-
-      List<Guid> usersIds = new() { dbUser.Id };
 
       Task<IGetUserEducationsResponse> educationsTask = filter.IncludeEducations
         ? GetEducationsAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as IGetUserEducationsResponse);
 
       Task<List<CompanyData>> companiesTask = filter.IncludeCompany
-        ? GetCompaniesAsync(usersIds, response.Errors)
+        ? GetCompaniesAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as List<CompanyData>);
 
       Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
-        ? GetDepartmentsAsync(usersIds, response.Errors)
+        ? GetDepartmentsAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as List<DepartmentData>);
 
       Task<List<ImageData>> imagesTask = filter.IncludeAvatars || filter.IncludeCurrentAvatar
@@ -586,11 +346,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         : Task.FromResult(null as List<ImageData>);
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
-        ? GetOfficesAsync(usersIds, response.Errors)
+        ? GetOfficesAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as List<OfficeData>);
 
       Task<List<PositionData>> positionsTask = filter.IncludePosition
-        ? GetPositionsAsync(usersIds, response.Errors)
+        ? GetPositionsAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as List<PositionData>);
 
       Task<List<ProjectData>> projectsTask = filter.IncludeProjects
@@ -598,7 +358,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         : Task.FromResult(null as List<ProjectData>);
 
       Task<List<RoleData>> rolesTask = filter.IncludeRole
-        ? GetRolesAsync(usersIds, filter.Locale, response.Errors)
+        ? GetRolesAsync(dbUser.Id, filter.Locale, response.Errors)
         : Task.FromResult(null as List<RoleData>);
 
       Task<List<UserSkillData>> skillsTask = filter.IncludeSkills

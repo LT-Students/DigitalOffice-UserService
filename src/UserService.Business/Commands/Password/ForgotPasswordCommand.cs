@@ -80,11 +80,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         Response<IOperationResult<bool>> sendEmailResponse =
           await _rcSendEmail.GetResponse<IOperationResult<bool>>(
             ISendEmailRequest.CreateObj(
-              //ToDo fix model
-              Guid.Empty,
               email,
               textTemplateResponse.Message.Body.Subject,
-              parsedText));
+              parsedText,
+              null));
 
         if (sendEmailResponse.Message.IsSuccess && sendEmailResponse.Message.Body)
         {

@@ -1,5 +1,5 @@
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -55,6 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITextTemplateParser _parser;
     private readonly ILogger<CreateUserCommand> _logger;
+    private readonly IRequestClient<ICreateCompanyUserRequest> _rcCreateCompanyUser;
     private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
     private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
     private readonly IRequestClient<ICreateUserOfficeRequest> _rcCreateUserOffice;
@@ -67,192 +68,78 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task CreateDepartmentUserAsync(Guid? departmentId, Guid userId, List<string> errors)
     {
-      if (!departmentId.HasValue || departmentId.Value == Guid.Empty)
+      if (departmentId.HasValue && departmentId.Value != Guid.Empty)
       {
-        return;
-      }
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await _rcCreateDepartmentEntity.GetResponse<IOperationResult<bool>>(
+        await RequestHandler.ProcessRequest<ICreateDepartmentEntityRequest, bool>(
+          _rcCreateDepartmentEntity,
           ICreateDepartmentEntityRequest.CreateObj(
             departmentId: departmentId.Value,
             createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            userId: userId));
-
-        if (response.Message.IsSuccess && response.Message.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(
-          "Error while adding user id {UserId} to the department id {DepartmentId}.\nErrors: {Errors}",
-          userId,
-          departmentId,
-          string.Join('\n', response.Message.Errors));
+            userId: userId),
+          errors,
+          _logger);
       }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot add user id {UserId} to the department id {DepartmentId}",
-          userId,
-          departmentId);
-      }
-
-      errors.Add("Unable to enroll a user in the department. Please try again later.");
     }
 
     private async Task CreateUserPositionAsync(Guid? positionId, Guid userId, List<string> errors)
     {
-      if (!positionId.HasValue || positionId.Value == Guid.Empty)
+      if (positionId.HasValue && positionId.Value != Guid.Empty)
       {
-        return;
-      }
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
+        await RequestHandler.ProcessRequest<ICreateUserPositionRequest, bool>(
+          _rcCreateUserPosition,
           ICreateUserPositionRequest.CreateObj(
             positionId: positionId.Value,
             createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            userId: userId));
-
-        if (response.Message.IsSuccess && response.Message.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(
-          "Error while adding user id {UserId} to the position id {PositionId}.\nErrors: {Errors}",
-          userId,
-          positionId,
-          string.Join('\n', response.Message.Errors));
+            userId: userId),
+          errors,
+          _logger);
       }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot add user id {UserId} to the position id {PositionId}.",
-          userId,
-          positionId);
-      }
-
-      errors.Add("Cannot assign position to user. Please try again later.");
     }
 
     private async Task CreateUserCompanyAsync(Guid? companyId, Guid userId, double? rate, DateTime? startWorkingAt, List<string> errors)
     {
-      if (!companyId.HasValue || companyId.Value == Guid.Empty)
+      if (companyId.HasValue && companyId.Value != Guid.Empty)
       {
-        return;
-      }
-
-      try
-      {
-        Response<IOperationResult<bool>> response = await _rcCreateUserPosition.GetResponse<IOperationResult<bool>>(
+        await RequestHandler.ProcessRequest<ICreateCompanyUserRequest, bool>(
+          _rcCreateCompanyUser,
           ICreateCompanyUserRequest.CreateObj(
             companyId: companyId.Value,
             userId: userId,
             rate: rate,
             startWorkingAt: startWorkingAt,
-            createdBy: _httpContextAccessor.HttpContext.GetUserId()));
-
-        if (response.Message.IsSuccess && response.Message.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(
-          "Error while adding user id {UserId} to the company id {CompanyId}.\nErrors: {Errors}",
-          userId,
-          companyId,
-          string.Join('\n', response.Message.Errors));
+            createdBy: _httpContextAccessor.HttpContext.GetUserId()),
+          errors,
+          _logger);
       }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot add user id {UserId} to the company id {CompanyId}.",
-          userId,
-          companyId);
-      }
-
-      errors.Add("Cannot assign company to user. Please try again later.");
     }
 
     private async Task CreateUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
     {
-      if (!officeId.HasValue || officeId.Value == Guid.Empty)
+      if (officeId.HasValue && officeId.Value != Guid.Empty)
       {
-        return;
+        await RequestHandler.ProcessRequest<ICreateUserOfficeRequest, bool>(
+          _rcCreateUserOffice,
+          ICreateUserOfficeRequest.CreateObj(
+            userId: userId,
+            modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
+            officeId: officeId.Value),
+          errors,
+          _logger);
       }
-
-      try
-      {
-        Response<IOperationResult<bool>> response =
-          await _rcCreateUserOffice.GetResponse<IOperationResult<bool>>(
-            ICreateUserOfficeRequest.CreateObj(
-              userId: userId,
-              modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
-              officeId: officeId.Value));
-
-        if (response.Message.IsSuccess && response.Message.Body)
-        {
-          return;
-        }
-
-        _logger.LogWarning(
-          "Error while adding user id {UserId} to the office id {OfficeId}.\nErrors: {Errors}",
-          userId,
-          officeId,
-          string.Join('\n', response.Message.Errors));
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot add user id {UserId} to the office id {OfficeId}.",
-          userId,
-          officeId);
-      }
-
-      errors.Add("Cannot assign office to user. Please try again later.");
     }
 
-    private async Task ChangeUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
+    private async Task CreateUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
     {
-      if (!roleId.HasValue || roleId.Value == Guid.Empty)
+      if (roleId.HasValue && roleId.Value != Guid.Empty)
       {
-        return;
+        await RequestHandler.ProcessRequest<IChangeUserRoleRequest, bool>(
+          _rcCreateUserRole,
+          IChangeUserRoleRequest.CreateObj(
+            roleId.Value,
+            userId, _httpContextAccessor.HttpContext.GetUserId()),
+          errors,
+          _logger);
       }
-
-      try
-      {
-        Response<IOperationResult<bool>> response =
-          await _rcCreateUserRole.GetResponse<IOperationResult<bool>>(
-            IChangeUserRoleRequest.CreateObj(
-              roleId.Value, userId, _httpContextAccessor.HttpContext.GetUserId()));
-
-        if (!response.Message.IsSuccess || !response.Message.Body)
-        {
-          _logger.LogWarning(
-            "Error while adding user id {UserId} to the role id {RoleId}.\nErrors: {Errors}",
-            userId,
-            roleId,
-            string.Join('\n', response.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Cannot add user id {UserId} to the role id {RoleId}.",
-          userId,
-          roleId);
-      }
-
-      errors.Add("Cannot assign role to user. Please try again later.");
     }
 
     private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
@@ -266,50 +153,42 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return;
       }
 
-      try
+      IGetTextTemplateResponse textTemplate =
+        await RequestHandler.ProcessRequest<IGetTextTemplateRequest, IGetTextTemplateResponse>(
+          _rcGetTextTemplate,
+          IGetTextTemplateRequest.CreateObj(
+            endpointId: Guid.Empty, //TO DO get guid from cache
+            templateType: TemplateType.Greeting,
+            locale: "en"),
+          errors,
+          _logger);
+
+      if (textTemplate is null)
       {
-        Response<IOperationResult<IGetTextTemplateResponse>> textTemplateResponse =
-          await _rcGetTextTemplate.GetResponse<IOperationResult<IGetTextTemplateResponse>>(
-            IGetTextTemplateRequest.CreateObj(
-              endpointId: Guid.Empty,
-              templateType: TemplateType.Greeting,
-              locale: "en"));
+        _logger.LogError(
+          "Not found text template to send email to user id '{UserId}'",
+          dbUser.Id);
 
-        if (!textTemplateResponse.Message.IsSuccess || textTemplateResponse.Message.Body is null)
-        {
-          _logger.LogWarning(
-            "Errors while getting text template':\n {Errors}",
-            string.Join(Environment.NewLine, textTemplateResponse.Message.Errors));
-
-          errors.Add("Email template not found");
-          return;
-        }
-
-        string parsedText = _parser.Parse(
-          new Dictionary<string, string> { { "Password", password } },
-          _parser.ParseModel<DbUser>(dbUser, textTemplateResponse.Message.Body.Text));
-
-        Response<IOperationResult<bool>> sendEmailResponse =
-          await _rcSendEmail.GetResponse<IOperationResult<bool>>(
-            ISendEmailRequest.CreateObj(
-              _httpContextAccessor.HttpContext.GetUserId(),
-              email.Value,
-              textTemplateResponse.Message.Body.Subject,
-              parsedText));
-
-        if (!sendEmailResponse.Message.IsSuccess || !sendEmailResponse.Message.Body)
-        {
-          _logger.LogWarning(
-            "Errors while sending email to '{Email}':\n {Errors}",
-            email.Value,
-            string.Join(Environment.NewLine, sendEmailResponse.Message.Errors));
-
-          errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
-        }
+        return;
       }
-      catch (Exception exc)
+
+      string parsedText = _parser.Parse(
+        new Dictionary<string, string> { { "Password", password } },
+        _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
+
+      if (!await RequestHandler.ProcessRequest<ISendEmailRequest, bool>(
+        _rcSendEmail,
+        ISendEmailRequest.CreateObj(
+          email.Value,
+          textTemplate.Subject,
+          parsedText,
+          _httpContextAccessor.HttpContext.GetUserId()),
+        errors,
+        _logger))
       {
-        _logger.LogError(exc, "Can not send email to '{Email}'", email.Value);
+        _logger.LogError(
+          "Invitation letter not sent to email '{Email}'",
+          email.Value);
 
         errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
       }
@@ -317,46 +196,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task<Guid?> GetAvatarImageIdAsync(CreateAvatarRequest avatarRequest, List<string> errors)
     {
-      if (avatarRequest == null)
+      if (avatarRequest is null)
       {
         return null;
       }
 
-      Guid? avatarImageId = null;
-      Guid senderId = _httpContextAccessor.HttpContext.GetUserId();
-
-      string errorMessage = $"Can not add avatar image to user. Please try again later.";
-
-      try
-      {
-        Response<IOperationResult<ICreateImagesResponse>> createResponse =
-          await _rcCreateImage.GetResponse<IOperationResult<ICreateImagesResponse>>(
-            ICreateImagesRequest.CreateObj(
-              _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
-              ImageSource.User));
-
-        if (createResponse.Message.IsSuccess
-          && createResponse.Message.Body != null
-          && createResponse.Message.Body.ImagesIds != null)
-        {
-          return createResponse.Message.Body.ImagesIds.FirstOrDefault();
-        }
-
-        _logger.LogWarning(
-          "Can not add avatar image to user, senderId: {SenderId}. Reason: '{Errors}'",
-          senderId,
-          string.Join(',', createResponse.Message.Errors));
-
-        errors.Add(errorMessage);
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Can not add avatar image to user, senderId:{SenderId}", senderId);
-
-        errors.Add(errorMessage);
-      }
-
-      return avatarImageId;
+      return (await RequestHandler.ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
+          _rcCreateImage,
+          ICreateImagesRequest.CreateObj(
+            _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
+            ImageSource.User),
+          errors,
+          _logger))
+        ?.ImagesIds?.FirstOrDefault();
     }
     #endregion
 
@@ -374,6 +226,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IResponseCreator responseCreator,
       ITextTemplateParser parser,
       ILogger<CreateUserCommand> logger,
+      IRequestClient<ICreateCompanyUserRequest> rcCreateCompanyUser,
       IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
       IRequestClient<ICreateImagesRequest> rcCreateImage,
       IRequestClient<IChangeUserRoleRequest> rcCreateUserRole,
@@ -395,6 +248,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _responseCreator = responseCreator;
       _parser = parser;
       _logger = logger;
+      _rcCreateCompanyUser = rcCreateCompanyUser;
       _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
       _rcCreateImage = rcCreateImage;
       _rcCreateUserRole = rcCreateUserRole;
@@ -436,7 +290,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       await Task.WhenAll(
         SendEmailAsync(dbUser, password, response.Errors),
         CreateUserOfficeAsync(request.OfficeId, userId, response.Errors),
-        ChangeUserRoleAsync(request.RoleId, userId, response.Errors),
+        CreateUserRoleAsync(request.RoleId, userId, response.Errors),
         CreateDepartmentUserAsync(request.DepartmentId, userId, response.Errors),
         CreateUserPositionAsync(request.PositionId, userId, response.Errors),
         CreateUserCompanyAsync(request.CompanyId, userId, request.Rate, request.StartWorkingAt, response.Errors));
