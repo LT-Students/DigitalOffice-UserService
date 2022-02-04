@@ -208,7 +208,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             ImageSource.User),
           errors,
           _logger))
-        ?.ImagesIds.FirstOrDefault();
+        ?.ImagesIds?.FirstOrDefault();
     }
     #endregion
 
