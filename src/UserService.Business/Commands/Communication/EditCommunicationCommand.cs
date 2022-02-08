@@ -79,8 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
         await _repository.RemoveBaseTypeAsync(dbUserCommunication.UserId);
       }
 
-      response.Body = await _repository.EditAsync(communicationId, _mapper.Map(patch));
-      response.Status = OperationResultStatusType.FullSuccess;
+      response.Body = await _repository.EditAsync(dbUserCommunication, _mapper.Map(patch));
 
       return response;
     }

@@ -11,7 +11,9 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbUserCommunication dbUserCommunication);
 
-    Task<bool> EditAsync(Guid communicationId, JsonPatchDocument<DbUserCommunication> request);
+    Task<bool> EditAsync(
+      DbUserCommunication dbUserCommunication,
+      JsonPatchDocument<DbUserCommunication> request);
 
     Task<bool> Confirm(Guid communicationId);
 

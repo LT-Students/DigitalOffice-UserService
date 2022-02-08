@@ -35,9 +35,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ITextTemplateParser _parser;
 
-    private async Task SendEmailAsync(DbUserCommunication dbUserCommunication, string password, List<string> errors)
+    private async Task SendEmailAsync(DbUserCommunication dbUserCommunication, string secret, List<string> errors)
     {
-
       IGetTextTemplateResponse textTemplate =
         await RequestHandler.ProcessRequest<IGetTextTemplateRequest, IGetTextTemplateResponse>(
           _rcGetTextTemplate,
@@ -58,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       string parsedText = _parser.Parse(
-        new Dictionary<string, string> { { "Password", password } },
+        new Dictionary<string, string> { { "Secret", secret } },
         _parser.ParseModel<DbUserCommunication>(dbUserCommunication, textTemplate.Text));
 
       if (!await RequestHandler.ProcessRequest<ISendEmailRequest, bool>(

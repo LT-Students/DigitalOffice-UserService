@@ -38,12 +38,9 @@ namespace LT.DigitalOffice.UserService.Data
     }
 
     public async Task<bool> EditAsync(
-      Guid communicationId,
+      DbUserCommunication dbUserCommunication,
       JsonPatchDocument<DbUserCommunication> request)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
-        .FirstOrDefaultAsync(x => x.Id == communicationId);
-
       if (dbUserCommunication is null || request is null)
       {
         return false;
