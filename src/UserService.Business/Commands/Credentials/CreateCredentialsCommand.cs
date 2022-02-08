@@ -28,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
+    private readonly ICommunicationRepository _communicationRepository;
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
     private readonly ICreateCredentialsRequestValidator _validator;
@@ -38,6 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
       IUserCredentialsRepository userCredentialsRepository,
+      ICommunicationRepository communicationRepository,
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
       ICreateCredentialsRequestValidator validator,
@@ -47,6 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _userRepository = userRepository;
       _pendingUserRepository = pendingUserRepository;
       _userCredentialsRepository = userCredentialsRepository;
+      _communicationRepository = communicationRepository;
       _rcToken = rcToken;
       _logger = logger;
       _validator = validator;
@@ -80,6 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
           await _pendingUserRepository.RemoveAsync(request.UserId);
           await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
+          await _communicationRepository.ActivateFirstCommunicationAsync(request.UserId);
 
           return new()
           {

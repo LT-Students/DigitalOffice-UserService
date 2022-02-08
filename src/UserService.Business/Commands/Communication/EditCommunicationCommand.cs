@@ -46,17 +46,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
-      JsonPatchDocument<EditCommunicationRequest> request)
+      JsonPatchDocument<EditCommunicationRequest> patch)
     {
-      DbUserCommunication communication = await _repository.GetAsync(communicationId);
+      DbUserCommunication dbUserCommunication = await _repository
+        .GetAsync(communicationId);
 
-      if (_httpContextAccessor.HttpContext.GetUserId() != communication.UserId &&
+      if (dbUserCommunication is null)
+      {
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
+
+      if (_httpContextAccessor.HttpContext.GetUserId() != dbUserCommunication.UserId &&
         !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
+      ValidationResult validationResult = await _validator
+        .ValidateAsync((dbUserCommunication, patch));
 
       if (!validationResult.IsValid)
       {
@@ -65,13 +72,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       OperationResultResponse<bool> response = new();
-      response.Body = await _repository.EditAsync(communicationId, _mapper.Map(request));
-      response.Status = OperationResultStatusType.FullSuccess;
 
-      if (!response.Body)
+      if (patch.Operations[0].path
+        .EndsWith(nameof(EditCommunicationRequest.Type), StringComparison.OrdinalIgnoreCase))
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        await _repository.RemoveBaseTypeAsync(dbUserCommunication.UserId);
       }
+
+      response.Body = await _repository.EditAsync(communicationId, _mapper.Map(patch));
+      response.Status = OperationResultStatusType.FullSuccess;
 
       return response;
     }

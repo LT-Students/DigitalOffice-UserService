@@ -12,23 +12,39 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
   {
     public JsonPatchDocument<DbUserCommunication> Map(JsonPatchDocument<EditCommunicationRequest> request)
     {
-      if (request == null)
+      if (request is null)
       {
-        throw new ArgumentNullException(nameof(request));
+        return default;
       }
 
-      var result = new JsonPatchDocument<DbUserCommunication>();
+      JsonPatchDocument<DbUserCommunication> result = new();
 
-      foreach (var item in request.Operations)
+      foreach (Operation item in request.Operations)
       {
         if (item.path.EndsWith(nameof(EditCommunicationRequest.Type), StringComparison.OrdinalIgnoreCase))
         {
           result.Operations.Add(new Operation<DbUserCommunication>(
-              item.op, item.path, item.from, (int)Enum.Parse(typeof(CommunicationType), item.value.ToString())));
+            item.op,
+            item.path,
+            item.from,
+            (int)Enum.Parse(typeof(CommunicationType), item.value.ToString())));
+
           continue;
         }
+        else if (item.path.EndsWith(nameof(EditCommunicationRequest.Value), StringComparison.OrdinalIgnoreCase))
+        {
+          result.Operations.Add(new Operation<DbUserCommunication>(
+            "replace",
+            nameof(DbUserCommunication.IsConfirmed),
+            null,
+            false));
+        }
 
-        result.Operations.Add(new Operation<DbUserCommunication>(item.op, item.path, item.from, item.value));
+        result.Operations.Add(new Operation<DbUserCommunication>(
+          item.op,
+          item.path,
+          item.from,
+          item.value));
       }
 
       return result;

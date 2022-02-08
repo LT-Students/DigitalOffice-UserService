@@ -1,7 +1,4 @@
-﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
-using LT.DigitalOffice.Kernel.Constants;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -13,10 +10,8 @@ using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
-using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -29,16 +24,13 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
-  public class CreateCommunicationCommand : ICreateCommunicationCommand
+  public class ResendConfirmationCommunicationCommand : IResendConfirmationCommunicationCommand
   {
-    private readonly ICreateCommunicationRequestValidator _validator;
-    private readonly IDbUserCommunicationMapper _mapper;
     private readonly ICommunicationRepository _repository;
-    private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IMemoryCache _cache;
-    private readonly ILogger<CreateCommunicationCommand> _logger;
+    private readonly ILogger<ResendConfirmationCommunicationCommand> _logger;
     private readonly IRequestClient<IGetTextTemplateRequest> _rcGetTextTemplate;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
     private readonly ITextTemplateParser _parser;
@@ -87,23 +79,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
     }
 
-    public CreateCommunicationCommand(
-      ICreateCommunicationRequestValidator validator,
-      IDbUserCommunicationMapper mapper,
+    public ResendConfirmationCommunicationCommand(
       ICommunicationRepository repository,
-      IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
       IMemoryCache cache,
-      ILogger<CreateCommunicationCommand> logger,
+      ILogger<ResendConfirmationCommunicationCommand> logger,
       IRequestClient<IGetTextTemplateRequest> rcGetTextTemplate,
       IRequestClient<ISendEmailRequest> rcSendEmail,
       ITextTemplateParser parser)
     {
-      _validator = validator;
-      _mapper = mapper;
       _repository = repository;
-      _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _cache = cache;
@@ -113,47 +99,37 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _parser = parser;
     }
 
-    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateCommunicationRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId)
     {
-      if ((request.UserId != _httpContextAccessor.HttpContext.GetUserId()) &&
-        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
+      DbUserCommunication dbUserCommunication = await _repository.GetAsync(communicationId);
+
+      if (dbUserCommunication is null)
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
-
-      if (!validationResult.IsValid)
+      if (_httpContextAccessor.HttpContext.GetUserId() != dbUserCommunication.UserId)
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
-          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      OperationResultResponse<Guid?> response = new();
-
-      DbUserCommunication dbUserCommunication = _mapper.Map(request);
-
-      response.Body = await _repository.CreateAsync(dbUserCommunication);
-
-      if (response.Body is null)
+      if (dbUserCommunication.Type != (int)CommunicationType.Email)
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+      OperationResultResponse<bool> response = new();
 
-      if (request.Type == Models.Dto.Enums.CommunicationType.Email)
-      {
-        string secret = Guid.NewGuid().ToString();
+      string secret = Guid.NewGuid().ToString();
 
-        _cache.Set(dbUserCommunication.Id, secret);
+      _cache.Set(communicationId, secret);
 
-        await SendEmailAsync(dbUserCommunication, secret, response.Errors);
-      }
+      await SendEmailAsync(dbUserCommunication, secret, response.Errors);
 
+      response.Body = response.Errors.Any() ? false : true;
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.Failed
-        : OperationResultStatusType.PartialSuccess;
+        : OperationResultStatusType.FullSuccess;
 
       return response;
     }
