@@ -9,6 +9,7 @@ using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System;
@@ -30,8 +31,21 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UserIds, true);
+      List<DbUser> dbUsers = new();
+
+      if (request.UsersIds.Any())
+      {
+        dbUsers = await _userRepository
+         .GetAsync(request.UsersIds, true);
+      }
+      else if (!request.UsersIds.Any() && (request.SkipCount > -1 && request.TakeCount > 1))
+      {
+        (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
+        {
+          SkipCount = request.SkipCount,
+          TakeCount = request.TakeCount
+        });
+      }
 
       return dbUsers.Select(
         u => new UserData(
@@ -66,7 +80,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users != null)
       {
-        string key = context.Message.UserIds.GetRedisCacheHashCode();
+        string key = context.Message.UsersIds.GetRedisCacheHashCode();
 
         await _redisHelper.CreateAsync(
           Cache.Users,
@@ -74,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           users,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
 
-        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
+        _cacheNotebook.Add(context.Message.UsersIds, Cache.Users, key);
       }
     }
   }
