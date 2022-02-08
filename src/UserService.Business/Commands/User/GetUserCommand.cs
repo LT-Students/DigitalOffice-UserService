@@ -71,8 +71,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetCompaniesRequest> _rcGetCompanies;
-    private readonly IRedisHelper _redisHelper;
     private readonly IResponseCreator _responseCreator;
+    private readonly IGlobalCacheRepository _globalCache;
 
     #region private methods
 
@@ -119,7 +119,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      List<CompanyData> companies = await _redisHelper.GetAsync<List<CompanyData>>(Cache.Companies, usersIds.GetRedisCacheHashCode());
+      List<CompanyData> companies = await _globalCache.GetAsync<List<CompanyData>>(Cache.Companies, usersIds.GetRedisCacheHashCode());
 
       if (companies != null)
       {
@@ -179,7 +179,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      List<OfficeData> offices = await _redisHelper.GetAsync<List<OfficeData>>(Cache.Offices, usersIds.GetRedisCacheHashCode());
+      List<OfficeData> offices = await _globalCache.GetAsync<List<OfficeData>>(Cache.Offices, usersIds.GetRedisCacheHashCode());
 
       if (offices != null)
       {
@@ -239,7 +239,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      List<PositionData> positions = await _redisHelper.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheHashCode());
+      List<PositionData> positions = await _globalCache.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheHashCode());
 
       if (positions != null)
       {
@@ -389,7 +389,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors)
     {
-      (List<ProjectData> projects, int _) = await _redisHelper.GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
+      (List<ProjectData> projects, int _) = await _globalCache.GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
 
       return projects
         ?? await GetProjectsThroughBroker(userId, errors);
@@ -516,8 +516,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetCompaniesRequest> rcGetCompanies,
-      IRedisHelper redisHelper,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IGlobalCacheRepository globalCache)
     {
       _logger = logger;
       _repository = repository;
@@ -541,8 +541,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetCompanies = rcGetCompanies;
-      _redisHelper = redisHelper;
       _responseCreator = responseCreator;
+      _globalCache = globalCache;
     }
 
     /// <inheritdoc />

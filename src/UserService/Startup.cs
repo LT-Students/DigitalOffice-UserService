@@ -7,8 +7,10 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
@@ -36,6 +38,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -44,6 +47,7 @@ namespace LT.DigitalOffice.UserService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
     private readonly RabbitMqConfig _rabbitMqConfig;
@@ -78,28 +82,25 @@ namespace LT.DigitalOffice.UserService
         .OfType<NewtonsoftJsonPatchInputFormatter>()
         .First();
     }
-
-    private string HidePassord(string line)
+    private void FlushRedisDatabase(string redisConnStr)
     {
-      string password = "Password";
-
-      int index = line.IndexOf(password, 0, StringComparison.OrdinalIgnoreCase);
-
-      if (index != -1)
+      try
       {
-        string[] words = Regex.Split(line, @"[=,; ]");
-
-        for (int i = 0; i < words.Length; i++)
+        using (ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(redisConnStr + ",allowAdmin=true,connectRetry=1,connectTimeout=2000"))
         {
-          if (string.Equals(password, words[i], StringComparison.OrdinalIgnoreCase))
+          EndPoint[] endpoints = cm.GetEndPoints(true);
+
+          foreach (EndPoint endpoint in endpoints)
           {
-            line = line.Replace(words[i + 1], "****");
-            break;
+            IServer server = cm.GetServer(endpoint);
+            server.FlushDatabase(Cache.Users);
           }
         }
       }
-
-      return line;
+      catch (Exception ex)
+      {
+        Log.Error($"Error while flushing Redis database. Text: {ex.Message}");
+      }
     }
 
     #region configure masstransit
@@ -265,11 +266,11 @@ namespace LT.DigitalOffice.UserService
       {
         connStr = Configuration.GetConnectionString("SQLConnectionString");
 
-        Log.Information($"SQL connection string from appsettings.json was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from appsettings.json was used. Value '{HidePasswordHelper.HidePassword(connStr)}'.");
       }
       else
       {
-        Log.Information($"SQL connection string from environment was used. Value '{HidePassord(connStr)}'.");
+        Log.Information($"SQL connection string from environment was used. Value '{HidePasswordHelper.HidePassword(connStr)}'.");
       }
 
       services.AddHttpContextAccessor();
@@ -318,7 +319,6 @@ namespace LT.DigitalOffice.UserService
 
       services.AddMemoryCache();
       services.AddBusinessObjects();
-      services.AddTransient<IRedisHelper, RedisHelper>();
 
       ConfigureMassTransit(services);
 
@@ -328,22 +328,20 @@ namespace LT.DigitalOffice.UserService
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
 
-      services.AddTransient<ICacheNotebook, CacheNotebook>();
-
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
 
-        Log.Information($"Redis connection string from appsettings.json was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from appsettings.json was used. Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
       }
       else
       {
-        Log.Information($"Redis connection string from environment was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from environment was used. Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
 
       services
         .AddControllers(options =>
@@ -363,6 +361,8 @@ namespace LT.DigitalOffice.UserService
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
       UpdateDatabase(app);
+
+      FlushRedisDatabase(redisConnStr);
 
       app.UseForwardedHeaders();
 
