@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetUserRolesRequest> _rcGetUserRoles;
     private readonly IRequestClient<IGetCompaniesRequest> _rcGetCompanies;
-    private readonly IRedisHelper _redisHelper;
+    private readonly IGlobalCacheRepository _globalCache;
     private readonly IResponseCreator _responseCreator;
 
     #region private methods
@@ -91,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId,
       List<string> errors)
     {
-      List<CompanyData> companies = await _redisHelper
+      List<CompanyData> companies = await _globalCache
         .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheHashCode());
 
       if (companies is not null)
@@ -117,7 +117,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId,
       List<string> errors)
     {
-      List<OfficeData> offices = await _redisHelper
+      List<OfficeData> offices = await _globalCache
         .GetAsync<List<OfficeData>>(Cache.Offices, userId.GetRedisCacheHashCode());
 
       if (offices is not null)
@@ -143,7 +143,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId,
       List<string> errors)
     {
-      List<PositionData> positions = await _redisHelper
+      List<PositionData> positions = await _globalCache
         .GetAsync<List<PositionData>>(Cache.Positions, userId.GetRedisCacheHashCode());
 
       if (positions is not null)
@@ -207,7 +207,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors)
     {
-      (List<ProjectData> projects, int _) = await _redisHelper
+      (List<ProjectData> projects, int _) = await _globalCache
         .GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
 
       if (projects is not null)
@@ -279,7 +279,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetUserRolesRequest> rcGetUserRoles,
       IRequestClient<IGetCompaniesRequest> rcGetCompanies,
-      IRedisHelper redisHelper,
+      IGlobalCacheRepository globalCache,
       IResponseCreator responseCreator)
     {
       _logger = logger;
@@ -304,7 +304,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _rcGetImages = rcGetImages;
       _rcGetUserRoles = rcGetUserRoles;
       _rcGetCompanies = rcGetCompanies;
-      _redisHelper = redisHelper;
+      _globalCache = globalCache;
       _responseCreator = responseCreator;
     }
 

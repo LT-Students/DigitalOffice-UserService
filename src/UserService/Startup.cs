@@ -11,6 +11,7 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
@@ -39,6 +40,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
@@ -46,6 +48,7 @@ namespace LT.DigitalOffice.UserService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
     private readonly RabbitMqConfig _rabbitMqConfig;
@@ -79,6 +82,27 @@ namespace LT.DigitalOffice.UserService
         .InputFormatters
         .OfType<NewtonsoftJsonPatchInputFormatter>()
         .First();
+    }
+
+    private void FlushRedisDatabase(string redisConnStr)
+    {
+      try
+      {
+        using (ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(redisConnStr + ",allowAdmin=true,connectRetry=1,connectTimeout=2000"))
+        {
+          EndPoint[] endpoints = cm.GetEndPoints(true);
+
+          foreach (EndPoint endpoint in endpoints)
+          {
+            IServer server = cm.GetServer(endpoint);
+            server.FlushDatabase(Cache.Users);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Log.Error($"Error while flushing Redis database. Text: {ex.Message}");
+      }
     }
 
     #region configure masstransit
@@ -284,7 +308,7 @@ namespace LT.DigitalOffice.UserService
 
       services.AddTransient<ICacheNotebook, CacheNotebook>();
 
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
@@ -297,7 +321,7 @@ namespace LT.DigitalOffice.UserService
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
 
       services
         .AddControllers(options =>
@@ -317,6 +341,8 @@ namespace LT.DigitalOffice.UserService
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
       UpdateDatabase(app);
+
+      FlushRedisDatabase(redisConnStr);
 
       app.UseForwardedHeaders();
 
