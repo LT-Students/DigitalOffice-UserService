@@ -39,7 +39,6 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text.Json.Serialization;
 
 namespace LT.DigitalOffice.UserService
@@ -317,7 +316,11 @@ namespace LT.DigitalOffice.UserService
     {
       UpdateDatabase(app);
 
-      FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 
