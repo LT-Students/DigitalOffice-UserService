@@ -11,11 +11,13 @@ using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IMemoryCache _cache;
+    private readonly IOptions<MemoryCacheConfig> _cacheOptions;
     private readonly ILogger<ResendConfirmationCommunicationCommand> _logger;
     private readonly IRequestClient<IGetTextTemplateRequest> _rcGetTextTemplate;
     private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
@@ -83,6 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
       IMemoryCache cache,
+      IOptions<MemoryCacheConfig> cacheOptions,
       ILogger<ResendConfirmationCommunicationCommand> logger,
       IRequestClient<IGetTextTemplateRequest> rcGetTextTemplate,
       IRequestClient<ISendEmailRequest> rcSendEmail,
@@ -92,6 +96,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _cache = cache;
+      _cacheOptions = cacheOptions;
       _logger = logger;
       _rcGetTextTemplate = rcGetTextTemplate;
       _rcSendEmail = rcSendEmail;
@@ -121,7 +126,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
       string secret = Guid.NewGuid().ToString();
 
-      _cache.Set(communicationId, secret);
+      _cache.Set(communicationId, secret, TimeSpan.FromMinutes(_cacheOptions.Value.CacheLiveInMinutes));
 
       await SendEmailAsync(dbUserCommunication, secret, response.Errors);
 
