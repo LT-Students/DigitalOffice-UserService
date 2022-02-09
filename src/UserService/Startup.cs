@@ -12,6 +12,7 @@ using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
@@ -80,27 +81,6 @@ namespace LT.DigitalOffice.UserService
         .InputFormatters
         .OfType<NewtonsoftJsonPatchInputFormatter>()
         .First();
-    }
-
-    private void FlushRedisDatabase(string redisConnStr)
-    {
-      try
-      {
-        using (ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(redisConnStr + ",allowAdmin=true,connectRetry=1,connectTimeout=2000"))
-        {
-          EndPoint[] endpoints = cm.GetEndPoints(true);
-
-          foreach (EndPoint endpoint in endpoints)
-          {
-            IServer server = cm.GetServer(endpoint);
-            server.FlushDatabase(Cache.Users);
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Log.Error($"Error while flushing Redis database. Text: {ex.Message}");
-      }
     }
 
     #region configure masstransit
@@ -337,7 +317,7 @@ namespace LT.DigitalOffice.UserService
     {
       UpdateDatabase(app);
 
-      FlushRedisDatabase(redisConnStr);
+      FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
 
       app.UseForwardedHeaders();
 

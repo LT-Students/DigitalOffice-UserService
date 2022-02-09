@@ -108,6 +108,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         {
           return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
         }
+
+        await _globalCache.RemoveAsync(userId);
       }
 
       if (dbUserAdditionPatch.Operations.Any())
@@ -119,8 +121,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
         }
       }
-
-      await _globalCache.RemoveAsync(userId);
 
       return response;
     }
