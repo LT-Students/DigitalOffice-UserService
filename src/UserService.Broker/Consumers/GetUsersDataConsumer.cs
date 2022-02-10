@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
       List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UserIds, true);
+        .GetAsync(request.UsersIds, true);
 
       return dbUsers.Select(
         u => new UserData(
@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users != null)
       {
-        string key = context.Message.UserIds.GetRedisCacheHashCode();
+        string key = context.Message.UsersIds.GetRedisCacheHashCode();
 
         await _globalCache.CreateAsync(
           Cache.Users,

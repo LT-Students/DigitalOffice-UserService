@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
@@ -67,10 +68,12 @@ namespace LT.DigitalOffice.UserService.Validation.User
           .MaximumLength(150).WithMessage("About is too long.");
       });
 
-      RuleFor(user => user.Communications)
-        .NotEmpty();
-
-      RuleForEach(user => user.Communications)
+      RuleFor(user => user.Communication)
+        .Cascade(CascadeMode.Stop)
+        .NotNull()
+        .WithMessage("Communication must not be empty.")
+        .Must(x => x.Type == CommunicationType.Email)
+        .WithMessage("Communication type must be email.")
         .SetValidator(communicationValidator);
 
       RuleFor(user => user.Rate)
