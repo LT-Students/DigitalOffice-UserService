@@ -169,8 +169,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Guid userId,
       List<string> errors)
     {
-      //to do implement update cache
-      List<DepartmentData> departments = null;//await _redisHelper.GetAsync<List<DepartmentData>>(Cache.Departments, usersIds.GetRedisCacheHashCode());
+      List<DepartmentData> departments = await _globalCache
+        .GetAsync<List<DepartmentData>>(Cache.Departments, userId.GetRedisCacheHashCode());
 
       if (departments is not null)
       {
