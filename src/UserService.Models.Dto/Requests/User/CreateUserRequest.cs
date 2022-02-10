@@ -28,6 +28,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto
     public Guid? RoleId { get; set; }
     public string Password { get; set; }
     public CreateAvatarRequest AvatarImage { get; set; }
-    public IEnumerable<CreateCommunicationRequest> Communications { get; set; }
+    public CreateCommunicationRequest Communication { get; set; }
   }
 }

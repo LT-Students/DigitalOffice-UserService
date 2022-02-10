@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
       List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UserIds, true);
+        .GetAsync(request.UsersIds, true);
 
       return dbUsers.Select(
         u => new UserData(
@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users != null)
       {
-        string key = context.Message.UserIds.GetRedisCacheHashCode();
+        string key = context.Message.UsersIds.GetRedisCacheHashCode();
 
         await _redisHelper.CreateAsync(
           Cache.Users,
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           users,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
 
-        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
+        _cacheNotebook.Add(context.Message.UsersIds, Cache.Users, key);
       }
     }
   }

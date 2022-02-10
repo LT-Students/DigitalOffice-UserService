@@ -42,15 +42,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         IsActive = false,
         CreatedBy = createdBy,
         CreatedAtUtc = createdAtUtc,
-        Communications = request.Communications?.Select(x => new DbUserCommunication
-        {
-          Id = Guid.NewGuid(),
-          Type = (int)x.Type,
-          Value = x.Value,
-          UserId = userId,
-          CreatedBy = createdBy,
-          CreatedAtUtc = createdAtUtc
-        }).ToList(),
+        Communications = new List<DbUserCommunication> {
+          new DbUserCommunication
+          {
+            Id = Guid.NewGuid(),
+            Type = (int)request.Communication.Type,
+            Value = request.Communication.Value,
+            UserId = userId,
+            CreatedBy = createdBy,
+            CreatedAtUtc = createdAtUtc
+          }
+        },
         Addition = new DbUserAddition
         {
           Id = Guid.NewGuid(),

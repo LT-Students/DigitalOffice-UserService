@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Enums
         Telegram,
         Phone,
         Skype,
-        Twitter
+        Twitter,
+        BaseEmail
     }
 }

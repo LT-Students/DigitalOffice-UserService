@@ -36,5 +36,22 @@ namespace LT.DigitalOffice.UserService.Controllers
     {
       return await command.ExecuteAsync(communicationId);
     }
+
+    [HttpPut("confirm")]
+    public async Task<OperationResultResponse<bool>> ConfirmAsync(
+      [FromServices] IConfirmCommunicationCommand command,
+      [FromQuery] Guid communicationId,
+      [FromQuery] string secret)
+    {
+      return await command.ExecuteAsync(communicationId, secret);
+    }
+
+    [HttpGet("resendconfirmation")]
+    public async Task<OperationResultResponse<bool>> ConfirmAsync(
+      [FromServices] IResendConfirmationCommunicationCommand command,
+      [FromQuery] Guid communicationId)
+    {
+      return await command.ExecuteAsync(communicationId);
+    }
   }
 }
