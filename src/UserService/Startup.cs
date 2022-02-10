@@ -11,8 +11,8 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
-using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
@@ -46,6 +46,7 @@ namespace LT.DigitalOffice.UserService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
     private readonly RabbitMqConfig _rabbitMqConfig;
@@ -272,7 +273,6 @@ namespace LT.DigitalOffice.UserService
 
       services.AddMemoryCache();
       services.AddBusinessObjects();
-      services.AddTransient<IRedisHelper, RedisHelper>();
 
       ConfigureMassTransit(services);
 
@@ -282,9 +282,7 @@ namespace LT.DigitalOffice.UserService
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
 
-      services.AddTransient<ICacheNotebook, CacheNotebook>();
-
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
@@ -297,7 +295,7 @@ namespace LT.DigitalOffice.UserService
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
 
       services
         .AddControllers(options =>
@@ -317,6 +315,12 @@ namespace LT.DigitalOffice.UserService
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
       UpdateDatabase(app);
+
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 

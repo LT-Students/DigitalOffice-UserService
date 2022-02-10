@@ -25,8 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   {
     private readonly IUserRepository _userRepository;
     private readonly IOptions<RedisConfig> _redisConfig;
-    private readonly IRedisHelper _redisHelper;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
@@ -48,13 +47,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     public GetUsersDataConsumer(
       IUserRepository userRepository,
       IOptions<RedisConfig> redisConfig,
-      IRedisHelper redisHelper,
-      ICacheNotebook cacheNotebook)
+      IGlobalCacheRepository globalCache)
     {
       _userRepository = userRepository;
       _redisConfig = redisConfig;
-      _redisHelper = redisHelper;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
     }
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
@@ -68,13 +65,12 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       {
         string key = context.Message.UsersIds.GetRedisCacheHashCode();
 
-        await _redisHelper.CreateAsync(
+        await _globalCache.CreateAsync(
           Cache.Users,
           key,
           users,
+          context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-
-        _cacheNotebook.Add(context.Message.UsersIds, Cache.Users, key);
       }
     }
   }

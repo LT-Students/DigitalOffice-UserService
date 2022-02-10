@@ -5,6 +5,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
@@ -32,6 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IAccessValidator _accessValidator;
     private readonly ILogger<RemoveAvatarsCommand> _logger;
     private readonly IResponseCreator _responseCreator;
+    private readonly IGlobalCacheRepository _globalCache;
 
     private async Task<bool> RemoveImages(List<Guid> imagesIds, List<string> errors)
     {
@@ -55,8 +57,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       catch (Exception e)
       {
         _logger.LogError(e, logMessage, string.Join(", ", imagesIds));
-
-
       }
       errors.Add("Cannot remove images. Please try again later.");
 
@@ -70,7 +70,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IRemoveAvatarsRequestValidator removeRequestValidator,
       IAccessValidator accessValidator,
       ILogger<RemoveAvatarsCommand> logger,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IGlobalCacheRepository globalCache)
     {
       _avatarRepository = imageRepository;
       _httpContextAccessor = httpContextAccessor;
@@ -79,6 +80,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _accessValidator = accessValidator;
       _logger = logger;
       _responseCreator = responseCreator;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(RemoveAvatarsRequest request)
@@ -104,6 +106,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       if (response.Body)
       {
         await RemoveImages(request.AvatarsIds, response.Errors);
+
+        await _globalCache.RemoveAsync(request.UserId);
       }
 
       response.Status = response.Errors.Any()
