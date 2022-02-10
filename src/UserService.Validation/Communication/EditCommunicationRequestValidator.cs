@@ -93,7 +93,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
       _communicationRepository = communicationRepository;
 
       RuleFor(request => request)
-        .Must(request => request.Item2.Operations.Count() != 1)
+        .Must(request => request.Item2.Operations.Count() == 1)
         .WithMessage("it is not allowed to change more than 2 properties at the same time.")
         .CustomAsync(async (request, context, _) => await HandleInternalPropertyValidation(request, context));
     }
