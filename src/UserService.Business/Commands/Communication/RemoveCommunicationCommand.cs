@@ -45,12 +45,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (dbUserCommunication.Type == (int)CommunicationType.Email &&
-        (await _repository.CountUserEmails(dbUserCommunication.UserId)) < 2)
+      if (dbUserCommunication.Type == (int)CommunicationType.BaseEmail)
       {
         return _responseCreator.CreateFailureResponse<bool>(
           HttpStatusCode.BadRequest,
-          new List<string>() { "Last email can not be removed." });
+          new List<string>() { "Base email cannot be removed." });
       }
 
       bool result = await _repository.RemoveAsync(dbUserCommunication);

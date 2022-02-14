@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
     private readonly IBus _bus;
 
     public EditUserCommand(
@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      ICacheNotebook cacheNotebook,
+      IGlobalCacheRepository globalCache,
       IBus bus)
     {
       _userRepository = userRepository;
@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
       _bus = bus;
     }
 
@@ -108,6 +108,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         {
           return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
         }
+
+        await _globalCache.RemoveAsync(userId);
       }
 
       if (dbUserAdditionPatch.Operations.Any())
@@ -119,8 +121,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
         }
       }
-
-      await _cacheNotebook.RemoveAsync(userId);
 
       return response;
     }

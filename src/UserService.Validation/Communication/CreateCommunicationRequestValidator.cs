@@ -19,7 +19,9 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
         .NotEmpty().WithMessage("Communication value must not be empty.");
 
       RuleFor(c => c.Type)
-        .IsInEnum().WithMessage("Incorrect communication type format.");
+        .IsInEnum().WithMessage("Incorrect communication type format.")
+        .Must(ct => ct != CommunicationType.BaseEmail)
+        .WithMessage("Can't set unconfirmed email as base.");
 
       When(c => c.Type == CommunicationType.Phone && c.Value != null, () =>
         RuleFor(c => c.Value)
@@ -42,7 +44,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
           .WithMessage("Incorrect email address."));
 
       RuleFor(c => c.Value)
-        .MustAsync(async (v, _, _) => !await _communicationRepository.CheckExistingValue(v.Value))
+        .MustAsync(async (v, _, _) => !await _communicationRepository.DoesValueExist(v.Value))
         .WithMessage("Communication value already exist.");
     }
   }

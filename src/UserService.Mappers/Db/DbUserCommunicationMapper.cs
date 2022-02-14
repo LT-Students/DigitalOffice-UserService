@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
     public DbUserCommunication Map(CreateCommunicationRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }

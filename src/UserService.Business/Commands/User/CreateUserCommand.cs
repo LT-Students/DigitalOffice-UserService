@@ -144,14 +144,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
     {
-      DbUserCommunication email = dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
-
-      if (email is null)
-      {
-        errors.Add("User does not have any linked email.");
-
-        return;
-      }
+      DbUserCommunication email = dbUser.Communications
+        .FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
 
       IGetTextTemplateResponse textTemplate =
         await RequestHandler.ProcessRequest<IGetTextTemplateRequest, IGetTextTemplateResponse>(
@@ -201,7 +195,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return null;
       }
 
-      return (await RequestHandler.ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
+      return (await RequestHandler
+        .ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
           _rcCreateImage,
           ICreateImagesRequest.CreateObj(
             _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
