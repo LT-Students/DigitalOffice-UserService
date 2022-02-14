@@ -43,7 +43,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
         {
           SkipCount = request.SkipCount,
-          TakeCount = request.TakeCount
+          TakeCount = request.TakeCount,
+          IncludeCurrentAvatar = true
         });
       }
 
