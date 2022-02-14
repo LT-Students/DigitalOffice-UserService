@@ -87,8 +87,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           users,
           context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-
-        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
       }
     }
   }
