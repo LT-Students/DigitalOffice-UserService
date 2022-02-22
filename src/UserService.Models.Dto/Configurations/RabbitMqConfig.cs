@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
-using LT.DigitalOffice.Models.Broker.Requests.Admin;
+using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Education;
@@ -12,7 +12,6 @@ using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Requests.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
-using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
@@ -27,17 +26,10 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string FindParseEntitiesEndpoint { get; set; }
     public string CheckUsersExistenceEndpoint { get; set; }
 
-    // Admin
-    [AutoInjectRequest(typeof(ICreateServiceEndpointsRequest))]
-    public string CreateServiceEndpointsEndpoint { get; set; }
-
     //TextTemplate
 
     [AutoInjectRequest(typeof(IGetTextTemplateRequest))]
     public string GetTextTemplateEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(ICreateKeywordsRequest))]
-    public string CreateKeywordsEndpoint { get; set; }
 
     //Email
 

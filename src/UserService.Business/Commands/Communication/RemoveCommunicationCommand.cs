@@ -20,13 +20,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
   {
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IResponseCreator _responseCreator;
 
     public RemoveCommunicationCommand(
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      ICommunicationRepository communicationRepository,
+      IUserCommunicationRepository communicationRepository,
       IResponseCreator responseCreator)
     {
       _accessValidator = accessValidator;

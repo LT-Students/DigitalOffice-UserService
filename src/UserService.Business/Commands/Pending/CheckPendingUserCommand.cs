@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
+using LT.DigitalOffice.UserService.Business.Commands.Pending.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using System;
 using System.Threading.Tasks;

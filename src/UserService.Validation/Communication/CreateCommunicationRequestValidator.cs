@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
     private static Regex PhoneRegex = new(@"^\d+$");
 
     public CreateCommunicationRequestValidator(
-      ICommunicationRepository _communicationRepository)
+      IUserCommunicationRepository _communicationRepository)
     {
       RuleFor(c => c.Value)
         .NotEmpty().WithMessage("Communication value must not be empty.");

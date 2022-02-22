@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  public class CommunicationRepository : ICommunicationRepository
+  public class UserCommunicationRepository : IUserCommunicationRepository
   {
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CommunicationRepository(
+    public UserCommunicationRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
     {

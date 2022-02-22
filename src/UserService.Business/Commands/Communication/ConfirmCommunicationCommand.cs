@@ -11,12 +11,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class ConfirmCommunicationCommand : IConfirmCommunicationCommand
   {
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IMemoryCache _cache;
     private readonly IResponseCreator _responseCreator;
 
     public ConfirmCommunicationCommand(
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IMemoryCache cache,
       IResponseCreator responseCreator)
     {

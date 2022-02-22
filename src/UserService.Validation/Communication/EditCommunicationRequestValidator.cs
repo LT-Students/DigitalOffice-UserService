@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
   public class EditCommunicationRequestValidator :
     ExtendedEditRequestValidator<DbUserCommunication, EditCommunicationRequest>, IEditCommunicationRequestValidator
   {
-    private readonly ICommunicationRepository _communicationRepository;
+    private readonly IUserCommunicationRepository _communicationRepository;
 
     private async Task HandleInternalPropertyValidation(
       (DbUserCommunication communication, JsonPatchDocument<EditCommunicationRequest> patch) request,
@@ -88,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
     }
 
     public EditCommunicationRequestValidator(
-      ICommunicationRepository communicationRepository)
+      IUserCommunicationRepository communicationRepository)
     {
       _communicationRepository = communicationRepository;
 

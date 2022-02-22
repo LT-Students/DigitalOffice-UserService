@@ -1,6 +1,8 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.PendingUser.Filters;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
@@ -11,6 +13,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
     Task CreateAsync(DbPendingUser dbPendingUser);
 
     Task<DbPendingUser> GetAsync(Guid userId);
+
+    Task<(List<DbPendingUser> dbPendingUsers, int totalCount)> FindAsync(FindPendingUserFilter filter);
 
     Task RemoveAsync(Guid userId);
 

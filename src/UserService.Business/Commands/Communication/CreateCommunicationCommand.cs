@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
   {
     private readonly ICreateCommunicationRequestValidator _validator;
     private readonly IDbUserCommunicationMapper _mapper;
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
@@ -92,7 +92,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     public CreateCommunicationCommand(
       ICreateCommunicationRequestValidator validator,
       IDbUserCommunicationMapper mapper,
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,

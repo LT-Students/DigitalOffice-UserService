@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  public class ImageRepository : IAvatarRepository
+  public class ImageRepository : IUserAvatarRepository
   {
     private readonly IDataProvider _provider;
 

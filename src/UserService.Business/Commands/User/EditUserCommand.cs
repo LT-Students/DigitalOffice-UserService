@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -71,8 +70,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
 
       if ((!isAddEditRemoveUsers && userId != requestSenderId && !isAdmin) ||
-        (isActiveOperation is not null && !(isAddEditRemoveUsers || isAdmin)) || 
-        (isAdminOperation is not null && !isAdmin) || 
+        (isActiveOperation is not null && !(isAddEditRemoveUsers || isAdmin)) ||
+        (isAdminOperation is not null && !isAdmin) ||
         (isGenderOperation is not null && userId != requestSenderId))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);

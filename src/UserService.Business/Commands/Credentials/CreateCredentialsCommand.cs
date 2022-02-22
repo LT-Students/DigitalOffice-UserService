@@ -3,10 +3,10 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.Token;
+using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
-using LT.DigitalOffice.UserService.Business.Helpers.Password;
+using LT.DigitalOffice.UserService.Broker.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
-    private readonly ICommunicationRepository _communicationRepository;
+    private readonly IUserCommunicationRepository _communicationRepository;
     private readonly IRequestClient<IGetTokenRequest> _rcToken;
     private readonly ILogger<CreateCredentialsCommand> _logger;
     private readonly ICreateCredentialsRequestValidator _validator;
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
       IUserCredentialsRepository userCredentialsRepository,
-      ICommunicationRepository communicationRepository,
+      IUserCommunicationRepository communicationRepository,
       IRequestClient<IGetTokenRequest> rcToken,
       ILogger<CreateCredentialsCommand> logger,
       ICreateCredentialsRequestValidator validator,

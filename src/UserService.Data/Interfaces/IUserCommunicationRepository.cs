@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
   [AutoInject]
-  public interface ICommunicationRepository
+  public interface IUserCommunicationRepository
   {
     Task<Guid?> CreateAsync(DbUserCommunication dbUserCommunication);
 

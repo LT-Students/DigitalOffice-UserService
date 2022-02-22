@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class EditCommunicationCommand : IEditCommunicationCommand
   {
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
     private readonly IPatchDbUserCommunicationMapper _mapper;
     private readonly IEditCommunicationRequestValidator _validator;
@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     private readonly IResponseCreator _responseCreator;
 
     public EditCommunicationCommand(
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IAccessValidator accessValidator,
       IPatchDbUserCommunicationMapper mapper,
       IEditCommunicationRequestValidator validator,

@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 {
   public class RemoveAvatarsCommand : IRemoveAvatarsCommand
   {
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IUserAvatarRepository _avatarRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRequestClient<IRemoveImagesRequest> _rcRemoveImages;
     private readonly IRemoveAvatarsRequestValidator _removeRequestValidator;
@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     }
 
     public RemoveAvatarsCommand(
-      IAvatarRepository imageRepository,
+      IUserAvatarRepository imageRepository,
       IHttpContextAccessor httpContextAccessor,
       IRequestClient<IRemoveImagesRequest> rcRemoveImages,
       IRemoveAvatarsRequestValidator removeRequestValidator,

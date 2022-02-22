@@ -19,7 +19,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 {
   public class EditAvatarCommand : IEditAvatarCommand
   {
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IUserAvatarRepository _avatarRepository;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
-      IAvatarRepository avatarRepository,
+      IUserAvatarRepository avatarRepository,
       IGlobalCacheRepository globalCache)
     {
       _httpContextAccessor = httpContextAccessor;

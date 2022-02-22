@@ -37,21 +37,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
     {
       if (dbUser is null)
       {
-        return null;
+        return default;
       }
 
       return new UserResponse
       {
-        User = _userInfoMapper.Map(
-          dbUser,
-          companyUserData,
-          avatar,
-          company,
-          department,
-          office,
-          position,
-          role),
-        UserAddition = dbUser.Addition is null ? null : new()
+        User = _userInfoMapper.Map(dbUser, avatar),
+        UserAddition = dbUser.Addition is null ? default : new()
         {
           GenderName = dbUser.Addition.Gender?.Name,
           About = dbUser.Addition.About,
@@ -61,6 +53,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
           BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
         },
+        Company = company,
+        Department = department,
+        Office = office,
+        Position = position,
+        Role = role,
         Images = images,
         Certificates = certificates,
         Communications = dbUser.Communications?.Select(
