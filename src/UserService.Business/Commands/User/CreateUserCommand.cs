@@ -274,7 +274,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
+      await _pendingUserRepository
+        .CreateAsync(new DbPendingUser()
+        {
+          UserId = userId,
+          Password = password,
+          CommunicationId = dbUser.Communications.FirstOrDefault().Id
+        });
 
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)

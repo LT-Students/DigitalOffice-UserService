@@ -60,13 +60,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         Role = role,
         Images = images,
         Certificates = certificates,
-        Communications = dbUser.Communications?.Select(
-          c => new CommunicationInfo
-          {
-            Id = c.Id,
-            Type = (CommunicationType)c.Type,
-            Value = c.Value
-          }),
         Educations = educations,
         Projects = projects,
         Skills = skills

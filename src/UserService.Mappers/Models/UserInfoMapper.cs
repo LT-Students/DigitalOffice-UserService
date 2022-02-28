@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -25,7 +26,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Status = (UserStatus)dbUser.Status,
         IsAdmin = dbUser.IsAdmin,
         IsActive = dbUser.IsActive,
-        Avatar = avatar
+        Avatar = avatar,
+        Communications = dbUser.Communications
+        ?.Select(c => new CommunicationInfo
+        {
+          Id = c.Id,
+          Type = (CommunicationType)c.Type,
+          Value = c.Value
+        }),
       };
     }
   }

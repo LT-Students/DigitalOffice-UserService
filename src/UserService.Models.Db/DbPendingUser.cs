@@ -9,6 +9,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public const string TableName = "PendingUsers";
 
     public Guid UserId { get; set; }
+    public Guid CommunicationId { get; set; }
     public string Password { get; set; }
     public DbUser User { get; set; }
   }

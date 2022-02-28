@@ -26,10 +26,23 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
     }
 
-    public async Task<DbPendingUser> GetAsync(Guid userId)
+    public async Task<DbPendingUser> GetAsync(Guid userId, bool includeUser)
     {
-      return await _provider.PendingUsers
+      IQueryable<DbPendingUser> dbPendingUser = _provider.PendingUsers.AsQueryable();
+
+      if (includeUser)
+      {
+        dbPendingUser = dbPendingUser.Include(pu => pu.User).ThenInclude(u => u.Communications);
+      }
+
+      return await dbPendingUser
         .FirstOrDefaultAsync(pu => pu.UserId == userId);
+    }
+
+    public async Task UpdateAsync(DbPendingUser dbPendingUser)
+    {
+      _provider.PendingUsers.Update(dbPendingUser);
+      await _provider.SaveAsync();
     }
 
     public async Task<(List<DbPendingUser> dbPendingUsers, int totalCount)> FindAsync(
@@ -41,14 +54,14 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (filter.IncludeCommunication)
       {
-        dbPendingUsers
+        dbPendingUsers = dbPendingUsers
           .Include(pu => pu.User)
           .ThenInclude(u => u.Communications);
       }
 
       if (filter.IncludeCurrentAvatar)
       {
-        dbPendingUsers
+        dbPendingUsers = dbPendingUsers
           .Include(pu => pu.User)
           .ThenInclude(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
@@ -58,16 +71,18 @@ namespace LT.DigitalOffice.UserService.Data
         await dbPendingUsers.CountAsync());
     }
 
-    public async Task RemoveAsync(Guid userId)
+    public async Task<DbPendingUser> RemoveAsync(Guid userId)
     {
       DbPendingUser dbPendingUser = await _provider.PendingUsers
         .FirstOrDefaultAsync(pu => pu.UserId == userId);
 
-      if (dbPendingUser != null)
+      if (dbPendingUser is not null)
       {
         _provider.PendingUsers.Remove(dbPendingUser);
         await _provider.SaveAsync();
       }
+
+      return dbPendingUser;
     }
 
     public async Task<bool> DoesExistAsync(Guid userId)

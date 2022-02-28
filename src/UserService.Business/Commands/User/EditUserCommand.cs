@@ -4,7 +4,6 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
@@ -25,32 +24,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class EditUserCommand : IEditUserCommand
   {
     private readonly IUserRepository _userRepository;
-    private readonly IUserCredentialsRepository _credentialsRepository;
+    //private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
-    private readonly IBus _bus;
 
     public EditUserCommand(
       IUserRepository userRepository,
-      IUserCredentialsRepository credentialsRepository,
       IPatchDbUserMapper mapperUser,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      IGlobalCacheRepository globalCache,
-      IBus bus)
+      IGlobalCacheRepository globalCache)
     {
       _userRepository = userRepository;
-      _credentialsRepository = credentialsRepository;
       _mapperUser = mapperUser;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
-      _bus = bus;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId, JsonPatchDocument<EditUserRequest> patch)
@@ -60,9 +54,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       bool isAdmin = await _accessValidator.IsAdminAsync(userId);
       bool isAddEditRemoveUsers = await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers);
 
-      Operation<EditUserRequest> isActiveOperation = patch.Operations.FirstOrDefault(
-        o => o.path.EndsWith(nameof(EditUserRequest.IsActive), StringComparison.OrdinalIgnoreCase));
-
       Operation<EditUserRequest> isAdminOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.IsAdmin), StringComparison.OrdinalIgnoreCase));
 
@@ -70,7 +61,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
 
       if ((!isAddEditRemoveUsers && userId != requestSenderId && !isAdmin) ||
-        (isActiveOperation is not null && !(isAddEditRemoveUsers || isAdmin)) ||
         (isAdminOperation is not null && !isAdmin) ||
         (isGenderOperation is not null && userId != requestSenderId))
       {
@@ -78,24 +68,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       OperationResultResponse<bool> response = new();
-
-      if (isActiveOperation != null)
-      {
-        bool newValue = bool.Parse(isActiveOperation.value.ToString());
-
-        bool switchActiveStatusResult = await _credentialsRepository.SwitchActiveStatusAsync(userId, newValue);
-
-        if (!switchActiveStatusResult)
-        {
-          response.Errors.Add("Can not change is active status.");
-        }
-        else if (!newValue)
-        {
-          await _bus.Publish<IDisactivateUserRequest>(IDisactivateUserRequest.CreateObj(
-            userId,
-            requestSenderId));
-        }
-      }
 
       (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) = _mapperUser.Map(patch);
 

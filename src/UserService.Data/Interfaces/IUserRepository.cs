@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
 
-    Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActive);
 
     Task<bool> DoesExistAsync(Guid userId);
 

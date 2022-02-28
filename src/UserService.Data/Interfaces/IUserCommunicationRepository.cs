@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
-using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Threading.Tasks;
 
@@ -11,15 +10,15 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbUserCommunication dbUserCommunication);
 
-    Task<bool> EditAsync(
-      DbUserCommunication dbUserCommunication,
-      JsonPatchDocument<DbUserCommunication> request);
+    Task<bool> EditAsync(Guid communicationId, string newValue);
 
     Task<bool> Confirm(Guid communicationId);
 
     Task<DbUserCommunication> GetAsync(Guid communicationId);
 
-    Task ActivateFirstCommunicationAsync(Guid userId);
+    Task<DbUserCommunication> GetBaseAsync(Guid userId);
+
+    Task SetBaseTypeAsync(Guid communicationId, Guid modifiedBy);
 
     Task RemoveBaseTypeAsync(Guid userId);
 

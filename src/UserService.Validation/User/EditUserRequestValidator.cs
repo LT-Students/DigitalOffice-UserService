@@ -30,7 +30,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
           nameof(EditUserRequest.LastName),
           nameof(EditUserRequest.Status),
           nameof(EditUserRequest.IsAdmin),
-          nameof(EditUserRequest.IsActive),
           nameof(EditUserRequest.GenderId),
           nameof(EditUserRequest.DateOfBirth),
           nameof(EditUserRequest.About),
@@ -45,7 +44,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       AddСorrectOperations(nameof(EditUserRequest.LastName), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.Status), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.IsAdmin), new List<OperationType> { OperationType.Replace });
-      AddСorrectOperations(nameof(EditUserRequest.IsActive), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.GenderId), new List<OperationType> { OperationType.Replace });
       AddСorrectOperations(nameof(EditUserRequest.DateOfBirth), new List<OperationType> { OperationType.Replace }); 
       AddСorrectOperations(nameof(EditUserRequest.About), new List<OperationType> { OperationType.Replace });
@@ -124,18 +122,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
        {
           { x => bool.TryParse(x.value?.ToString(), out bool _), "Incorrect user is admin format" },
        });
-
-      #endregion
-
-      #region IsActive
-
-      AddFailureForPropertyIf(
-        nameof(EditUserRequest.IsActive),
-        x => x == OperationType.Replace,
-        new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
-        {
-          { x => bool.TryParse(x.value?.ToString(), out _), "Incorrect user is active format." }
-        });
 
       #endregion
 

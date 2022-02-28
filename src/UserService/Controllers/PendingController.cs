@@ -22,10 +22,19 @@ namespace LT.DigitalOffice.UserService.Controllers
 
     [HttpGet("find")]
     public async Task<FindResultResponse<UserInfo>> FindAsync(
-      [FromServices] IFindPendingUserCommand command,
+      [FromServices] IFindPendingUsersCommand command,
       [FromQuery] FindPendingUserFilter filter)
     {
       return await command.ExecuteAsync(filter);
+    }
+
+    [HttpGet("resendinvitation")]
+    public async Task<OperationResultResponse<bool>> ResendInvitationAsync(
+      [FromServices] IResendInvitationCommand command,
+      [FromQuery] Guid userId,
+      [FromQuery] Guid communicationId)
+    {
+      return await command.ExecuteAsync(userId, communicationId);
     }
   }
 }

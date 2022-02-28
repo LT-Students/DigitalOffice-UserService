@@ -20,10 +20,10 @@ namespace LT.DigitalOffice.UserService.Controllers
       return await command.ExecuteAsync(request);
     }
 
-    [HttpPatch("edit")]
+    [HttpPut("edit")]
     public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditCommunicationCommand command,
-      [FromBody] JsonPatchDocument<EditCommunicationRequest> request,
+      [FromBody] EditCommunicationRequest request,
       [FromQuery] Guid communicationId)
     {
       return await command.ExecuteAsync(communicationId, request);

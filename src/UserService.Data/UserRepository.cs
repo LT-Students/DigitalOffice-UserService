@@ -210,9 +210,9 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActive)
     {
-      DbUser dbUser = await _provider.Users
+      DbUser dbUser = await _provider.Users.Include(x => x.Credentials)
         .FirstOrDefaultAsync(u => u.Id == userId);
 
       if (dbUser is null)
@@ -220,13 +220,13 @@ namespace LT.DigitalOffice.UserService.Data
         return false;
       }
 
-      dbUser.IsActive = status;
-
-      _provider.Users.Update(dbUser);
+      dbUser.IsActive = isActive;
       dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
         _httpContextAccessor.HttpContext.GetUserId() :
         null;
       dbUser.ModifiedAtUtc = DateTime.UtcNow;
+      dbUser.Credentials.IsActive = dbUser.IsActive;
+
       await _provider.SaveAsync();
 
       return true;

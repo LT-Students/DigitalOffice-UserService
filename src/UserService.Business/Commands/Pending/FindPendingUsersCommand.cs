@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Pending
 {
-  public class FindPendingUserCommand : IFindPendingUserCommand
+  public class FindPendingUsersCommand : IFindPendingUsersCommand
   {
     private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IPendingUserRepository _repository;
@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
     private readonly IImageService _imageService;
     private readonly IResponseCreator _responseCreator;
 
-    public FindPendingUserCommand(
+    public FindPendingUsersCommand(
       IBaseFindFilterValidator baseFindValidator,
       IPendingUserRepository repository,
       IUserInfoMapper mapper,

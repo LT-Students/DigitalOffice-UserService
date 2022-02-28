@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -16,7 +15,6 @@ namespace LT.DigitalOffice.UserService.Data
   public class UserCredentialsRepository : IUserCredentialsRepository
   {
     private readonly HttpContext _httpContext;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<UserCredentialsRepository> _logger;
     private readonly IDataProvider _provider;
 
@@ -26,7 +24,6 @@ namespace LT.DigitalOffice.UserService.Data
       IDataProvider provider)
     {
       _httpContext = httpContextAccessor.HttpContext;
-      _httpContextAccessor = httpContextAccessor;
       _logger = logger;
       _provider = provider;
     }
@@ -93,26 +90,6 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
 
       return dbUserCredentials.Id;
-    }
-
-    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus)
-    {
-      DbUserCredentials dbUserCredentials = await _provider.UsersCredentials
-        .FirstOrDefaultAsync(c => c.UserId == userId);
-
-      if (dbUserCredentials == null)
-      {
-        return false;
-      }
-
-      dbUserCredentials.IsActive = isActiveStatus;
-
-      _provider.UsersCredentials.Update(dbUserCredentials);
-      dbUserCredentials.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-      dbUserCredentials.ModifiedAtUtc = DateTime.UtcNow;
-      await _provider.SaveAsync();
-
-      return true;
     }
 
     public async Task<bool> LoginExistAsync(string login)

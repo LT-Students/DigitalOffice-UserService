@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Models
 {
@@ -13,5 +14,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; }
     public ImageInfo Avatar { get; set; }
+    public IEnumerable<CommunicationInfo> Communications { get; set; }
   }
 }

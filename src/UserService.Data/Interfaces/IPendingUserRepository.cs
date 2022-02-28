@@ -12,11 +12,13 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task CreateAsync(DbPendingUser dbPendingUser);
 
-    Task<DbPendingUser> GetAsync(Guid userId);
+    Task<DbPendingUser> GetAsync(Guid userId, bool includeUser = false);
+
+    Task UpdateAsync(DbPendingUser dbPendingUser);
 
     Task<(List<DbPendingUser> dbPendingUsers, int totalCount)> FindAsync(FindPendingUserFilter filter);
 
-    Task RemoveAsync(Guid userId);
+    Task<DbPendingUser> RemoveAsync(Guid userId);
 
     Task<bool> DoesExistAsync(Guid userId);
   }

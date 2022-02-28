@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace LT.DigitalOffice.UserService.Business.Commands.Pending.Interfaces
 {
   [AutoInject]
-  public interface IFindPendingUserCommand
+  public interface IFindPendingUsersCommand
   {
     Task<FindResultResponse<UserInfo>> ExecuteAsync(FindPendingUserFilter filter);
   }
