@@ -9,6 +9,7 @@ using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System;
@@ -31,6 +32,21 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     {
       List<DbUser> dbUsers = await _userRepository
         .GetAsync(request.UsersIds, true);
+
+      if (request.UsersIds.Any())
+      {
+        dbUsers = await _userRepository
+         .GetAsync(request.UsersIds, true);
+      }
+      else if (!request.UsersIds.Any() && (request.SkipCount > -1 && request.TakeCount > 1))
+      {
+        (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
+        {
+          SkipCount = request.SkipCount,
+          TakeCount = request.TakeCount,
+          IncludeCurrentAvatar = true
+        });
+      }
 
       return dbUsers.Select(
         u => new UserData(
