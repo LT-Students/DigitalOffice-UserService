@@ -12,6 +12,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
       IPendingUserRepository _pendingRepository)
     {
       RuleFor(request => request)
+        .Cascade(CascadeMode.Stop)
         .MustAsync(async (request, _) =>
           (await _userRepository.GetAsync(request.UserId))?.IsActive != request.IsActive)
         .WithMessage("Error is active value.")
