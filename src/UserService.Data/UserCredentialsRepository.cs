@@ -33,10 +33,11 @@ namespace LT.DigitalOffice.UserService.Data
       DbUserCredentials dbUserCredentials = null;
       if (filter.UserId.HasValue)
       {
-        dbUserCredentials = await _provider.UsersCredentials.FirstOrDefaultAsync(
-          uc =>
-            uc.UserId == filter.UserId.Value &&
-            uc.IsActive);
+        dbUserCredentials = filter.IncludeDeactivated
+          ? await _provider.UsersCredentials
+            .FirstOrDefaultAsync(uc => uc.UserId == filter.UserId.Value)
+          : await _provider.UsersCredentials
+            .FirstOrDefaultAsync(uc => uc.UserId == filter.UserId.Value && uc.IsActive);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
@@ -64,7 +65,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> EditAsync(DbUserCredentials dbUserCredentials)
     {
-      if (dbUserCredentials == null)
+      if (dbUserCredentials is null)
       {
         return false;
       }
@@ -81,7 +82,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials)
     {
-      if (dbUserCredentials == null)
+      if (dbUserCredentials is null)
       {
         return null;
       }

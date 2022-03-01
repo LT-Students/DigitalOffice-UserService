@@ -9,7 +9,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -24,7 +23,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class EditUserCommand : IEditUserCommand
   {
     private readonly IUserRepository _userRepository;
-    //private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IPatchDbUserMapper _mapperUser;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;

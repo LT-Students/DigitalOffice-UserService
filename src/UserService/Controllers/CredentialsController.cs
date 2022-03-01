@@ -18,5 +18,13 @@ namespace LT.DigitalOffice.UserService.Controllers
     {
       return await command.ExecuteAsync(request);
     }
+
+    [HttpPut("reactivate")]
+    public async Task<OperationResultResponse<CredentialsResponse>> ReactivateAcync(
+      [FromServices] IReactivateCredentialsCommand command,
+      [FromBody] ReactivateCredentialsRequest request)
+    {
+      return await command.ExecuteAsync(request);
+    }
   }
 }

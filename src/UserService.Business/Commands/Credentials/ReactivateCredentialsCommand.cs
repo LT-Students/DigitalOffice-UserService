@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.Enums;
+﻿using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
@@ -7,58 +6,50 @@ using LT.DigitalOffice.UserService.Broker.Helpers.Password;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
-using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
-using System;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 {
-  public class CreateCredentialsCommand : ICreateCredentialsCommand
+  public class ReactivateCredentialsCommand : IReactivateCredentialsCommand
   {
-    private readonly IDbUserCredentialsMapper _mapper;
+    private readonly IPendingUserRepository _pendingRepository;
+    private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IPendingUserRepository _pendingUserRepository;
-    private readonly IUserCredentialsRepository _userCredentialsRepository;
     private readonly IUserCommunicationRepository _communicationRepository;
-    private readonly IAuthService _authService;
-    private readonly ICreateCredentialsRequestValidator _validator;
     private readonly IResponseCreator _responseCreator;
+    private readonly IAuthService _authService;
 
-    public CreateCredentialsCommand(
-      IDbUserCredentialsMapper mapper,
+    public ReactivateCredentialsCommand(
+      IPendingUserRepository pendingRepository,
+      IUserCredentialsRepository credentialsRepository,
       IUserRepository userRepository,
-      IPendingUserRepository pendingUserRepository,
-      IUserCredentialsRepository userCredentialsRepository,
       IUserCommunicationRepository communicationRepository,
-      IAuthService authService,
-      ICreateCredentialsRequestValidator validator,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IAuthService authService)
     {
-      _mapper = mapper;
+      _pendingRepository = pendingRepository;
+      _credentialsRepository = credentialsRepository;
       _userRepository = userRepository;
-      _pendingUserRepository = pendingUserRepository;
-      _userCredentialsRepository = userCredentialsRepository;
       _communicationRepository = communicationRepository;
-      _authService = authService;
-      _validator = validator;
       _responseCreator = responseCreator;
+      _authService = authService;
     }
 
-    public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(CreateCredentialsRequest request)
+    public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(ReactivateCredentialsRequest request)
     {
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
+      DbPendingUser dbPendingUser = await _pendingRepository.GetAsync(request.UserId);
 
-      if (!validationResult.IsValid)
+      DbUserCredentials dbUserCredentials = await _credentialsRepository
+        .GetAsync(new GetCredentialsFilter() { UserId = request.UserId, IncludeDeactivated = true });
+
+      if (dbPendingUser is null || dbUserCredentials is null || dbPendingUser.Password != request.Password)
       {
-        return _responseCreator.CreateFailureResponse<CredentialsResponse>(
-          HttpStatusCode.BadRequest,
-          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
+        return _responseCreator.CreateFailureResponse<CredentialsResponse>(HttpStatusCode.BadRequest);
       }
 
       OperationResultResponse<CredentialsResponse> response = new();
@@ -73,11 +64,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
         return response;
       }
 
-      string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
-      string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
+      dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
+        dbUserCredentials.Login,
+        dbUserCredentials.Salt,
+        request.Password);
 
-      await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
-      DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
+      await _credentialsRepository.EditAsync(dbUserCredentials);
+      await _pendingRepository.RemoveAsync(request.UserId);
       await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
 
