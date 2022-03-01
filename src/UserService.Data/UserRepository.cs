@@ -62,9 +62,11 @@ namespace LT.DigitalOffice.UserService.Data
       FindUsersFilter filter,
       IQueryable<DbUser> dbUsers)
     {
-      if (!filter.IncludeDeactivated)
+      if (filter.Active.HasValue)
       {
-        dbUsers = dbUsers.Where(u => u.IsActive);
+        dbUsers = filter.Active.Value
+          ? dbUsers.Where(u => u.IsActive)
+          : dbUsers.Where(u => !u.IsActive);
       }
 
       if (filter.IncludeCurrentAvatar)

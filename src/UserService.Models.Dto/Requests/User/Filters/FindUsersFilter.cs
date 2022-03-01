@@ -11,8 +11,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
     [FromQuery(Name = "fullnameincludesubstring")]
     public string FullNameIncludeSubstring { get; set; }
 
-    [FromQuery(Name = "includedeactivated")]
-    public bool IncludeDeactivated { get; set; } = false;
+    [FromQuery(Name = "active")]
+    public bool? Active { get; set; }
 
     [FromQuery(Name = "includecurrentavatar")]
     public bool IncludeCurrentAvatar { get; set; } = false;
