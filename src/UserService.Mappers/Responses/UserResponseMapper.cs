@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       PositionInfo position,
       List<ProjectInfo> projects,
       RoleInfo role,
-      List<UserSkillInfo> skills)
+      List<SkillInfo> skills)
     {
       if (dbUser is null)
       {

@@ -16,6 +16,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
     public IEnumerable<CertificateInfo> Certificates { get; set; }
     public IEnumerable<EducationInfo> Educations { get; set; }
     public IEnumerable<ProjectInfo> Projects { get; set; }
-    public IEnumerable<UserSkillInfo> Skills { get; set; }
+    public IEnumerable<SkillInfo> Skills { get; set; }
   }
 }

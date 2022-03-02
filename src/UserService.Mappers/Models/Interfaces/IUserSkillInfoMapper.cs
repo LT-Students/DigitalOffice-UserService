@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
   [AutoInject]
   public interface IUserSkillInfoMapper
   {
-    UserSkillInfo Map(UserSkillData userSkillData);
+    SkillInfo Map(UserSkillData userSkillData);
   }
 }
