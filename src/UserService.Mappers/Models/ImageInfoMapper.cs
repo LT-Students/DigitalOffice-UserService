@@ -8,9 +8,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public ImageInfo Map(ImageData image)
     {
-      if (image == null)
+      if (image is null)
       {
-        return null;
+        return default;
       }
 
       return new ImageInfo

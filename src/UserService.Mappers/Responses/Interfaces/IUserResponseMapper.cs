@@ -23,6 +23,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
       PositionInfo position,
       List<ProjectInfo> projects,
       RoleInfo role,
-      List<UserSkillInfo> skills);
+      List<SkillInfo> skills);
   }
 }

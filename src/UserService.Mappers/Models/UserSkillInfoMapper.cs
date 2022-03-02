@@ -6,14 +6,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class UserSkillInfoMapper : IUserSkillInfoMapper
   {
-    public UserSkillInfo Map(UserSkillData userSkillData)
+    public SkillInfo Map(UserSkillData userSkillData)
     {
       if (userSkillData is null)
       {
         return null;
       }
 
-      return new UserSkillInfo
+      return new SkillInfo
       {
         Id = userSkillData.Id,
         Name = userSkillData.Name,

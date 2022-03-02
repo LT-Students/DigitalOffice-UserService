@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICreateUserRequestValidator _validator;
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
-    private readonly IAvatarRepository _imageRepository;
+    private readonly IUserAvatarRepository _imageRepository;
     private readonly IDbUserMapper _dbUserMapper;
     private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
     private readonly ICreateImageDataMapper _createImageDataMapper;
@@ -211,7 +211,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       ICreateUserRequestValidator validator,
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
-      IAvatarRepository imageRepository,
+      IUserAvatarRepository imageRepository,
       IHttpContextAccessor httpContextAccessor,
       IDbUserMapper dbUserMapper,
       IDbUserAvatarMapper dbUserAvatarMapper,
@@ -274,7 +274,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid userId = await _userRepository.CreateAsync(dbUser);
 
-      await _pendingUserRepository.CreateAsync(new DbPendingUser() { UserId = userId, Password = password });
+      await _pendingUserRepository
+        .CreateAsync(new DbPendingUser()
+        {
+          UserId = userId,
+          Password = password,
+          CommunicationId = dbUser.Communications.FirstOrDefault().Id
+        });
 
       Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
       if (avatarImageId.HasValue)

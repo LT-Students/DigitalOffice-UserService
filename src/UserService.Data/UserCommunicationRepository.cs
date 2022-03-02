@@ -4,19 +4,18 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  public class CommunicationRepository : ICommunicationRepository
+  public class UserCommunicationRepository : IUserCommunicationRepository
   {
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CommunicationRepository(
+    public UserCommunicationRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
     {
@@ -37,18 +36,20 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCommunication.Id;
     }
 
-    public async Task<bool> EditAsync(
-      DbUserCommunication dbUserCommunication,
-      JsonPatchDocument<DbUserCommunication> request)
+    public async Task<bool> EditAsync(Guid communicationId, string newValue)
     {
-      if (dbUserCommunication is null || request is null)
+      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+        .FirstOrDefaultAsync(c => c.Id == communicationId);
+
+      if (dbUserCommunication is null)
       {
         return false;
       }
 
-      request.ApplyTo(dbUserCommunication);
       dbUserCommunication.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbUserCommunication.ModifiedAtUtc = DateTime.UtcNow;
+      dbUserCommunication.Value = newValue;
+
       await _provider.SaveAsync();
 
       return true;
@@ -66,10 +67,25 @@ namespace LT.DigitalOffice.UserService.Data
 
       dbUserCommunication.IsConfirmed = true;
       dbUserCommunication.ModifiedAtUtc = DateTime.UtcNow;
-      dbUserCommunication.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       await _provider.SaveAsync();
 
       return true;
+    }
+
+    public async Task SetBaseTypeAsync(Guid communicationId, Guid modifiedBy)
+    {
+      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+        .FirstOrDefaultAsync(uc => uc.Id == communicationId && uc.Type == (int)CommunicationType.Email);
+
+      if (dbUserCommunication is not null)
+      {
+        dbUserCommunication.Type = (int)CommunicationType.BaseEmail;
+        dbUserCommunication.IsConfirmed = true;
+        dbUserCommunication.ModifiedBy = modifiedBy;
+        dbUserCommunication.ModifiedAtUtc = DateTime.UtcNow;
+
+        await _provider.SaveAsync();
+      }
     }
 
     public async Task RemoveBaseTypeAsync(Guid userId)
@@ -93,20 +109,10 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync(x => x.Id == communicationId);
     }
 
-    public async Task ActivateFirstCommunicationAsync(Guid userId)
+    public async Task<DbUserCommunication> GetBaseAsync(Guid userId)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
-        .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.Type == (int)CommunicationType.Email);
-
-      if (dbUserCommunication is not null)
-      {
-        dbUserCommunication.Type = (int)CommunicationType.BaseEmail;
-        dbUserCommunication.IsConfirmed = true;
-        dbUserCommunication.ModifiedBy = userId;
-        dbUserCommunication.ModifiedAtUtc = DateTime.UtcNow;
-
-        await _provider.SaveAsync();
-      }
+      return await _provider.UserCommunications
+        .FirstOrDefaultAsync(x => x.Type == (int)CommunicationType.BaseEmail && x.UserId == userId);
     }
 
     public async Task<bool> RemoveAsync(DbUserCommunication communication)

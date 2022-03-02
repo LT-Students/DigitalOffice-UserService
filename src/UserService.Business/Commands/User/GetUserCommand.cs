@@ -11,6 +11,7 @@ using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Project;
 using LT.DigitalOffice.Models.Broker.Models.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;

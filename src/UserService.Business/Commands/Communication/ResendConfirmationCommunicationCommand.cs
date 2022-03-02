@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class ResendConfirmationCommunicationCommand : IResendConfirmationCommunicationCommand
   {
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IMemoryCache _cache;
@@ -82,7 +82,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     }
 
     public ResendConfirmationCommunicationCommand(
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
       IMemoryCache cache,

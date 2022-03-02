@@ -1,18 +1,15 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Linq;
 using System.Net;
@@ -22,31 +19,28 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class EditCommunicationCommand : IEditCommunicationCommand
   {
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
-    private readonly IPatchDbUserCommunicationMapper _mapper;
     private readonly IEditCommunicationRequestValidator _validator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
 
     public EditCommunicationCommand(
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IAccessValidator accessValidator,
-      IPatchDbUserCommunicationMapper mapper,
       IEditCommunicationRequestValidator validator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator)
     {
       _repository = repository;
       _accessValidator = accessValidator;
-      _mapper = mapper;
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
-      JsonPatchDocument<EditCommunicationRequest> patch)
+      EditCommunicationRequest request)
     {
       DbUserCommunication dbUserCommunication = await _repository
         .GetAsync(communicationId);
@@ -63,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       ValidationResult validationResult = await _validator
-        .ValidateAsync((dbUserCommunication, patch));
+        .ValidateAsync((dbUserCommunication, request));
 
       if (!validationResult.IsValid)
       {
@@ -73,14 +67,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
       OperationResultResponse<bool> response = new();
 
-      if (patch.Operations[0].path
-        .EndsWith(nameof(EditCommunicationRequest.Type), StringComparison.OrdinalIgnoreCase))
+      if (request.Type is not null)
       {
         await _repository.RemoveBaseTypeAsync(dbUserCommunication.UserId);
+        await _repository.SetBaseTypeAsync(communicationId, _httpContextAccessor.HttpContext.GetUserId());
+      }
+      else
+      {
+        await _repository.EditAsync(communicationId, request.Value);
       }
 
-      response.Body = await _repository.EditAsync(dbUserCommunication, _mapper.Map(patch));
-
+      response.Body = true;
       return response;
     }
   }

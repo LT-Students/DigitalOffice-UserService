@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 {
   public class CreateAvatarCommand : ICreateAvatarCommand
   {
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IUserAvatarRepository _avatarRepository;
     private readonly IAccessValidator _accessValidator;
     private readonly ICreateAvatarRequestValidator _requestValidator;
     private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     }
 
     public CreateAvatarCommand(
-      IAvatarRepository avatarRepository,
+      IUserAvatarRepository avatarRepository,
       IAccessValidator accessValidator,
       ICreateAvatarRequestValidator requestValidator,
       IDbUserAvatarMapper dbEntityImageMapper,

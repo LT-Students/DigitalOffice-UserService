@@ -1,0 +1,14 @@
+﻿using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
+using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
+using System.Threading.Tasks;
+
+namespace LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces
+{
+  [AutoInject]
+  public interface IReactivateCredentialsCommand
+  {
+    Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(ReactivateCredentialsRequest request);
+  }
+}

@@ -25,14 +25,14 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public void Configure(EntityTypeBuilder<DbUserCommunication> builder)
     {
       builder
-          .ToTable(DbUserCommunication.TableName);
+        .ToTable(DbUserCommunication.TableName);
 
       builder
-          .HasKey(uc => uc.Id);
+        .HasKey(uc => uc.Id);
 
       builder
-          .HasOne(uc => uc.User)
-          .WithMany(u => u.Communications);
+        .HasOne(uc => uc.User)
+        .WithMany(u => u.Communications);
     }
   }
 }

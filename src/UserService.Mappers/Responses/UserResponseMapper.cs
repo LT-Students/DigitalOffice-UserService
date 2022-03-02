@@ -2,11 +2,9 @@
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses
 {
@@ -33,25 +31,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       PositionInfo position,
       List<ProjectInfo> projects,
       RoleInfo role,
-      List<UserSkillInfo> skills)
+      List<SkillInfo> skills)
     {
       if (dbUser is null)
       {
-        return null;
+        return default;
       }
 
       return new UserResponse
       {
-        User = _userInfoMapper.Map(
-          dbUser,
-          companyUserData,
-          avatar,
-          company,
-          department,
-          office,
-          position,
-          role),
-        UserAddition = dbUser.Addition is null ? null : new()
+        User = _userInfoMapper.Map(dbUser, avatar),
+        UserAddition = dbUser.Addition is null ? default : new()
         {
           GenderName = dbUser.Addition.Gender?.Name,
           About = dbUser.Addition.About,
@@ -61,15 +51,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
           BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
         },
+        Company = company,
+        Department = department,
+        Office = office,
+        Position = position,
+        Role = role,
         Images = images,
         Certificates = certificates,
-        Communications = dbUser.Communications?.Select(
-          c => new CommunicationInfo
-          {
-            Id = c.Id,
-            Type = (CommunicationType)c.Type,
-            Value = c.Value
-          }),
         Educations = educations,
         Projects = projects,
         Skills = skills

@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 {
   public class GetAvatarsCommand : IGetAvatarsCommand
   {
-    private readonly IAvatarRepository _avatarRepository;
+    private readonly IUserAvatarRepository _avatarRepository;
     private readonly IImagesResponseMapper _imagesResponseMapper;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly ILogger<GetAvatarsCommand> _logger;
@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     }
 
     public GetAvatarsCommand(
-      IAvatarRepository avatarRepository,
+      IUserAvatarRepository avatarRepository,
       IImagesResponseMapper imagesResponseMapper,
       IRequestClient<IGetImagesRequest> rcGetImages,
       ILogger<GetAvatarsCommand> logger,

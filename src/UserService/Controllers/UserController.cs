@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
@@ -15,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Controllers
 {
   [Route("[controller]")]
   [ApiController]
-  public class UsersController : ControllerBase
+  public class UserController : ControllerBase
   {
     [HttpPost("create")]
     public async Task<OperationResultResponse<Guid>> CreateAsync(
@@ -48,6 +49,14 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] FindUsersFilter filter)
     {
       return await command.ExecuteAsync(filter);
+    }
+
+    [HttpPut("editactive")]
+    public async Task<OperationResultResponse<bool>> EditStatusAsync(
+      [FromServices] IEditUserActiveCommand command,
+      [FromBody] EditUserActiveRequest request)
+    {
+      return await command.ExecuteAsync(request);
     }
   }
 }

@@ -1,21 +1,18 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.Token;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
+using LT.DigitalOffice.UserService.Broker.Helpers.Password;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
-using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
-using MassTransit;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -28,9 +25,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
-    private readonly ICommunicationRepository _communicationRepository;
-    private readonly IRequestClient<IGetTokenRequest> _rcToken;
-    private readonly ILogger<CreateCredentialsCommand> _logger;
+    private readonly IUserCommunicationRepository _communicationRepository;
+    private readonly IAuthService _authService;
     private readonly ICreateCredentialsRequestValidator _validator;
     private readonly IResponseCreator _responseCreator;
 
@@ -39,9 +35,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
       IUserCredentialsRepository userCredentialsRepository,
-      ICommunicationRepository communicationRepository,
-      IRequestClient<IGetTokenRequest> rcToken,
-      ILogger<CreateCredentialsCommand> logger,
+      IUserCommunicationRepository communicationRepository,
+      IAuthService authService,
       ICreateCredentialsRequestValidator validator,
       IResponseCreator responseCreator)
     {
@@ -50,8 +45,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _pendingUserRepository = pendingUserRepository;
       _userCredentialsRepository = userCredentialsRepository;
       _communicationRepository = communicationRepository;
-      _rcToken = rcToken;
-      _logger = logger;
+      _authService = authService;
       _validator = validator;
       _responseCreator = responseCreator;
     }
@@ -67,58 +61,36 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      try
+      OperationResultResponse<CredentialsResponse> response = new();
+
+      IGetTokenResponse tokenResponse = await _authService.GetTokenAsync(request.UserId, response.Errors);
+
+      if (tokenResponse is null)
       {
-        Response<IOperationResult<IGetTokenResponse>> tokenResponse =
-          await _rcToken.GetResponse<IOperationResult<IGetTokenResponse>>(
-            IGetTokenRequest.CreateObj(request.UserId));
+        response.Errors.Add("Something is wrong, please try again later.");
+        response.Status = OperationResultStatusType.Failed;
 
-        if (tokenResponse.Message.IsSuccess &&
-          !string.IsNullOrEmpty(tokenResponse.Message.Body.AccessToken) &&
-          !string.IsNullOrEmpty(tokenResponse.Message.Body.RefreshToken))
-        {
-          string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
-          string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
-
-          await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
-          await _pendingUserRepository.RemoveAsync(request.UserId);
-          await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
-          await _communicationRepository.ActivateFirstCommunicationAsync(request.UserId);
-
-          return new()
-          {
-            Body = new CredentialsResponse
-            {
-              UserId = request.UserId,
-              AccessToken = tokenResponse.Message.Body.AccessToken,
-              RefreshToken = tokenResponse.Message.Body.RefreshToken,
-              AccessTokenExpiresIn = tokenResponse.Message.Body.AccessTokenExpiresIn,
-              RefreshTokenExpiresIn = tokenResponse.Message.Body.RefreshTokenExpiresIn
-            },
-            Status = OperationResultStatusType.FullSuccess
-          };
-        }
-        else
-        {
-          _logger.LogWarning(
-            "Can not get token for pending user '{UserId}' reason:\n{Errors}",
-            request.UserId,
-            string.Join('\n', tokenResponse.Message.Errors));
-        }
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(
-          exc,
-          "Execpion while creating credentials for user id {UserId}",
-          request.UserId);
+        return response;
       }
 
-      return new()
+      string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
+      string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
+
+      await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
+      DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
+      await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
+      await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
+
+      response.Body = new CredentialsResponse
       {
-        Status = OperationResultStatusType.Failed,
-        Errors = new List<string>() { "Something is wrong, please try again later." }
+        UserId = request.UserId,
+        AccessToken = tokenResponse.AccessToken,
+        RefreshToken = tokenResponse.RefreshToken,
+        AccessTokenExpiresIn = tokenResponse.AccessTokenExpiresIn,
+        RefreshTokenExpiresIn = tokenResponse.RefreshTokenExpiresIn
       };
+
+      return response;
     }
   }
 }

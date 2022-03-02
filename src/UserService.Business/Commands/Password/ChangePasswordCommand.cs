@@ -4,7 +4,7 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
-using LT.DigitalOffice.UserService.Business.Helpers.Password;
+using LT.DigitalOffice.UserService.Broker.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;

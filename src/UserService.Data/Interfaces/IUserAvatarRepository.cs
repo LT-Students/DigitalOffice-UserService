@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
   [AutoInject]
-  public interface IAvatarRepository
+  public interface IUserAvatarRepository
   {
     Task<Guid?> CreateAsync(DbUserAvatar dbEntityImage);
 

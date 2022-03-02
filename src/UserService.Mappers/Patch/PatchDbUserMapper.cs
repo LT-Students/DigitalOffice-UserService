@@ -30,7 +30,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
         if (item.path.EndsWith(nameof(EditUserRequest.FirstName)) ||
          item.path.EndsWith(nameof(EditUserRequest.LastName)) ||
          item.path.EndsWith(nameof(EditUserRequest.MiddleName)) ||
-         item.path.EndsWith(nameof(EditUserRequest.IsActive)) ||
          item.path.EndsWith(nameof(EditUserRequest.IsAdmin)))
         {
           dbUserPatch.Operations.Add(new Operation<DbUser>(item.op, item.path, item.from, item.value));

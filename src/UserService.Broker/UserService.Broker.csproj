@@ -7,7 +7,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UserService.Business\UserService.Business.csproj" />
     <ProjectReference Include="..\UserService.Data\UserService.Data.csproj" />
     <ProjectReference Include="..\UserService.Mappers\UserService.Mappers.csproj" />
     <ProjectReference Include="..\UserService.Models.Db\UserService.Models.Db.csproj" />

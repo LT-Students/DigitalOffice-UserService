@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public Guid AvatarId { get; set; }
     public bool IsCurrentAvatar { get; set; }
 
-    public DbUser User {get; set;}
+    public DbUser User { get; set; }
   }
 
   public class DbEntityImageConfiguration : IEntityTypeConfiguration<DbUserAvatar>
