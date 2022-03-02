@@ -8,5 +8,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
     public Guid Id { get; set; }
     public CommunicationType Type { get; set; }
     public string Value { get; set; }
+    public bool IsConfirmed { get; set; }
   }
 }

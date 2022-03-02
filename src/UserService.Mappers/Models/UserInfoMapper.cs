@@ -28,12 +28,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         IsActive = dbUser.IsActive,
         Avatar = avatar,
         Communications = dbUser.Communications
-        ?.Select(c => new CommunicationInfo
-        {
-          Id = c.Id,
-          Type = (CommunicationType)c.Type,
-          Value = c.Value
-        }),
+          ?.Select(c => new CommunicationInfo
+          {
+            Id = c.Id,
+            Type = (CommunicationType)c.Type,
+            Value = c.Value,
+            IsConfirmed = c.IsConfirmed
+          }),
       };
     }
   }

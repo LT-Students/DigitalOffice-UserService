@@ -2,11 +2,9 @@
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses
 {

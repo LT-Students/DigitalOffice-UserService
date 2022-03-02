@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending.Interfaces
   [AutoInject]
   public interface IFindPendingUsersCommand
   {
-    Task<FindResultResponse<UserInfo>> ExecuteAsync(FindPendingUserFilter filter);
+    Task<FindResultResponse<PendingUserInfo>> ExecuteAsync(FindPendingUserFilter filter);
   }
 }

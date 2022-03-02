@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpGet("find")]
-    public async Task<FindResultResponse<UserInfo>> FindAsync(
+    public async Task<FindResultResponse<PendingUserInfo>> FindAsync(
       [FromServices] IFindPendingUsersCommand command,
       [FromQuery] FindPendingUserFilter filter)
     {
