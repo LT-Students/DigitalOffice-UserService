@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Id = educationData.Id,
         UniversityName = educationData.UniversityName,
         QualificationName = educationData.QualificationName,
-        FormEducation = educationData.FormEducation,
+        FormEducation = "",
         AdmissionAt = educationData.AdmissionAt,
         IssueAt = educationData.IssueAt
       };

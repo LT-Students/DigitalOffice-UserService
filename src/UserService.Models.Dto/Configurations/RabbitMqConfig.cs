@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
+using LT.DigitalOffice.Kernel.EndpointSupport.Broker.Configurations;
 using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -16,7 +17,7 @@ using LT.DigitalOffice.Models.Broker.Requests.User;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
-  public class RabbitMqConfig : BaseRabbitMqConfig
+  public class RabbitMqConfig : ExtendedBaseRabbitMqConfig
   {
     public string CompanyServiceUrl { get; set; }
     public string GetUserCredentialsEndpoint { get; set; }

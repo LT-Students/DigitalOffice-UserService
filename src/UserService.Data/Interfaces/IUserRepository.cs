@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<DbUser> GetAsync(GetUserFilter filter);
 
-    Task<DbUser> GetAsync(Guid id);
+    Task<DbUser> GetAsync(Guid userId, bool includeBaseEmail = false);
 
     Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false);
 

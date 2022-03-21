@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -8,10 +7,8 @@ using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 

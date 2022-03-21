@@ -6,7 +6,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers

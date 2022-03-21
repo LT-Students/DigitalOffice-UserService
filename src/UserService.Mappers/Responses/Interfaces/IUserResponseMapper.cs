@@ -14,7 +14,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
       DbUser dbUser,
       CompanyUserData companyUserData,
       ImageInfo avatar,
-      List<CertificateInfo> certificates,
       CompanyInfo company,
       DepartmentInfo department,
       List<EducationInfo> educations,

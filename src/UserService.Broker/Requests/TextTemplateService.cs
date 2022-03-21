@@ -25,15 +25,16 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     }
 
     public async Task<IGetTextTemplateResponse> GetAsync(
-      Guid endpointId,
+      TemplateType templateType,
       string locale,
-      List<string> errors)
+      List<string> errors,
+      Guid? endpointId = null)
     {
       return await RequestHandler.ProcessRequest<IGetTextTemplateRequest, IGetTextTemplateResponse>(
         _rcGetTextTemplate,
         IGetTextTemplateRequest.CreateObj(
           endpointId: endpointId,
-          templateType: TemplateType.Greeting,
+          templateType: templateType,
           locale: locale),
         errors,
         _logger);

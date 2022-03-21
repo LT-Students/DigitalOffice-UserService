@@ -1,36 +1,22 @@
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
-using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
-using LT.DigitalOffice.Models.Broker.Requests.Email;
-using LT.DigitalOffice.Models.Broker.Requests.Image;
-using LT.DigitalOffice.Models.Broker.Requests.Office;
-using LT.DigitalOffice.Models.Broker.Requests.Position;
-using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
-using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
-using MassTransit;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,121 +34,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IUserAvatarRepository _imageRepository;
     private readonly IDbUserMapper _dbUserMapper;
     private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
-    private readonly ICreateImageDataMapper _createImageDataMapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly IResponseCreator _responseCreator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITextTemplateParser _parser;
-    private readonly ILogger<CreateUserCommand> _logger;
-    private readonly IRequestClient<ICreateCompanyUserRequest> _rcCreateCompanyUser;
-    private readonly IRequestClient<ICreateDepartmentEntityRequest> _rcCreateDepartmentEntity;
-    private readonly IRequestClient<ICreateImagesRequest> _rcCreateImage;
-    private readonly IRequestClient<ICreateUserOfficeRequest> _rcCreateUserOffice;
-    private readonly IRequestClient<ICreateUserPositionRequest> _rcCreateUserPosition;
-    private readonly IRequestClient<IChangeUserRoleRequest> _rcCreateUserRole;
-    private readonly IRequestClient<IGetTextTemplateRequest> _rcGetTextTemplate;
-    private readonly IRequestClient<ISendEmailRequest> _rcSendEmail;
+    private readonly ICompanyService _companyService;
+    private readonly IDepartmentService _departmentService;
+    private readonly IImageService _imageService;
+    private readonly IOfficeService _officeService;
+    private readonly IPositionService _positionService;
+    private readonly IRightService _rightService;
+    private readonly ITextTemplateService _textTemplateService;
+    private readonly IEmailService _emailService;
 
-    #region private methods
-
-    private async Task CreateDepartmentUserAsync(Guid? departmentId, Guid userId, List<string> errors)
+    private async Task NotifyAsync(
+      DbUser dbUser,
+      string password,
+      string locale,
+      List<string> errors)
     {
-      if (departmentId.HasValue && departmentId.Value != Guid.Empty)
-      {
-        await RequestHandler.ProcessRequest<ICreateDepartmentEntityRequest, bool>(
-          _rcCreateDepartmentEntity,
-          ICreateDepartmentEntityRequest.CreateObj(
-            departmentId: departmentId.Value,
-            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            userId: userId),
-          errors,
-          _logger);
-      }
-    }
-
-    private async Task CreateUserPositionAsync(Guid? positionId, Guid userId, List<string> errors)
-    {
-      if (positionId.HasValue && positionId.Value != Guid.Empty)
-      {
-        await RequestHandler.ProcessRequest<ICreateUserPositionRequest, bool>(
-          _rcCreateUserPosition,
-          ICreateUserPositionRequest.CreateObj(
-            positionId: positionId.Value,
-            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-            userId: userId),
-          errors,
-          _logger);
-      }
-    }
-
-    private async Task CreateUserCompanyAsync(Guid? companyId, Guid userId, double? rate, DateTime? startWorkingAt, List<string> errors)
-    {
-      if (companyId.HasValue && companyId.Value != Guid.Empty)
-      {
-        await RequestHandler.ProcessRequest<ICreateCompanyUserRequest, bool>(
-          _rcCreateCompanyUser,
-          ICreateCompanyUserRequest.CreateObj(
-            companyId: companyId.Value,
-            userId: userId,
-            rate: rate,
-            startWorkingAt: startWorkingAt,
-            createdBy: _httpContextAccessor.HttpContext.GetUserId()),
-          errors,
-          _logger);
-      }
-    }
-
-    private async Task CreateUserOfficeAsync(Guid? officeId, Guid userId, List<string> errors)
-    {
-      if (officeId.HasValue && officeId.Value != Guid.Empty)
-      {
-        await RequestHandler.ProcessRequest<ICreateUserOfficeRequest, bool>(
-          _rcCreateUserOffice,
-          ICreateUserOfficeRequest.CreateObj(
-            userId: userId,
-            modifiedBy: _httpContextAccessor.HttpContext.GetUserId(),
-            officeId: officeId.Value),
-          errors,
-          _logger);
-      }
-    }
-
-    private async Task CreateUserRoleAsync(Guid? roleId, Guid userId, List<string> errors)
-    {
-      if (roleId.HasValue && roleId.Value != Guid.Empty)
-      {
-        await RequestHandler.ProcessRequest<IChangeUserRoleRequest, bool>(
-          _rcCreateUserRole,
-          IChangeUserRoleRequest.CreateObj(
-            roleId.Value,
-            userId, _httpContextAccessor.HttpContext.GetUserId()),
-          errors,
-          _logger);
-      }
-    }
-
-    private async Task SendEmailAsync(DbUser dbUser, string password, List<string> errors)
-    {
-      DbUserCommunication email = dbUser.Communications
-        .FirstOrDefault(c => c.Type == (int)CommunicationType.Email);
-
-      IGetTextTemplateResponse textTemplate =
-        await RequestHandler.ProcessRequest<IGetTextTemplateRequest, IGetTextTemplateResponse>(
-          _rcGetTextTemplate,
-          IGetTextTemplateRequest.CreateObj(
-            endpointId: Guid.Empty, //TO DO get guid from cache
-            templateType: TemplateType.Greeting,
-            locale: "en"),
-          errors,
-          _logger);
+      IGetTextTemplateResponse textTemplate = await _textTemplateService
+        .GetAsync(TemplateType.Greeting, locale, errors);
 
       if (textTemplate is null)
       {
-        _logger.LogError(
-          "Not found text template to send email to user id '{UserId}'",
-          dbUser.Id);
-
         return;
       }
 
@@ -170,42 +66,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         new Dictionary<string, string> { { "Password", password } },
         _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
 
-      if (!await RequestHandler.ProcessRequest<ISendEmailRequest, bool>(
-        _rcSendEmail,
-        ISendEmailRequest.CreateObj(
-          email.Value,
-          textTemplate.Subject,
-          parsedText,
-          _httpContextAccessor.HttpContext.GetUserId()),
-        errors,
-        _logger))
-      {
-        _logger.LogError(
-          "Invitation letter not sent to email '{Email}'",
-          email.Value);
+      string email = dbUser.Communications
+        .FirstOrDefault(c => c.Type == (int)CommunicationType.Email)?.Value;
 
-        errors.Add($"Can not send email to '{email.Value}'. Email placed in resend queue and will be resent in 1 hour.");
-      }
+      await _emailService.SendAsync(email, textTemplate.Subject, parsedText, errors);
     }
-
-    private async Task<Guid?> GetAvatarImageIdAsync(CreateAvatarRequest avatarRequest, List<string> errors)
-    {
-      if (avatarRequest is null)
-      {
-        return null;
-      }
-
-      return (await RequestHandler
-        .ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
-          _rcCreateImage,
-          ICreateImagesRequest.CreateObj(
-            _createImageDataMapper.Map(new List<CreateAvatarRequest>() { avatarRequest }),
-            ImageSource.User),
-          errors,
-          _logger))
-        ?.ImagesIds?.FirstOrDefault();
-    }
-    #endregion
 
     public CreateUserCommand(
       ICreateUserRequestValidator validator,
@@ -215,20 +80,18 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IHttpContextAccessor httpContextAccessor,
       IDbUserMapper dbUserMapper,
       IDbUserAvatarMapper dbUserAvatarMapper,
-      ICreateImageDataMapper createImageDataMapper,
       IAccessValidator accessValidator,
       IGeneratePasswordCommand generatePassword,
       IResponseCreator responseCreator,
       ITextTemplateParser parser,
-      ILogger<CreateUserCommand> logger,
-      IRequestClient<ICreateCompanyUserRequest> rcCreateCompanyUser,
-      IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
-      IRequestClient<ICreateImagesRequest> rcCreateImage,
-      IRequestClient<IChangeUserRoleRequest> rcCreateUserRole,
-      IRequestClient<ICreateUserOfficeRequest> rcCreateUserOffice,
-      IRequestClient<ICreateUserPositionRequest> rcCreateUserPosition,
-      IRequestClient<IGetTextTemplateRequest> rcGetTextTemplate,
-      IRequestClient<ISendEmailRequest> rcSendEmail)
+      ICompanyService companyService,
+      IDepartmentService departmentService,
+      IImageService imageService,
+      IOfficeService officeService,
+      IPositionService positionService,
+      IRightService rightService,
+      ITextTemplateService textTemplateService,
+      IEmailService emailService)
     {
       _validator = validator;
       _userRepository = userRepository;
@@ -236,21 +99,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _imageRepository = imageRepository;
       _dbUserMapper = dbUserMapper;
       _dbUserAvatarMapper = dbUserAvatarMapper;
-      _createImageDataMapper = createImageDataMapper;
       _accessValidator = accessValidator;
       _generatePassword = generatePassword;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _parser = parser;
-      _logger = logger;
-      _rcCreateCompanyUser = rcCreateCompanyUser;
-      _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
-      _rcCreateImage = rcCreateImage;
-      _rcCreateUserRole = rcCreateUserRole;
-      _rcCreateUserOffice = rcCreateUserOffice;
-      _rcCreateUserPosition = rcCreateUserPosition;
-      _rcGetTextTemplate = rcGetTextTemplate;
-      _rcSendEmail = rcSendEmail;
+      _companyService = companyService;
+      _departmentService = departmentService;
+      _imageService = imageService;
+      _officeService = officeService;
+      _positionService = positionService;
+      _rightService = rightService;
+      _textTemplateService = textTemplateService;
+      _emailService = emailService;
     }
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateUserRequest request)
@@ -282,19 +143,32 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           CommunicationId = dbUser.Communications.FirstOrDefault().Id
         });
 
-      Guid? avatarImageId = await GetAvatarImageIdAsync(request.AvatarImage, response.Errors);
+      Guid? avatarImageId = request.AvatarImage is null
+        ? null
+        : await _imageService.CreateImageAsync(request.AvatarImage, response.Errors);
+
       if (avatarImageId.HasValue)
       {
         await _imageRepository.CreateAsync(_dbUserAvatarMapper.Map(avatarImageId.Value, userId, true));
       }
 
       await Task.WhenAll(
-        SendEmailAsync(dbUser, password, response.Errors),
-        CreateUserOfficeAsync(request.OfficeId, userId, response.Errors),
-        CreateUserRoleAsync(request.RoleId, userId, response.Errors),
-        CreateDepartmentUserAsync(request.DepartmentId, userId, response.Errors),
-        CreateUserPositionAsync(request.PositionId, userId, response.Errors),
-        CreateUserCompanyAsync(request.CompanyId, userId, request.Rate, request.StartWorkingAt, response.Errors));
+        NotifyAsync(dbUser, password, "ru", response.Errors),
+        request.OfficeId.HasValue
+          ? _officeService.CreateUserOfficeAsync(request.OfficeId.Value, userId, response.Errors)
+          : null,
+        request.RoleId.HasValue
+          ? _rightService.CreateUserRoleAsync(request.RoleId.Value, userId, response.Errors)
+          : null,
+        request.DepartmentId.HasValue
+          ? _departmentService.CreateDepartmentUserAsync(request.DepartmentId.Value, userId, response.Errors)
+          : null,
+        request.PositionId.HasValue
+          ? _positionService.CreateUserPositionAsync(request.PositionId.Value, userId, response.Errors)
+          : null,
+        request.UserCompany is not null
+          ? _companyService.CreateUserCompanyAsync(request.UserCompany, userId, response.Errors)
+          : null);
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;

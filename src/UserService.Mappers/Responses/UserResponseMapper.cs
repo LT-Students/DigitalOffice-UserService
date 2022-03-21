@@ -22,7 +22,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       DbUser dbUser,
       CompanyUserData companyUserData,
       ImageInfo avatar,
-      List<CertificateInfo> certificates,
       CompanyInfo company,
       DepartmentInfo department,
       List<EducationInfo> educations,
@@ -57,7 +56,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         Position = position,
         Role = role,
         Images = images,
-        Certificates = certificates,
         Educations = educations,
         Projects = projects,
         Skills = skills

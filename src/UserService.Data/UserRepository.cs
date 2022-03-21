@@ -31,6 +31,10 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Where(u => u.Id == filter.UserId);
       }
+      else if (!string.IsNullOrEmpty(filter.Login))
+      {
+        dbUsers = dbUsers.Include(u => u.Credentials).Where(u => u.Credentials.Login == filter.Login);
+      }
 
       if (filter.IncludeCommunications)
       {
@@ -39,8 +43,9 @@ namespace LT.DigitalOffice.UserService.Data
         if (!string.IsNullOrEmpty(filter.Email?.Trim()))
         {
           dbUsers = dbUsers
-            .Where(u => u.Communications
-              .Any(c => c.Type == (int)CommunicationType.Email && c.Value == filter.Email));
+            .Where(u => 
+              u.Communications.Any(c => c.Type == (int)CommunicationType.Email && c.Value == filter.Email)
+              || u.Communications.Any(c => c.Type == (int)CommunicationType.BaseEmail && c.Value == filter.Email));
         }
       }
 
@@ -116,9 +121,17 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUser.Id;
     }
 
-    public async Task<DbUser> GetAsync(Guid id)
+    public async Task<DbUser> GetAsync(Guid userId, bool includeBaseEmail = false)
     {
-      return await GetAsync(new GetUserFilter() { UserId = id });
+      IQueryable<DbUser> dbUser = _provider.Users.AsQueryable();
+
+      if (includeBaseEmail)
+      {
+        dbUser = dbUser
+          .Include(u => u.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.BaseEmail));
+      }
+
+      return await dbUser.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<DbUser> GetAsync(GetUserFilter filter)
