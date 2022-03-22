@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
+using LT.DigitalOffice.Models.Broker.Models.Education;
 using LT.DigitalOffice.Models.Broker.Requests.Education;
 using LT.DigitalOffice.Models.Broker.Responses.Education;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
@@ -23,7 +24,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       _logger = logger;
     }
 
-    public async Task<IGetUserEducationsResponse> GetEducationsAsync(
+    public async Task<List<EducationData>> GetEducationsAsync(
       Guid userId,
       List<string> errors)
     {
@@ -31,7 +32,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
         _rcGetUserEducations,
         IGetUserEducationsRequest.CreateObj(userId: userId),
         errors,
-        _logger));
+        _logger))?.Educations;
     }
   }
 }

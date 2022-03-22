@@ -4,11 +4,11 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
+using LT.DigitalOffice.Models.Broker.Models.Education;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Models.Position;
 using LT.DigitalOffice.Models.Broker.Models.Project;
 using LT.DigitalOffice.Models.Broker.Models.Skill;
-using LT.DigitalOffice.Models.Broker.Responses.Education;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -18,7 +18,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -28,14 +27,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
   public class GetUserCommand : IGetUserCommand
   {
-    private readonly ILogger<GetUserCommand> _logger;
     private readonly IUserRepository _repository;
     private readonly IUserResponseMapper _mapper;
     private readonly IUserSkillInfoMapper _skillMapper;
     private readonly IEducationInfoMapper _educationMapper;
     private readonly IOfficeInfoMapper _officeMapper;
     private readonly IDepartmentInfoMapper _departmentMapper;
-    private readonly ICompanyInfoMapper _companyMapper;
+    private readonly ICompanyUserInfoMapper _companyUserMapper;
     private readonly IPositionInfoMapper _positionMapper;
     private readonly IRoleInfoMapper _roleMapper;
     private readonly IProjectInfoMapper _projectMapper;
@@ -51,14 +49,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IResponseCreator _responseCreator;
 
     public GetUserCommand(
-      ILogger<GetUserCommand> logger,
       IUserRepository repository,
       IUserResponseMapper mapper,
       IUserSkillInfoMapper skillMapper,
       IEducationInfoMapper educationMapper,
       IRoleInfoMapper roleMapper,
       IDepartmentInfoMapper departmentMapper,
-      ICompanyInfoMapper companyMapper,
+      ICompanyUserInfoMapper companyUserMapper,
       IPositionInfoMapper positionMapper,
       IOfficeInfoMapper officeMapper,
       IProjectInfoMapper projectMapper,
@@ -73,14 +70,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       ISkillService skillService,
       IResponseCreator responseCreator)
     {
-      _logger = logger;
       _repository = repository;
       _mapper = mapper;
       _skillMapper = skillMapper;
       _educationMapper = educationMapper;
       _roleMapper = roleMapper;
       _departmentMapper = departmentMapper;
-      _companyMapper = companyMapper;
+      _companyUserMapper = companyUserMapper;
       _positionMapper = positionMapper;
       _officeMapper = officeMapper;
       _projectMapper = projectMapper;
@@ -91,6 +87,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _officeService = officeService;
       _positionService = positionService;
       _projectSrvice = projectSrvice;
+      _rightService = rightService;
       _skillService = skillService;
       _responseCreator = responseCreator;
     }
@@ -116,9 +113,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           HttpStatusCode.NotFound);
       }
 
-      Task<IGetUserEducationsResponse> educationsTask = filter.IncludeEducations
+      Task<List<EducationData>> educationsTask = filter.IncludeEducations
         ? _educationService.GetEducationsAsync(dbUser.Id, response.Errors)
-        : Task.FromResult(null as IGetUserEducationsResponse);
+        : Task.FromResult(null as List<EducationData>);
 
       Task<List<CompanyData>> companiesTask = filter.IncludeCompany
         ? _companyService.GetCompaniesAsync(dbUser.Id, response.Errors)
@@ -154,7 +151,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask, skillsTask);
 
-      IGetUserEducationsResponse educations = await educationsTask;
+      List<EducationData> educations = await educationsTask;
       List<CompanyData> companies = await companiesTask;
       List<DepartmentData> departments = await departmentsTask;
       List<ImageInfo> images = await imagesTask;
@@ -166,11 +163,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       response.Body = _mapper.Map(
         dbUser,
-        companies?.FirstOrDefault()?.Users.FirstOrDefault(),
+        _companyUserMapper.Map(companies?.FirstOrDefault(), companies?.FirstOrDefault()?.Users.FirstOrDefault(cu => cu.UserId == dbUser.Id)),
         images?.FirstOrDefault(i => i.Id == dbUser.Avatars.FirstOrDefault(ua => ua.IsCurrentAvatar).AvatarId),
-        _companyMapper.Map(companies?.FirstOrDefault()),
         _departmentMapper.Map(departments?.FirstOrDefault()),
-        educations?.Educations?.Select(_educationMapper.Map).ToList(),
+        educations?.Select(_educationMapper.Map).ToList(),
         images,
         _officeMapper.Map(offices?.FirstOrDefault()),
         _positionMapper.Map(positions?.FirstOrDefault()),

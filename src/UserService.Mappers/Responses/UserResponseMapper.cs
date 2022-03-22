@@ -20,9 +20,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
 
     public UserResponse Map(
       DbUser dbUser,
-      CompanyUserData companyUserData,
+      CompanyUserInfo companyUser,
       ImageInfo avatar,
-      CompanyInfo company,
       DepartmentInfo department,
       List<EducationInfo> educations,
       List<ImageInfo> images,
@@ -50,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
           BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
         },
-        Company = company,
+        CompanyUser = companyUser,
         Department = department,
         Office = office,
         Position = position,
