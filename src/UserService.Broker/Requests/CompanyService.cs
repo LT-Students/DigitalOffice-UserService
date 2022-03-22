@@ -27,11 +27,13 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
 
     public CompanyService(
       IRequestClient<ICreateCompanyUserRequest> rcCreateCompanyUser,
+      IRequestClient<IGetCompaniesRequest> rcGetCompanies,
       ILogger<CompanyService> logger,
       IHttpContextAccessor httpContextAccessor,
       IGlobalCacheRepository globalCache)
     {
       _rcCreateCompanyUser = rcCreateCompanyUser;
+      _rcGetCompanies = rcGetCompanies;
       _logger = logger;
       _httpContextAccessor = httpContextAccessor;
       _globalCache = globalCache;
