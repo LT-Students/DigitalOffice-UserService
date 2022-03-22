@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
       RuleFor(user => user.Status)
         .IsInEnum().WithMessage("Wrong status value.");
 
-      When(user => user.About != null, () =>
+      When(user => user.About is not null, () =>
       {
         RuleFor(user => user.About)
           .MaximumLength(150).WithMessage("About is too long.");
@@ -76,9 +76,13 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .WithMessage("Communication type must be email.")
         .SetValidator(communicationValidator);
 
-      RuleFor(user => user.Rate)
-        .GreaterThan(0)
-        .LessThanOrEqualTo(1);
+      When(user => user.UserCompany is not null, () =>
+      {
+        RuleFor(user => user.UserCompany.Rate)
+          .NotNull()
+          .GreaterThan(0)
+          .LessThanOrEqualTo(1);
+      });
 
       When(
         user => (!string.IsNullOrEmpty(user.Password)),

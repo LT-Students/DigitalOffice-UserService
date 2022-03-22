@@ -16,6 +16,12 @@ using FluentValidation.Results;
 using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
+using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
+using LT.DigitalOffice.Kernel.Enums;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -31,6 +37,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IBus _bus;
+    private readonly ITextTemplateService _textTemplateService;
+    private readonly IEmailService _emailService;
+    private readonly ITextTemplateParser _parser;
+
+    private async Task NotifyAsync(
+      DbUser dbUser,
+      string email,
+      string password,
+      string locale,
+      List<string> errors)
+    {
+      IGetTextTemplateResponse textTemplate = await _textTemplateService
+        .GetAsync(TemplateType.UserRecovery, locale, errors);
+
+      if (textTemplate is null)
+      {
+        return;
+      }
+
+      string parsedText = _parser.Parse(
+        new Dictionary<string, string> { { "Password", password } },
+        _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
+
+      await _emailService.SendAsync(email, textTemplate.Subject, parsedText, errors);
+    }
 
     public EditUserActiveCommand(
       IEditUserActiveRequestValidator validator,
@@ -41,7 +72,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      IBus bus)
+      IBus bus,
+      ITextTemplateService textTemplateService,
+      IEmailService emailService,
+      ITextTemplateParser parser)
     {
       _validator = validator;
       _userRepository = userRepository;
@@ -52,6 +86,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _bus = bus;
+      _textTemplateService = textTemplateService;
+      _emailService = emailService;
+      _parser = parser;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(EditUserActiveRequest request)
@@ -83,18 +120,33 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
       else
       {
+        string password = _generatePassword.Execute();
+
         await _pendingRepository.CreateAsync(
           new DbPendingUser()
           {
             UserId = request.UserId,
-            Password = _generatePassword.Execute(),
+            Password = password,
             CommunicationId = request.CommunicationId.HasValue 
               ? request.CommunicationId.Value
               : (await _communicationRepository.GetBaseAsync(request.UserId)).Id
           });
 
         response.Body = true;
+
+        DbUser dbUser = await _userRepository.GetAsync(request.UserId, true);
+
+        await NotifyAsync(
+          dbUser,
+          dbUser.Communications.FirstOrDefault(c => c.Id == request.CommunicationId)?.Value,
+          password,
+          "ru",
+          response.Errors);
       }
+
+      response.Status = response.Errors.Any() 
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
 
       return response;
     }

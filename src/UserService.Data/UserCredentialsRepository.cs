@@ -56,6 +56,7 @@ namespace LT.DigitalOffice.UserService.Data
               uc.IsActive &&
               uc.User.Communications.Any(
                 c =>
+                  (c.Type == (int)CommunicationType.BaseEmail && c.Value == filter.Email) ||
                   (c.Type == (int)CommunicationType.Email && c.Value == filter.Email) ||
                   (c.Type == (int)CommunicationType.Phone && c.Value == filter.Phone)));
       }

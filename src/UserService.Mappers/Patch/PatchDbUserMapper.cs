@@ -13,7 +13,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch
     public (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) Map(
      JsonPatchDocument<EditUserRequest> request)
     {
-
       if (request is null)
       {
         return (null, null);

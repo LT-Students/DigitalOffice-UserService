@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
@@ -12,10 +11,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
   {
     UserResponse Map(
       DbUser dbUser,
-      CompanyUserData companyUserData,
+      CompanyUserInfo companyUser,
       ImageInfo avatar,
-      List<CertificateInfo> certificates,
-      CompanyInfo company,
       DepartmentInfo department,
       List<EducationInfo> educations,
       List<ImageInfo> images,

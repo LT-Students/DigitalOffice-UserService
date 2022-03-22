@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
         _logger))
       {
         _logger.LogError(
-          "Invitation letter not sent to email '{Email}'",
+          "Letter not sent to email '{Email}'",
           email);
 
         errors.Add($"Can not send email to '{email}'. Email placed in resend queue and will be resent in 1 hour.");

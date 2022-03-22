@@ -5,8 +5,8 @@ using LT.DigitalOffice.UserService.Models.Dto.Models;
 namespace LT.DigitalOffice.UserService.Mappers.Models.Interfaces
 {
   [AutoInject]
-  public interface ICompanyInfoMapper
+  public interface ICompanyUserInfoMapper
   {
-    CompanyInfo Map(CompanyData companyData);
+    CompanyUserInfo Map(CompanyData companyData, CompanyUserData companyUserData);
   }
 }
