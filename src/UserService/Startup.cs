@@ -376,11 +376,3 @@ namespace LT.DigitalOffice.UserService
     #endregion
   }
 }
-
-public static class MyClass
-{
-  public static string MyMethod(this string someString)
-  {
-    return someString;
-  }
-}
