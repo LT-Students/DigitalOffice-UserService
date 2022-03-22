@@ -28,12 +28,14 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       IRequestClient<ICreateDepartmentEntityRequest> rcCreateDepartmentEntity,
       IRequestClient<IGetDepartmentsRequest> rcGetDepartments,
       ILogger<DepartmentService> logger,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      IGlobalCacheRepository globalCache)
     {
       _rcCreateDepartmentEntity = rcCreateDepartmentEntity;
       _rcGetDepartments = rcGetDepartments;
       _logger = logger;
       _httpContextAccessor = httpContextAccessor;
+      _globalCache = globalCache;
     }
 
     public async Task CreateDepartmentUserAsync(Guid departmentId, Guid userId, List<string> errors)
