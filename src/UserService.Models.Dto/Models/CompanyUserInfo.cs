@@ -6,6 +6,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
   {
     public CompanyInfo Company { get; set; }
     public double? Rate { get; set; }
-    public DateTime StartWorkingAt { get; set; }
+    public DateTime? StartWorkingAt { get; set; }
   }
 }

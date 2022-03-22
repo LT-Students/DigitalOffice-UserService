@@ -314,9 +314,6 @@ namespace LT.DigitalOffice.UserService
           options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         })
         .AddNewtonsoftJson();
-
-      services.AddLocalization(options => options.ResourcesPath = "Resources");
-      services.AddControllersWithViews();
     }
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -329,8 +326,6 @@ namespace LT.DigitalOffice.UserService
         Log.Error(error);
       }
 
-      Task.Run(() => app.Send(_rabbitMqConfig));
-
       app.UseForwardedHeaders();
 
       app.UseExceptionsHandler(loggerFactory);
@@ -342,19 +337,6 @@ namespace LT.DigitalOffice.UserService
       app.UseMiddleware<TokenMiddleware>();
 
       app.UseCors(CorsPolicyName);
-
-      var supportedCultures = new[]
-      {
-        new CultureInfo("en"),
-        new CultureInfo("ru")
-      };
-
-      app.UseRequestLocalization(new RequestLocalizationOptions
-      {
-        DefaultRequestCulture = new RequestCulture("ru"),
-        SupportedCultures = supportedCultures,
-        SupportedUICultures = supportedCultures
-      });
 
       app.UseEndpoints(endpoints =>
       {
