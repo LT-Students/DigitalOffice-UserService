@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
-using LT.DigitalOffice.Kernel.EndpointSupport.Broker;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
@@ -41,9 +40,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
 
 namespace LT.DigitalOffice.UserService
 {
