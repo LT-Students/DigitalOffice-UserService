@@ -33,7 +33,9 @@ namespace LT.DigitalOffice.UserService.Data
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
-        dbUsers = dbUsers.Include(u => u.Credentials).Where(u => u.Credentials.Login == filter.Login);
+        dbUsers = dbUsers
+          .Include(u => u.Credentials)
+          .Where(u => u.Credentials.Login == filter.Login);
       }
 
       if (filter.IncludeCommunications)
@@ -43,9 +45,7 @@ namespace LT.DigitalOffice.UserService.Data
         if (!string.IsNullOrEmpty(filter.Email?.Trim()))
         {
           dbUsers = dbUsers
-            .Where(u => 
-              u.Communications.Any(c => c.Type == (int)CommunicationType.Email && c.Value == filter.Email)
-              || u.Communications.Any(c => c.Type == (int)CommunicationType.BaseEmail && c.Value == filter.Email));
+            .Where(u => u.Communications.Any(c => c.IsConfirmed && c.Value == filter.Email));
         }
       }
 

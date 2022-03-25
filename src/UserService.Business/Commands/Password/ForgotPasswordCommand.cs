@@ -4,11 +4,13 @@ using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UserService.Broker.Helpers.Login;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -30,6 +32,24 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
     private readonly IResponseCreator _responseCreator;
     private readonly ITextTemplateService _textTemplateService;
     private readonly IEmailService _emailService;
+
+    private GetUserFilter CreateFilter(string LoginData)
+    {
+      GetUserFilter filter = new();
+
+      if (LoginData.IsEmail())
+      {
+        filter.Email = LoginData;
+      }
+      else
+      {
+        filter.Login = LoginData;
+      }
+
+      filter.IncludeCommunications = true;
+
+      return filter;
+    }
 
     private string SetGuidInCache(Guid userId)
     {
@@ -85,24 +105,32 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       _emailService = emailService;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(string userEmail)
+    public async Task<OperationResultResponse<string>> ExecuteAsync(string userLoginData)
     {
-      DbUser dbUser = string.IsNullOrEmpty(userEmail)
-        ? null
-        : await _repository.GetAsync(new GetUserFilter() { Email = userEmail, IncludeCommunications = true });
+      if (string.IsNullOrEmpty(userLoginData))
+      {
+        return _responseCreator.CreateFailureResponse<string>(HttpStatusCode.BadRequest);
+      }
+
+      GetUserFilter filter = CreateFilter(userLoginData);
+
+      DbUser dbUser = await _repository.GetAsync(CreateFilter(userLoginData));
 
       if (dbUser is null)
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        return _responseCreator.CreateFailureResponse<string>(HttpStatusCode.NotFound);
       }
 
       string secret = SetGuidInCache(dbUser.Id);
+      string email = filter.Email is null
+        ? dbUser.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.BaseEmail).Value
+        : filter.Email;
 
-      OperationResultResponse<bool> response = new();
+      OperationResultResponse<string> response = new();
 
-      await NotifyAsync(dbUser, userEmail, secret, "ru", response.Errors);
+      await NotifyAsync(dbUser, email, secret, "ru", response.Errors);
 
-      response.Body = response.Errors.Any() ? true : false;
+      response.Body = response.Errors.Any() ? null : email;
 
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.Failed

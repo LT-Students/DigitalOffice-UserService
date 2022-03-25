@@ -2,7 +2,9 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.Credentials
 {
@@ -12,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
       IPendingUserRepository repository,
       IUserCredentialsRepository credentialsRepository)
     {
-      RuleFor(request => request.Login.Trim() )
+      RuleFor(request => request.Login.Trim())
         .Cascade(CascadeMode.Stop)
         .NotEmpty().WithMessage("Login can't be empty.")
         .Must(login => char.IsLetter(login[0])).WithMessage("Login must start with letter.")

@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces
   [AutoInject]
   public interface IForgotPasswordCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(string userEmail);
+    Task<OperationResultResponse<string>> ExecuteAsync(string userEmail);
   }
 }

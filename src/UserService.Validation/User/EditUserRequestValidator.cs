@@ -162,7 +162,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         x => x == OperationType.Replace,
         new Dictionary<Func<Operation<EditUserRequest>, bool>, string>
         {
-          {x => x.value?.ToString().Trim().Length < 150, "About is too long." },
+          {x => x.value?.ToString().Trim().Length < 151, "About is too long." },
         });
 
       #endregion

@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Controllers
   public class PasswordController : ControllerBase
   {
     [HttpGet("forgot")]
-    public async Task<OperationResultResponse<bool>> ForgotPasswordAsync(
+    public async Task<OperationResultResponse<string>> ForgotPasswordAsync(
       [FromServices] IForgotPasswordCommand command,
       [FromQuery] string userEmail)
     {
