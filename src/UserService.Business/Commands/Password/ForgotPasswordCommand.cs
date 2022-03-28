@@ -114,7 +114,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       GetUserFilter filter = CreateFilter(userLoginData);
 
-      DbUser dbUser = await _repository.GetAsync(CreateFilter(userLoginData));
+      DbUser dbUser = await _repository.GetAsync(filter);
 
       if (dbUser is null)
       {
