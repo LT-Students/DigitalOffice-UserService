@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
           email,
           subject,
           text,
-          _httpContextAccessor.HttpContext?.GetUserId()),
+          _httpContextAccessor.HttpContext.UserIdOrDefault()),
         errors,
         _logger))
       {
