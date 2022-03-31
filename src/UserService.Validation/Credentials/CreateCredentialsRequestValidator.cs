@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
   public class CreateCredentialsRequestValidator : AbstractValidator<CreateCredentialsRequest>, ICreateCredentialsRequestValidator
   {
     private static Regex loginRegex = new(@"[а-яА-ЯёЁ]");
+
     public CreateCredentialsRequestValidator(
       IPendingUserRepository repository,
       IUserCredentialsRepository credentialsRepository)
