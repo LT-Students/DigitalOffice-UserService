@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
 {
   public class CreateCredentialsRequestValidator : AbstractValidator<CreateCredentialsRequest>, ICreateCredentialsRequestValidator
   {
+    private static Regex loginRegex = new(@"[а-яА-ЯёЁ]");
     public CreateCredentialsRequestValidator(
       IPendingUserRepository repository,
       IUserCredentialsRepository credentialsRepository)
@@ -21,7 +22,9 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         .MinimumLength(3).WithMessage("Login is too short.")
         .MaximumLength(15).WithMessage("Login is too long")
         .Must(login => login.All(char.IsLetterOrDigit))
-        .WithMessage("Login must contain only letters or digits.");
+        .WithMessage("Login must contain only letters or digits.")
+        .Must(login => !loginRegex.IsMatch(login))
+        .WithMessage("Login can't contain russian letters.");
 
       RuleFor(request => request.UserId)
         .NotEmpty().WithMessage("UserId can't be empty.");
