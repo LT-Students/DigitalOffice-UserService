@@ -230,7 +230,7 @@ namespace LT.DigitalOffice.UserService.Data
       DbUser dbUser = await _provider.Users.Include(x => x.Credentials)
         .FirstOrDefaultAsync(u => u.Id == userId);
 
-      if (dbUser is null)
+      if (dbUser is null || dbUser.Credentials is null)
       {
         return false;
       }

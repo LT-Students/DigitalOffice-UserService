@@ -22,6 +22,7 @@ using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
@@ -99,8 +100,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
+      DbUser dbUser = await _userRepository
+        .GetAsync(new GetUserFilter() { UserId = request.UserId, IncludeCommunications = true });
+
       ValidationResult validationResult = await _validator
-        .ValidateAsync(request);
+        .ValidateAsync((dbUser, request));
 
       if (!validationResult.IsValid)
       {
@@ -127,14 +131,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           {
             UserId = request.UserId,
             Password = password,
-            CommunicationId = request.CommunicationId.HasValue 
-              ? request.CommunicationId.Value
-              : (await _communicationRepository.GetBaseAsync(request.UserId)).Id
+            CommunicationId = request.CommunicationId.Value
           });
 
         response.Body = true;
-
-        DbUser dbUser = await _userRepository.GetAsync(request.UserId, true);
 
         await NotifyAsync(
           dbUser,
