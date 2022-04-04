@@ -153,8 +153,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       await Task.WhenAll(
-        NotifyAsync(dbUser, password, "ru", response.Errors)
-      /*  request.OfficeId.HasValue
+        NotifyAsync(dbUser, password, "ru", response.Errors),
+        request.OfficeId.HasValue
           ? _officeService.CreateUserOfficeAsync(request.OfficeId.Value, userId, response.Errors)
           : null,
         request.RoleId.HasValue
@@ -168,7 +168,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           : null,
         request.UserCompany is not null
           ? _companyService.CreateUserCompanyAsync(request.UserCompany, userId, response.Errors)
-          : null*/);
+          : null);
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;
