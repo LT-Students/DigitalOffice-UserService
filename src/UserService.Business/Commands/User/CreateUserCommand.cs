@@ -156,19 +156,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         NotifyAsync(dbUser, password, "ru", response.Errors),
         request.OfficeId.HasValue
           ? _officeService.CreateUserOfficeAsync(request.OfficeId.Value, userId, response.Errors)
-          : null,
+          : Task.FromResult<object>(null),
         request.RoleId.HasValue
           ? _rightService.CreateUserRoleAsync(request.RoleId.Value, userId, response.Errors)
-          : null,
+          : Task.FromResult<object>(null),
         request.DepartmentId.HasValue
           ? _departmentService.CreateDepartmentUserAsync(request.DepartmentId.Value, userId, response.Errors)
-          : null,
+          : Task.FromResult<object>(null),
         request.PositionId.HasValue
           ? _positionService.CreateUserPositionAsync(request.PositionId.Value, userId, response.Errors)
-          : null,
+          : Task.FromResult<object>(null),
         request.UserCompany is not null
           ? _companyService.CreateUserCompanyAsync(request.UserCompany, userId, response.Errors)
-          : null);
+          : Task.FromResult<object>(null));
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       response.Body = userId;
