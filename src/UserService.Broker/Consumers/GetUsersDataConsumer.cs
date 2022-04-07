@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         dbUsers = await _userRepository
          .GetAsync(request.UsersIds, true);
       }
-      else if (!request.UsersIds.Any() && (request.SkipCount > -1 && request.TakeCount > 1))
+      else if (!request.UsersIds.Any())
       {
         (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
         {
@@ -77,7 +77,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
 
-      if (users != null)
+      if (users is not null)
       {
         string key = context.Message.UsersIds.GetRedisCacheHashCode();
 

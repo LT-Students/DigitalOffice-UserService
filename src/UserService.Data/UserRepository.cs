@@ -163,6 +163,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       return await dbUsers
         .Where(x => usersIds.Contains(x.Id))
+        .OrderBy(x => x.LastName)
         .ToListAsync();
     }
 
