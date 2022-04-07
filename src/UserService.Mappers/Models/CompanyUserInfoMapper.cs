@@ -1,7 +1,6 @@
 ﻿using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -21,8 +20,12 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           Id = companyData.Id,
           Name = companyData.Name
         },
+        ContractSubject = companyUserData.ContractSubject,
+        ContractTermType = companyUserData.ContractTermType,
         Rate = companyUserData.Rate,
-        StartWorkingAt = companyUserData.StartWorkingAt
+        StartWorkingAt = companyUserData.StartWorkingAt,
+        EndWorkingAt = companyUserData.EndWorkingAt,
+        Probation = companyUserData.Probation
       };
     }
   }
