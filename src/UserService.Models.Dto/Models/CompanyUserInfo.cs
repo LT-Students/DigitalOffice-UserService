@@ -8,7 +8,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
   {
     public CompanyInfo Company { get; set; }
     public ContractSubjectData ContractSubject { get; set; }
-    public ContractTerm ContratcTermType { get; set; }
+    public ContractTerm ContractTermType { get; set; }
     public double? Rate { get; set; }
     public DateTime StartWorkingAt { get; set; }
     public DateTime? EndWorkingAt { get; set; }

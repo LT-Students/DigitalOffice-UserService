@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           Name = companyData.Name
         },
         ContractSubject = companyUserData.ContractSubject,
-        ContratcTermType = companyUserData.ContractTermType,
+        ContractTermType = companyUserData.ContractTermType,
         Rate = companyUserData.Rate,
         StartWorkingAt = companyUserData.StartWorkingAt,
         EndWorkingAt = companyUserData.EndWorkingAt,
