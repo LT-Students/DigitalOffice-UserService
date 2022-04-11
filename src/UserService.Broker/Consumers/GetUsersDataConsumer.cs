@@ -33,12 +33,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       List<DbUser> dbUsers = await _userRepository
         .GetAsync(request.UsersIds, true);
 
-      if (request.UsersIds.Any())
-      {
-        dbUsers = await _userRepository
-         .GetAsync(request.UsersIds, true);
-      }
-      else if (!request.UsersIds.Any() && (request.SkipCount > -1 && request.TakeCount > 1))
+      if ((!request.UsersIds.Any() || request.UsersIds.Any()) && request.SkipCount > -1 && request.TakeCount > 1)
       {
         (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
         {
@@ -46,6 +41,11 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true
         });
+      }
+      else if (request.UsersIds.Any())
+      {
+        dbUsers = await _userRepository
+         .GetAsync(request.UsersIds, true);
       }
 
       return dbUsers.Select(
@@ -79,13 +79,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users is not null)
       {
-        string key = context.Message.UsersIds.GetRedisCacheHashCode();
+        string key = users.Select(u => u.Id).ToList().GetRedisCacheHashCode();
 
         await _globalCache.CreateAsync(
           Cache.Users,
           key,
           users,
-          context.Message.UsersIds,
+          users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }
