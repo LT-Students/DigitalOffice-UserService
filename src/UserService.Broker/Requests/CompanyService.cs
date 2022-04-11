@@ -48,8 +48,12 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
           ICreateCompanyUserRequest.CreateObj(
             companyId: request.CompanyId,
             userId: userId,
+            contractSubjectId: request.ContractSubjectId,
+            contractTermType: request.ContractTermType,
             rate: request.Rate,
             startWorkingAt: request.StartWorkingAt,
+            endWorkingAt: request.EndWorkingAt,
+            probation: request.Probation,
             createdBy: _httpContextAccessor.HttpContext.GetUserId()),
           errors,
           _logger);

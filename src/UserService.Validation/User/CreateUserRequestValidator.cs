@@ -1,10 +1,12 @@
 ﻿using FluentValidation;
+using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using System;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.User
@@ -82,6 +84,10 @@ namespace LT.DigitalOffice.UserService.Validation.User
           .NotNull()
           .GreaterThan(0)
           .LessThanOrEqualTo(1);
+
+        RuleFor(user => user.UserCompany.ContractTermType)
+          .Must(x => Enum.IsDefined(typeof(ContractTerm), x))
+          .WithMessage("Wrong contract term type.");
       });
 
       When(
