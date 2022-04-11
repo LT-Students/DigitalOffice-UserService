@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         dbUsers = await _userRepository
          .GetAsync(request.UsersIds, true);
       }
-      else if (!request.UsersIds.Any())
+      else if (!request.UsersIds.Any() && (request.SkipCount > -1 && request.TakeCount > 1))
       {
         (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
         {
