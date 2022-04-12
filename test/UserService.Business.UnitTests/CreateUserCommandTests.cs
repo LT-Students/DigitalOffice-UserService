@@ -84,24 +84,6 @@
         //        .Returns(Task.FromResult(responseBrokerChangePositionMock.Object));
         //}
 
-        //private void RcChangeDepartmentSetUp()
-        //{
-        //    _operationResultChangeDepartmentMock = new Mock<IOperationResult<bool>>();
-        //    _operationResultChangeDepartmentMock.Setup(x => x.Body).Returns(true);
-        //    _operationResultChangeDepartmentMock.Setup(x => x.IsSuccess).Returns(true);
-        //    _operationResultChangeDepartmentMock.Setup(x => x.Errors).Returns(new List<string>());
-
-        //    var responseBrokerChangeDepartmentMock = new Mock<Response<IOperationResult<bool>>>();
-
-        //    responseBrokerChangeDepartmentMock
-        //       .SetupGet(x => x.Message)
-        //       .Returns(_operationResultChangeDepartmentMock.Object);
-
-        //    _rcDepartmentMock.Setup(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Returns(Task.FromResult(responseBrokerChangeDepartmentMock.Object));
-        //}
         //#endregion
 
         //#region Setup

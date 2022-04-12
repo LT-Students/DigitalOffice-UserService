@@ -1,47 +1,96 @@
-﻿using LT.DigitalOffice.UserService.Business.Commands.Credentials;
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Responses.Auth;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
+using LT.DigitalOffice.UserService.Business.Commands.Credentials;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
+using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
-namespace LT.DigitalOffice.UserService.Business.UnitTests
+namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
 {
   class CreateCredentialsCommandTests
   {
-    private Mock<ILogger<CreateCredentialsCommand>> _loggerMock;
     private AutoMocker _mocker;
     private ICreateCredentialsCommand _command;
 
     private CreateCredentialsRequest _request;
-    private DbPendingUser _dbPendingUser;
-    private string _userAccessToken;
-    private string _userRefreshToken;
+    private IGetTokenResponse _tokenResponse;
     private Guid _userId = Guid.NewGuid();
+    private string _accessToken = String.Empty;
+    private string _refreshToken = String.Empty;
+    private double _accessTokenExpiresIn = default;
+    private double _refreshTokenExpiresIn = default;
+
+    private DbPendingUser _dbPendingUser;
+
+    
     private string _password = "password";
     private CredentialsResponse _response;
 
-    //[SetUp]
-    //public void SetUp()
-    //{
-    //    _dbPendingUser = new()
-    //    {
-    //        UserId = _userId,
-    //        Password = _password
-    //    };
 
-    //    _request = new CreateCredentialsRequest()
-    //    {
-    //        UserId = _userId,
-    //        Login = "login",
-    //        Password = _password
-    //    };
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+      _mocker
+        .Setup<ICreateCredentialsRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateCredentialsRequest>(), default))
+        .Returns(Task.FromResult(new ValidationResult()));
 
-    //    _userAccessToken = "Access";
-    //    _userRefreshToken = "Refresh";
+      _mocker
+        .Setup<IResponseCreator, OperationResultResponse<CredentialsResponse>>(x =>
+          x.CreateFailureResponse<CredentialsResponse>(It.IsAny<HttpStatusCode>(), default))
+        .Returns(new OperationResultResponse<CredentialsResponse>());
+
+      _mocker
+        .Setup<IGetTokenResponse, string>(x => x.AccessToken)
+        .Returns(_accessToken);
+
+      _mocker
+        .Setup<IGetTokenResponse, string>(x => x.RefreshToken)
+        .Returns(_refreshToken);
+
+      _mocker
+        .Setup<IGetTokenResponse, double>(x => x.AccessTokenExpiresIn)
+        .Returns(_accessTokenExpiresIn);
+
+      _mocker
+        .Setup<IGetTokenResponse, double>(x => x.RefreshTokenExpiresIn)
+        .Returns(_refreshTokenExpiresIn);
+
+      _mocker
+        .Setup<IAuthService, Task<IGetTokenResponse>>(x => x.GetTokenAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_mocker.GetMock<IGetTokenResponse>().Object));
+    }
+
+    /*[SetUp]
+    public void SetUp()
+    {
+        _dbPendingUser = new()
+      {
+           UserId = _userId,
+           Password = _password
+       };
+
+       _request = new CreateCredentialsRequest()
+       {
+           UserId = _userId,
+           Login = "login",
+           Password = _password
+        };
+
+       _userAccessToken = "Access";
+       _userRefreshToken = "Refresh";
 
     //    _response = new()
     //    {
