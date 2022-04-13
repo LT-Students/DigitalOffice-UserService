@@ -28,19 +28,22 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IGlobalCacheRepository _globalCache;
 
-    private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
+    private async Task<(List<UserData> userData, int? totalCount)> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UsersIds, true);
+      List<DbUser> dbUsers = new();
+
+      int defaultValue = 0;
+      object totalCount = defaultValue;
 
       if ((!request.UsersIds.Any() || request.UsersIds.Any()) && request.SkipCount > -1 && request.TakeCount > 1)
       {
-        (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
+        (dbUsers, totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
         {
           SkipCount = request.SkipCount,
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true
-        });
+        },
+        request.UsersIds);
       }
       else if (request.UsersIds.Any())
       {
@@ -48,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
          .GetAsync(request.UsersIds, true);
       }
 
-      return dbUsers.Select(
+      return (dbUsers.Select(
         u => new UserData(
           u.Id,
           u.Avatars?.FirstOrDefault(ua => ua.IsCurrentAvatar)?.AvatarId,
@@ -57,7 +60,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           u.LastName,
           ((UserStatus)u.Status).ToString(),
           u.IsActive))
-        .ToList();
+        .ToList(),
+        (int)totalCount);
     }
 
     public GetUsersDataConsumer(
@@ -72,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
     {
-      List<UserData> users = await GetUserInfoAsync(context.Message);
+      (List<UserData> users, int? usersCount) = await GetUserInfoAsync(context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
@@ -84,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         await _globalCache.CreateAsync(
           Cache.Users,
           key,
-          users,
+          (users, usersCount),
           users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }

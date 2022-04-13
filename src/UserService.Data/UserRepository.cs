@@ -65,8 +65,14 @@ namespace LT.DigitalOffice.UserService.Data
 
     private IQueryable<DbUser> CreateFindPredicates(
       FindUsersFilter filter,
+      List<Guid> userIds,
       IQueryable<DbUser> dbUsers)
     {
+      if (userIds is not null && userIds.Any())
+      {
+        dbUsers = dbUsers.Where(u => userIds.Contains(u.Id));
+      }
+
       if (filter.Active.HasValue)
       {
         dbUsers = filter.Active.Value
@@ -247,7 +253,7 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter)
+    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null)
     {
       if (filter is null)
       {
@@ -256,6 +262,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       IQueryable<DbUser> dbUsers = CreateFindPredicates(
         filter,
+        userIds,
         _provider.Users.AsQueryable());
 
       return (
