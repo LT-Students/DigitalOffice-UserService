@@ -18,7 +18,7 @@
 //using System.Threading.Tasks;
 //using LT.DigitalOffice.UserService.Business.Commands.User;
 
-//namespace LT.DigitalOffice.UserService.Business.UnitTests
+//namespace LT.DigitalOffice.UserService.Business.UnitTests.User
 //{
 //    class FindUserCommandTests
 //    {

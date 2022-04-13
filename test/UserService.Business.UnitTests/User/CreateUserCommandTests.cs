@@ -1,4 +1,4 @@
-﻿namespace LT.DigitalOffice.UserService.Business.UnitTests
+﻿namespace LT.DigitalOffice.UserService.Business.UnitTests.User
 {
   class CreateUserCommandTests
     {
