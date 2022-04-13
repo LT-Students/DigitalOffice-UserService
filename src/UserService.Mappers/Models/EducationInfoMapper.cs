@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           Name = educationData.EducationType.Name,
           Id = educationData.EducationType.Id
         },
-         Ñompleteness = educationData.Ñompleteness,
+        Completeness = educationData.Ñompleteness,
         AdmissionAt = educationData.AdmissionAt,
         IssueAt = educationData.IssueAt,
         ImagesIds = educationData?.ImagesIds
