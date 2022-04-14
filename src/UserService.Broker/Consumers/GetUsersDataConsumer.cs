@@ -32,8 +32,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     {
       List<DbUser> dbUsers = new();
 
-      int defaultValue = 0;
-      object totalCount = defaultValue;
+      int totalCount = 0;
 
       if ((!request.UsersIds.Any() || request.UsersIds.Any()) && request.SkipCount > -1 && request.TakeCount > 1)
       {
@@ -41,7 +40,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         {
           SkipCount = request.SkipCount,
           TakeCount = request.TakeCount,
-          IncludeCurrentAvatar = true
+          IncludeCurrentAvatar = true,
+          Active = true
         },
         request.UsersIds);
       }
@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           ((UserStatus)u.Status).ToString(),
           u.IsActive))
         .ToList(),
-        (int)totalCount);
+        totalCount);
     }
 
     public GetUsersDataConsumer(
@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       (List<UserData> users, int? usersCount) = await GetUserInfoAsync(context.Message);
 
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
-        OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
+        OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users, usersCount is 0 ? null : usersCount), context));
 
       if (users is not null)
       {
