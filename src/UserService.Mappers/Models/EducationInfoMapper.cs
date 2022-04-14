@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Completeness = educationData.Completeness,
         AdmissionAt = educationData.AdmissionAt,
         IssueAt = educationData.IssueAt,
-        ImagesIds = educationData?.ImagesIds
+        ImagesIds = educationData.ImagesIds
       };
     }
   }
