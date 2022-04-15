@@ -56,13 +56,13 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
         body: default,
         status: OperationResultStatusType.Failed,
         errors: new List<string>() { errorMessage });
-
-      _mocker = new AutoMocker();
     }
 
     [SetUp]
     public void SetUp()
     {
+      _mocker = new AutoMocker();
+
       _mocker
         .Setup<ICreateCredentialsRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateCredentialsRequest>(), default))
         .Returns(Task.FromResult(new ValidationResult() { }));
@@ -223,6 +223,8 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
       _mocker.Verify<IUserCommunicationRepository>(
         x => x.SetBaseTypeAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
         userCommunicationRepositoryCalls);
+
+      _mocker.Resolvers.Clear();
     }
   }
 }
