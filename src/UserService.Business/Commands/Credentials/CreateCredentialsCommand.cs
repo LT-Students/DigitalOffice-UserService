@@ -13,6 +13,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -61,16 +62,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<CredentialsResponse> response = new();
+      List<string> errors = new();
 
-      IGetTokenResponse tokenResponse = await _authService.GetTokenAsync(request.UserId, response.Errors);
+      IGetTokenResponse tokenResponse = await _authService.GetTokenAsync(request.UserId, errors);
 
       if (tokenResponse is null)
       {
-        response.Errors.Add("Something is wrong, please try again later.");
-        response.Status = OperationResultStatusType.Failed;
-
-        return response;
+        return _responseCreator.CreateFailureResponse<CredentialsResponse>(
+          HttpStatusCode.ServiceUnavailable,
+          errors);
       }
 
       string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
@@ -81,16 +81,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
 
-      response.Body = new CredentialsResponse
+      return new()
       {
-        UserId = request.UserId,
-        AccessToken = tokenResponse.AccessToken,
-        RefreshToken = tokenResponse.RefreshToken,
-        AccessTokenExpiresIn = tokenResponse.AccessTokenExpiresIn,
-        RefreshTokenExpiresIn = tokenResponse.RefreshTokenExpiresIn
+        Body = new CredentialsResponse
+        {
+          UserId = request.UserId,
+          AccessToken = tokenResponse.AccessToken,
+          RefreshToken = tokenResponse.RefreshToken,
+          AccessTokenExpiresIn = tokenResponse.AccessTokenExpiresIn,
+          RefreshTokenExpiresIn = tokenResponse.RefreshTokenExpiresIn
+        }
       };
-
-      return response;
     }
   }
 }

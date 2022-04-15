@@ -34,6 +34,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
     private string _refreshToken = String.Empty;
     private double _accessTokenExpiresIn = default;
     private double _refreshTokenExpiresIn = default;
+    private string errorMessage = "Error message";
 
     private DbPendingUser _dbPendingUser = new();
     private DbUserCredentials _dbUserCredentials = new();
@@ -54,7 +55,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
       _badRequestResponse = new(
         body: default,
         status: OperationResultStatusType.Failed,
-        errors: new List<string>() { "Error" });
+        errors: new List<string>() { errorMessage });
 
       _mocker = new AutoMocker();
     }
@@ -127,6 +128,16 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
       };
 
       SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        validatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        authServiceCalls: Times.Once(),
+        userCredentialsRepositoryCalls: Times.Once(),
+        dbUserCredentialsMapperCalls: Times.Once(),
+        pendingUserRepositoryCalls: Times.Once(),
+        userRepositoryCalls: Times.Once(),
+        userCommunicationRepositoryCalls: Times.Once());
     }
 
     [Test]
@@ -134,14 +145,19 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
     {
       _mocker
         .Setup<ICreateCredentialsRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateCredentialsRequest>(), default))
-        .Returns(Task.FromResult(new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("Login", "Error") })));
+        .Returns(Task.FromResult(new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("_", errorMessage) })));
 
-      _response.Errors.Add("Error");
-      _response.Status = OperationResultStatusType.Failed;
-      _response.Body = default;
+      SerializerAssert.AreEqual(_badRequestResponse, _command.ExecuteAsync(_request).Result);
 
-      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
-
+      Verifiable(
+        validatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Once(),
+        authServiceCalls: Times.Never(),
+        userCredentialsRepositoryCalls: Times.Never(),
+        dbUserCredentialsMapperCalls: Times.Never(),
+        pendingUserRepositoryCalls: Times.Never(),
+        userRepositoryCalls: Times.Never(),
+        userCommunicationRepositoryCalls: Times.Never());
     }
 
     [Test]
@@ -153,11 +169,60 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
         .Setup<IAuthService, Task<IGetTokenResponse>>(x => x.GetTokenAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
         .Returns(Task.FromResult(tokenResponse));
 
-      _response.Errors.Add("Something is wrong, please try again later.");
-      _response.Status = OperationResultStatusType.Failed;
-      _response.Body = default;
+      SerializerAssert.AreEqual(_badRequestResponse, _command.ExecuteAsync(_request).Result);
 
-      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+      Verifiable(
+        validatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Once(),
+        authServiceCalls: Times.Once(),
+        userCredentialsRepositoryCalls: Times.Never(),
+        dbUserCredentialsMapperCalls: Times.Never(),
+        pendingUserRepositoryCalls: Times.Never(),
+        userRepositoryCalls: Times.Never(),
+        userCommunicationRepositoryCalls: Times.Never());
+    }
+
+    private void Verifiable(
+      Times validatorCalls,
+      Times responseCreatorCalls,
+      Times authServiceCalls,
+      Times userCredentialsRepositoryCalls,
+      Times dbUserCredentialsMapperCalls,
+      Times pendingUserRepositoryCalls,
+      Times userRepositoryCalls,
+      Times userCommunicationRepositoryCalls)
+    {
+      _mocker.Verify<ICreateCredentialsRequestValidator>(
+        x => x.ValidateAsync(It.IsAny<CreateCredentialsRequest>(), default),
+        validatorCalls);
+
+      _mocker.Verify<IResponseCreator>(
+        x => x.CreateFailureResponse<CredentialsResponse>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()),
+        responseCreatorCalls);
+
+      _mocker.Verify<IAuthService>(
+        x => x.GetTokenAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        authServiceCalls);
+
+      _mocker.Verify<IUserCredentialsRepository>(
+        x => x.CreateAsync(It.IsAny<DbUserCredentials>()),
+        userCredentialsRepositoryCalls);
+
+      _mocker.Verify<IDbUserCredentialsMapper>(
+        x => x.Map(It.IsAny<CreateCredentialsRequest>(), It.IsAny<string>(), It.IsAny<string>()),
+        dbUserCredentialsMapperCalls);
+
+      _mocker.Verify<IPendingUserRepository>(
+        x => x.RemoveAsync(It.IsAny<Guid>()),
+        pendingUserRepositoryCalls);
+
+      _mocker.Verify<IUserRepository>(
+        x => x.SwitchActiveStatusAsync(It.IsAny<Guid>(), It.IsAny<bool>()),
+        userRepositoryCalls);
+
+      _mocker.Verify<IUserCommunicationRepository>(
+        x => x.SetBaseTypeAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+        userCommunicationRepositoryCalls);
     }
   }
 }
