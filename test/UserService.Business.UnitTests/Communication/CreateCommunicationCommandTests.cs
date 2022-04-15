@@ -50,10 +50,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Communication
       _request.Type = Models.Dto.Enums.CommunicationType.Email;
       _request.UserId = _requestUserId;
       _request.Value = "phone";
-
-      _response.Status = Kernel.Enums.OperationResultStatusType.FullSuccess;
-      _response.Errors = new();
-      _response.Body = _communicationId;
     }
 
     [SetUp]
@@ -116,37 +112,25 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Communication
     [Test]
     public void SuccessTest()
     {
+      _response.Status = Kernel.Enums.OperationResultStatusType.FullSuccess;
+      _response.Errors = new();
+      _response.Body = _communicationId;
+
       SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+    }
 
-      /*_mocker.Verify<IUserRepository, DbPendingUser>(
-          x => x.GetPendingUser(It.IsAny<Guid>()),
-          Times.Never());
+    [Test]
+    public void FailedValidation()
+    {
+      _response.Status = Kernel.Enums.OperationResultStatusType.Failed;
+      _response.Errors = new() { "Error" };
+      _response.Body = default;
 
-      _mocker.Verify<IDbUserCredentialsMapper, DbUserCredentials>(
-          x => x.Map(It.IsAny<CreateCredentialsRequest>(),
-              It.IsAny<string>(),
-              It.IsAny<string>()),
-          Times.Never());
+      _mocker
+        .Setup<ICreateCommunicationRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateCommunicationRequest>(), default))
+        .Returns(Task.FromResult(new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("Login", "Error") })));
 
-      _mocker.Verify<IRequestClient<IGetTokenRequest>, IOperationResult<IGetTokenResponse>>(
-          x => x.GetResponse<IOperationResult<IGetTokenResponse>>(
-              IGetTokenRequest.CreateObj(_userId),
-              default,
-              default)
-          .Result.Message,
-          Times.Never());
-
-      _mocker.Verify<IUserCredentialsRepository, Guid>(
-          x => x.Create(It.IsAny<DbUserCredentials>()),
-          Times.Never());
-
-      _mocker.Verify<IUserRepository>(
-          x => x.DeletePendingUser(It.IsAny<Guid>()),
-          Times.Never());
-
-      _mocker.Verify<IUserRepository, bool>(
-          x => x.SwitchActiveStatus(It.IsAny<Guid>(), It.IsAny<bool>()),
-          Times.Never());*/
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
     }
   }
 }

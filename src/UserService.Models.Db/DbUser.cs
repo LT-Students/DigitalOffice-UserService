@@ -65,6 +65,10 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .WithOne(ua => ua.User);
 
       builder
+        .HasOne(u => u.Pending)
+        .WithOne(ua => ua.User);
+
+      builder
         .HasMany(u => u.Avatars)
         .WithOne(ua => ua.User);
 
