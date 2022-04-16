@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
@@ -39,6 +38,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       return new UserResponse
       {
         User = _userInfoMapper.Map(dbUser, avatar),
+        IsPending = dbUser.Pending is not null,
         UserAddition = dbUser.Addition is null ? default : new()
         {
           GenderName = dbUser.Addition.Gender?.Name,

@@ -10,12 +10,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public List<GenderInfo> Map(List<DbGender> dbGenders)
     {
-      if (dbGenders == null)
+      if (dbGenders is null)
       {
         return null;
       }
 
-      return dbGenders.Select(x => new GenderInfo { Name = x.Name }).ToList();
+      return dbGenders
+        .Select(x => new GenderInfo 
+        {
+          Id = x.Id,
+          Name = x.Name
+        }).ToList();
     }
   }
 }
