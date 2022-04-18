@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models;
+﻿using LT.DigitalOffice.Models.Broker.Models.Right;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 
@@ -17,7 +17,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       {
         Id = role.Id,
         Name = role.Name,
-        Description = role.Description
+        RightsIds = role.RightsIds
       };
     }
   }
