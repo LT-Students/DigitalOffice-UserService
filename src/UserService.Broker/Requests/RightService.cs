@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Right;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
 using LT.DigitalOffice.Models.Broker.Responses.Rights;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
