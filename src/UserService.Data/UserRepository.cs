@@ -168,7 +168,7 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       return await dbUsers
-        .Where(x => usersIds.Contains(x.Id))
+        .Where(x => usersIds.Contains(x.Id) && x.IsActive == true)
         .ToListAsync();
     }
 
