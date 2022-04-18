@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Right;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

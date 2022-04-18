@@ -59,6 +59,7 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       dbUsers = dbUsers.Include(u => u.Addition).ThenInclude(ua => ua.Gender);
+      dbUsers = dbUsers.Include(u => u.Pending);
 
       return dbUsers;
     }

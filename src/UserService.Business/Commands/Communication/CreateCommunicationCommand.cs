@@ -128,8 +128,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       response.Status = response.Errors.Any()
-        ? OperationResultStatusType.Failed
-        : OperationResultStatusType.PartialSuccess;
+        ? OperationResultStatusType.PartialSuccess
+        : OperationResultStatusType.FullSuccess;
 
       return response;
     }
