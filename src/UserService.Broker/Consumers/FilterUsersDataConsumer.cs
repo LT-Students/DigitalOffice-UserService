@@ -4,6 +4,8 @@ using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Requests.User;
+using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
@@ -23,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IGlobalCacheRepository _globalCache;
 
-    private async Task<(List<UserData> userData, int? totalCount)> GetUserInfoAsync(IFilteredUsersDataRequest request)
+    private async Task<(List<UserData> userData, int totalCount)> GetUserInfoAsync(IFilteredUsersDataRequest request)
     {
       List<DbUser> dbUsers = new();
 
@@ -66,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     }
     public async Task Consume(ConsumeContext<IFilteredUsersDataRequest> context)
     {
-      (List<UserData> users, int? usersCount) = await GetUserInfoAsync(context.Message);
+      (List<UserData> users, int usersCount) = await GetUserInfoAsync(context.Message);
 
       await context.RespondAsync<IOperationResult<IFilteredUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IFilteredUsersDataResponse.CreateObj(users, usersCount), context));
