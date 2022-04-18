@@ -45,7 +45,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         .ToList();
     }
 
-
     public GetUsersDataConsumer(
       IUserRepository userRepository,
       IOptions<RedisConfig> redisConfig,
