@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
         totalCount);
     }
 
-    FilterUsersDataConsumer(
+    public FilterUsersDataConsumer(
       IUserRepository userRepository,
       IOptions<RedisConfig> redisConfig,
       IGlobalCacheRepository globalCache)
