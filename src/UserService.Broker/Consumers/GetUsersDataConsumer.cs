@@ -9,7 +9,6 @@ using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System;
@@ -19,9 +18,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-  /// <summary>
-  /// Consumer for getting information about the users.
-  /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
     private readonly IUserRepository _userRepository;
@@ -31,23 +27,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
       List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UsersIds, true);
-
-      if (request.UsersIds.Any())
-      {
-        dbUsers = await _userRepository
-         .GetAsync(request.UsersIds, true);
-      }
-      else if (!request.UsersIds.Any())
-        //&& (request.SkipCount > -1 && request.TakeCount > 1)) create new method
-      {
-        (dbUsers, int totalCount) = await _userRepository.FindAsync(new FindUsersFilter()
-        {
-          SkipCount = 0, //request.SkipCount,
-          TakeCount = 20, //request.TakeCount,
-          IncludeCurrentAvatar = true
-        });
-      }
+        .GetAsync(usersIds: request.UsersIds, includeAvatars: true);
 
       return dbUsers.Select(
         u => new UserData(
@@ -78,9 +58,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
 
-      if (users != null)
+      if (users is not null)
       {
-        string key = context.Message.UsersIds.GetRedisCacheHashCode();
+        string key = users.Select(u => u.Id).ToList().GetRedisCacheHashCode();
 
         await _globalCache.CreateAsync(
           Cache.Users,

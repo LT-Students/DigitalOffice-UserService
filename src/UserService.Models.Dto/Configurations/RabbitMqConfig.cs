@@ -26,6 +26,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     public string CreateAdminEndpoint { get; set; }
     public string FindParseEntitiesEndpoint { get; set; }
     public string CheckUsersExistenceEndpoint { get; set; }
+    public string FilterUsersDataEndpoint { get; set; }
 
     //TextTemplate
 

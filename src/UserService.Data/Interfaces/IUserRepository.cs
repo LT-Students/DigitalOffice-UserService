@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 
-    Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter);
+    Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null);
 
     Task<Guid> CreateAsync(DbUser dbUser);
 
