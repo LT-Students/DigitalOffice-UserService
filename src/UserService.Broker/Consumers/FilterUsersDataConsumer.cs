@@ -66,6 +66,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       _redisConfig = redisConfig;
       _globalCache = globalCache;
     }
+
     public async Task Consume(ConsumeContext<IFilteredUsersDataRequest> context)
     {
       (List<UserData> users, int usersCount) = await GetUserInfoAsync(context.Message);
