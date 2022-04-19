@@ -18,9 +18,6 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-  /// <summary>
-  /// Consumer for getting information about the users.
-  /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
     private readonly IUserRepository _userRepository;
@@ -30,7 +27,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
       List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UsersIds, true);
+        .GetAsync(usersIds: request.UsersIds, includeAvatars: true);
 
       return dbUsers.Select(
         u => new UserData(
