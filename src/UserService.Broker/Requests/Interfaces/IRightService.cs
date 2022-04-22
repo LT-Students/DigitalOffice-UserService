@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Right;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IRightService
   {
-    Task CreateUserRoleAsync(Guid roleId, Guid userId, List<string> errors);
-
     Task<List<RoleData>> GetRolesAsync(
       Guid userId,
       string locale,

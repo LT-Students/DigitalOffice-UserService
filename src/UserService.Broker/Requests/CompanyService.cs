@@ -1,5 +1,4 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -7,9 +6,7 @@ using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.UserCompany;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,45 +16,18 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
 {
   public class CompanyService : ICompanyService
   {
-    private readonly IRequestClient<ICreateCompanyUserRequest> _rcCreateCompanyUser;
     private readonly IRequestClient<IGetCompaniesRequest> _rcGetCompanies;
     private readonly ILogger<CompanyService> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IGlobalCacheRepository _globalCache;
 
     public CompanyService(
-      IRequestClient<ICreateCompanyUserRequest> rcCreateCompanyUser,
       IRequestClient<IGetCompaniesRequest> rcGetCompanies,
       ILogger<CompanyService> logger,
-      IHttpContextAccessor httpContextAccessor,
       IGlobalCacheRepository globalCache)
     {
-      _rcCreateCompanyUser = rcCreateCompanyUser;
       _rcGetCompanies = rcGetCompanies;
       _logger = logger;
-      _httpContextAccessor = httpContextAccessor;
       _globalCache = globalCache;
-    }
-
-    public async Task CreateUserCompanyAsync(CreateUserCompanyRequest request, Guid userId, List<string> errors)
-    {
-      if (request is not null)
-      {
-        await RequestHandler.ProcessRequest<ICreateCompanyUserRequest, bool>(
-          _rcCreateCompanyUser,
-          ICreateCompanyUserRequest.CreateObj(
-            companyId: request.CompanyId,
-            userId: userId,
-            contractSubjectId: request.ContractSubjectId,
-            contractTermType: request.ContractTermType,
-            rate: request.Rate,
-            startWorkingAt: request.StartWorkingAt,
-            endWorkingAt: request.EndWorkingAt,
-            probation: request.Probation,
-            createdBy: _httpContextAccessor.HttpContext.GetUserId()),
-          errors,
-          _logger);
-      }
     }
 
     public async Task<List<CompanyData>> GetCompaniesAsync(

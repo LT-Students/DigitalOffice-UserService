@@ -15,8 +15,8 @@ namespace LT.DigitalOffice.UserService.Validation.User
     {
       RuleFor(x => x)
         .Cascade(CascadeMode.Stop)
-        .Must(x => x.dbUser.IsActive != x.request.IsActive)
-        .WithMessage("Error is active value.")
+        //.Must(x => x.dbUser.IsActive != x.request.IsActive)
+        //.WithMessage("Error is active value.")
         .MustAsync(async (x, _) =>
           !(x.request.IsActive && await _pendingRepository.GetAsync(x.request.UserId) is not null))
         .WithMessage("User already pending.")

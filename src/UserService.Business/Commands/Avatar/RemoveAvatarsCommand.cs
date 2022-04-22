@@ -6,11 +6,14 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Net;
@@ -27,6 +30,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IImageService _imageService;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
+    private readonly IBus _bus;
 
     public RemoveAvatarsCommand(
       IUserAvatarRepository repository,
@@ -35,7 +39,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IAccessValidator accessValidator,
       IImageService imageService,
       IResponseCreator responseCreator,
-      IGlobalCacheRepository globalCache)
+      IGlobalCacheRepository globalCache,
+      IBus bus)
     {
       _repository = repository;
       _httpContextAccessor = httpContextAccessor;
@@ -44,6 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _imageService = imageService;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
+      _bus = bus;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(RemoveAvatarsRequest request)
@@ -68,7 +74,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
       if (response.Body)
       {
-        await _imageService.RemoveImages(request.AvatarsIds, response.Errors);
+        await _bus.Send<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
+          imagesIds: request.AvatarsIds,
+          imageSource: ImageSource.User));
 
         await _globalCache.RemoveAsync(request.UserId);
       }

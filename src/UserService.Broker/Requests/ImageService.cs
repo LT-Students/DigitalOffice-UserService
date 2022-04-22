@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
@@ -22,23 +23,20 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
   {
     private readonly ILogger<ImageService> _logger;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
-    private readonly IRequestClient<ICreateImagesRequest> _rcCreateImages;
-    private readonly IRequestClient<IRemoveImagesRequest> _rcRemoveImages;
+    private readonly IRequestClient<ICreateImagesPublish> _rcCreateImages;
     private readonly IImageInfoMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ImageService(
       ILogger<ImageService> logger,
       IRequestClient<IGetImagesRequest> rcGetImages,
-      IRequestClient<ICreateImagesRequest> rcCreateImages,
-      IRequestClient<IRemoveImagesRequest> rcRemoveImages,
+      IRequestClient<ICreateImagesPublish> rcCreateImages,
       IImageInfoMapper mapper,
       IHttpContextAccessor httpContextAccessor)
     {
       _logger = logger;
       _rcCreateImages = rcCreateImages;
       _rcGetImages = rcGetImages;
-      _rcRemoveImages = rcRemoveImages;
       _mapper = mapper;
       _httpContextAccessor = httpContextAccessor;
     }
@@ -61,26 +59,14 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       return request is null
         ? null
         : (await RequestHandler
-          .ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
+          .ProcessRequest<ICreateImagesPublish, ICreateImagesResponse>(
             _rcCreateImages,
-            ICreateImagesRequest.CreateObj(
+            ICreateImagesPublish.CreateObj(
               new() { new CreateImageData(request.Name, request.Content, request.Extension, _httpContextAccessor.HttpContext.GetUserId()) },
               ImageSource.User),
             errors,
             _logger))
           ?.ImagesIds?.FirstOrDefault();
-    }
-
-    public async Task<bool> RemoveImages(List<Guid> imagesIds, List<string> errors)
-    {
-      return imagesIds is null || imagesIds.Any()
-        ? false
-        : (await RequestHandler
-          .ProcessRequest<IRemoveImagesRequest, bool>(
-            _rcRemoveImages,
-            IRemoveImagesRequest.CreateObj(imagesIds: imagesIds, imageSource: ImageSource.User)),
-            errors,
-            _logger).Item1;
     }
   }
 }
