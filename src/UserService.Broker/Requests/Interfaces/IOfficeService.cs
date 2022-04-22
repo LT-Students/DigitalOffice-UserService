@@ -9,8 +9,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IOfficeService
   {
-    Task CreateUserOfficeAsync(Guid officeId, Guid userId, List<string> errors);
-
     Task<List<OfficeData>> GetOfficesAsync(Guid userId, List<string> errors);
   }
 }
