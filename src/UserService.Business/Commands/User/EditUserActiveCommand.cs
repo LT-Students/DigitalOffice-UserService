@@ -151,7 +151,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         response.Status = response.Errors.Any()
           ? OperationResultStatusType.PartialSuccess
           : OperationResultStatusType.FullSuccess;
-
       }
 
       return response;
