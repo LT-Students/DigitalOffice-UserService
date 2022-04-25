@@ -13,7 +13,5 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
     Task<List<ImageInfo>> GetImagesAsync(List<Guid> imageIds, List<string> errors);
 
     Task<Guid?> CreateImageAsync(CreateAvatarRequest request, List<string> errors);
-
-    Task<bool> RemoveImages(List<Guid> imagesIds, List<string> errors);
   }
 }

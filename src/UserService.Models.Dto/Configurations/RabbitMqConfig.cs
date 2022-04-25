@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
-using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.EndpointSupport.Broker.Configurations;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -48,6 +48,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetUserEducationsRequest))]
     public string GetUserEducationsEndpoint { get; set; }
 
+    //Skill
+
     [AutoInjectRequest(typeof(IGetUserSkillsRequest))]
     public string GetUserSkillsEndpoint { get; set; }
 
@@ -63,9 +65,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
     //Rights
 
-    [AutoInjectRequest(typeof(IChangeUserRoleRequest))]
-    public string ChangeUserRoleEndpoint { get; set; }
-
     [AutoInjectRequest(typeof(IGetUserRolesRequest))]
     public string GetUserRolesEndpoint { get; set; }
 
@@ -74,42 +73,27 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(ICreateUserPositionRequest))]
-    public string CreateUserPositionEndpoint { get; set; }
-
     //Department
 
     [AutoInjectRequest(typeof(IGetDepartmentsRequest))]
     public string GetDepartmentsEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(ICreateDepartmentEntityRequest))]
-    public string CreateDepartmentEntityEndpoint { get; set; }
 
     //Company
 
     [AutoInjectRequest(typeof(IGetCompaniesRequest))]
     public string GetCompaniesEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(ICreateCompanyUserRequest))]
-    public string CreateCompanyUserEndpoint { get; set; }
-
     //Office
-
-    [AutoInjectRequest(typeof(ICreateUserOfficeRequest))]
-    public string CreateUserOfficeEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetOfficesRequest))]
     public string GetOfficesEndpoint { get; set; }
 
     //Image
 
-    [AutoInjectRequest(typeof(ICreateImagesRequest))]
+    [AutoInjectRequest(typeof(ICreateImagesPublish))]
     public string CreateImagesEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
-
-    [AutoInjectRequest(typeof(IRemoveImagesRequest))]
-    public string RemoveImagesEndpoint { get; set; }
   }
 }

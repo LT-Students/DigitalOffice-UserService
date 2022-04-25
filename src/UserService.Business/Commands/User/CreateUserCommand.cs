@@ -1,11 +1,17 @@
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Company;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Department;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Office;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Position;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Right;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
@@ -16,6 +22,7 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -39,14 +46,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IResponseCreator _responseCreator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITextTemplateParser _parser;
-    private readonly ICompanyService _companyService;
-    private readonly IDepartmentService _departmentService;
     private readonly IImageService _imageService;
-    private readonly IOfficeService _officeService;
-    private readonly IPositionService _positionService;
-    private readonly IRightService _rightService;
     private readonly ITextTemplateService _textTemplateService;
     private readonly IEmailService _emailService;
+    private readonly IBus _bus;
 
     private async Task NotifyAsync(
       DbUser dbUser,
@@ -84,14 +87,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IGeneratePasswordCommand generatePassword,
       IResponseCreator responseCreator,
       ITextTemplateParser parser,
-      ICompanyService companyService,
-      IDepartmentService departmentService,
       IImageService imageService,
-      IOfficeService officeService,
-      IPositionService positionService,
-      IRightService rightService,
+      IEmailService emailService,
       ITextTemplateService textTemplateService,
-      IEmailService emailService)
+      IBus bus)
     {
       _validator = validator;
       _userRepository = userRepository;
@@ -104,14 +103,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _parser = parser;
-      _companyService = companyService;
-      _departmentService = departmentService;
       _imageService = imageService;
-      _officeService = officeService;
-      _positionService = positionService;
-      _rightService = rightService;
-      _textTemplateService = textTemplateService;
       _emailService = emailService;
+      _textTemplateService = textTemplateService;
+      _bus = bus;
     }
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateUserRequest request)
@@ -154,23 +149,50 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       await Task.WhenAll(
         NotifyAsync(dbUser, password, "ru", response.Errors),
+
         request.OfficeId.HasValue
-          ? _officeService.CreateUserOfficeAsync(request.OfficeId.Value, userId, response.Errors)
-          : Task.FromResult<object>(null),
+          ? _bus.Publish<ICreateUserOfficePublish>(ICreateUserOfficePublish.CreateObj(
+            userId: userId,
+            officeId: request.OfficeId.Value,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId()))
+          : Task.CompletedTask,
+
         request.RoleId.HasValue
-          ? _rightService.CreateUserRoleAsync(request.RoleId.Value, userId, response.Errors)
-          : Task.FromResult<object>(null),
+          ? _bus.Publish<ICreateUserRolePublish>(ICreateUserRolePublish.CreateObj(
+            roleId: request.RoleId.Value,
+            userId: userId,
+            changedBy: _httpContextAccessor.HttpContext.GetUserId()))
+          : Task.CompletedTask,
+
         request.DepartmentId.HasValue
-          ? _departmentService.CreateDepartmentUserAsync(request.DepartmentId.Value, userId, response.Errors)
-          : Task.FromResult<object>(null),
+          ? _bus.Publish<ICreateDepartmentEntityPublish>(ICreateDepartmentEntityPublish.CreateObj(
+            departmentId: request.DepartmentId.Value,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
+            userId: userId))
+          : Task.CompletedTask,
+
         request.PositionId.HasValue
-          ? _positionService.CreateUserPositionAsync(request.PositionId.Value, userId, response.Errors)
-          : Task.FromResult<object>(null),
+          ? _bus.Publish<ICreateUserPositionPublish>(ICreateUserPositionPublish.CreateObj(
+            positionId: request.PositionId.Value,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId(),
+            userId: userId))
+          : Task.CompletedTask,
+
         request.UserCompany is not null
-          ? _companyService.CreateUserCompanyAsync(request.UserCompany, userId, response.Errors)
-          : Task.FromResult<object>(null));
+          ? _bus.Publish<ICreateCompanyUserPublish>(ICreateCompanyUserPublish.CreateObj(
+            companyId: request.UserCompany.CompanyId,
+            userId: userId,
+            contractSubjectId: request.UserCompany.ContractSubjectId,
+            contractTermType: request.UserCompany.ContractTermType,
+            rate: request.UserCompany.Rate,
+            startWorkingAt: request.UserCompany.StartWorkingAt,
+            endWorkingAt: request.UserCompany.EndWorkingAt,
+            probation: request.UserCompany.Probation,
+            createdBy: _httpContextAccessor.HttpContext.GetUserId()))
+          : Task.CompletedTask);
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
       response.Body = userId;
       response.Status = response.Errors.Any()
         ? OperationResultStatusType.PartialSuccess

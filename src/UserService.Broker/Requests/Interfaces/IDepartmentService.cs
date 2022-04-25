@@ -9,8 +9,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IDepartmentService
   {
-    Task CreateDepartmentUserAsync(Guid departmentId, Guid userId, List<string> errors);
-
     Task<List<DepartmentData>> GetDepartmentsAsync(Guid userId, List<string> errors);
   }
 }

@@ -77,7 +77,19 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users is not null)
       {
-        string key = users.Select(u => u.Id).ToList().GetRedisCacheHashCode();
+        string key = null;
+
+        if (context.Message.AscendingSort.HasValue) 
+        {
+          key = users.Select(u => u.Id).ToList()
+            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount, context.Message.AscendingSort);
+        }
+        else
+        {
+          key = users.Select(u => u.Id).ToList()
+            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount);
+        }
+        
 
         await _globalCache.CreateAsync(
           Cache.Users,
