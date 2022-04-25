@@ -116,11 +116,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (!request.IsActive)
       {
-        response.Body = await _userRepository.SwitchActiveStatusAsync(request.UserId, request.IsActive);
+        if (!await _userRepository.SwitchActiveStatusAsync(request.UserId, request.IsActive))
+        {
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        }
 
         await _bus.Publish<IDisactivateUserPublish>(IDisactivateUserPublish.CreateObj(
-          request.UserId,
-          _httpContextAccessor.HttpContext.GetUserId()));
+        request.UserId,
+        _httpContextAccessor.HttpContext.GetUserId()));
+
+        response.Body = true;
       }
       else
       {
@@ -142,11 +147,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           password,
           "ru",
           response.Errors);
-      }
 
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
+        response.Status = response.Errors.Any()
+          ? OperationResultStatusType.PartialSuccess
+          : OperationResultStatusType.FullSuccess;
+
+      }
 
       return response;
     }

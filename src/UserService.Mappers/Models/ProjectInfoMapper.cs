@@ -6,9 +6,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class ProjectInfoMapper : IProjectInfoMapper
   {
-    public ProjectInfo Map(ProjectData projectData)
+    public ProjectInfo Map(ProjectData projectData, ProjectUserData projectUser)
     {
-      if (projectData == null)
+      if (projectData is null)
       {
         return null;
       }
@@ -19,7 +19,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         Name = projectData.Name,
         ShortDescription = projectData.ShortDescription,
         ShortName = projectData.ShortName,
-        Status = projectData.Status
+        Status = projectData.Status,
+        User = new ProjectUserInfo()
+        {
+          IsActive = projectUser.IsActive
+        }
       };
     }
   }
