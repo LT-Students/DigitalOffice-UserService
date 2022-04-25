@@ -20,10 +20,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         ShortDescription = projectData.ShortDescription,
         ShortName = projectData.ShortName,
         Status = projectData.Status,
-        User = new ProjectUserInfo()
-        {
-          IsActive = projectUser.IsActive
-        }
+        User = projectUser is null
+          ? null
+          : new ProjectUserInfo()
+          {
+            IsActive = projectUser.IsActive,
+            CreatedAtUtc = projectUser.CreatedAtUtc
+          }
       };
     }
   }
