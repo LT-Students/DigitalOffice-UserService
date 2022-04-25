@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           IncludeCurrentAvatar = true,
           Active = true,
           AscendingSort = request.AscendingSort,
-          //FullNameIncludeSubstring = request.FullNameIncludeSubstring
+          FullNameIncludeSubstring = request.FullNameIncludeSubstring
         },
         request.UsersIds);
       }
