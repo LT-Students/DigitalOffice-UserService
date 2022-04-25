@@ -39,7 +39,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true,
           Active = true,
-          AscendingSort = request.AscendingSort
+          AscendingSort = request.AscendingSort,
+          //FullNameIncludeSubstring = request.FullNameIncludeSubstring
         },
         request.UsersIds);
       }

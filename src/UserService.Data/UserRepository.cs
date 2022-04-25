@@ -280,8 +280,10 @@ namespace LT.DigitalOffice.UserService.Data
     public async Task<List<DbUser>> SearchAsync(string text)
     {
       return await _provider.Users
-        .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName)
-        .Contains(text))
+        .Where(u =>
+          u.FirstName.Contains(text) ||
+          u.MiddleName.Contains(text) ||
+          u.LastName.Contains(text))
         .ToListAsync();
     }
   }
