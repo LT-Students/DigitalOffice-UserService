@@ -86,15 +86,6 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
-      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
-      {
-        dbUsers = dbUsers.Where(
-          u =>
-            u.FirstName.Contains(filter.FullNameIncludeSubstring)
-            || u.LastName.Contains(filter.FullNameIncludeSubstring)
-            || u.MiddleName.Contains(filter.FullNameIncludeSubstring));
-      }
-
       if (filter.AscendingSort.HasValue)
       {
         dbUsers = filter.AscendingSort.Value
@@ -266,9 +257,16 @@ namespace LT.DigitalOffice.UserService.Data
         userIds,
         _provider.Users.AsQueryable());
 
+      List<DbUser> dbUsersList = await dbUsers.ToListAsync();
+
+      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
+      {
+        dbUsersList = await SearchAsync(filter.FullNameIncludeSubstring);
+      }
+
       return (
-        await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await dbUsers.CountAsync());
+         dbUsersList.Skip(filter.SkipCount).Take(filter.TakeCount).ToList(),
+         dbUsersList.Count());
     }
 
     public async Task<bool> DoesExistAsync(Guid userId)
@@ -279,12 +277,15 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<List<DbUser>> SearchAsync(string text)
     {
-      return await _provider.Users
-        .Where(
-          u =>
-            u.FirstName.Contains(text)
-            || u.LastName.Contains(text)
-            || u.MiddleName.Contains(text))
+      string FullNameIncludeSubstring = string.Join("", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+
+      return await _provider.Users.Where(u => 
+           string.Concat(u.FirstName, u.LastName, u.MiddleName).Contains(FullNameIncludeSubstring)
+        || string.Concat(u.LastName, u.FirstName, u.MiddleName).Contains(FullNameIncludeSubstring)
+        || string.Concat(u.LastName, u.MiddleName, u.FirstName).Contains(FullNameIncludeSubstring)
+        || string.Concat(u.MiddleName, u.LastName, u.FirstName).Contains(FullNameIncludeSubstring)
+        || string.Concat(u.FirstName, u.MiddleName, u.FirstName).Contains(FullNameIncludeSubstring)
+        || string.Concat(u.MiddleName, u.FirstName, u.LastName).Contains(FullNameIncludeSubstring))
         .ToListAsync();
     }
   }
