@@ -122,8 +122,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
 
         await _bus.Publish<IDisactivateUserPublish>(IDisactivateUserPublish.CreateObj(
-        request.UserId,
-        _httpContextAccessor.HttpContext.GetUserId()));
+          request.UserId,
+          _httpContextAccessor.HttpContext.GetUserId()));
 
         response.Body = true;
       }

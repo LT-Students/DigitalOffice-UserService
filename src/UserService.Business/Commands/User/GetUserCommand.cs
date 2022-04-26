@@ -170,7 +170,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         images,
         _officeMapper.Map(offices?.FirstOrDefault()),
         _positionMapper.Map(positions?.FirstOrDefault()),
-        projects?.Select(p => _projectMapper.Map(p, p.Users.FirstOrDefault(pu => pu.UserId == filter.UserId))).ToList(),
+        projects?.Select(p => _projectMapper.Map(p, p.Users?.FirstOrDefault(pu => pu.UserId == filter.UserId))).ToList(),
         _roleMapper.Map(roles?.FirstOrDefault()),
         skills?.Select(_skillMapper.Map).ToList());
 
