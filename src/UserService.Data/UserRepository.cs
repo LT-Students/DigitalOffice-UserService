@@ -74,11 +74,9 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Where(u => userIds.Contains(u.Id));
       }
 
-      if (filter.Active.HasValue)
+      if (filter.IsActive.HasValue)
       {
-        dbUsers = filter.Active.Value
-          ? dbUsers.Where(u => u.IsActive)
-          : dbUsers.Where(u => !u.IsActive);
+        dbUsers = dbUsers.Where(u => u.IsActive == filter.IsActive.Value);
       }
 
       if (filter.IncludeCurrentAvatar)
@@ -95,9 +93,9 @@ namespace LT.DigitalOffice.UserService.Data
             || u.MiddleName.Contains(filter.FullNameIncludeSubstring));
       }
 
-      if (filter.AscendingSort.HasValue)
+      if (filter.IsAscendingSort.HasValue)
       {
-        dbUsers = filter.AscendingSort.Value
+        dbUsers = filter.IsAscendingSort.Value
           ? dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName)
           : dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
       }
