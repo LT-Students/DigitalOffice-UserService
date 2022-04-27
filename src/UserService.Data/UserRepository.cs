@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
-      if (filter.AscendingSort.HasValue)
+      if (filter.IsAscendingSort.HasValue)
       {
         dbUsers = filter.IsAscendingSort.Value
           ? dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName)

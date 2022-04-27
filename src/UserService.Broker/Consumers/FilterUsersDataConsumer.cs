@@ -38,8 +38,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           SkipCount = request.SkipCount,
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true,
-          Active = true,
-          AscendingSort = request.AscendingSort,
+          IsActive = true,
+          IsAscendingSort = request.AscendingSort,
           FullNameIncludeSubstring = request.FullNameIncludeSubstring
         },
         request.UsersIds);
