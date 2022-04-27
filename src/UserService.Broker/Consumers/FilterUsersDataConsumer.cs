@@ -79,23 +79,30 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       {
         string key = null;
 
-        if (context.Message.AscendingSort.HasValue) 
+        if (context.Message.AscendingSort.HasValue)
         {
-          key = users.Select(u => u.Id).ToList()
-            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount, context.Message.AscendingSort);
+          key = context.Message.UsersIds
+            .GetRedisCacheHashCode(
+              context.Message.SkipCount,
+              context.Message.TakeCount,
+              context.Message.AscendingSort,
+              context.Message.FullNameIncludeSubstring is not null ? context.Message.FullNameIncludeSubstring.Length : 0);
         }
         else
         {
-          key = users.Select(u => u.Id).ToList()
-            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount);
+          key = context.Message.UsersIds
+            .GetRedisCacheHashCode(
+              context.Message.SkipCount, 
+              context.Message.TakeCount,
+              context.Message.FullNameIncludeSubstring is not null ? context.Message.FullNameIncludeSubstring.Length : 0);
         }
-        
+
 
         await _globalCache.CreateAsync(
           Cache.Users,
           key,
           (users, usersCount),
-          users.Select(u => u.Id).ToList(),
+          context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }

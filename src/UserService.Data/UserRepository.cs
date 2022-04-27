@@ -278,14 +278,14 @@ namespace LT.DigitalOffice.UserService.Data
     public async Task<List<DbUser>> SearchAsync(string text)
     {
       string FullNameIncludeSubstring = string.Join("", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
-
-      return await _provider.Users.Where(u => 
-           string.Concat(u.FirstName, u.LastName, u.MiddleName).Contains(FullNameIncludeSubstring)
-        || string.Concat(u.LastName, u.FirstName, u.MiddleName).Contains(FullNameIncludeSubstring)
-        || string.Concat(u.LastName, u.MiddleName, u.FirstName).Contains(FullNameIncludeSubstring)
-        || string.Concat(u.MiddleName, u.LastName, u.FirstName).Contains(FullNameIncludeSubstring)
-        || string.Concat(u.FirstName, u.MiddleName, u.FirstName).Contains(FullNameIncludeSubstring)
-        || string.Concat(u.MiddleName, u.FirstName, u.LastName).Contains(FullNameIncludeSubstring))
+      
+      return await _provider.Users.Where(u =>
+           string.Concat(u.FirstName, u.LastName, u.MiddleName).StartsWith(FullNameIncludeSubstring)
+        || string.Concat(u.LastName, u.FirstName, u.MiddleName).StartsWith(FullNameIncludeSubstring)
+        || string.Concat(u.LastName, u.MiddleName, u.FirstName).StartsWith(FullNameIncludeSubstring)
+        || string.Concat(u.MiddleName, u.LastName, u.FirstName).StartsWith(FullNameIncludeSubstring)
+        || string.Concat(u.FirstName, u.MiddleName, u.FirstName).StartsWith(FullNameIncludeSubstring)
+        || string.Concat(u.MiddleName, u.FirstName, u.LastName).StartsWith(FullNameIncludeSubstring))
         .ToListAsync();
     }
   }
