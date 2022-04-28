@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         .MinimumLength(5).WithMessage("Login is too short.")
         .MaximumLength(15).WithMessage("Login is too long")
         .Must(login => loginRegex.IsMatch(login))
-        .WithMessage("Login must contain only latin letters and digits.");
+        .WithMessage("Login must contain only Latin letters and digits or only Latin letters.");
 
       RuleFor(request => request.UserId)
         .NotEmpty().WithMessage("UserId can't be empty.");
