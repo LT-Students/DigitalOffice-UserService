@@ -273,8 +273,8 @@ namespace LT.DigitalOffice.UserService.Data
 
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
     {
-      List<string> fullNameIncludeSubstring = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-        .ToLower().Split(" ").ToList();
+      string[] fullNameIncludeSubstring = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+        .ToLower().Split(" ");
 
       IQueryable<DbUser> dbUsers = dbUsersFiltered is null && !dbUsersFiltered.Any() ? _provider.Users : dbUsersFiltered;
 
