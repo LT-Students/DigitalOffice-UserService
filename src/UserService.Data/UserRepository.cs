@@ -273,31 +273,31 @@ namespace LT.DigitalOffice.UserService.Data
 
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
     {
-      string[] fullNameIncludeSubstring = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+      string[] cleanedFullName = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
         .ToLower().Split(" ");
 
       IQueryable<DbUser> dbUsers = dbUsersFiltered is null && !dbUsersFiltered.Any() ? _provider.Users : dbUsersFiltered;
 
-      if (fullNameIncludeSubstring.Count() == 1)
+      if (cleanedFullName.Count() == 1)
       {
         return dbUsers.Where(u =>
-            u.FirstName.ToLower().Contains(fullNameIncludeSubstring[0])
-            || u.LastName.ToLower().Contains(fullNameIncludeSubstring[0])
-            || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[0]));
+            u.FirstName.ToLower().Contains(cleanedFullName[0])
+            || u.LastName.ToLower().Contains(cleanedFullName[0])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]));
       }
 
-      if (fullNameIncludeSubstring.Count() == 2)
+      if (cleanedFullName.Count() == 2)
       {
         return dbUsers.Where(u =>
-            u.FirstName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.FirstName.ToLower().Contains(fullNameIncludeSubstring[1])
-            || u.LastName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.LastName.ToLower().Contains(fullNameIncludeSubstring[1])
-            || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[1]));
+            u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1])
+            || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]));
       }
 
       return dbUsers.Where(u =>
-        u.FirstName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.FirstName.ToLower().Contains(fullNameIncludeSubstring[1]) || u.FirstName.ToLower().Contains(fullNameIncludeSubstring[2])
-        || u.LastName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.LastName.ToLower().Contains(fullNameIncludeSubstring[1]) || u.LastName.ToLower().Contains(fullNameIncludeSubstring[2])
-        || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[0]) || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[1]) || u.MiddleName.ToLower().Contains(fullNameIncludeSubstring[2]));
+        u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1]) || u.FirstName.ToLower().Contains(cleanedFullName[2])
+        || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
+        || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
     }
   }
 }
