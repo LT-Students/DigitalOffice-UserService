@@ -255,16 +255,14 @@ namespace LT.DigitalOffice.UserService.Data
         userIds,
         _provider.Users.AsQueryable());
 
-      List<DbUser> dbUsersList = await dbUsers.ToListAsync();
-
       if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
       {
-        dbUsersList = await SearchAsync(filter.FullNameIncludeSubstring);
+        dbUsers = SearchAsync(filter.FullNameIncludeSubstring, dbUsers);
       }
 
       return (
-         dbUsersList.Skip(filter.SkipCount).Take(filter.TakeCount).ToList(),
-         dbUsersList.Count());
+         await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+         dbUsers.Count());
     }
 
     public async Task<bool> DoesExistAsync(Guid userId)
@@ -273,18 +271,39 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync(u => u.Id == userId) != null;
     }
 
-    public async Task<List<DbUser>> SearchAsync(string text)
+    public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsers = null)
     {
-      string FullNameIncludeSubstring = string.Join("", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
-      
-      return await _provider.Users.Where(u =>
-           string.Concat(u.FirstName, u.LastName, u.MiddleName).StartsWith(FullNameIncludeSubstring)
-        || string.Concat(u.LastName, u.FirstName, u.MiddleName).StartsWith(FullNameIncludeSubstring)
-        || string.Concat(u.LastName, u.MiddleName, u.FirstName).StartsWith(FullNameIncludeSubstring)
-        || string.Concat(u.MiddleName, u.LastName, u.FirstName).StartsWith(FullNameIncludeSubstring)
-        || string.Concat(u.FirstName, u.MiddleName, u.FirstName).StartsWith(FullNameIncludeSubstring)
-        || string.Concat(u.MiddleName, u.FirstName, u.LastName).StartsWith(FullNameIncludeSubstring))
-        .ToListAsync();
+      string[] fullNameIncludeSubstring = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Split(" ");
+
+      if (fullNameIncludeSubstring.Count() == 1)
+      {
+        return _provider.Users.Where(u =>
+          u.FirstName.StartsWith(fullNameIncludeSubstring[0])
+          || u.LastName.StartsWith(fullNameIncludeSubstring[0])
+          || u.MiddleName.StartsWith(fullNameIncludeSubstring[0]));
+      }
+      if (fullNameIncludeSubstring.Count() == 2)
+      {
+        return _provider.Users.Where(u =>
+          u.FirstName.StartsWith(fullNameIncludeSubstring[0]) && u.LastName.StartsWith(fullNameIncludeSubstring[1])
+          || u.FirstName.StartsWith(fullNameIncludeSubstring[1]) && u.LastName.StartsWith(fullNameIncludeSubstring[0])
+          || u.MiddleName.StartsWith(fullNameIncludeSubstring[0]) && u.FirstName.StartsWith(fullNameIncludeSubstring[1])
+          || u.MiddleName.StartsWith(fullNameIncludeSubstring[1]) && u.FirstName.StartsWith(fullNameIncludeSubstring[0])
+          || u.LastName.StartsWith(fullNameIncludeSubstring[0]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[1])
+          || u.LastName.StartsWith(fullNameIncludeSubstring[1]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[0]));
+      }
+      if (fullNameIncludeSubstring.Count() == 3)
+      {
+        return _provider.Users.Where(u =>
+          (u.FirstName.StartsWith(fullNameIncludeSubstring[0]) && u.LastName.StartsWith(fullNameIncludeSubstring[1]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[2]))
+          || (u.FirstName.StartsWith(fullNameIncludeSubstring[0]) && u.LastName.StartsWith(fullNameIncludeSubstring[2]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[1]))
+          || (u.FirstName.StartsWith(fullNameIncludeSubstring[1]) && u.LastName.StartsWith(fullNameIncludeSubstring[0]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[2]))
+          || (u.FirstName.StartsWith(fullNameIncludeSubstring[1]) && u.LastName.StartsWith(fullNameIncludeSubstring[2]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[0]))
+          || (u.FirstName.StartsWith(fullNameIncludeSubstring[2]) && u.LastName.StartsWith(fullNameIncludeSubstring[0]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[1]))
+          || (u.FirstName.StartsWith(fullNameIncludeSubstring[2]) && u.LastName.StartsWith(fullNameIncludeSubstring[1]) && u.MiddleName.StartsWith(fullNameIncludeSubstring[0])));
+      }
+
+      return dbUsers.DefaultIfEmpty();
     }
   }
 }

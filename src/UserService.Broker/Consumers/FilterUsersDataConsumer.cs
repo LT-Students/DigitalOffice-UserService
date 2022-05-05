@@ -86,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
               context.Message.SkipCount,
               context.Message.TakeCount,
               context.Message.AscendingSort,
-              context.Message.FullNameIncludeSubstring is not null ? context.Message.FullNameIncludeSubstring.Length : 0);
+              context.Message.FullNameIncludeSubstring);
         }
         else
         {
@@ -94,7 +94,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             .GetRedisCacheHashCode(
               context.Message.SkipCount, 
               context.Message.TakeCount,
-              context.Message.FullNameIncludeSubstring is not null ? context.Message.FullNameIncludeSubstring.Length : 0);
+              context.Message.FullNameIncludeSubstring);
         }
 
 
