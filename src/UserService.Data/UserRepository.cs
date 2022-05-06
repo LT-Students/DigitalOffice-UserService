@@ -296,8 +296,8 @@ namespace LT.DigitalOffice.UserService.Data
 
       return dbUsers.Where(u =>
         u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1]) || u.FirstName.ToLower().Contains(cleanedFullName[2])
-        || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
-        || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
+        && u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
+        && u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
     }
   }
 }
