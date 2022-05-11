@@ -39,7 +39,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true,
           IsActive = true,
-          IsAscendingSort = request.AscendingSort
+          IsAscendingSort = request.AscendingSort,
+          FullNameIncludeSubstring = request.FullNameIncludeSubstring
         },
         request.UsersIds);
       }
@@ -78,23 +79,30 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       {
         string key = null;
 
-        if (context.Message.AscendingSort.HasValue) 
+        if (context.Message.FullNameIncludeSubstring is null)
         {
-          key = users.Select(u => u.Id).ToList()
-            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount, context.Message.AscendingSort);
+          if (context.Message.AscendingSort.HasValue)
+          {
+            key = context.Message.UsersIds
+              .GetRedisCacheHashCode(
+                context.Message.SkipCount,
+                context.Message.TakeCount,
+                context.Message.AscendingSort);
+          }
+          else
+          {
+            key = context.Message.UsersIds
+              .GetRedisCacheHashCode(
+                context.Message.SkipCount,
+                context.Message.TakeCount);
+          }
         }
-        else
-        {
-          key = users.Select(u => u.Id).ToList()
-            .GetRedisCacheHashCode(context.Message.SkipCount, context.Message.TakeCount);
-        }
-        
 
         await _globalCache.CreateAsync(
           Cache.Users,
           key,
           (users, usersCount),
-          users.Select(u => u.Id).ToList(),
+          context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }

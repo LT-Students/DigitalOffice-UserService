@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -32,6 +33,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> DoesExistAsync(Guid userId);
 
-    Task<List<DbUser>> SearchAsync(string text);
+    IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUser = null);
   }
 }

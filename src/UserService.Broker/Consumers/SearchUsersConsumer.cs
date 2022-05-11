@@ -5,6 +5,7 @@ using LT.DigitalOffice.Models.Broker.Responses.Search;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
     private async Task<object> SearchUsersAsync(string text)
     {
-      List<DbUser> users = await _userRepository.SearchAsync(text);
+      List<DbUser> users = await _userRepository.SearchAsync(text, null).ToListAsync();
 
       return ISearchResponse.CreateObj(
         users.Select(

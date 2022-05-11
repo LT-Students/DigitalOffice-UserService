@@ -84,15 +84,6 @@ namespace LT.DigitalOffice.UserService.Data
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
-      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
-      {
-        dbUsers = dbUsers.Where(
-          u =>
-            u.FirstName.Contains(filter.FullNameIncludeSubstring)
-            || u.LastName.Contains(filter.FullNameIncludeSubstring)
-            || u.MiddleName.Contains(filter.FullNameIncludeSubstring));
-      }
-
       if (filter.IsAscendingSort.HasValue)
       {
         dbUsers = filter.IsAscendingSort.Value
@@ -264,9 +255,14 @@ namespace LT.DigitalOffice.UserService.Data
         userIds,
         _provider.Users.AsQueryable());
 
+      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
+      {
+        dbUsers = SearchAsync(filter.FullNameIncludeSubstring, dbUsers);
+      }
+
       return (
-        await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await dbUsers.CountAsync());
+         await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+         dbUsers.Count());
     }
 
     public async Task<bool> DoesExistAsync(Guid userId)
@@ -275,12 +271,33 @@ namespace LT.DigitalOffice.UserService.Data
         .FirstOrDefaultAsync(u => u.Id == userId) != null;
     }
 
-    public async Task<List<DbUser>> SearchAsync(string text)
+    public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
     {
-      return await _provider.Users
-        .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName)
-        .Contains(text))
-        .ToListAsync();
+      string[] cleanedFullName = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+        .ToLower().Split(" ");
+
+      IQueryable<DbUser> dbUsers = dbUsersFiltered is null && !dbUsersFiltered.Any() ? _provider.Users : dbUsersFiltered;
+
+      if (cleanedFullName.Count() == 1)
+      {
+        return dbUsers.Where(u =>
+            u.FirstName.ToLower().Contains(cleanedFullName[0])
+            || u.LastName.ToLower().Contains(cleanedFullName[0])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]));
+      }
+
+      if (cleanedFullName.Count() == 2)
+      {
+        return dbUsers.Where(u =>
+            u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1])
+            || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]));
+      }
+
+      return dbUsers.Where(u =>
+        u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1]) || u.FirstName.ToLower().Contains(cleanedFullName[2])
+        && u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
+        && u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
     }
   }
 }
