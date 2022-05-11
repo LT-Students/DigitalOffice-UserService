@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
 {
   public class CreateCredentialsRequestValidator : AbstractValidator<CreateCredentialsRequest>, ICreateCredentialsRequestValidator
   {
-    private static Regex loginRegex = new(@"([a-zA-Z]|[a-zA-z]+[0-9]$)");
+    private static Regex loginRegex = new(@"^([a-zA-Z]+)$|^([a-zA-Z0-9]*[0-9]+[a-zA-Z]+[0-9]*)$|^([a-zA-Z]+[0-9]+)$");
 
     public CreateCredentialsRequestValidator(
       IPendingUserRepository repository,
@@ -21,10 +21,8 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
         .NotEmpty().WithMessage("Login can't be empty.")
         .MinimumLength(5).WithMessage("Login is too short.")
         .MaximumLength(15).WithMessage("Login is too long")
-        .Must(login => !login.All(char.IsDigit))
-        .WithMessage("Login must not contain only digits.")
         .Must(login => loginRegex.IsMatch(login))
-        .WithMessage("Login must contain only latin letters.");
+        .WithMessage("Login must contain only Latin letters and digits or only Latin letters.");
 
       RuleFor(request => request.UserId)
         .NotEmpty().WithMessage("UserId can't be empty.");

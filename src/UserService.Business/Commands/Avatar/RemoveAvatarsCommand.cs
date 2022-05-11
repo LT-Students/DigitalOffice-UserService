@@ -8,7 +8,6 @@ using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
-using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
@@ -27,7 +26,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRemoveAvatarsRequestValidator _validator;
     private readonly IAccessValidator _accessValidator;
-    private readonly IImageService _imageService;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
     private readonly IBus _bus;
@@ -37,7 +35,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IHttpContextAccessor httpContextAccessor,
       IRemoveAvatarsRequestValidator validator,
       IAccessValidator accessValidator,
-      IImageService imageService,
       IResponseCreator responseCreator,
       IGlobalCacheRepository globalCache,
       IBus bus)
@@ -46,7 +43,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _httpContextAccessor = httpContextAccessor;
       _validator = validator;
       _accessValidator = accessValidator;
-      _imageService = imageService;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
       _bus = bus;
