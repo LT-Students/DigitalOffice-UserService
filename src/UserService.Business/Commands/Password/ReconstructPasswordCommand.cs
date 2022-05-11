@@ -48,7 +48,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       dbUserCredentials.Salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
       dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
-        request.Login,
+        dbUserCredentials.Login,
         dbUserCredentials.Salt,
         request.NewPassword);
 

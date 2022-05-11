@@ -15,25 +15,23 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
     public CreateCommunicationRequestValidator(
       IUserCommunicationRepository _communicationRepository)
     {
-      RuleFor(c => c.Value)
-        .NotEmpty().WithMessage("Communication value must not be empty.");
-
       RuleFor(c => c.Type)
-        .IsInEnum().WithMessage("Incorrect communication type format.")
+        .IsInEnum()
+        .WithMessage("Incorrect communication type format.")
         .Must(ct => ct != CommunicationType.BaseEmail)
         .WithMessage("Can't set unconfirmed email as base.");
 
-      When(c => c.Type == CommunicationType.Phone && c.Value != null, () =>
+      When(c => c.Type == CommunicationType.Phone, () =>
         RuleFor(c => c.Value)
           .Must(v => PhoneRegex.IsMatch(v.Trim())).WithMessage("Incorrect phone number."));
 
-      When(c => c.Type == CommunicationType.Email && c.Value != null, () =>
+      When(c => c.Type == CommunicationType.Email, () =>
         RuleFor(c => c.Value)
           .Must(v =>
           {
             try
             {
-              MailAddress address = new(v?.Trim());
+              MailAddress address = new(v.Trim());
               return true;
             }
             catch

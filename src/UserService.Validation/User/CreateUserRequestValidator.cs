@@ -23,7 +23,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       IPasswordValidator passwordValidator)
     {
       RuleFor(user => user.FirstName)
-        .NotEmpty().WithMessage("First name cannot be empty.")
         .Must(x => !NumberRegex.IsMatch(x))
         .WithMessage("First name must not contain numbers.")
         .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -33,7 +32,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .WithMessage("First name contains invalid characters.");
 
       RuleFor(user => user.LastName)
-        .NotEmpty().WithMessage("Last name cannot be empty.")
         .Must(x => !NumberRegex.IsMatch(x))
         .WithMessage("Last name must not contain numbers.")
         .Must(x => !SpecialCharactersRegex.IsMatch(x))
@@ -72,8 +70,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
 
       RuleFor(user => user.Communication)
         .Cascade(CascadeMode.Stop)
-        .NotNull()
-        .WithMessage("Communication must not be empty.")
         .Must(x => x.Type == CommunicationType.Email)
         .WithMessage("Communication type must be email.")
         .SetValidator(communicationValidator);
@@ -81,7 +77,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
       When(user => user.UserCompany is not null, () =>
       {
         RuleFor(user => user.UserCompany.Rate)
-          .NotNull()
           .GreaterThan(0)
           .LessThanOrEqualTo(1);
 
