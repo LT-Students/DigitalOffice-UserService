@@ -265,12 +265,6 @@ namespace LT.DigitalOffice.UserService.Data
          dbUsers.Count());
     }
 
-    public async Task<bool> DoesExistAsync(Guid userId)
-    {
-      return await _provider.Users
-        .FirstOrDefaultAsync(u => u.Id == userId) != null;
-    }
-
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
     {
       string[] cleanedFullName = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
