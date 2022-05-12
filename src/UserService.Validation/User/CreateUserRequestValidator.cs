@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
         .WithMessage("Communication type must be email.")
         .SetValidator(communicationValidator);
 
-      When(user => user.UserCompany is not null, () =>
+      When(user => user.UserCompany is not null && user.UserCompany.Rate is not null, () =>
       {
         RuleFor(user => user.UserCompany.Rate)
           .GreaterThan(0)
