@@ -8,16 +8,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public SkillInfo Map(UserSkillData userSkillData)
     {
-      if (userSkillData is null)
-      {
-        return null;
-      }
-
-      return new SkillInfo
-      {
-        Id = userSkillData.Id,
-        Name = userSkillData.Name,
-      };
+      return userSkillData is null
+        ? default
+        : new SkillInfo
+        {
+          Id = userSkillData.Id,
+          Name = userSkillData.Name,
+        };
     }
   }
 }

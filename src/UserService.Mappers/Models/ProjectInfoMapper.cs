@@ -8,26 +8,23 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public ProjectInfo Map(ProjectData projectData, ProjectUserData projectUser)
     {
-      if (projectData is null)
-      {
-        return null;
-      }
-
-      return new ProjectInfo
-      {
-        Id = projectData.Id,
-        Name = projectData.Name,
-        ShortDescription = projectData.ShortDescription,
-        ShortName = projectData.ShortName,
-        Status = projectData.Status,
-        User = projectUser is null
-          ? null
-          : new ProjectUserInfo()
-          {
-            IsActive = projectUser.IsActive,
-            CreatedAtUtc = projectUser.CreatedAtUtc
-          }
-      };
+      return projectData is null
+        ? default
+        : new ProjectInfo
+        {
+          Id = projectData.Id,
+          Name = projectData.Name,
+          ShortDescription = projectData.ShortDescription,
+          ShortName = projectData.ShortName,
+          Status = projectData.Status,
+          User = projectUser is null
+            ? default
+            : new ProjectUserInfo()
+            {
+              IsActive = projectUser.IsActive,
+              CreatedAtUtc = projectUser.CreatedAtUtc
+            }
+        };
     }
   }
 }

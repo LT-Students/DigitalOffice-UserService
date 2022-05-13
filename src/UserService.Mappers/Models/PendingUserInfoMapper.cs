@@ -20,16 +20,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       Guid invintationCommunicationId,
       ImageInfo avatar)
     {
-      if (dbUser is null)
-      {
-        return default;
-      }
-
-      return new PendingUserInfo
-      {
-        User = _userInfoMapper.Map(dbUser, avatar),
-        InvintationCommunicationId = invintationCommunicationId
-      };
+      return dbUser is null
+        ? default
+        : new PendingUserInfo
+        {
+          User = _userInfoMapper.Map(dbUser, avatar),
+          InvintationCommunicationId = invintationCommunicationId
+        };
     }
   }
 }

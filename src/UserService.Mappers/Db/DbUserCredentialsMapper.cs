@@ -12,21 +12,18 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       string salt,
       string passwordHash)
     {
-      if (request == null)
-      {
-        return null;
-      }
-
-      return new DbUserCredentials
-      {
-        Id = Guid.NewGuid(),
-        Login = request.Login.Trim(),
-        Salt = salt,
-        UserId = request.UserId,
-        PasswordHash = passwordHash,
-        IsActive = true,
-        CreatedAtUtc = DateTime.UtcNow
-      };
+      return request is null
+        ? null
+        : new DbUserCredentials
+        {
+          Id = Guid.NewGuid(),
+          Login = request.Login.Trim(),
+          Salt = salt,
+          UserId = request.UserId,
+          PasswordHash = passwordHash,
+          IsActive = true,
+          CreatedAtUtc = DateTime.UtcNow
+        };
     }
   }
 }
