@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
     {
       RuleFor(request => request.Login.Trim())
         .MinimumLength(5).WithMessage("Login is too short.")
-        .MaximumLength(15).WithMessage("Login is too long")
+        .MaximumLength(15).WithMessage("Login is too long.")
         .Must(login => loginRegex.IsMatch(login))
         .WithMessage("Login must contain only Latin letters and digits or only Latin letters.");
 
