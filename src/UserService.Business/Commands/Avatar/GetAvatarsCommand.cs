@@ -16,27 +16,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
   {
     private readonly IUserAvatarRepository _avatarRepository;
     private readonly IImageService _imageService;
-    private readonly IImagesResponseMapper _mapper;
+    private readonly IUserImagesResponseMapper _mapper;
 
     public GetAvatarsCommand(
       IUserAvatarRepository avatarRepository,
       IImageService imageService,
-      IImagesResponseMapper mapper)
+      IUserImagesResponseMapper mapper)
     {
       _avatarRepository = avatarRepository;
       _imageService = imageService;
       _mapper = mapper;
     }
 
-    public async Task<OperationResultResponse<ImagesResponse>> ExecuteAsync(Guid userId)
+    public async Task<OperationResultResponse<UserImagesResponse>> ExecuteAsync(Guid userId)
     {
       List<Guid> dbImagesIds = await _avatarRepository.GetAvatarsByUserId(userId);
 
-      OperationResultResponse<ImagesResponse> response = new();
+      OperationResultResponse<UserImagesResponse> response = new();
 
       if (dbImagesIds is null || !dbImagesIds.Any())
       {
-        response.Body = _mapper.Map(await _imageService.GetImagesAsync(dbImagesIds, response.Errors));
+        response.Body = _mapper.Map(userId, await _imageService.GetImagesAsync(dbImagesIds, response.Errors));
       }
 
       response.Status = response.Errors.Any()

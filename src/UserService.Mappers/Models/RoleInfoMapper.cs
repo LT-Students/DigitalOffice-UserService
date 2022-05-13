@@ -8,17 +8,14 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public RoleInfo Map(RoleData role)
     {
-      if (role == null)
-      {
-        return null;
-      }
-
-      return new RoleInfo
-      {
-        Id = role.Id,
-        Name = role.Name,
-        RightsIds = role.RightsIds
-      };
+      return role is null
+        ? default
+        : new RoleInfo
+        {
+          Id = role.Id,
+          Name = role.Name,
+          RightsIds = role.RightsIds
+        };
     }
   }
 }

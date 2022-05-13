@@ -18,20 +18,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
 
     public DbUserCommunication Map(CreateCommunicationRequest request)
     {
-      if (request is null)
-      {
-        return null;
-      }
-
-      return new DbUserCommunication
-      {
-        Id = Guid.NewGuid(),
-        Type = (int)request.Type,
-        UserId = request.UserId.Value,
-        Value = request.Value,
-        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-        CreatedAtUtc = DateTime.UtcNow,
-      };
+      return request is null
+        ? null
+        : new DbUserCommunication
+        {
+          Id = Guid.NewGuid(),
+          Type = (int)request.Type,
+          UserId = request.UserId.Value,
+          Value = request.Value,
+          CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+          CreatedAtUtc = DateTime.UtcNow,
+        };
     }
   }
 }

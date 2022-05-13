@@ -3,12 +3,15 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.UserCompany;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace LT.DigitalOffice.UserService.Models.Dto
 {
   public record CreateUserRequest
   {
+    [Required]
     public string FirstName { get; set; }
+    [Required]
     public string LastName { get; set; }
     public string MiddleName { get; set; }
     public UserStatus Status { get; set; }
@@ -26,6 +29,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto
     public string Password { get; set; }
     public CreateUserCompanyRequest UserCompany { get; set; }
     public CreateAvatarRequest AvatarImage { get; set; }
+    [Required]
     public CreateCommunicationRequest Communication { get; set; }
   }
 }

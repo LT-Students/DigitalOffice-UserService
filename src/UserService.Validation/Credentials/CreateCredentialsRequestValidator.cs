@@ -2,8 +2,6 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
-using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService.Validation.Credentials
@@ -17,18 +15,13 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
       IUserCredentialsRepository credentialsRepository)
     {
       RuleFor(request => request.Login.Trim())
-        .Cascade(CascadeMode.Stop)
-        .NotEmpty().WithMessage("Login can't be empty.")
         .MinimumLength(5).WithMessage("Login is too short.")
-        .MaximumLength(15).WithMessage("Login is too long")
+        .MaximumLength(15).WithMessage("Login is too long.")
         .Must(login => loginRegex.IsMatch(login))
         .WithMessage("Login must contain only Latin letters and digits or only Latin letters.");
 
       RuleFor(request => request.UserId)
         .NotEmpty().WithMessage("UserId can't be empty.");
-
-      RuleFor(request => request.Password)
-        .NotEmpty().WithMessage("Password can't be empty.");
 
       RuleFor(request => request)
         .Cascade(CascadeMode.Stop)

@@ -21,7 +21,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
   {
     public string CompanyServiceUrl { get; set; }
     public string GetUserCredentialsEndpoint { get; set; }
-    public string GetUserDataEndpoint { get; set; }
     public string GetUsersDataEndpoint { get; set; }
     public string CreateAdminEndpoint { get; set; }
     public string FindParseEntitiesEndpoint { get; set; }

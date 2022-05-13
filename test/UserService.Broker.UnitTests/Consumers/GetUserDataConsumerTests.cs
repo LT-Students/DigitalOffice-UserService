@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
 {
     internal class GetUserDataConsumerTests
     {
-        private readonly Guid userId = Guid.NewGuid();
+        /*private readonly Guid userId = Guid.NewGuid();
         private ConsumerTestHarness<GetUserDataConsumer> consumerTestHarness;
 
         private InMemoryTestHarness harness;
@@ -37,7 +37,7 @@ namespace LT.DigitalOffice.UserService.Broker.UnitTests.Consumers
                 MiddleName = "Ivnovich",
                 IsActive = false
             };
-        }
+        }*/
 
         // TODO fix
 

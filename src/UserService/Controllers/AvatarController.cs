@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpGet("get")]
-    public async Task<OperationResultResponse<ImagesResponse>> GetAsync(
+    public async Task<OperationResultResponse<UserImagesResponse>> GetAsync(
       [FromServices] IGetAvatarsCommand command,
       [FromQuery] Guid userId)
     {

@@ -12,30 +12,27 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       DbUser dbUser,
       ImageInfo avatar)
     {
-      if (dbUser is null)
-      {
-        return null;
-      }
-
-      return new UserInfo
-      {
-        Id = dbUser.Id,
-        FirstName = dbUser.FirstName,
-        LastName = dbUser.LastName,
-        MiddleName = dbUser.MiddleName,
-        Status = (UserStatus)dbUser.Status,
-        IsAdmin = dbUser.IsAdmin,
-        IsActive = dbUser.IsActive,
-        Avatar = avatar,
-        Communications = dbUser.Communications
-          ?.Select(c => new CommunicationInfo
-          {
-            Id = c.Id,
-            Type = (CommunicationType)c.Type,
-            Value = c.Value,
-            IsConfirmed = c.IsConfirmed
-          }),
-      };
+      return dbUser is null
+        ? default
+        : new UserInfo
+        {
+          Id = dbUser.Id,
+          FirstName = dbUser.FirstName,
+          LastName = dbUser.LastName,
+          MiddleName = dbUser.MiddleName,
+          Status = (UserStatus)dbUser.Status,
+          IsAdmin = dbUser.IsAdmin,
+          IsActive = dbUser.IsActive,
+          Avatar = avatar,
+          Communications = dbUser.Communications
+            ?.Select(c => new CommunicationInfo
+            {
+              Id = c.Id,
+              Type = (CommunicationType)c.Type,
+              Value = c.Value,
+              IsConfirmed = c.IsConfirmed
+            }),
+        };
     }
   }
 }

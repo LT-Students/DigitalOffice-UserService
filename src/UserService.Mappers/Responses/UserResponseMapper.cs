@@ -30,35 +30,32 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       RoleInfo role,
       List<SkillInfo> skills)
     {
-      if (dbUser is null)
-      {
-        return default;
-      }
-
-      return new UserResponse
-      {
-        User = _userInfoMapper.Map(dbUser, avatar),
-        IsPending = dbUser.Pending is not null,
-        UserAddition = dbUser.Addition is null ? default : new()
+      return dbUser is null
+        ? default
+        : new UserResponse
         {
-          GenderName = dbUser.Addition.Gender?.Name,
-          About = dbUser.Addition.About,
-          DateOfBirth = dbUser.Addition.DateOfBirth,
-          Latitude = dbUser.Addition.Latitude,
-          Longitude = dbUser.Addition.Latitude,
-          BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
-          BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
-        },
-        CompanyUser = companyUser,
-        Department = department,
-        Office = office,
-        Position = position,
-        Role = role,
-        Images = images,
-        Educations = educations,
-        Projects = projects,
-        Skills = skills
-      };
+          User = _userInfoMapper.Map(dbUser, avatar),
+          IsPending = dbUser.Pending is not null,
+          UserAddition = dbUser.Addition is null ? default : new()
+          {
+            GenderName = dbUser.Addition.Gender?.Name,
+            About = dbUser.Addition.About,
+            DateOfBirth = dbUser.Addition.DateOfBirth,
+            Latitude = dbUser.Addition.Latitude,
+            Longitude = dbUser.Addition.Latitude,
+            BusinessHoursFromUtc = dbUser.Addition.BusinessHoursFromUtc,
+            BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
+          },
+          CompanyUser = companyUser,
+          Department = department,
+          Office = office,
+          Position = position,
+          Role = role,
+          Images = images,
+          Educations = educations,
+          Projects = projects,
+          Skills = skills
+        };
     }
   }
 }

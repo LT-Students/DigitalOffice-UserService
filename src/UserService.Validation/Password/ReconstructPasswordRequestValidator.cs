@@ -15,15 +15,7 @@ namespace LT.DigitalOffice.UserService.Validation.Password
       RuleFor(r => r.UserId)
         .NotEmpty().WithMessage("User id must not be empty.");
 
-      RuleFor(r => r.Secret)
-        .NotEmpty().WithMessage("Secret must not be empty.");
-
-      RuleFor(r => r.Login)
-        .NotEmpty().WithMessage("Login must not be empty.");
-
       RuleFor(r => r.NewPassword)
-        .Cascade(CascadeMode.Stop)
-        .NotEmpty().WithMessage("New password must not be empty.")
         .SetValidator(passwordValidator);
 
       RuleFor(r => r)

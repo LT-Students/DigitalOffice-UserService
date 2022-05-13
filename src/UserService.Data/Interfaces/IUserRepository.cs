@@ -31,8 +31,6 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActive);
 
-    Task<bool> DoesExistAsync(Guid userId);
-
     IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUser = null);
   }
 }

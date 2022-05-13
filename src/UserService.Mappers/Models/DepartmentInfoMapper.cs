@@ -8,16 +8,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public DepartmentInfo Map(DepartmentData department)
     {
-      if (department == null)
-      {
-        return null;
-      }
-
-      return new DepartmentInfo
-      {
-        Id = department.Id,
-        Name = department.Name
-      };
+      return department is null
+        ? default
+        : new DepartmentInfo
+        {
+          Id = department.Id,
+          Name = department.Name
+        };
     }
   }
 }

@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces
   [AutoInject]
   public interface IGetAvatarsCommand
   {
-    Task<OperationResultResponse<ImagesResponse>> ExecuteAsync(Guid userId);
+    Task<OperationResultResponse<UserImagesResponse>> ExecuteAsync(Guid userId);
   }
 }

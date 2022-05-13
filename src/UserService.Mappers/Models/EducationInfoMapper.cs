@@ -8,31 +8,28 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public EducationInfo Map(EducationData educationData)
     {
-      if (educationData is null)
-      {
-        return null;
-      }
-
-      return new EducationInfo
-      {
-        Id = educationData.Id,
-        UniversityName = educationData.UniversityName,
-        QualificationName = educationData.QualificationName,
-        EducationForm = new EducationFormInfo
+      return educationData is null
+        ? default
+        : new EducationInfo
         {
-          Name = educationData.EducationForm.Name,
-          Id = educationData.EducationForm.Id
-        },
-        EducationType = new EducationTypeInfo
-        {
-          Name = educationData.EducationType.Name,
-          Id = educationData.EducationType.Id
-        },
-        Completeness = educationData.Completeness,
-        AdmissionAt = educationData.AdmissionAt,
-        IssueAt = educationData.IssueAt,
-        ImagesIds = educationData.ImagesIds
-      };
+          Id = educationData.Id,
+          UniversityName = educationData.UniversityName,
+          QualificationName = educationData.QualificationName,
+          EducationForm = new EducationFormInfo
+          {
+            Name = educationData.EducationForm.Name,
+            Id = educationData.EducationForm.Id
+          },
+          EducationType = new EducationTypeInfo
+          {
+            Name = educationData.EducationType.Name,
+            Id = educationData.EducationType.Id
+          },
+          Completeness = educationData.Completeness,
+          AdmissionAt = educationData.AdmissionAt,
+          IssueAt = educationData.IssueAt,
+          ImagesIds = educationData.ImagesIds
+        };
     }
   }
 }
