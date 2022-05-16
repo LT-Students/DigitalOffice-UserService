@@ -1,5 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Pending.Interfaces;
@@ -35,9 +36,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
 
       OperationResultResponse<bool> response = new();
       response.Body = (await _repository.RemoveAsync(userId)) is not null;
-      response.Status = response.Body 
-        ? Kernel.Enums.OperationResultStatusType.FullSuccess
-        : Kernel.Enums.OperationResultStatusType.Failed;
+
+      if (!response.Body)
+      {
+        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
 
       return response;
     }

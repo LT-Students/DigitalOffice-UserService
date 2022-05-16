@@ -30,6 +30,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
               Id = c.Id,
               Type = (CommunicationType)c.Type,
               Value = c.Value,
+              VisiblyTo = (CommunicationVisibleTo)c.VisibleTo,
               IsConfirmed = c.IsConfirmed
             }),
         };
