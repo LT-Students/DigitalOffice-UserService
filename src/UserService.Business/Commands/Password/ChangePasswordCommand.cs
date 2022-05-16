@@ -65,14 +65,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       OperationResultResponse<bool> response = new();
 
       response.Body = await _repository.EditAsync(dbUserCredentials);
-      response.Status = OperationResultStatusType.FullSuccess;
 
-      if (!response.Body)
-      {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
-      }
-
-      return response;
+      return response.Body
+        ? response
+        : _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
     }
   }
 }
