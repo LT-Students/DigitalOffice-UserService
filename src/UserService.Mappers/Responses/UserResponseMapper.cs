@@ -35,8 +35,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
         : new UserResponse
         {
           User = _userInfoMapper.Map(dbUser, avatar),
-          IsPending = dbUser.Pending is not null,
-          UserAddition = dbUser.Addition is null ? default : new()
+          UserAddition = dbUser.Addition is null ? new() : new()
           {
             GenderName = dbUser.Addition.Gender?.Name,
             About = dbUser.Addition.About,

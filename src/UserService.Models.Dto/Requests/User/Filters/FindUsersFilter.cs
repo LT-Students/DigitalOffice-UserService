@@ -16,5 +16,8 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 
     [FromQuery(Name = "includecurrentavatar")]
     public bool IncludeCurrentAvatar { get; set; } = false;
+
+    [FromQuery(Name = "includecommunications")]
+    public bool IncludeCommunications { get; set; } = false;
   }
 }

@@ -1,4 +1,7 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
+﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models.Company;
@@ -15,9 +18,12 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -27,6 +33,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 {
   public class GetUserCommand : IGetUserCommand
   {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAccessValidator _accessValidator;
     private readonly IUserRepository _repository;
     private readonly IUserResponseMapper _mapper;
     private readonly IUserSkillInfoMapper _skillMapper;
@@ -49,6 +57,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IResponseCreator _responseCreator;
 
     public GetUserCommand(
+      IHttpContextAccessor httpContextAccessor,
+      IAccessValidator accessValidator,
       IUserRepository repository,
       IUserResponseMapper mapper,
       IUserSkillInfoMapper skillMapper,
@@ -70,6 +80,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       ISkillService skillService,
       IResponseCreator responseCreator)
     {
+      _httpContextAccessor = httpContextAccessor;
+      _accessValidator = accessValidator;
       _repository = repository;
       _mapper = mapper;
       _skillMapper = skillMapper;
@@ -105,7 +117,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           new List<string> { "You must specify 'userId' or|and 'email'." });
       }
 
-      DbUser dbUser = await _repository.GetAsync(filter);
+      Guid requesterId = _httpContextAccessor.HttpContext.GetUserId();
+
+      DbUser dbUser = await _repository.GetAsync(
+        filter: filter,
+        accessLevel: filter.IncludeCommunications
+          && (requesterId == filter.UserId
+            || await _accessValidator.HasRightsAsync(userId: requesterId, includeIsAdminCheck: false, Rights.AddEditRemoveUsers)
+            || (await _repository.GetAsync(requesterId)).IsAdmin)
+        ? CommunicationVisibleTo.Admin
+        : default);
 
       if (dbUser is null)
       {

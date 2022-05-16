@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpGet("find")]
-    public async Task<FindResultResponse<PendingUserInfo>> FindAsync(
+    public async Task<FindResultResponse<UserInfo>> FindAsync(
       [FromServices] IFindPendingUsersCommand command,
       [FromQuery] FindPendingUserFilter filter)
     {
@@ -35,6 +35,14 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] Guid communicationId)
     {
       return await command.ExecuteAsync(userId, communicationId);
+    }
+
+    [HttpDelete("remove")]
+    public async Task<OperationResultResponse<bool>> RemoveAsync(
+      [FromServices] IRemovePendingUserCommand command,
+      [FromQuery] Guid userId)
+    {
+      return await command.ExecuteAsync(userId);
     }
   }
 }

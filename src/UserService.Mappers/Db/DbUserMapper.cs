@@ -7,17 +7,20 @@ using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
   public class DbUserMapper : IDbUserMapper
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDbUserCommunicationMapper _dbUserCommunicationMapper;
 
-    public DbUserMapper(IHttpContextAccessor httpContextAccessor)
+    public DbUserMapper(
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserCommunicationMapper dbUserCommunicationMapper)
     {
       _httpContextAccessor = httpContextAccessor;
+      _dbUserCommunicationMapper = dbUserCommunicationMapper;
     }
 
     public DbUser Map(CreateUserRequest request)
@@ -31,28 +34,19 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       Guid createdBy = _httpContextAccessor.HttpContext.GetUserId();
       DateTime createdAtUtc = DateTime.UtcNow;
 
-      DbUser dbUser = new()
+      return new DbUser()
       {
         Id = userId,
         FirstName = request.FirstName,
         LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
         Status = (int)request.Status,
-        IsAdmin = request.IsAdmin ?? false,
+        IsAdmin = request.IsAdmin,
         IsActive = false,
         CreatedBy = createdBy,
         CreatedAtUtc = createdAtUtc,
-        Communications = new List<DbUserCommunication> {
-          new DbUserCommunication
-          {
-            Id = Guid.NewGuid(),
-            Type = (int)request.Communication.Type,
-            Value = request.Communication.Value,
-            UserId = userId,
-            CreatedBy = createdBy,
-            CreatedAtUtc = createdAtUtc
-          }
-        },
+        Communications = 
+          new List<DbUserCommunication> { _dbUserCommunicationMapper.Map(request.Communication) },
         Addition = new DbUserAddition
         {
           Id = Guid.NewGuid(),
@@ -68,13 +62,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           ModifiedAtUtc = createdAtUtc
         }
       };
-
-      return dbUser;
     }
 
     public DbUser Map(ICreateAdminRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }

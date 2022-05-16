@@ -4,13 +4,9 @@ using Newtonsoft.Json.Converters;
 namespace LT.DigitalOffice.UserService.Models.Dto.Enums
 {
   [JsonConverter(typeof(StringEnumConverter))]
-  public enum CommunicationType
+  public enum CommunicationVisibleTo
   {
-    Email,
-    Telegram,
-    Phone,
-    Skype,
-    Twitter,
-    BaseEmail
+    AllUsers,
+    Admin
   }
 }

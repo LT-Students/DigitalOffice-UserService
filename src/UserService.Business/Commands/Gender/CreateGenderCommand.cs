@@ -50,16 +50,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       response.Body = await _genderRepository.CreateAsync(_mapper.Map(request));
-      response.Status = OperationResultStatusType.FullSuccess;
-
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
-      if (response.Body == default)
-      {
-        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
-      }
-
-      return response;
+      return response.Body == default
+        ? _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest)
+        : response;
     }
   }
 }

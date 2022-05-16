@@ -87,7 +87,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
       if (response.Body is not null)
       {
-
         await _avatarRepository.CreateAsync(
           _dbUserAvatarMapper
             .Map(response.Body.Value, request.UserId.Value, request.IsCurrentAvatar));

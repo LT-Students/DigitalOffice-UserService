@@ -44,6 +44,10 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
       RuleFor(c => c.Value)
         .MustAsync(async (v, _, _) => !await _communicationRepository.DoesValueExist(v.Value))
         .WithMessage("Communication value already exist.");
+
+      RuleFor(c => c.VisibleTo)
+        .IsInEnum()
+        .WithMessage("Wrong visible to value.");
     }
   }
 }
