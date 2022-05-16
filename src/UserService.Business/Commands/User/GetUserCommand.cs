@@ -111,8 +111,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           new List<string> { "You must specify 'userId' or|and 'email'." });
       }
 
-      bool isAdmin = filter.IncludeCommunications ? await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers) : false;
-
       DbUser dbUser = await _repository.GetAsync(
         filter: filter,
         accessLevel: filter.IncludeCommunications && await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers)
