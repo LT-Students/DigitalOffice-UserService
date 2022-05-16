@@ -89,6 +89,11 @@ namespace LT.DigitalOffice.UserService.Data
           : dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
       }
 
+      if (filter.IncludeCommunications)
+      {
+        dbUsers = dbUsers.Include(u => u.Communications);
+      }
+
       return dbUsers;
     }
 
