@@ -6,7 +6,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
   public record UserResponse
   {
     public UserInfo User { get; set; }
-    public bool IsPending { get; set; }
     public UserAdditionInfo UserAddition { get; set; }
     public CompanyUserInfo CompanyUser { get; set; }
     public DepartmentInfo Department { get; set; }

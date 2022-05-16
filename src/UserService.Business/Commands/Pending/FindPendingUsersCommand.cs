@@ -20,14 +20,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
   {
     private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IPendingUserRepository _repository;
-    private readonly IPendingUserInfoMapper _mapper;
+    private readonly IUserInfoMapper _mapper;
     private readonly IImageService _imageService;
     private readonly IResponseCreator _responseCreator;
 
     public FindPendingUsersCommand(
       IBaseFindFilterValidator baseFindValidator,
       IPendingUserRepository repository,
-      IPendingUserInfoMapper mapper,
+      IUserInfoMapper mapper,
       IImageService imageService,
       IResponseCreator responseCreator)
     {
@@ -38,14 +38,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
       _responseCreator = responseCreator;
     }
 
-    public async Task<FindResultResponse<PendingUserInfo>> ExecuteAsync(FindPendingUserFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindPendingUserFilter filter)
     {
       if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
       {
-        return _responseCreator.CreateFailureFindResponse<PendingUserInfo>(HttpStatusCode.BadRequest, errors);
+        return _responseCreator.CreateFailureFindResponse<UserInfo>(HttpStatusCode.BadRequest, errors);
       }
 
-      FindResultResponse<PendingUserInfo> response = new();
+      FindResultResponse<UserInfo> response = new();
 
       (List<DbPendingUser> dbPendingUsers, int totalCount) = await _repository.FindAsync(filter);
 
@@ -60,7 +60,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
         .Select(pu => _mapper
           .Map(
             pu.User,
-            pu.CommunicationId,
             images?.FirstOrDefault(ii => ii.Id == pu.User.Avatars?.FirstOrDefault()?.AvatarId)))
         .ToList();
 

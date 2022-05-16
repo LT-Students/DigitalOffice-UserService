@@ -12,9 +12,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
       DbUser dbUser,
       ImageInfo avatar)
     {
-      return dbUser is null
-        ? default
-        : new UserInfo
+      return dbUser is null ? default : new UserInfo
         {
           Id = dbUser.Id,
           FirstName = dbUser.FirstName,
@@ -23,6 +21,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           Status = (UserStatus)dbUser.Status,
           IsAdmin = dbUser.IsAdmin,
           IsActive = dbUser.IsActive,
+          pendingInfo = dbUser.Pending is null ? null : new PendingUserInfo()
+            { InvitationCommunicationId = dbUser.Pending.CommunicationId },
           Avatar = avatar,
           Communications = dbUser.Communications
             ?.Select(c => new CommunicationInfo

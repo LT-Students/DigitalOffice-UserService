@@ -75,6 +75,11 @@ namespace LT.DigitalOffice.UserService.Data
       if (filter.IsActive.HasValue)
       {
         dbUsers = dbUsers.Where(u => u.IsActive == filter.IsActive.Value);
+
+        if (!filter.IsActive.Value)
+        {
+          dbUsers = dbUsers.Include(u => u.Pending);
+        }
       }
 
       if (filter.IncludeCurrentAvatar)
