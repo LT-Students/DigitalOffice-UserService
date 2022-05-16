@@ -25,6 +25,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     private IQueryable<DbUser> CreateGetPredicates(
       GetUserFilter filter,
+      CommunicationVisibleTo accessLevel,
       IQueryable<DbUser> dbUsers)
     {
       if (filter.UserId.HasValue)
@@ -40,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (filter.IncludeCommunications)
       {
-        dbUsers = dbUsers.Include(u => u.Communications);
+        dbUsers = dbUsers.Include(u => u.Communications.Where(c => c.VisibleTo <= (int)accessLevel));
 
         if (!string.IsNullOrEmpty(filter.Email?.Trim()))
         {
@@ -57,9 +58,6 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
-
-      dbUsers = dbUsers.Include(u => u.Addition).ThenInclude(ua => ua.Gender);
-      dbUsers = dbUsers.Include(u => u.Pending);
 
       return dbUsers;
     }
@@ -117,75 +115,42 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUser.Id;
     }
 
-    public async Task<DbUser> GetAsync(Guid userId, bool includeBaseEmail = false)
+    public async Task<DbUser> GetAsync(Guid userId)
     {
-      IQueryable<DbUser> dbUser = _provider.Users.AsQueryable();
-
-      if (includeBaseEmail)
-      {
-        dbUser = dbUser
-          .Include(u => u.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.BaseEmail));
-      }
-
-      return await dbUser.FirstOrDefaultAsync(u => u.Id == userId);
+      return await _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task<DbUser> GetAsync(GetUserFilter filter)
+    public async Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0)
     {
       if (filter is null)
       {
         return null;
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+      IQueryable<DbUser> dbUsers = CreateGetPredicates(filter, accessLevel, _provider.Users.AsQueryable());
 
-      return await CreateGetPredicates(filter, dbUsers)
-        .FirstOrDefaultAsync();
-    }
+      dbUsers = dbUsers.Include(u => u.Addition).ThenInclude(ua => ua.Gender);
+      dbUsers = dbUsers.Include(u => u.Pending);
 
-    public async Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false)
-    {
-      if (usersIds is null)
-      {
-        return null;
-      }
-
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
-
-      if (includeAvatars)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars);
-      }
-
-      return await dbUsers
-        .Where(x => usersIds.Contains(x.Id) && x.IsActive == true)
-        .ToListAsync();
+      return await dbUsers.FirstOrDefaultAsync();
     }
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
     {
-      if (usersIds is null)
-      {
-        return null;
-      }
-
-      return await _provider.Users
-        .Where(u => usersIds.Contains(u.Id) && u.IsActive)
-        .Select(u => u.Id)
-        .ToListAsync();
+      return usersIds is null
+        ? new()
+        : await _provider.Users
+          .Where(u => usersIds.Contains(u.Id) && u.IsActive)
+          .Select(u => u.Id)
+          .ToListAsync();
     }
 
     public async Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch)
     {
-      if (patch is null)
-      {
-        return false;
-      }
-
       DbUserAddition dbUserAddition = await _provider.UsersAdditions
         .FirstOrDefaultAsync(x => x.UserId == userId);
 
-      if (dbUserAddition == default)
+      if (patch is null || dbUserAddition is null)
       {
         return false;
       }
@@ -200,15 +165,10 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)
     {
-      if (patch is null)
-      {
-        return false;
-      }
-
       DbUser dbUser = await _provider.Users
         .FirstOrDefaultAsync(x => x.Id == userId);
 
-      if (dbUser == default)
+      if (patch is null || dbUser is null)
       {
         return false;
       }
@@ -261,8 +221,8 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       return (
-         await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-         dbUsers.Count());
+        await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+        dbUsers.Count());
     }
 
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)

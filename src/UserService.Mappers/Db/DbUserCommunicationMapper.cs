@@ -16,16 +16,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbUserCommunication Map(CreateCommunicationRequest request)
+    public DbUserCommunication Map(CreateCommunicationRequest request, Guid? userId = null)
     {
       return request is null
         ? null
         : new DbUserCommunication
         {
           Id = Guid.NewGuid(),
+          UserId = request.UserId.HasValue ? request.UserId.Value : userId.Value,
           Type = (int)request.Type,
-          UserId = request.UserId.Value,
           Value = request.Value,
+          VisibleTo = (int)request.VisibleTo,
           CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
           CreatedAtUtc = DateTime.UtcNow,
         };

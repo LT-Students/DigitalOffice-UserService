@@ -7,17 +7,16 @@ using Microsoft.AspNetCore.JsonPatch;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using System.Threading.Tasks;
 using System.Linq;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
   [AutoInject]
   public interface IUserRepository
   {
-    Task<DbUser> GetAsync(GetUserFilter filter);
+    Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0);
 
-    Task<DbUser> GetAsync(Guid userId, bool includeBaseEmail = false);
-
-    Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false);
+    Task<DbUser> GetAsync(Guid userId);
 
     Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 
