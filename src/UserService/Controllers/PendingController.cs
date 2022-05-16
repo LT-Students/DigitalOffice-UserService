@@ -36,5 +36,13 @@ namespace LT.DigitalOffice.UserService.Controllers
     {
       return await command.ExecuteAsync(userId, communicationId);
     }
+
+    [HttpDelete("remove")]
+    public async Task<OperationResultResponse<bool>> RemoveAsync(
+      [FromServices] IRemovePendingUserCommand command,
+      [FromQuery] Guid userId)
+    {
+      return await command.ExecuteAsync(userId);
+    }
   }
 }
