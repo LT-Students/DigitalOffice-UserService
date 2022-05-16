@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         : new PendingUserInfo
         {
           User = _userInfoMapper.Map(dbUser, avatar),
-          InvintationCommunicationId = invintationCommunicationId
+          InvitationCommunicationId = invintationCommunicationId
         };
     }
   }
