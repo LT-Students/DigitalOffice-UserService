@@ -139,8 +139,9 @@ namespace LT.DigitalOffice.UserService.Data
 
       IQueryable<DbUser> dbUsers = CreateGetPredicates(filter, accessLevel, _provider.Users.AsQueryable());
 
-      dbUsers = dbUsers.Include(u => u.Addition).ThenInclude(ua => ua.Gender);
-      dbUsers = dbUsers.Include(u => u.Pending);
+      dbUsers = dbUsers
+        .Include(u => u.Pending)
+        .Include(u => u.Addition).ThenInclude(ua => ua.Gender);
 
       return await dbUsers.FirstOrDefaultAsync();
     }

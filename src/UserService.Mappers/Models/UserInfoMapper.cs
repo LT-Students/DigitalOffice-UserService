@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           Status = (UserStatus)dbUser.Status,
           IsAdmin = dbUser.IsAdmin,
           IsActive = dbUser.IsActive,
-          pendingInfo = dbUser.Pending is null ? null : new PendingUserInfo()
+          PendingInfo = dbUser.Pending is null ? null : new PendingUserInfo()
             { InvitationCommunicationId = dbUser.Pending.CommunicationId },
           Avatar = avatar,
           Communications = dbUser.Communications
