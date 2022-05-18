@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -70,16 +69,16 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
       if (response.Body)
       {
-        await _bus.Send<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
+        await _bus.Publish<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
           imagesIds: request.AvatarsIds,
           imageSource: ImageSource.User));
 
         await _globalCache.RemoveAsync(request.UserId);
       }
-
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
+      else
+      {
+        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+      }
 
       return response;
     }
