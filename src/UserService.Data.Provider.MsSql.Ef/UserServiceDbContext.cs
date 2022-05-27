@@ -1,5 +1,5 @@
 using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.Kernel.Database;
+using LT.DigitalOffice.Kernel.EFSupport.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef
     public DbSet<DbUser> Users { get; set; }
     public DbSet<DbUserAddition> UsersAdditions { get; set; }
     public DbSet<DbUserCredentials> UsersCredentials { get; set; }
-    public DbSet<DbUserCommunication> UserCommunications { get; set; }
+    public DbSet<DbUserCommunication> UsersCommunications { get; set; }
     public DbSet<DbPendingUser> PendingUsers { get; set; }
     public DbSet<DbUserAvatar> UsersAvatars { get; set; }
     public DbSet<DbGender> Genders { get; set; }

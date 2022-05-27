@@ -8,7 +8,6 @@ using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -34,13 +33,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       return dbUsers.Select(
         u => new UserData(
-          u.Id,
-          u.Avatars?.FirstOrDefault()?.AvatarId,
-          u.FirstName,
-          u.MiddleName,
-          u.LastName,
-          ((UserStatus)u.Status).ToString(),
-          u.IsActive))
+          id: u.Id,
+          imageId: u.Avatars?.FirstOrDefault()?.AvatarId,
+          firstName: u.FirstName,
+          middleName: u.MiddleName,
+          lastName: u.LastName,
+          status: default, //TODO remmove
+          isActive: u.IsActive))
         .ToList();
     }
 

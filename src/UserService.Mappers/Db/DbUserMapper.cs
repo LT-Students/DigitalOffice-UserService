@@ -40,13 +40,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         FirstName = request.FirstName,
         LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
-        Status = (int)request.Status,
         IsAdmin = request.IsAdmin,
         IsActive = false,
         CreatedBy = createdBy,
-        CreatedAtUtc = createdAtUtc,
         Communications = 
-          new List<DbUserCommunication> { _dbUserCommunicationMapper.Map(request.Communication) },
+          new List<DbUserCommunication> { _dbUserCommunicationMapper.Map(request.Communication, userId) },
         Addition = new DbUserAddition
         {
           Id = Guid.NewGuid(),
@@ -80,11 +78,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         FirstName = request.FirstName,
         LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName) ? request.MiddleName : null,
-        Status = (int)UserStatus.WorkFromOffice,
         IsActive = true,
         IsAdmin = true,
         CreatedBy = userId,
-        CreatedAtUtc = createdAtUtc,
         Communications = new List<DbUserCommunication> {
           new DbUserCommunication
           {
@@ -103,10 +99,10 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           GenderId = null,
           About = null,
           DateOfBirth = null,
-          Latitude = null,
-          Longitude = null,
           BusinessHoursFromUtc = null,
           BusinessHoursToUtc = null,
+          Latitude = null,
+          Longitude = null,
           ModifiedBy = userId,
           ModifiedAtUtc = createdAtUtc
         }

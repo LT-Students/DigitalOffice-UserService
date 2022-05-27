@@ -5,7 +5,8 @@ using System.Text;
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Business")]
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Business.UnitTests")]
 [assembly: InternalsVisibleTo("LT.DigitalOffice.UserService.Mappers.UnitTests")]
-namespace LT.DigitalOffice.UserService.Broker.Helpers.Password
+
+namespace LT.DigitalOffice.UserService.Mappers.Helpers.Password
 {
   internal static class UserPasswordHash
   {

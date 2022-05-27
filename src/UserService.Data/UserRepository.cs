@@ -185,8 +185,7 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       patch.ApplyTo(dbUser);
-      dbUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-      dbUser.ModifiedAtUtc = DateTime.UtcNow;
+      dbUser.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       await _provider.SaveAsync();
 
       return true;
@@ -203,10 +202,9 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       dbUser.IsActive = isActive;
-      dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
+      dbUser.CreatedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
         _httpContextAccessor.HttpContext.GetUserId() :
-        null;
-      dbUser.ModifiedAtUtc = DateTime.UtcNow;
+        Guid.Empty;
       dbUser.Credentials.IsActive = dbUser.IsActive;
 
       await _provider.SaveAsync();

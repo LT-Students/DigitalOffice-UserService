@@ -2,7 +2,6 @@
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
-using LT.DigitalOffice.UserService.Broker.Helpers.Password;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -11,7 +10,6 @@ using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -72,10 +70,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           errors);
       }
 
-      string salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
-      string passwordHash = UserPasswordHash.GetPasswordHash(request.Login, salt, request.Password);
-
-      await _userCredentialsRepository.CreateAsync(_mapper.Map(request, salt, passwordHash));
+      await _userCredentialsRepository.CreateAsync(_mapper.Map(request));
       DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
       await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);

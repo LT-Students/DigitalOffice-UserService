@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
   public class DbUserCredentials
   {
-    public const string TableName = "UserCredentials";
+    public const string TableName = "UsersCredentials";
 
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

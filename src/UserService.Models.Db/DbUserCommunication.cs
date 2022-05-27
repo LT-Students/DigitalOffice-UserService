@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.UserService.Models.Db
 {
   public class DbUserCommunication
   {
-    public const string TableName = "UserCommunications";
+    public const string TableName = "UsersCommunications";
 
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
