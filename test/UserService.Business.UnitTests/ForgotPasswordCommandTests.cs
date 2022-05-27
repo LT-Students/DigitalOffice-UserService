@@ -93,7 +93,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         LastName = "Ivanov",
         MiddleName = "Ivanovich",
         PositionId = Guid.NewGuid(),
-        Status = UserStatus.Vacation,
         IsAdmin = false
       };
 
