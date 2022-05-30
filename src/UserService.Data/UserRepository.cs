@@ -204,7 +204,7 @@ namespace LT.DigitalOffice.UserService.Data
       dbUser.IsActive = isActive;
       dbUser.CreatedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
         _httpContextAccessor.HttpContext.GetUserId() :
-        Guid.Empty;
+        userId;
       dbUser.Credentials.IsActive = dbUser.IsActive;
 
       await _provider.SaveAsync();
