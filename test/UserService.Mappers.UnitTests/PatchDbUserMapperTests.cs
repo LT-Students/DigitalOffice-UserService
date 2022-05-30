@@ -69,12 +69,7 @@ namespace LT.DigitalOffice.UserService.Mappers.UnitTests
                     "replace",
                     $"/{nameof(DbUser.LastName)}",
                     "",
-                    "Lastname"),
-                new Operation<DbUser>(
-                    "replace",
-                    $"/{nameof(DbUser.Status)}",
-                    "",
-                    (int)UserStatus.Vacation)
+                    "Lastname")
             }, new CamelCasePropertyNamesContractResolver());
     }
 

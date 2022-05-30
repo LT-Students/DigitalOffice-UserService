@@ -59,9 +59,6 @@ namespace LT.DigitalOffice.UserService.Validation.User
             .SetValidator(imageValidator)
         );
 
-      RuleFor(user => user.Status)
-        .IsInEnum().WithMessage("Wrong status value.");
-
       When(user => user.About is not null, () =>
       {
         RuleFor(user => user.About)

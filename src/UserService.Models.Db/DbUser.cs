@@ -10,18 +10,15 @@ namespace LT.DigitalOffice.UserService.Models.Db
   public class DbUser
   {
     public const string TableName = "Users";
+    public const string HistoryTableName = "UsersHistory";
 
     public Guid Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public int Status { get; set; }
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
-    public DateTime CreatedAtUtc { get; set; }
-    public Guid? ModifiedBy { get; set; }
-    public DateTime? ModifiedAtUtc { get; set; }
 
     [IgnoreParse]
     public DbUserAddition Addition { get; set; }
@@ -46,8 +43,11 @@ namespace LT.DigitalOffice.UserService.Models.Db
   {
     public void Configure(EntityTypeBuilder<DbUser> builder)
     {
-      builder.
-        ToTable(DbUser.TableName);
+      builder
+        .ToTable(DbUser.TableName, du => du.IsTemporal(h =>
+        {
+          h.UseHistoryTable(DbUser.HistoryTableName);
+        }));
 
       builder.
         HasKey(p => p.Id);

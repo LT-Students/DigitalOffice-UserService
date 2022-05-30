@@ -14,10 +14,9 @@ namespace LT.DigitalOffice.UserService.Models.Dto
     [Required]
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public UserStatus Status { get; set; }
     public bool IsAdmin { get; set; } = false;
-    public DateTime? DateOfBirth { get; set; }
     public string About { get; set; }
+    public DateTime? DateOfBirth { get; set; }
     public DateTime? BusinessHoursFromUtc { get; set; }
     public DateTime? BusinessHoursToUtc { get; set; }
     public double? Latitude { get; set; }

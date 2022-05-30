@@ -94,12 +94,12 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserCredentials.Id;
     }
 
-    public async Task<bool> LoginExistAsync(string login)
+    public async Task<bool> DoesLoginExistAsync(string login)
     {
       return await _provider.UsersCredentials.AnyAsync(uc => uc.Login == login);
     }
 
-    public async Task<bool> CredentialsExistAsync(Guid userId)
+    public async Task<bool> DoesExistAsync(Guid userId)
     {
       return await _provider.UsersCredentials.AnyAsync(uc => uc.UserId == userId);
     }

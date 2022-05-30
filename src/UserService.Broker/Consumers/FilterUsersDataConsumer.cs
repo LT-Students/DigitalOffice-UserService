@@ -47,13 +47,13 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       return (dbUsers.Select(
         u => new UserData(
-          u.Id,
-          u.Avatars?.FirstOrDefault(ua => ua.IsCurrentAvatar)?.AvatarId,
-          u.FirstName,
-          u.MiddleName,
-          u.LastName,
-          ((UserStatus)u.Status).ToString(),
-          u.IsActive))
+          id: u.Id,
+          imageId: u.Avatars?.FirstOrDefault(ua => ua.IsCurrentAvatar)?.AvatarId,
+          firstName: u.FirstName,
+          middleName: u.MiddleName,
+          lastName: u.LastName,
+          status: default,//((UserStatus)u.Status).ToString(),
+          isActive: u.IsActive))
         .ToList(),
         totalCount);
     }

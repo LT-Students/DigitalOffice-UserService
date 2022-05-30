@@ -7,6 +7,8 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Kernel.EFSupport.Extensions;
+using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
@@ -54,17 +56,6 @@ namespace LT.DigitalOffice.UserService
     public IConfiguration Configuration { get; }
 
     #region private methods
-
-    private void UpdateDatabase(IApplicationBuilder app)
-    {
-      using var serviceScope = app.ApplicationServices
-        .GetRequiredService<IServiceScopeFactory>()
-        .CreateScope();
-
-      using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
-
-      context.Database.Migrate();
-    }
 
     private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
     {
@@ -215,28 +206,18 @@ namespace LT.DigitalOffice.UserService
           });
       });
 
-      string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-      if (string.IsNullOrEmpty(connStr))
-      {
-        connStr = Configuration.GetConnectionString("SQLConnectionString");
-
-        Log.Information($"SQL connection string from appsettings.json was used. Value '{PasswordHider.Hide(connStr)}'.");
-      }
-      else
-      {
-        Log.Information($"SQL connection string from environment was used. Value '{PasswordHider.Hide(connStr)}'.");
-      }
-
       services.AddHttpContextAccessor();
-
-      services.AddHealthChecks()
-        .AddRabbitMqCheck()
-        .AddSqlServer(connStr);
+      
+      string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<UserServiceDbContext>(options =>
       {
-        options.UseSqlServer(connStr);
+        options.UseSqlServer(dbConnStr);
       });
+
+      services.AddHealthChecks()
+        .AddRabbitMqCheck()
+        .AddSqlServer(dbConnStr);
 
       if (int.TryParse(Environment.GetEnvironmentVariable("MemoryCacheLiveInMinutes"), out int memoryCacheLifetime))
       {
@@ -314,7 +295,7 @@ namespace LT.DigitalOffice.UserService
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
-      UpdateDatabase(app);
+      app.UpdateDatabase<UserServiceDbContext>();
 
       string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
       if (error is not null)

@@ -39,8 +39,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateGenderRequest request)
     {
-      OperationResultResponse<Guid?> response = new();
-
       ValidationResult validationResult = await _validator.ValidateAsync(request);
 
       if (!validationResult.IsValid)
@@ -49,7 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      response.Body = await _genderRepository.CreateAsync(_mapper.Map(request));
+      OperationResultResponse<Guid?> response = new(body: await _genderRepository.CreateAsync(_mapper.Map(request)));
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       return response.Body == default

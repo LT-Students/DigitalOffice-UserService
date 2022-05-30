@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
         .Returns(Task.FromResult(_userCredentialsId));
 
       _mocker
-        .Setup<IDbUserCredentialsMapper, DbUserCredentials>(x => x.Map(It.IsAny<CreateCredentialsRequest>(), It.IsAny<string>(), It.IsAny<string>()))
+        .Setup<IDbUserCredentialsMapper, DbUserCredentials>(x => x.Map(It.IsAny<CreateCredentialsRequest>()))
         .Returns(_dbUserCredentials);
 
       _mocker
@@ -209,7 +209,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
         userCredentialsRepositoryCalls);
 
       _mocker.Verify<IDbUserCredentialsMapper>(
-        x => x.Map(It.IsAny<CreateCredentialsRequest>(), It.IsAny<string>(), It.IsAny<string>()),
+        x => x.Map(It.IsAny<CreateCredentialsRequest>()),
         dbUserCredentialsMapperCalls);
 
       _mocker.Verify<IPendingUserRepository>(

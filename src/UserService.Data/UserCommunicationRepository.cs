@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Data
         return null;
       }
 
-      _provider.UserCommunications.Add(dbUserCommunication);
+      _provider.UsersCommunications.Add(dbUserCommunication);
       await _provider.SaveAsync();
 
       return dbUserCommunication.Id;
@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> EditAsync(Guid communicationId, string newValue)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+      DbUserCommunication dbUserCommunication = await _provider.UsersCommunications
         .FirstOrDefaultAsync(c => c.Id == communicationId);
 
       if (dbUserCommunication is null)
@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> Confirm(Guid communicationId)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+      DbUserCommunication dbUserCommunication = await _provider.UsersCommunications
         .FirstOrDefaultAsync(c => c.Id == communicationId);
 
       if (dbUserCommunication is null)
@@ -74,7 +74,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task SetBaseTypeAsync(Guid communicationId, Guid modifiedBy)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+      DbUserCommunication dbUserCommunication = await _provider.UsersCommunications
         .FirstOrDefaultAsync(uc => uc.Id == communicationId && uc.Type == (int)CommunicationType.Email);
 
       if (dbUserCommunication is not null)
@@ -90,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task RemoveBaseTypeAsync(Guid userId)
     {
-      DbUserCommunication dbUserCommunication = await _provider.UserCommunications
+      DbUserCommunication dbUserCommunication = await _provider.UsersCommunications
         .FirstOrDefaultAsync(c => c.UserId == userId && c.Type == (int)CommunicationType.BaseEmail);
 
       if (dbUserCommunication is not null)
@@ -105,13 +105,13 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<DbUserCommunication> GetAsync(Guid communicationId)
     {
-      return await _provider.UserCommunications
+      return await _provider.UsersCommunications
         .FirstOrDefaultAsync(x => x.Id == communicationId);
     }
 
     public async Task<DbUserCommunication> GetBaseAsync(Guid userId)
     {
-      return await _provider.UserCommunications
+      return await _provider.UsersCommunications
         .FirstOrDefaultAsync(x => x.Type == (int)CommunicationType.BaseEmail && x.UserId == userId);
     }
 
@@ -122,7 +122,7 @@ namespace LT.DigitalOffice.UserService.Data
         return false;
       }
 
-      _provider.UserCommunications.Remove(communication);
+      _provider.UsersCommunications.Remove(communication);
       await _provider.SaveAsync();
 
       return true;
@@ -130,7 +130,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> DoesValueExist(string value)
     {
-      return await _provider.UserCommunications
+      return await _provider.UsersCommunications
         .AnyAsync(uc => uc.Value == value);
     }
   }

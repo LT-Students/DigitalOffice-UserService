@@ -22,6 +22,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
   {
     private readonly IAccessValidator _accessValidator;
     private readonly IPendingUserRepository _repository;
+    private readonly IUserCredentialsRepository _credentialsRepository;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly ITextTemplateParser _parser;
     private readonly IResponseCreator _responseCreator;
@@ -34,7 +35,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
       List<string> errors)
     {
       IGetTextTemplateResponse textTemplate = await _textTemplateService
-        .GetAsync(TemplateType.Greeting, locale, errors);
+        .GetAsync(
+          await _credentialsRepository.DoesExistAsync(dbPendingUser.UserId) ? TemplateType.UserRecovery : TemplateType.Greeting,
+          locale,
+          errors);
 
       if (textTemplate is null)
       {
@@ -55,6 +59,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
     public ResendInvitationCommand(
       IAccessValidator accessValidator,
       IPendingUserRepository repository,
+      IUserCredentialsRepository credentialsRepository,
       IGeneratePasswordCommand generatePassword,
       ITextTemplateParser parser,
       IResponseCreator responseCreator,
@@ -63,6 +68,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
     {
       _accessValidator = accessValidator;
       _repository = repository;
+      _credentialsRepository = credentialsRepository;
       _generatePassword = generatePassword;
       _parser = parser;
       _responseCreator = responseCreator;
@@ -77,7 +83,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      DbPendingUser dbPendingUser = await _repository.GetAsync(userId, true);
+      DbPendingUser dbPendingUser = await _repository.GetAsync(userId: userId, includeUser: true);
 
       if (dbPendingUser is null)
       {
@@ -102,7 +108,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
 
       await _repository.UpdateAsync(dbPendingUser);
 
-      await NotifyAsync(dbPendingUser, "en", response.Errors);
+      await NotifyAsync(dbPendingUser, "ru", response.Errors);
 
       response.Status = response.Errors.Any()
         ? Kernel.Enums.OperationResultStatusType.Failed
