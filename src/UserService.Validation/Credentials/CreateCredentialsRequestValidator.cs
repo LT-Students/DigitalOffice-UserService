@@ -25,9 +25,9 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
 
       RuleFor(request => request)
         .Cascade(CascadeMode.Stop)
-        .MustAsync(async (r, _) => !await credentialsRepository.CredentialsExistAsync(r.UserId))
+        .MustAsync(async (r, _) => !await credentialsRepository.DoesExistAsync(r.UserId))
         .WithMessage("The credentials already exist.")
-        .MustAsync(async (r, _) => !await credentialsRepository.LoginExistAsync(r.Login))
+        .MustAsync(async (r, _) => !await credentialsRepository.DoesLoginExistAsync(r.Login))
         .WithMessage("The login already exist.")
         .MustAsync(async (r, _) =>
           (await repository.GetAsync(r.UserId))?.Password == r.Password)
