@@ -13,7 +13,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
         : new DepartmentInfo
         {
           Id = department.Id,
-          Name = department.Name
+          Name = department.Name,
+          ShortName = department.ShortName
         };
     }
   }
