@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       DbUser dbUser,
       CompanyUserInfo companyUser,
       ImageInfo avatar,
-      DepartmentInfo department,
+      DepartmentUserInfo departmentUser,
       List<EducationInfo> educations,
       List<ImageInfo> images,
       OfficeInfo office,
@@ -46,7 +46,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
             BusinessHoursToUtc = dbUser.Addition.BusinessHoursToUtc
           },
           CompanyUser = companyUser,
-          Department = department,
+          DepartmentUser = departmentUser,
           Office = office,
           Position = position,
           Role = role,

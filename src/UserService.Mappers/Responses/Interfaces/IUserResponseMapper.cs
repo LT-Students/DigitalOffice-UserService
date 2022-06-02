@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
       DbUser dbUser,
       CompanyUserInfo companyUser,
       ImageInfo avatar,
-      DepartmentInfo department,
+      DepartmentUserInfo departmentUser,
       List<EducationInfo> educations,
       List<ImageInfo> images,
       OfficeInfo office,
