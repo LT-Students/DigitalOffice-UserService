@@ -18,7 +18,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 
     public DepartmentUserInfo Map(DepartmentData department)
     {
-      DepartmentUserData user = department.Users.FirstOrDefault(user => user.UserId == _httpContextAccessor.HttpContext.GetUserId());
+      DepartmentUserData user = department?.Users?.FirstOrDefault(user => user.UserId == _httpContextAccessor.HttpContext.GetUserId());
 
       return department is null || user is null
         ? default
