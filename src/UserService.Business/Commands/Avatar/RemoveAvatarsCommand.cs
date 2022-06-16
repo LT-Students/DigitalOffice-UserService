@@ -5,13 +5,11 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
+using LT.DigitalOffice.UserService.Broker.Publishes.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Validation.Image.Interfaces;
-using MassTransit;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Net;
@@ -27,7 +25,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
-    private readonly IBus _bus;
+    private readonly IPublish _publish;
 
     public RemoveAvatarsCommand(
       IUserAvatarRepository repository,
@@ -36,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
       IGlobalCacheRepository globalCache,
-      IBus bus)
+      IPublish publish)
     {
       _repository = repository;
       _httpContextAccessor = httpContextAccessor;
@@ -44,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
-      _bus = bus;
+      _publish = publish;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(RemoveAvatarsRequest request)
@@ -69,10 +67,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
 
       if (response.Body)
       {
-        await _bus.Publish<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
-          imagesIds: request.AvatarsIds,
-          imageSource: ImageSource.User));
-
+        await _publish.RemoveImagesAsync(imagesIds: request.AvatarsIds);
         await _globalCache.RemoveAsync(request.UserId);
       }
       else
