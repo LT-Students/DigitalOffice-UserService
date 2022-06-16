@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
 using LT.DigitalOffice.Kernel.EndpointSupport.Broker.Configurations;
-using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -89,7 +88,7 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
     //Image
 
-    [AutoInjectRequest(typeof(ICreateImagesPublish))]
+    [AutoInjectRequest(typeof(ICreateImagesRequest))]
     public string CreateImagesEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetImagesRequest))]

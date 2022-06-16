@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Image;
 using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
@@ -23,14 +24,14 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
   {
     private readonly ILogger<ImageService> _logger;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
-    private readonly IRequestClient<ICreateImagesPublish> _rcCreateImages;
+    private readonly IRequestClient<ICreateImagesRequest> _rcCreateImages;
     private readonly IImageInfoMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ImageService(
       ILogger<ImageService> logger,
       IRequestClient<IGetImagesRequest> rcGetImages,
-      IRequestClient<ICreateImagesPublish> rcCreateImages,
+      IRequestClient<ICreateImagesRequest> rcCreateImages,
       IImageInfoMapper mapper,
       IHttpContextAccessor httpContextAccessor)
     {
@@ -58,12 +59,11 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     {
       return request is null
         ? null
-        : (await RequestHandler
-          .ProcessRequest<ICreateImagesPublish, ICreateImagesResponse>(
-            _rcCreateImages,
-            ICreateImagesPublish.CreateObj(
-              new() { new CreateImageData(request.Name, request.Content, request.Extension, _httpContextAccessor.HttpContext.GetUserId()) },
-              ImageSource.User),
+        : (await _rcCreateImages.ProcessRequest<ICreateImagesRequest, ICreateImagesResponse>(
+            ICreateImagesRequest.CreateObj(
+              new() { new CreateImageData(request.Name, request.Content, request.Extension) },
+              ImageSource.User,
+              _httpContextAccessor.HttpContext.GetUserId()),
             errors,
             _logger))
           ?.ImagesIds?.FirstOrDefault();
