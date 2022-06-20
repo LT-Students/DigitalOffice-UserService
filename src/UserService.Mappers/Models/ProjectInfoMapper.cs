@@ -21,8 +21,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
             ? default
             : new ProjectUserInfo()
             {
-              IsActive = projectUser.IsActive,
-              CreatedAtUtc = projectUser.CreatedAtUtc
+              IsActive = projectUser.IsActive
             }
         };
     }
