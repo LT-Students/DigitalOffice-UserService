@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Responses;
+﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Pending.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using System;
@@ -18,11 +17,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid userId)
     {
-      return new()
-      {
-        Body = await _repository.DoesExistAsync(userId),
-        Status = OperationResultStatusType.FullSuccess
-      };
+      return new OperationResultResponse<bool>(
+        body: await _repository.DoesExistAsync(userId));
     }
   }
 }

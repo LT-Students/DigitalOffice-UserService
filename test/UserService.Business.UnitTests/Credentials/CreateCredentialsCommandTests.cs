@@ -54,7 +54,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Credentials
 
       _badRequestResponse = new(
         body: default,
-        status: OperationResultStatusType.Failed,
         errors: new List<string>() { errorMessage });
     }
 

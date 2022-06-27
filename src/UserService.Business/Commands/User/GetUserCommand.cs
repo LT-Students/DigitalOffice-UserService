@@ -195,10 +195,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         _roleMapper.Map(roles?.FirstOrDefault()),
         skills?.Select(_skillMapper.Map).ToList());
 
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
-
       return response;
     }
   }

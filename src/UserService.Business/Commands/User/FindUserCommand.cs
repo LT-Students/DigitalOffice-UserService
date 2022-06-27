@@ -1,4 +1,3 @@
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -68,9 +67,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         )));
 
       response.TotalCount = totalCount;
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
 
       return response;
     }

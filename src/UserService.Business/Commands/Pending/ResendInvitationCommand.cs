@@ -110,11 +110,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Pending
 
       await NotifyAsync(dbPendingUser, "ru", response.Errors);
 
-      response.Status = response.Errors.Any()
-        ? Kernel.Enums.OperationResultStatusType.Failed
-        : Kernel.Enums.OperationResultStatusType.PartialSuccess;
-
-      response.Body = true;
+      response.Body = !response.Errors.Any();
 
       return response;
     }

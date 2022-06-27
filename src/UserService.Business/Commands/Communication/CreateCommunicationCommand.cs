@@ -105,18 +105,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<Guid?> response = new();
-
       DbUserCommunication dbUserCommunication = _mapper.Map(request);
 
-      response.Body = await _repository.CreateAsync(dbUserCommunication);
+      OperationResultResponse<Guid?> response = new(
+        await _repository.CreateAsync(dbUserCommunication));
 
       if (response.Body is null)
       {
         return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
       }
-
-      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       if (request.Type == CommunicationType.Email)
       {
@@ -127,9 +124,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
         await NotifyAsync(dbUserCommunication, secret, "ru", response.Errors);
       }
 
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       return response;
     }

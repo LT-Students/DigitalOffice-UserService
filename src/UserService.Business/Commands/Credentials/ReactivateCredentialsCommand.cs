@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
@@ -59,7 +58,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       if (tokenResponse is null)
       {
         response.Errors.Add("Something is wrong, please try again later.");
-        response.Status = OperationResultStatusType.Failed;
 
         return response;
       }

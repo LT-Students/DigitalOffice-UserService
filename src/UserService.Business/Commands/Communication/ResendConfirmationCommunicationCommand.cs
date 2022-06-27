@@ -104,9 +104,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       await NotifyAsync(dbUserCommunication, secret, "ru", response.Errors);
 
       response.Body = response.Errors.Any() ? false : true;
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.Failed
-        : OperationResultStatusType.FullSuccess;
 
       return response;
     }

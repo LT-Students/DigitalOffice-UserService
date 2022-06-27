@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -44,17 +43,17 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      OperationResultResponse<bool> response = new();
+      OperationResultResponse<bool> response = new(
+        body: await _avatarRepository.UpdateCurrentAvatarAsync(userId, imageId));
 
-      response.Body = await _avatarRepository.UpdateCurrentAvatarAsync(userId, imageId);
-      response.Status = OperationResultStatusType.FullSuccess;
-
-      if (!response.Body)
+      if (response.Body)
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        await _globalCache.RemoveAsync(userId);
       }
-
-      await _globalCache.RemoveAsync(userId);
+      else
+      {
+        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+      }
 
       return response;
     }

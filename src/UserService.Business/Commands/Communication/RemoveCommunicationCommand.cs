@@ -52,13 +52,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
           new List<string>() { "Base email cannot be removed." });
       }
 
-      bool result = await _repository.RemoveAsync(dbUserCommunication);
-
-      return new OperationResultResponse<bool>
-      {
-        Status = result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
-        Body = result
-      };
+      return new OperationResultResponse<bool>(
+        body: await _repository.RemoveAsync(dbUserCommunication));
     }
   }
 }

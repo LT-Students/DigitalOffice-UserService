@@ -39,10 +39,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
         response.Body = _mapper.Map(userId, await _imageService.GetImagesAsync(dbImagesIds, response.Errors));
       }
 
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.PartialSuccess
-        : OperationResultStatusType.FullSuccess;
-
       return response;
     }
   }

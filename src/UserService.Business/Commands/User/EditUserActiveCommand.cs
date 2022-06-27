@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
@@ -148,10 +147,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           password,
           "ru",
           response.Errors);
-
-        response.Status = response.Errors.Any()
-          ? OperationResultStatusType.PartialSuccess
-          : OperationResultStatusType.FullSuccess;
       }
 
       return response;

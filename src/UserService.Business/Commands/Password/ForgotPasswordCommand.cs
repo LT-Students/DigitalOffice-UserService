@@ -132,10 +132,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       response.Body = response.Errors.Any() ? null : email;
 
-      response.Status = response.Errors.Any()
-        ? OperationResultStatusType.Failed
-        : OperationResultStatusType.FullSuccess;
-
       return response;
     }
   }

@@ -141,7 +141,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
       _expectedOperationResultResponse = new OperationResultResponse<bool>()
       {
         Body = true,
-        Status = OperationResultStatusType.FullSuccess,
         Errors = new List<string>()
       };
 
