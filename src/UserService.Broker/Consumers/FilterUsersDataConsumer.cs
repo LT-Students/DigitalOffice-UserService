@@ -8,7 +8,6 @@ using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -52,7 +51,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           firstName: u.FirstName,
           middleName: u.MiddleName,
           lastName: u.LastName,
-          status: default,//((UserStatus)u.Status).ToString(),
           isActive: u.IsActive))
         .ToList(),
         totalCount);

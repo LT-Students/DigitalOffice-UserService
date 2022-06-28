@@ -38,7 +38,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           firstName: u.FirstName,
           middleName: u.MiddleName,
           lastName: u.LastName,
-          status: default, //TODO remmove
           isActive: u.IsActive))
         .ToList();
     }

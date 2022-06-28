@@ -85,8 +85,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           new DbUserCommunication
           {
             Id = Guid.NewGuid(),
-            Type = (int)CommunicationType.Email,
+            Type = (int)CommunicationType.BaseEmail,
             Value = request.Email,
+            IsConfirmed = true,
             UserId = userId,
             CreatedBy = userId,
             CreatedAtUtc = createdAtUtc
