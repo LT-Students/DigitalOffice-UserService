@@ -30,10 +30,17 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       _globalCache = globalCache;
     }
 
-    public async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors)
+    public async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors, bool includeUsers = true, bool? acsendingSort = true)
     {
+      List<object> additionalArgs = new() { includeUsers };
+
+      if (acsendingSort.HasValue)
+      {
+        additionalArgs.Add(acsendingSort.Value);
+      }
+
       (List<ProjectData> projects, int _) = await _globalCache
-        .GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode());
+        .GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode(additionalArgs.ToArray()));
 
       if (projects is not null)
       {
@@ -45,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       {
         projects = (await RequestHandler.ProcessRequest<IGetProjectsRequest, IGetProjectsResponse>(
             _rcGetProjects,
-            IGetProjectsRequest.CreateObj(userId: userId, includeUsers: true),
+            IGetProjectsRequest.CreateObj(userId: userId, includeUsers: includeUsers, ascendingSort: acsendingSort),
             errors,
             _logger))
           ?.Projects;
