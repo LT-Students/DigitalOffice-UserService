@@ -52,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       {
         projects = (await RequestHandler.ProcessRequest<IGetProjectsRequest, IGetProjectsResponse>(
             _rcGetProjects,
-            IGetProjectsRequest.CreateObj(userId: userId, includeUsers: includeUsers, ascendingSort: acsendingSort),
+            IGetProjectsRequest.CreateObj(userId: userId, includeUsers: includeUsers, ascendingSort: ascendingSort),
             errors,
             _logger))
           ?.Projects;
