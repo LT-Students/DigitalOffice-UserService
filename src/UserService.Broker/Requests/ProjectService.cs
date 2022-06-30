@@ -30,13 +30,13 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       _globalCache = globalCache;
     }
 
-    public async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors, bool includeUsers = true, bool? acsendingSort = true)
+    public async Task<List<ProjectData>> GetProjectsAsync(Guid userId, List<string> errors, bool includeUsers = true, bool? ascendingSort = true)
     {
       List<object> additionalArgs = new() { includeUsers };
 
-      if (acsendingSort.HasValue)
+      if (ascendingSort.HasValue)
       {
-        additionalArgs.Add(acsendingSort.Value);
+        additionalArgs.Add(ascendingSort.Value);
       }
 
       (List<ProjectData> projects, int _) = await _globalCache
