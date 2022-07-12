@@ -125,12 +125,12 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUser.Id;
     }
 
-    public async Task<DbUser> GetAsync(Guid userId)
-    {
-      return await _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    public Task<DbUser> GetAsync(Guid userId)
+    { 
+      return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0)
+    public Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0)
     {
       if (filter is null)
       {
@@ -143,7 +143,7 @@ namespace LT.DigitalOffice.UserService.Data
         .Include(u => u.Pending)
         .Include(u => u.Addition).ThenInclude(ua => ua.Gender);
 
-      return await dbUsers.FirstOrDefaultAsync();
+      return dbUsers.FirstOrDefaultAsync();
     }
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)

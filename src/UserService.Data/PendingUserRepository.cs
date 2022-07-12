@@ -20,29 +20,28 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task CreateAsync(DbPendingUser dbPendingUser)
+    public Task CreateAsync(DbPendingUser dbPendingUser)
     {
       _provider.PendingUsers.Add(dbPendingUser);
-      await _provider.SaveAsync();
+      return _provider.SaveAsync();
     }
 
-    public async Task<DbPendingUser> GetAsync(Guid userId, bool includeUser)
+    public Task<DbPendingUser> GetAsync(Guid userId, bool includeUser)
     {
-      IQueryable<DbPendingUser> dbPendingUser = _provider.PendingUsers.AsQueryable();
+      IQueryable<DbPendingUser> query = _provider.PendingUsers.AsQueryable();
 
       if (includeUser)
       {
-        dbPendingUser = dbPendingUser.Include(pu => pu.User).ThenInclude(u => u.Communications);
+        query = query.Include(pu => pu.User).ThenInclude(u => u.Communications);
       }
 
-      return await dbPendingUser
-        .FirstOrDefaultAsync(pu => pu.UserId == userId);
+      return query.FirstOrDefaultAsync(pu => pu.UserId == userId);
     }
 
-    public async Task UpdateAsync(DbPendingUser dbPendingUser)
+    public Task UpdateAsync(DbPendingUser dbPendingUser)
     {
       _provider.PendingUsers.Update(dbPendingUser);
-      await _provider.SaveAsync();
+      return _provider.SaveAsync();
     }
 
     public async Task<(List<DbPendingUser> dbPendingUsers, int totalCount)> FindAsync(
@@ -85,9 +84,9 @@ namespace LT.DigitalOffice.UserService.Data
       return dbPendingUser;
     }
 
-    public async Task<bool> DoesExistAsync(Guid userId)
+    public Task<bool> DoesExistAsync(Guid userId)
     {
-      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
+      return _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
     }
   }
 }

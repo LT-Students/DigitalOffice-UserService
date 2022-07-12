@@ -27,25 +27,28 @@ namespace LT.DigitalOffice.UserService.Data
       return gender.Id;
     }
 
-    public async Task<bool> DoesGenderAlreadyExistAsync(string genderName)
+    public Task<bool> DoesGenderAlreadyExistAsync(string genderName)
     {
-      return await _provider.Genders.AnyAsync(s => s.Name.ToLower() == genderName.ToLower());
+      return _provider.Genders.AnyAsync(s => s.Name.ToLower() == genderName.ToLower());
     }
 
     public async Task<(List<DbGender> dbGenders, int totalCount)> FindGendersAsync(FindGendersFilter filter)
     {
-      if (filter == null)
+      if (filter is null)
       {
         return (null, default);
       }
 
-      IQueryable<DbGender> dbGenders = _provider.Genders
-        .Where(g => g.Name.Contains(filter.Name))
-        .AsQueryable();
+      IQueryable<DbGender> query = _provider.Genders.AsQueryable();
+
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        query = query.Where(g => g.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+      }
 
       return ( 
-        await dbGenders.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await dbGenders.CountAsync());
+        await query.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+        await query.CountAsync());
     }
   }
 }

@@ -49,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       Guid requestSenderId = _httpContextAccessor.HttpContext.GetUserId();
 
-      bool isAdmin = await _accessValidator.IsAdminAsync(userId);
+      bool isAdmin = await _accessValidator.IsAdminAsync(requestSenderId);
       bool isAddEditRemoveUsers = await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers);
 
       Operation<EditUserRequest> isAdminOperation = patch.Operations.FirstOrDefault(
@@ -58,7 +58,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       Operation<EditUserRequest> isGenderOperation = patch.Operations.FirstOrDefault(
         o => o.path.EndsWith(nameof(EditUserRequest.GenderId), StringComparison.OrdinalIgnoreCase));
 
-      if ((!isAddEditRemoveUsers && userId != requestSenderId && !isAdmin) ||
+      if ((userId != requestSenderId && !isAddEditRemoveUsers && !isAdmin) ||
         (isAdminOperation is not null && !isAdmin) ||
         (isGenderOperation is not null && userId != requestSenderId))
       {

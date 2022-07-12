@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<Guid?> CreateAsync(DbUserAvatar dbUserAvatar)
     {
-      if (dbUserAvatar == null)
+      if (dbUserAvatar is null)
       {
         return null;
       }
@@ -42,28 +42,28 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUserAvatar.AvatarId;
     }
 
-    public async Task<List<Guid>> GetAvatarsByUserId(Guid avatarId)
+    public Task<List<Guid>> GetAvatarsByUserId(Guid avatarId)
     {
-      return await _provider.UsersAvatars
+      return _provider.UsersAvatars
         .Where(a => a.AvatarId == avatarId)
         .Select(a => a.AvatarId)
         .ToListAsync();
     }
 
-    public async Task<List<DbUserAvatar>> GetAsync(List<Guid> imagesIds)
+    public Task<List<DbUserAvatar>> GetAsync(List<Guid> imagesIds)
     {
-      if (imagesIds == null || !imagesIds.Any())
+      if (imagesIds is null || !imagesIds.Any())
       {
         return null;
       }
 
-      return await _provider.UsersAvatars
+      return _provider.UsersAvatars
         .Where(a => imagesIds.Contains(a.AvatarId)).ToListAsync();
     }
 
     public async Task<bool> UpdateCurrentAvatarAsync(Guid userId, Guid avatarId)
     {
-      DbUserAvatar dbUserAvatar = _provider.UsersAvatars.FirstOrDefault(x => x.AvatarId == avatarId);
+      DbUserAvatar dbUserAvatar = await _provider.UsersAvatars.FirstOrDefaultAsync(x => x.AvatarId == avatarId);
 
       if (dbUserAvatar is null || dbUserAvatar.UserId != userId)
       {
@@ -86,7 +86,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<bool> RemoveAsync(List<Guid> imagesIds)
     {
-      if (imagesIds == null || !imagesIds.Any())
+      if (imagesIds is null || !imagesIds.Any())
       {
         return false;
       }

@@ -103,15 +103,15 @@ namespace LT.DigitalOffice.UserService.Data
       }
     }
 
-    public async Task<DbUserCommunication> GetAsync(Guid communicationId)
+    public Task<DbUserCommunication> GetAsync(Guid communicationId)
     {
-      return await _provider.UsersCommunications
+      return _provider.UsersCommunications
         .FirstOrDefaultAsync(x => x.Id == communicationId);
     }
 
-    public async Task<DbUserCommunication> GetBaseAsync(Guid userId)
+    public Task<DbUserCommunication> GetBaseAsync(Guid userId)
     {
-      return await _provider.UsersCommunications
+      return _provider.UsersCommunications
         .FirstOrDefaultAsync(x => x.Type == (int)CommunicationType.BaseEmail && x.UserId == userId);
     }
 
@@ -128,9 +128,9 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<bool> DoesValueExist(string value)
+    public Task<bool> DoesValueExist(string value)
     {
-      return await _provider.UsersCommunications
+      return _provider.UsersCommunications
         .AnyAsync(uc => uc.Value == value);
     }
   }
