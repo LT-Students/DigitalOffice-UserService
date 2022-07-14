@@ -170,8 +170,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? _skillService.GetSkillsAsync(dbUser.Id, response.Errors)
         : Task.FromResult(null as List<UserSkillData>);
 
-      await Task.WhenAll(educationsTask, companiesTask, departmentsTask, imagesTask, officesTask, positionsTask, projectsTask, rolesTask, skillsTask);
-
       List<EducationData> educations = await educationsTask;
       List<CompanyData> companies = await companiesTask;
       List<DepartmentData> departments = await departmentsTask;

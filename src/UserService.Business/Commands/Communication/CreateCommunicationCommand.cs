@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
@@ -32,7 +31,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
   {
     private readonly ICreateCommunicationRequestValidator _validator;
     private readonly IDbUserCommunicationMapper _mapper;
-    private readonly IUserCommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _communicationRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
@@ -48,8 +48,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       string locale,
       List<string> errors)
     {
-      IGetTextTemplateResponse textTemplate = await _textTemplateService
+      Task<IGetTextTemplateResponse> textTemplateTask = _textTemplateService
         .GetAsync(TemplateType.ConfirmСommunication, locale, errors);
+
+      Task<DbUser> dbUserTask = _userRepository.GetAsync(dbUserCommunication.UserId);
+
+      IGetTextTemplateResponse textTemplate = await textTemplateTask;
+      DbUser dbUser = await dbUserTask;
 
       if (textTemplate is null)
       {
@@ -57,8 +62,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       string parsedText = _parser.Parse(
-        new Dictionary<string, string> { { "Secret", secret } },
-        _parser.ParseModel<DbUserCommunication>(dbUserCommunication, textTemplate.Text));
+        new Dictionary<string, string> { { "Secret", secret }, { "CommunicationId", dbUserCommunication.Id.ToString() } },
+        _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
 
       await _emailService.SendAsync(dbUserCommunication.Value, textTemplate.Subject, parsedText, errors);
     }
@@ -66,8 +71,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     public CreateCommunicationCommand(
       ICreateCommunicationRequestValidator validator,
       IDbUserCommunicationMapper mapper,
-      IUserCommunicationRepository repository,
-      IAccessValidator accessValidator,
+      IUserCommunicationRepository communicationRepository,
+      IUserRepository userRepository,
+    IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
       IMemoryCache cache,
@@ -78,7 +84,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
     {
       _validator = validator;
       _mapper = mapper;
-      _repository = repository;
+      _communicationRepository = communicationRepository;
+      _userRepository = userRepository;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
@@ -108,7 +115,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       DbUserCommunication dbUserCommunication = _mapper.Map(request);
 
       OperationResultResponse<Guid?> response = new(
-        await _repository.CreateAsync(dbUserCommunication));
+        await _communicationRepository.CreateAsync(dbUserCommunication));
 
       if (response.Body is null)
       {
