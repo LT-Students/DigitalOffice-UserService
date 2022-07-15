@@ -24,7 +24,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class ResendConfirmationCommunicationCommand : IResendConfirmationCommunicationCommand
   {
-    private readonly IUserCommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _communicationRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IMemoryCache _cache;
@@ -35,10 +36,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
     private async Task NotifyAsync(DbUserCommunication dbUserCommunication, string secret, string locale, List<string> errors)
     {
-      IGetTextTemplateResponse textTemplate = await _textTemplateService.GetAsync(
-        templateType: TemplateType.ConfirmСommunication,
-        locale: locale,
-        errors: errors);
+
+      Task<IGetTextTemplateResponse> textTemplateTask = _textTemplateService
+        .GetAsync(TemplateType.ConfirmСommunication, locale, errors);
+
+      Task<DbUser> dbUserTask = _userRepository.GetAsync(dbUserCommunication.UserId);
+
+      IGetTextTemplateResponse textTemplate = await textTemplateTask;
+      DbUser dbUser = await dbUserTask;
 
       if (textTemplate is null)
       {
@@ -46,18 +51,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       string parsedText = _parser.Parse(
-        new Dictionary<string, string> { { "Secret", secret } },
-        _parser.ParseModel<DbUserCommunication>(dbUserCommunication, textTemplate.Text));
+        new Dictionary<string, string> { { "Secret", secret }, { "CommunicationId", dbUserCommunication.Id.ToString() } },
+        _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
 
-      await _emailService.SendAsync(
-        dbUserCommunication.Value,
-        textTemplate.Subject,
-        parsedText,
-        errors);
+      await _emailService.SendAsync(dbUserCommunication.Value, textTemplate.Subject, parsedText, errors);
     }
 
     public ResendConfirmationCommunicationCommand(
-      IUserCommunicationRepository repository,
+      IUserCommunicationRepository communicationRepository,
+      IUserRepository userRepository,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
       IMemoryCache cache,
@@ -66,7 +68,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       IEmailService emailService,
       ITextTemplateParser parser)
     {
-      _repository = repository;
+      _communicationRepository = communicationRepository;
+      _userRepository = userRepository;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _cache = cache;
@@ -78,7 +81,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid communicationId)
     {
-      DbUserCommunication dbUserCommunication = await _repository.GetAsync(communicationId);
+      DbUserCommunication dbUserCommunication = await _communicationRepository.GetAsync(communicationId);
 
       if (dbUserCommunication is null)
       {
