@@ -1,24 +1,16 @@
-﻿using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Models.Broker.Models.Department;
+﻿using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using Microsoft.AspNetCore.Http;
+using System;
 using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class DepartmentUserInfoMapper : IDepartmentInfoMapper
   {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public DepartmentUserInfoMapper(IHttpContextAccessor httpContextAccessor)
+    public DepartmentUserInfo Map(Guid userId, DepartmentData department)
     {
-      _httpContextAccessor = httpContextAccessor;
-    }
-
-    public DepartmentUserInfo Map(DepartmentData department)
-    {
-      DepartmentUserData user = department?.Users?.FirstOrDefault(user => user.UserId == _httpContextAccessor.HttpContext.GetUserId());
+      DepartmentUserData user = department?.Users?.FirstOrDefault(user => user.UserId == userId);
 
       return department is null || user is null
         ? default
