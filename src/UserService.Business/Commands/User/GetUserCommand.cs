@@ -1,6 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -184,7 +183,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         dbUser,
         _companyUserMapper.Map(companies?.FirstOrDefault(), companies?.FirstOrDefault()?.Users.FirstOrDefault(cu => cu.UserId == dbUser.Id)),
         images?.FirstOrDefault(i => i.Id == dbUser.Avatars.FirstOrDefault(ua => ua.IsCurrentAvatar).AvatarId),
-        _departmentMapper.Map(departments?.FirstOrDefault()),
+        _departmentMapper.Map(dbUser.Id, departments?.FirstOrDefault()),
         educations?.Select(_educationMapper.Map).ToList(),
         images,
         _officeMapper.Map(offices?.FirstOrDefault()),
