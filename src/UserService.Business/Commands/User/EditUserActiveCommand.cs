@@ -91,7 +91,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public async Task<OperationResultResponse<bool>> ExecuteAsync(EditUserActiveRequest request)
     {
       DbUser dbUser = await _userRepository
-        .GetAsync(new GetUserFilter() { UserId = request.UserId, IncludeCommunications = true }, CommunicationVisibleTo.Admin);
+        .GetAsync(new GetUserFilter() { UserId = request.UserId, IncludeCommunications = true });
 
       DbUser dbRequestSender = await _userRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId());
 

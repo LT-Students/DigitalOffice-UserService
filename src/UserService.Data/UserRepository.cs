@@ -25,7 +25,6 @@ namespace LT.DigitalOffice.UserService.Data
 
     private IQueryable<DbUser> CreateGetPredicates(
       GetUserFilter filter,
-      CommunicationVisibleTo accessLevel,
       IQueryable<DbUser> dbUsers)
     {
       if (filter.UserId.HasValue)
@@ -39,15 +38,10 @@ namespace LT.DigitalOffice.UserService.Data
           .Where(u => u.Credentials.Login == filter.Login);
       }
 
-      if (filter.IncludeCommunications)
+      if (filter.IncludeCommunications && !string.IsNullOrEmpty(filter.Email?.Trim()))
       {
-        dbUsers = dbUsers.Include(u => u.Communications.Where(c => c.VisibleTo <= (int)accessLevel));
-
-        if (!string.IsNullOrEmpty(filter.Email?.Trim()))
-        {
-          dbUsers = dbUsers
-            .Where(u => u.Communications.Any(c => c.IsConfirmed && c.Value == filter.Email));
-        }
+        dbUsers = dbUsers
+          .Where(u => u.Communications.Any(c => c.IsConfirmed && c.Value == filter.Email));
       }
 
       if (filter.IncludeAvatars)
@@ -130,14 +124,14 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0)
+    public Task<DbUser> GetAsync(GetUserFilter filter)
     {
       if (filter is null)
       {
         return null;
       }
 
-      IQueryable<DbUser> dbUsers = CreateGetPredicates(filter, accessLevel, _provider.Users.AsQueryable());
+      IQueryable<DbUser> dbUsers = CreateGetPredicates(filter, _provider.Users.AsQueryable());
 
       dbUsers = dbUsers
         .Include(u => u.Pending)

@@ -10,6 +10,5 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Communication
     public CommunicationType Type { get; set; }
     [Required]
     public string Value { get; set; }
-    public CommunicationVisibleTo VisibleTo { get; set; }
   }
 }

@@ -119,14 +119,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       Guid requesterId = _httpContextAccessor.HttpContext.GetUserId();
 
-      DbUser dbUser = await _repository.GetAsync(
-        filter: filter,
-        accessLevel: filter.IncludeCommunications
-          && (requesterId == filter.UserId
-            || await _accessValidator.HasRightsAsync(userId: requesterId, includeIsAdminCheck: false, Rights.AddEditRemoveUsers)
-            || (await _repository.GetAsync(requesterId)).IsAdmin)
-        ? CommunicationVisibleTo.Admin
-        : default);
+      DbUser dbUser = await _repository.GetAsync(filter: filter);
 
       if (dbUser is null)
       {

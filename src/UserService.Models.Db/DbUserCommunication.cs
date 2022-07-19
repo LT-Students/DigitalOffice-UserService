@@ -13,7 +13,6 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public int Type { get; set; }
     public string Value { get; set; }
     public bool IsConfirmed { get; set; }
-    public int VisibleTo { get; set; }
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
