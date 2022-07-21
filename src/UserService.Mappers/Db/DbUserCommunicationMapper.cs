@@ -26,7 +26,6 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
           UserId = request.UserId.HasValue ? request.UserId.Value : userId.Value,
           Type = (int)request.Type,
           Value = request.Value,
-          VisibleTo = (int)request.VisibleTo,
           CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
           CreatedAtUtc = DateTime.UtcNow,
         };

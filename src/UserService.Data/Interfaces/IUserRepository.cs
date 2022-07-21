@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IUserRepository
   {
-    Task<DbUser> GetAsync(GetUserFilter filter, CommunicationVisibleTo accessLevel = 0);
+    Task<DbUser> GetAsync(GetUserFilter filter);
 
     Task<DbUser> GetAsync(Guid userId);
 
