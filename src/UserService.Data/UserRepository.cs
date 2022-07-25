@@ -3,7 +3,6 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using Microsoft.AspNetCore.Http;
@@ -25,35 +24,34 @@ namespace LT.DigitalOffice.UserService.Data
 
     private IQueryable<DbUser> CreateGetPredicates(
       GetUserFilter filter,
-      IQueryable<DbUser> dbUsers)
+      IQueryable<DbUser> query)
     {
       if (filter.UserId.HasValue)
       {
-        dbUsers = dbUsers.Where(u => u.Id == filter.UserId);
+        query = query.Where(u => u.Id == filter.UserId);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
-        dbUsers = dbUsers
+        query = query
           .Include(u => u.Credentials)
           .Where(u => u.Credentials.Login == filter.Login);
       }
 
-      if (filter.IncludeCommunications && !string.IsNullOrEmpty(filter.Email?.Trim()))
+      if (filter.IncludeCommunications)
       {
-        dbUsers = dbUsers
-          .Where(u => u.Communications.Any(c => c.IsConfirmed && c.Value == filter.Email));
+        query = query.Include(u => u.Communications);
       }
 
       if (filter.IncludeAvatars)
       {
-        dbUsers = dbUsers.Include(u => u.Avatars);
+        query = query.Include(u => u.Avatars);
       }
       else if (filter.IncludeCurrentAvatar)
       {
-        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
+        query = query.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
-      return dbUsers;
+      return query;
     }
 
     private IQueryable<DbUser> CreateFindPredicates(
@@ -120,7 +118,7 @@ namespace LT.DigitalOffice.UserService.Data
     }
 
     public Task<DbUser> GetAsync(Guid userId)
-    { 
+    {
       return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
