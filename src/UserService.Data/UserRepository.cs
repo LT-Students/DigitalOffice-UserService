@@ -26,17 +26,6 @@ namespace LT.DigitalOffice.UserService.Data
       GetUserFilter filter,
       IQueryable<DbUser> query)
     {
-      if (filter.UserId.HasValue)
-      {
-        query = query.Where(u => u.Id == filter.UserId);
-      }
-      else if (!string.IsNullOrEmpty(filter.Login))
-      {
-        query = query
-          .Include(u => u.Credentials)
-          .Where(u => u.Credentials.Login == filter.Login);
-      }
-
       if (filter.IncludeCommunications)
       {
         query = query.Include(u => u.Communications);
@@ -50,6 +39,10 @@ namespace LT.DigitalOffice.UserService.Data
       {
         query = query.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
+
+      query = query
+        .Include(u => u.Pending)
+        .Include(u => u.Addition).ThenInclude(ua => ua.Gender);
 
       return query;
     }
@@ -122,20 +115,35 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public Task<DbUser> GetAsync(GetUserFilter filter)
+    public async Task<DbUser> GetAsync(GetUserFilter filter)
     {
       if (filter is null)
       {
         return null;
       }
 
-      IQueryable<DbUser> dbUsers = CreateGetPredicates(filter, _provider.Users.AsQueryable());
+      IQueryable<DbUser> query = CreateGetPredicates(filter, _provider.Users.AsQueryable());
 
-      dbUsers = dbUsers
-        .Include(u => u.Pending)
-        .Include(u => u.Addition).ThenInclude(ua => ua.Gender);
+      DbUser user = null;
 
-      return dbUsers.FirstOrDefaultAsync();
+      if (filter.UserId.HasValue)
+      {
+        user = await query.FirstOrDefaultAsync(u => u.Id == filter.UserId);
+      }
+      else if (!string.IsNullOrEmpty(filter.Login))
+      {
+        user = await query
+          .Include(u => u.Credentials)
+          .FirstOrDefaultAsync(u => u.Credentials.Login == filter.Login);
+      }
+      else if (!string.IsNullOrEmpty(filter.Email))
+      {
+        user = await query
+          .Include(u => u.Communications)
+          .FirstOrDefaultAsync(u => u.Communications.Select(c => c.Value).Contains(filter.Email));
+      }
+
+      return user;
     }
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
