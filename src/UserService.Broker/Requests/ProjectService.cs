@@ -39,8 +39,8 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
         additionalArgs.Add(ascendingSort.Value);
       }
 
-      (List<ProjectData> projects, int _) = await _globalCache
-        .GetAsync<(List<ProjectData>, int)>(Cache.Projects, userId.GetRedisCacheHashCode(additionalArgs.ToArray()));
+      List<ProjectData> projects = await _globalCache
+        .GetAsync<List<ProjectData>>(Cache.Projects, userId.GetRedisCacheHashCode(additionalArgs.ToArray()));
 
       if (projects is not null)
       {
