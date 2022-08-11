@@ -33,7 +33,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   public class GetUserCommand : IGetUserCommand
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IAccessValidator _accessValidator;
     private readonly IUserRepository _repository;
     private readonly IUserResponseMapper _mapper;
     private readonly IUserSkillInfoMapper _skillMapper;
@@ -57,7 +56,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
     public GetUserCommand(
       IHttpContextAccessor httpContextAccessor,
-      IAccessValidator accessValidator,
       IUserRepository repository,
       IUserResponseMapper mapper,
       IUserSkillInfoMapper skillMapper,
@@ -80,7 +78,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
-      _accessValidator = accessValidator;
       _repository = repository;
       _mapper = mapper;
       _skillMapper = skillMapper;

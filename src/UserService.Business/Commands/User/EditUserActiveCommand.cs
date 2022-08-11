@@ -6,18 +6,16 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UserService.Broker.Publishes.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
-using MassTransit;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
-    private readonly IBus _bus;
+    private readonly IPublish _publish;
     private readonly ITextTemplateService _textTemplateService;
     private readonly IEmailService _emailService;
     private readonly ITextTemplateParser _parser;
@@ -70,7 +68,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      IBus bus,
+      IPublish publish,
       ITextTemplateService textTemplateService,
       IEmailService emailService,
       ITextTemplateParser parser)
@@ -82,7 +80,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
-      _bus = bus;
+      _publish = publish;
       _textTemplateService = textTemplateService;
       _emailService = emailService;
       _parser = parser;
@@ -121,9 +119,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
         }
 
-        await _bus.Publish<IDisactivateUserPublish>(IDisactivateUserPublish.CreateObj(
-          request.UserId,
-          _httpContextAccessor.HttpContext.GetUserId()));
+        await _publish.DisactivateUserAsync(request.UserId);
 
         response.Body = true;
       }
