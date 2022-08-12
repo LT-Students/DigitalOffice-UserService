@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     {
       (List<DbUser> dbUsers, int totalCount) =
         await _userRepository.FindAsync(
-          filter: new FindUsersFilter() { TakeCount = int.MaxValue, IsActive = true, IncludeCurrentAvatar = true }, //TODO fix takeCount
+          filter: new FindUsersFilter() { TakeCount = int.MaxValue, IncludeCurrentAvatar = true }, //TODO fix takeCount
           userIds: request.UsersIds);
 
       return dbUsers.Select(
