@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.UnitTestKernel;
 using LT.DigitalOffice.UserService.Business.Commands.User;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
@@ -9,7 +8,6 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender.Filters;
 using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -17,9 +15,7 @@ using Moq.AutoMock;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.UnitTests.Gender
@@ -32,6 +28,31 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Gender
     private DbGender _dbGender;
     private OperationResultResponse<Guid?> _badResponse;
     private OperationResultResponse<Guid?> _goodResponse;
+
+    private void Verifiable(
+      Times validatorCalls,
+      Times responseCreatorCalls,
+      Times mapperCalls,
+      Times repositoryCalls)
+    {
+      _mocker.Verify<ICreateGenderRequestValidator>(
+        x => x.ValidateAsync(It.IsAny<CreateGenderRequest>(), default),
+        validatorCalls);
+
+      _mocker.Verify<IResponseCreator>(
+        x => x.CreateFailureResponse<Guid?>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()),
+        responseCreatorCalls);
+
+      _mocker.Verify<IDbGenderMapper>(
+        x => x.Map(It.IsAny<CreateGenderRequest>()),
+        mapperCalls);
+
+      _mocker.Verify<IGenderRepository>(
+        x => x.CreateAsync(It.IsAny<DbGender>()),
+        repositoryCalls);
+
+      _mocker.Resolvers.Clear();
+    }
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -117,31 +138,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.Gender
         responseCreatorCalls: Times.Once(),
         mapperCalls: Times.Never(),
         repositoryCalls: Times.Never());
-    }
-
-    private void Verifiable(
-      Times validatorCalls,
-      Times responseCreatorCalls,
-      Times mapperCalls,
-      Times repositoryCalls)
-    {
-      _mocker.Verify<ICreateGenderRequestValidator>(
-        x => x.ValidateAsync(It.IsAny<CreateGenderRequest>(), default),
-        validatorCalls);
-
-      _mocker.Verify<IResponseCreator>(
-        x => x.CreateFailureResponse<Guid?>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()),
-        responseCreatorCalls);
-
-      _mocker.Verify<IDbGenderMapper>(
-        x => x.Map(It.IsAny<CreateGenderRequest>()),
-        mapperCalls);
-
-      _mocker.Verify<IGenderRepository>(
-        x => x.CreateAsync(It.IsAny<DbGender>()),
-        repositoryCalls);
-
-      _mocker.Resolvers.Clear();
     }
   }
 }
