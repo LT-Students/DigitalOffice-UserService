@@ -24,6 +24,28 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IGlobalCacheRepository _globalCache;
 
+    private string CreateRedisKey(
+      List<Guid> usersIds,
+      int skipCount,
+      int takeCount,
+      bool? ascendingSort,
+      string fullNameIncludeSubstring)
+    {
+      List<object> additionalArgs = new() { skipCount, takeCount };
+
+      if (ascendingSort.HasValue)
+      {
+        additionalArgs.Add(ascendingSort.Value);
+      }
+
+      if (!string.IsNullOrEmpty(fullNameIncludeSubstring))
+      {
+        additionalArgs.Add(fullNameIncludeSubstring);
+      }
+
+      return usersIds.GetRedisCacheHashCode(additionalArgs.ToArray());
+    }
+
     private async Task<(List<UserData> userData, int totalCount)> GetUserInfoAsync(IFilteredUsersDataRequest request)
     {
       List<DbUser> dbUsers = new();
