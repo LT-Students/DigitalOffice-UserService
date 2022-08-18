@@ -99,7 +99,6 @@ namespace LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef.Migrations
           Type = table.Column<int>(nullable: false),
           Value = table.Column<string>(nullable: false, maxLength: 100),
           IsConfirmed = table.Column<bool>(nullable: false),
-          VisibleTo = table.Column<int>(nullable: false),
           CreatedBy = table.Column<Guid>(nullable: false),
           CreatedAtUtc = table.Column<DateTime>(nullable: false),
           ModifiedBy = table.Column<Guid>(nullable: true),
