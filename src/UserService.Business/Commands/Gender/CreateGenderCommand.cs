@@ -1,10 +1,10 @@
 ﻿using FluentValidation.Results;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 using LT.DigitalOffice.UserService.Validation.Gender.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -47,12 +47,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<Guid?> response = new(body: await _genderRepository.CreateAsync(_mapper.Map(request)));
+      DbGender dbGender = _mapper.Map(request);
+      await _genderRepository.CreateAsync(dbGender);
+
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
-      return response.Body == default
-        ? _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest)
-        : response;
+      return new OperationResultResponse<Guid?>(
+        body: dbGender.Id);
     }
   }
 }

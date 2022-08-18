@@ -19,12 +19,10 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<Guid?> CreateAsync(DbGender gender)
+    public Task CreateAsync(DbGender gender)
     {
       _provider.Genders.Add(gender);
-      await _provider.SaveAsync();
-
-      return gender.Id;
+      return _provider.SaveAsync();
     }
 
     public Task<bool> DoesGenderAlreadyExistAsync(string genderName)
