@@ -97,30 +97,14 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users is not null)
       {
-        string key = null;
-
-        if (context.Message.FullNameIncludeSubstring is null)
-        {
-          if (context.Message.AscendingSort.HasValue)
-          {
-            key = context.Message.UsersIds
-              .GetRedisCacheHashCode(
-                context.Message.SkipCount,
-                context.Message.TakeCount,
-                context.Message.AscendingSort);
-          }
-          else
-          {
-            key = context.Message.UsersIds
-              .GetRedisCacheHashCode(
-                context.Message.SkipCount,
-                context.Message.TakeCount);
-          }
-        }
-
         await _globalCache.CreateAsync(
           Cache.Users,
-          key,
+          CreateRedisKey(
+            usersIds: context.Message.UsersIds,
+            skipCount: context.Message.SkipCount,
+            takeCount: context.Message.TakeCount,
+            ascendingSort: context.Message.AscendingSort,
+            fullNameIncludeSubstring: context.Message.FullNameIncludeSubstring),
           (users, usersCount),
           context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
