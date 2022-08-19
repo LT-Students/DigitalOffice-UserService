@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Business.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto;
@@ -41,6 +42,13 @@ namespace LT.DigitalOffice.UserService.Controllers
       [FromQuery] GetUserFilter filter)
     {
       return await command.ExecuteAsync(filter);
+    }
+
+    [HttpGet("getinfo")]
+    public async Task<OperationResultResponse<UserData>> GetInfoAsync(
+      [FromServices] IGetUserInfoCommand command)
+    {
+      return await command.ExecuteAsync();
     }
 
     [HttpGet("find")]
