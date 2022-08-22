@@ -8,16 +8,13 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public PositionInfo Map(PositionData position)
     {
-      if (position == null)
-      {
-        return null;
-      }
-
-      return new PositionInfo
-      {
-        Id = position.Id,
-        Name = position.Name
-      };
+      return position is null
+        ? default
+        : new PositionInfo
+        {
+          Id = position.Id,
+          Name = position.Name
+        };
     }
   }
 }

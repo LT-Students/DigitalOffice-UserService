@@ -1,10 +1,9 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+﻿using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
-using LT.DigitalOffice.UserService.Business.Helpers.Password;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Helpers.Password;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
@@ -43,28 +42,22 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       if (dbUserCredentials is null)
       {
-        _responseCreator.CreateFailureResponse<bool>(
-          HttpStatusCode.BadRequest,
-          new List<string> { "The user credentials was not found." });
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
 
       dbUserCredentials.Salt = $"{Guid.NewGuid()}{Guid.NewGuid()}";
       dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
-        request.Login,
+        dbUserCredentials.Login,
         dbUserCredentials.Salt,
         request.NewPassword);
 
       OperationResultResponse<bool> response = new();
 
       response.Body = await _repository.EditAsync(dbUserCredentials);
-      response.Status = OperationResultStatusType.FullSuccess;
 
-      if (!response.Body)
-      {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
-      }
-
-      return response;
+      return response.Body
+        ? response
+        : _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
     }
   }
 }

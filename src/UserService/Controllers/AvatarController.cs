@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Avatar;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Image;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Controllers
     }
 
     [HttpGet("get")]
-    public async Task<OperationResultResponse<ImagesResponse>> GetAsync(
+    public async Task<OperationResultResponse<UserImagesResponse>> GetAsync(
       [FromServices] IGetAvatarsCommand command,
       [FromQuery] Guid userId)
     {

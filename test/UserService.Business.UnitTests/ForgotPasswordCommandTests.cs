@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Responses;
-using LT.DigitalOffice.Models.Broker.Requests.Message;
+using LT.DigitalOffice.Models.Broker.Requests.Email;
 using LT.DigitalOffice.UserService.Business.Commands.Password;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -92,9 +92,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         FirstName = "Ivan",
         LastName = "Ivanov",
         MiddleName = "Ivanovich",
-        Gender = UserGender.Male,
         PositionId = Guid.NewGuid(),
-        Status = UserStatus.Vacation,
         IsAdmin = false
       };
 
@@ -112,8 +110,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         FirstName = _createUserRequest.FirstName,
         LastName = _createUserRequest.LastName,
         MiddleName = _createUserRequest.MiddleName,
-        Gender = (int)_createUserRequest.Gender,
-        Status = (int)_createUserRequest.Status,
         IsAdmin = (bool)_createUserRequest.IsAdmin,
         IsActive = true,
         Communications = new List<DbUserCommunication>
@@ -145,7 +141,6 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
       _expectedOperationResultResponse = new OperationResultResponse<bool>()
       {
         Body = true,
-        Status = OperationResultStatusType.FullSuccess,
         Errors = new List<string>()
       };
 

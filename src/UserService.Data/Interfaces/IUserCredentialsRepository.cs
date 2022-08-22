@@ -13,12 +13,10 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<Guid?> CreateAsync(DbUserCredentials dbUserCredentials);
 
-    Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActiveStatus);
-
     Task<bool> EditAsync(DbUserCredentials userCredentials);
 
-    Task<bool> LoginExistAsync(string login);
+    Task<bool> DoesLoginExistAsync(string login);
 
-    Task<bool> CredentialsExistAsync(Guid userId);
+    Task<bool> DoesExistAsync(Guid userId);
   }
 }

@@ -20,13 +20,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
   {
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IResponseCreator _responseCreator;
 
     public RemoveCommunicationCommand(
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      ICommunicationRepository communicationRepository,
+      IUserCommunicationRepository communicationRepository,
       IResponseCreator responseCreator)
     {
       _accessValidator = accessValidator;
@@ -45,21 +45,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (dbUserCommunication.Type == (int)CommunicationType.Email &&
-        (await _repository.CountUserEmails(dbUserCommunication.UserId)) < 2)
+      if (dbUserCommunication.Type == (int)CommunicationType.BaseEmail)
       {
         return _responseCreator.CreateFailureResponse<bool>(
           HttpStatusCode.BadRequest,
-          new List<string>() { "Last email can not be removed." });
+          new List<string>() { "Base email cannot be removed." });
       }
 
-      bool result = await _repository.RemoveAsync(dbUserCommunication);
-
-      return new OperationResultResponse<bool>
-      {
-        Status = result ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
-        Body = result
-      };
+      return new OperationResultResponse<bool>(
+        body: await _repository.RemoveAsync(dbUserCommunication));
     }
   }
 }

@@ -7,4 +7,8 @@
     <ProjectReference Include="..\..\src\UserService.Models.Db\UserService.Models.Db.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Communication\" />
+  </ItemGroup>
+
 </Project>

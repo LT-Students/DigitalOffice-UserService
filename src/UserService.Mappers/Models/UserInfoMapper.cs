@@ -1,8 +1,8 @@
-﻿using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+﻿using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
+using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Models
 {
@@ -10,40 +10,27 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public UserInfo Map(
       DbUser dbUser,
-      CompanyUserData companyUserData,
-      ImageInfo avatar,
-      CompanyInfo company,
-      DepartmentInfo department,
-      OfficeInfo office,
-      PositionInfo position,
-      RoleInfo role)
+      ImageInfo avatar)
     {
-      if (dbUser == null)
-      {
-        return null;
-      }
-
-      return new UserInfo
+      return dbUser is null ? default : new UserInfo
       {
         Id = dbUser.Id,
         FirstName = dbUser.FirstName,
         LastName = dbUser.LastName,
         MiddleName = dbUser.MiddleName,
-        Gender = (UserGender)dbUser.Gender,
-        DateOfBirth = dbUser.DateOfBirth?.ToShortDateString(),
-        City = dbUser.City,    
-        About = dbUser.About,
-        Status = (UserStatus)dbUser.Status,
-        Rate = companyUserData?.Rate,
-        StartWorkingAt = companyUserData?.StartWorkingAt?.ToShortDateString(),
         IsAdmin = dbUser.IsAdmin,
         IsActive = dbUser.IsActive,
+        PendingInfo = dbUser.Pending is null ? null : new PendingUserInfo()
+        { InvitationCommunicationId = dbUser.Pending.CommunicationId },
         Avatar = avatar,
-        Company = company,
-        Department = department,
-        Office = office,
-        Position = position,
-        Role = role,
+        Communications = dbUser.Communications
+          ?.Select(c => new CommunicationInfo
+          {
+            Id = c.Id,
+            Type = (CommunicationType)c.Type,
+            Value = c.Value,
+            IsConfirmed = c.IsConfirmed
+          }),
       };
     }
   }

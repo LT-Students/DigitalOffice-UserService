@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using System.Threading.Tasks;
+using System.Linq;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -14,34 +16,20 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task<DbUser> GetAsync(GetUserFilter filter);
 
-    Task<DbUser> GetAsync(Guid id);
-
-    Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false);
+    Task<DbUser> GetAsync(Guid userId);
 
     Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds);
 
-    Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter);
-
-    Task<DbPendingUser> GetPendingUserAsync(Guid userId);
-
-    Task DeletePendingUserAsync(Guid userId);
+    Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null);
 
     Task<Guid> CreateAsync(DbUser dbUser);
 
-    Task CreatePendingAsync(DbPendingUser dbPendingUser);
+    Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch);
 
     Task<bool> EditUserAsync(Guid id, JsonPatchDocument<DbUser> userPatch);
 
-    DbSkill FindSkillByName(string name);
+    Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActive);
 
-    Task<Guid> CreateSkillAsync(string name);
-
-    Task<bool> SwitchActiveStatusAsync(Guid userId, bool status);
-
-    Task<bool> IsUserExistAsync(Guid userId);
-
-    Task<List<DbUser>> SearchAsync(string text);
-
-    Task<bool> PendingUserExistAsync(Guid userId);
+    IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUser = null);
   }
 }

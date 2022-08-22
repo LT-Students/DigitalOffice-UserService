@@ -8,7 +8,7 @@ using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,43 +18,38 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Consumers
 {
-  /// <summary>
-  /// Consumer for getting information about the users.
-  /// </summary>
   public class GetUsersDataConsumer : IConsumer<IGetUsersDataRequest>
   {
     private readonly IUserRepository _userRepository;
     private readonly IOptions<RedisConfig> _redisConfig;
-    private readonly IRedisHelper _redisHelper;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
 
     private async Task<List<UserData>> GetUserInfoAsync(IGetUsersDataRequest request)
     {
-      List<DbUser> dbUsers = await _userRepository
-        .GetAsync(request.UserIds, true);
+      (List<DbUser> dbUsers, int totalCount) =
+        await _userRepository.FindAsync(
+          filter: new FindUsersFilter() { TakeCount = int.MaxValue, IncludeCurrentAvatar = true }, //TODO fix takeCount
+          userIds: request.UsersIds);
 
       return dbUsers.Select(
         u => new UserData(
-          u.Id,
-          u.Avatars?.FirstOrDefault(ua => ua.IsCurrentAvatar)?.AvatarId,
-          u.FirstName,
-          u.MiddleName,
-          u.LastName,
-          ((UserStatus)u.Status).ToString(),
-          u.IsActive))
+          id: u.Id,
+          imageId: u.Avatars?.FirstOrDefault()?.AvatarId,
+          firstName: u.FirstName,
+          middleName: u.MiddleName,
+          lastName: u.LastName,
+          isActive: u.IsActive))
         .ToList();
     }
 
     public GetUsersDataConsumer(
       IUserRepository userRepository,
       IOptions<RedisConfig> redisConfig,
-      IRedisHelper redisHelper,
-      ICacheNotebook cacheNotebook)
+      IGlobalCacheRepository globalCache)
     {
       _userRepository = userRepository;
       _redisConfig = redisConfig;
-      _redisHelper = redisHelper;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
     }
 
     public async Task Consume(ConsumeContext<IGetUsersDataRequest> context)
@@ -64,17 +59,16 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<IGetUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IGetUsersDataResponse.CreateObj(users), context));
 
-      if (users != null)
+      if (users is not null)
       {
-        string key = context.Message.UserIds.GetRedisCacheHashCode();
+        string key = users.Select(u => u.Id).ToList().GetRedisCacheHashCode();
 
-        await _redisHelper.CreateAsync(
+        await _globalCache.CreateAsync(
           Cache.Users,
           key,
           users,
+          context.Message.UsersIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-
-        _cacheNotebook.Add(context.Message.UserIds, Cache.Users, key);
       }
     }
   }

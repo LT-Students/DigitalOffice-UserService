@@ -7,22 +7,25 @@ using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db
 {
   public class DbUserMapper : IDbUserMapper
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDbUserCommunicationMapper _dbUserCommunicationMapper;
 
-    public DbUserMapper(IHttpContextAccessor httpContextAccessor)
+    public DbUserMapper(
+      IHttpContextAccessor httpContextAccessor,
+      IDbUserCommunicationMapper dbUserCommunicationMapper)
     {
       _httpContextAccessor = httpContextAccessor;
+      _dbUserCommunicationMapper = dbUserCommunicationMapper;
     }
 
     public DbUser Map(CreateUserRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }
@@ -31,37 +34,37 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       Guid createdBy = _httpContextAccessor.HttpContext.GetUserId();
       DateTime createdAtUtc = DateTime.UtcNow;
 
-      DbUser dbUser = new()
+      return new DbUser()
       {
         Id = userId,
-        FirstName = request.FirstName.Trim(),
-        LastName = request.LastName.Trim(),
+        FirstName = request.FirstName,
+        LastName = request.LastName,
         MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
-        Gender = (int)request.Gender,
-        City = !string.IsNullOrEmpty(request.City?.Trim()) ? request.City.Trim() : null,
-        Status = (int)request.Status,
-        IsAdmin = request.IsAdmin ?? false,
+        IsAdmin = request.IsAdmin,
         IsActive = false,
-        DateOfBirth = request.DateOfBirth,
         CreatedBy = createdBy,
-        CreatedAtUtc = createdAtUtc,
-        Communications = request.Communications?.Select(x => new DbUserCommunication
+        Communications = 
+          new List<DbUserCommunication> { _dbUserCommunicationMapper.Map(request.Communication, userId) },
+        Addition = new DbUserAddition
         {
           Id = Guid.NewGuid(),
-          Type = (int)x.Type,
-          Value = x.Value,
           UserId = userId,
-          CreatedBy = createdBy,
-          CreatedAtUtc = createdAtUtc
-        }).ToList()
+          GenderId = null,
+          About = request.About,
+          DateOfBirth = request.DateOfBirth,
+          Latitude = request.Latitude,
+          Longitude = request.Longitude,
+          BusinessHoursFromUtc = request.BusinessHoursFromUtc,
+          BusinessHoursToUtc = request.BusinessHoursToUtc,
+          ModifiedBy = createdBy,
+          ModifiedAtUtc = createdAtUtc
+        }
       };
-
-      return dbUser;
     }
 
     public DbUser Map(ICreateAdminRequest request)
     {
-      if (request == null)
+      if (request is null)
       {
         return null;
       }
@@ -74,22 +77,35 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
         Id = userId,
         FirstName = request.FirstName,
         LastName = request.LastName,
-        MiddleName = !string.IsNullOrEmpty(request.MiddleName?.Trim()) ? request.MiddleName.Trim() : null,
-        Status = (int)UserStatus.WorkFromOffice,
+        MiddleName = !string.IsNullOrEmpty(request.MiddleName) ? request.MiddleName : null,
         IsActive = true,
         IsAdmin = true,
         CreatedBy = userId,
-        CreatedAtUtc = createdAtUtc,
         Communications = new List<DbUserCommunication> {
           new DbUserCommunication
           {
             Id = Guid.NewGuid(),
-            Type = (int)CommunicationType.Email,
+            Type = (int)CommunicationType.BaseEmail,
             Value = request.Email,
+            IsConfirmed = true,
             UserId = userId,
             CreatedBy = userId,
             CreatedAtUtc = createdAtUtc
           }
+        },
+        Addition = new DbUserAddition
+        {
+          Id = Guid.NewGuid(),
+          UserId = userId,
+          GenderId = null,
+          About = null,
+          DateOfBirth = null,
+          BusinessHoursFromUtc = null,
+          BusinessHoursToUtc = null,
+          Latitude = null,
+          Longitude = null,
+          ModifiedBy = userId,
+          ModifiedAtUtc = createdAtUtc
         }
       };
     }

@@ -3,7 +3,6 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using Microsoft.AspNetCore.Http;
@@ -16,60 +15,79 @@ using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
 {
-  /// <inheritdoc/>
   public class UserRepository : IUserRepository
   {
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    #region Predicates
+
     private IQueryable<DbUser> CreateGetPredicates(
       GetUserFilter filter,
-      IQueryable<DbUser> dbUsers)
+      IQueryable<DbUser> query)
     {
-      if (filter.UserId.HasValue)
+      if (filter.IncludeCommunications)
       {
-        dbUsers = dbUsers.Where(u => u.Id == filter.UserId);
+        query = query.Include(u => u.Communications);
       }
 
-      if (!string.IsNullOrEmpty(filter.Name?.Trim()))
+      if (filter.IncludeAvatars)
       {
-        dbUsers = dbUsers
-          .Where(u => u.FirstName.Contains(filter.Name) || u.LastName.Contains(filter.Name));
+        query = query.Include(u => u.Avatars);
+      }
+      else if (filter.IncludeCurrentAvatar)
+      {
+        query = query.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
+      }
+
+      query = query
+        .Include(u => u.Pending)
+        .Include(u => u.Addition).ThenInclude(ua => ua.Gender);
+
+      return query;
+    }
+
+    private IQueryable<DbUser> CreateFindPredicates(
+      FindUsersFilter filter,
+      List<Guid> userIds,
+      IQueryable<DbUser> dbUsers)
+    {
+      if (userIds is not null && userIds.Any())
+      {
+        dbUsers = dbUsers.Where(u => userIds.Contains(u.Id));
+      }
+
+      if (filter.IsActive.HasValue)
+      {
+        dbUsers = dbUsers.Where(u => u.IsActive == filter.IsActive.Value);
+
+        if (!filter.IsActive.Value)
+        {
+          dbUsers = dbUsers.Include(u => u.Pending);
+        }
+      }
+
+      if (filter.IncludeCurrentAvatar)
+      {
+        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        dbUsers = filter.IsAscendingSort.Value
+          ? dbUsers.OrderBy(u => u.LastName).ThenBy(u => u.LastName).ThenBy(u => u.MiddleName)
+          : dbUsers.OrderByDescending(u => u.LastName).ThenByDescending(u => u.LastName).ThenByDescending(u => u.MiddleName);
       }
 
       if (filter.IncludeCommunications)
       {
         dbUsers = dbUsers.Include(u => u.Communications);
-
-        if (!string.IsNullOrEmpty(filter.Email?.Trim()))
-        {
-          dbUsers = dbUsers
-            .Where(u => u.Communications
-              .Any(c => c.Type == (int)CommunicationType.Email && c.Value == filter.Email));
-        }
-      }
-
-      if (filter.IncludeAchievements)
-      {
-        dbUsers = dbUsers.Include(u => u.Achievements).ThenInclude(a => a.Achievement);
-      }
-
-      if (filter.IncludeSkills)
-      {
-        dbUsers = dbUsers.Include(u => u.Skills).ThenInclude(s => s.Skill);
-      }
-
-      if (filter.IncludeAvatars)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars);
-      }
-      else if (filter.IncludeCurrentAvatar)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
       }
 
       return dbUsers;
     }
+
+    #endregion
 
     public UserRepository(
       IDataProvider provider,
@@ -81,7 +99,7 @@ namespace LT.DigitalOffice.UserService.Data
 
     public async Task<Guid> CreateAsync(DbUser dbUser)
     {
-      if (dbUser == null)
+      if (dbUser is null)
       {
         return default;
       }
@@ -92,200 +110,157 @@ namespace LT.DigitalOffice.UserService.Data
       return dbUser.Id;
     }
 
-    public async Task CreatePendingAsync(DbPendingUser dbPendingUser)
+    public Task<DbUser> GetAsync(Guid userId)
     {
-      _provider.PendingUsers.Add(dbPendingUser);
-      await _provider.SaveAsync();
-    }
-
-    public async Task<DbUser> GetAsync(Guid id)
-    {
-      return await GetAsync(new GetUserFilter() { UserId = id });
+      return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<DbUser> GetAsync(GetUserFilter filter)
     {
-      if (filter == null)
+      if (filter is null)
       {
         return null;
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+      IQueryable<DbUser> query = CreateGetPredicates(filter, _provider.Users.AsQueryable());
 
-      return await CreateGetPredicates(filter, dbUsers)
-        .FirstOrDefaultAsync();
-    }
+      DbUser user = null;
 
-    public async Task<List<DbUser>> GetAsync(List<Guid> usersIds, bool includeAvatars = false)
-    {
-      if (usersIds is null)
+      if (filter.UserId.HasValue)
       {
-        return null;
+        user = await query.FirstOrDefaultAsync(u => u.Id == filter.UserId);
+      }
+      else if (!string.IsNullOrEmpty(filter.Login))
+      {
+        user = await query
+          .Include(u => u.Credentials)
+          .FirstOrDefaultAsync(u => u.Credentials.Login == filter.Login);
+      }
+      else if (!string.IsNullOrEmpty(filter.Email))
+      {
+        user = await query
+          .Include(u => u.Communications)
+          .FirstOrDefaultAsync(u => u.Communications.Select(c => c.Value).Contains(filter.Email));
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
-
-      if (includeAvatars)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars);
-      }
-
-      return await dbUsers
-        .Where(x => usersIds.Contains(x.Id))
-        .ToListAsync();
+      return user;
     }
 
     public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
     {
-      if (usersIds == null)
-      {
-        return null;
-      }
-
-      return await _provider.Users
-        .Where(u => usersIds.Contains(u.Id) && u.IsActive)
-        .Select(u => u.Id)
-        .ToListAsync();
+      return usersIds is null
+        ? new()
+        : await _provider.Users
+          .Where(u => usersIds.Contains(u.Id) && u.IsActive)
+          .Select(u => u.Id)
+          .ToListAsync();
     }
 
-    public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)
+    public async Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch)
     {
-      if (patch == null)
+      DbUserAddition dbUserAddition = await _provider.UsersAdditions
+        .FirstOrDefaultAsync(x => x.UserId == userId);
+
+      if (patch is null || dbUserAddition is null)
       {
         return false;
       }
 
+      patch.ApplyTo(dbUserAddition);
+      dbUserAddition.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+      dbUserAddition.ModifiedAtUtc = DateTime.UtcNow;
+      await _provider.SaveAsync();
+
+      return true;
+    }
+
+    public async Task<bool> EditUserAsync(Guid userId, JsonPatchDocument<DbUser> patch)
+    {
       DbUser dbUser = await _provider.Users
         .FirstOrDefaultAsync(x => x.Id == userId);
 
-      if (dbUser == default)
+      if (patch is null || dbUser is null)
       {
         return false;
       }
 
       patch.ApplyTo(dbUser);
-      dbUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-      dbUser.ModifiedAtUtc = DateTime.UtcNow;
+      dbUser.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       await _provider.SaveAsync();
 
       return true;
     }
 
-    //remove to education service
-    public DbSkill FindSkillByName(string name)
+    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool isActive)
     {
-      return _provider.Skills.FirstOrDefault(s => s.Name == name);
-    }
-
-    //remove to education service
-    public async Task<Guid> CreateSkillAsync(string name)
-    {
-      if (string.IsNullOrEmpty(name))
-      {
-        throw new ArgumentNullException(nameof(name));
-      }
-
-      DbSkill dbSkill = _provider.Skills.FirstOrDefault(s => s.Name == name);
-
-      if (dbSkill != null)
-      {
-        return dbSkill.Id;
-      }
-
-      DbSkill skill = new DbSkill
-      {
-        Id = Guid.NewGuid(),
-        Name = name
-      };
-
-      _provider.Skills.Add(skill);
-      await _provider.SaveAsync();
-
-      return skill.Id;
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> SwitchActiveStatusAsync(Guid userId, bool status)
-    {
-      DbUser dbUser = await _provider.Users
+      DbUser dbUser = await _provider.Users.Include(x => x.Credentials)
         .FirstOrDefaultAsync(u => u.Id == userId);
 
-      if (dbUser == null)
+      if (dbUser is null || dbUser.Credentials is null)
       {
         return false;
       }
 
-      dbUser.IsActive = status;
+      dbUser.IsActive = isActive;
+      dbUser.CreatedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
+        _httpContextAccessor.HttpContext.GetUserId() :
+        userId;
+      dbUser.Credentials.IsActive = dbUser.IsActive;
 
-      _provider.Users.Update(dbUser);
-      dbUser.ModifiedBy = _httpContextAccessor.HttpContext.Items.ContainsKey(ConstStrings.UserId) ?
-          _httpContextAccessor.HttpContext.GetUserId() :
-          null;
-      dbUser.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
 
       return true;
     }
 
-    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter)
+    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null)
     {
-      if (filter == null)
+      if (filter is null)
       {
         return (null, default);
       }
 
-      IQueryable<DbUser> dbUsers = _provider.Users.AsQueryable();
+      IQueryable<DbUser> dbUsers = CreateFindPredicates(
+        filter,
+        userIds,
+        _provider.Users.AsQueryable());
 
-      if (!filter.IncludeDeactivated)
+      if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
       {
-        dbUsers = dbUsers.Where(u => u.IsActive);
-      }
-
-      if (filter.IncludeCurrentAvatar)
-      {
-        dbUsers = dbUsers.Include(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
+        dbUsers = SearchAsync(filter.FullNameIncludeSubstring, dbUsers);
       }
 
       return (
         await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await dbUsers.CountAsync());
+        dbUsers.Count());
     }
 
-    public async Task<DbPendingUser> GetPendingUserAsync(Guid userId)
+    public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
     {
-      return await _provider.PendingUsers
-        .FirstOrDefaultAsync(pu => pu.UserId == userId);
-    }
+      string[] cleanedFullName = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+        .ToLower().Split(" ");
 
-    public async Task DeletePendingUserAsync(Guid userId)
-    {
-      DbPendingUser dbPendingUser = await _provider.PendingUsers
-        .FirstOrDefaultAsync(pu => pu.UserId == userId);
+      IQueryable<DbUser> dbUsers = dbUsersFiltered is null && !dbUsersFiltered.Any() ? _provider.Users : dbUsersFiltered;
 
-      if (dbPendingUser != null)
+      if (cleanedFullName.Count() == 1)
       {
-        _provider.PendingUsers.Remove(dbPendingUser);
-        await _provider.SaveAsync();
+        return dbUsers.Where(u =>
+            u.FirstName.ToLower().Contains(cleanedFullName[0])
+            || u.LastName.ToLower().Contains(cleanedFullName[0])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]));
       }
-    }
 
-    public async Task<bool> IsUserExistAsync(Guid userId)
-    {
-      return await _provider.Users
-        .FirstOrDefaultAsync(u => u.Id == userId) != null;
-    }
+      if (cleanedFullName.Count() == 2)
+      {
+        return dbUsers.Where(u =>
+            u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1])
+            || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1])
+            || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]));
+      }
 
-    public async Task<List<DbUser>> SearchAsync(string text)
-    {
-      return await _provider.Users
-        .Where(u => string.Join(" ", u.FirstName, u.MiddleName, u.LastName)
-        .Contains(text))
-        .ToListAsync();
-    }
-
-    public async Task<bool> PendingUserExistAsync(Guid userId)
-    {
-      return await _provider.PendingUsers.AnyAsync(pu => pu.UserId == userId);
+      return dbUsers.Where(u =>
+        u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1]) || u.FirstName.ToLower().Contains(cleanedFullName[2])
+        && u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
+        && u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
     }
   }
 }

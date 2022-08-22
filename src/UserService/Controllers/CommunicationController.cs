@@ -1,7 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
-using Microsoft.AspNetCore.JsonPatch;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -20,10 +19,10 @@ namespace LT.DigitalOffice.UserService.Controllers
       return await command.ExecuteAsync(request);
     }
 
-    [HttpPatch("edit")]
+    [HttpPut("edit")]
     public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditCommunicationCommand command,
-      [FromBody] JsonPatchDocument<EditCommunicationRequest> request,
+      [FromBody] EditCommunicationRequest request,
       [FromQuery] Guid communicationId)
     {
       return await command.ExecuteAsync(communicationId, request);
@@ -32,6 +31,23 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpDelete("remove")]
     public async Task<OperationResultResponse<bool>> RemoveAsync(
       [FromServices] IRemoveCommunicationCommand command,
+      [FromQuery] Guid communicationId)
+    {
+      return await command.ExecuteAsync(communicationId);
+    }
+
+    [HttpPut("confirm")]
+    public async Task<OperationResultResponse<bool>> ConfirmAsync(
+      [FromServices] IConfirmCommunicationCommand command,
+      [FromQuery] Guid communicationId,
+      [FromQuery] string secret)
+    {
+      return await command.ExecuteAsync(communicationId, secret);
+    }
+
+    [HttpGet("resendconfirmation")]
+    public async Task<OperationResultResponse<bool>> ConfirmAsync(
+      [FromServices] IResendConfirmationCommunicationCommand command,
       [FromQuery] Guid communicationId)
     {
       return await command.ExecuteAsync(communicationId);

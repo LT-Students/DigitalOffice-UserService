@@ -4,34 +4,35 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
-    public class DbUserCommunication
+  public class DbUserCommunication
+  {
+    public const string TableName = "UsersCommunications";
+
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public int Type { get; set; }
+    public string Value { get; set; }
+    public bool IsConfirmed { get; set; }
+    public Guid CreatedBy { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public DateTime? ModifiedAtUtc { get; set; }
+    public DbUser User { get; set; }
+  }
+
+  public class DbConnectionConfiguration : IEntityTypeConfiguration<DbUserCommunication>
+  {
+    public void Configure(EntityTypeBuilder<DbUserCommunication> builder)
     {
-        public const string TableName = "UserCommunications";
+      builder
+        .ToTable(DbUserCommunication.TableName);
 
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
-        public int Type { get; set; }
-        public string Value { get; set; }
-        public Guid CreatedBy { get; set; }
-        public DateTime CreatedAtUtc { get; set; }
-        public Guid? ModifiedBy { get; set; }
-        public DateTime? ModifiedAtUtc { get; set; }
-        public DbUser User { get; set; }
+      builder
+        .HasKey(uc => uc.Id);
+
+      builder
+        .HasOne(uc => uc.User)
+        .WithMany(u => u.Communications);
     }
-
-    public class DbConnectionConfiguration : IEntityTypeConfiguration<DbUserCommunication>
-    {
-        public void Configure(EntityTypeBuilder<DbUserCommunication> builder)
-        {
-            builder
-                .ToTable(DbUserCommunication.TableName);
-
-            builder
-                .HasKey(uc => uc.Id);
-
-            builder
-                .HasOne(uc => uc.User)
-                .WithMany(u => u.Communications);
-        }
-    }
+  }
 }

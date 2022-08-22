@@ -1,19 +1,25 @@
 ﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
-using LT.DigitalOffice.UserService.Mappers.Patch.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
+using LT.DigitalOffice.UserService.Models.Dto.Configurations;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,41 +28,81 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
 {
   public class EditCommunicationCommand : IEditCommunicationCommand
   {
-    private readonly ICommunicationRepository _repository;
+    private readonly IUserCommunicationRepository _repository;
     private readonly IAccessValidator _accessValidator;
-    private readonly IPatchDbUserCommunicationMapper _mapper;
     private readonly IEditCommunicationRequestValidator _validator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
+    private readonly ITextTemplateService _textTemplateService;
+    private readonly IEmailService _emailService;
+    private readonly ITextTemplateParser _parser;
+    private readonly IMemoryCache _cache;
+    private readonly IOptions<MemoryCacheConfig> _cacheOptions;
+
+    private async Task NotifyAsync(
+      DbUserCommunication dbUserCommunication,
+      string secret,
+      string locale,
+      List<string> errors)
+    {
+      IGetTextTemplateResponse textTemplate = await _textTemplateService
+        .GetAsync(TemplateType.ConfirmСommunication, locale, errors);
+
+      if (textTemplate is null)
+      {
+        return;
+      }
+
+      string parsedText = _parser.Parse(
+        new Dictionary<string, string> { { "Secret", secret } },
+        _parser.ParseModel<DbUserCommunication>(dbUserCommunication, textTemplate.Text));
+
+      await _emailService.SendAsync(dbUserCommunication.Value, textTemplate.Subject, parsedText, errors);
+    }
 
     public EditCommunicationCommand(
-      ICommunicationRepository repository,
+      IUserCommunicationRepository repository,
       IAccessValidator accessValidator,
-      IPatchDbUserCommunicationMapper mapper,
       IEditCommunicationRequestValidator validator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      ITextTemplateService textTemplateService,
+      IEmailService emailService,
+      ITextTemplateParser parser,
+      IMemoryCache cache,
+      IOptions<MemoryCacheConfig> cacheOptions)
     {
       _repository = repository;
       _accessValidator = accessValidator;
-      _mapper = mapper;
       _validator = validator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
+      _textTemplateService = textTemplateService;
+      _emailService = emailService;
+      _parser = parser;
+      _cache = cache;
+      _cacheOptions = cacheOptions;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(
       Guid communicationId,
-      JsonPatchDocument<EditCommunicationRequest> request)
+      EditCommunicationRequest request)
     {
-      DbUserCommunication communication = await _repository.GetAsync(communicationId);
+      DbUserCommunication dbUserCommunication = await _repository
+        .GetAsync(communicationId);
 
-      if (_httpContextAccessor.HttpContext.GetUserId() != communication.UserId &&
+      if (dbUserCommunication is null)
+      {
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
+
+      if (_httpContextAccessor.HttpContext.GetUserId() != dbUserCommunication.UserId &&
         !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveUsers))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
+      ValidationResult validationResult = await _validator
+        .ValidateAsync((dbUserCommunication, request));
 
       if (!validationResult.IsValid)
       {
@@ -65,14 +111,26 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Communication
       }
 
       OperationResultResponse<bool> response = new();
-      response.Body = await _repository.EditAsync(communicationId, _mapper.Map(request));
-      response.Status = OperationResultStatusType.FullSuccess;
 
-      if (!response.Body)
+      if (request.Type is not null)
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+        await _repository.RemoveBaseTypeAsync(dbUserCommunication.UserId);
+        await _repository.SetBaseTypeAsync(communicationId, _httpContextAccessor.HttpContext.GetUserId());
+      }
+      else
+      {
+        await _repository.EditAsync(communicationId, request.Value);
+
+        if (dbUserCommunication.Type == (int)CommunicationType.Email)
+        {
+          Guid secret = Guid.NewGuid();
+          _cache.Set(dbUserCommunication.Id, secret, TimeSpan.FromMinutes(_cacheOptions.Value.CacheLiveInMinutes));
+
+          await NotifyAsync(dbUserCommunication, secret.ToString(), "ru", response.Errors);
+        }
       }
 
+      response.Body = true;
       return response;
     }
   }

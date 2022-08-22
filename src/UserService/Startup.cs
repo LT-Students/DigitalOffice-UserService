@@ -4,19 +4,21 @@ using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
+using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Kernel.EFSupport.Extensions;
+using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
-using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Consumers;
 using LT.DigitalOffice.UserService.Data.Provider.MsSql.Ef;
-using LT.DigitalOffice.UserService.Models.Dto;
 using LT.DigitalOffice.UserService.Models.Dto.Configurations;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
-using LT.DigitalOffice.UserService.Validation.Skill;
 using LT.DigitalOffice.UserService.Validation.User;
 using MassTransit;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
@@ -28,6 +30,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -39,13 +42,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace LT.DigitalOffice.UserService
 {
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
     private readonly RabbitMqConfig _rabbitMqConfig;
@@ -53,17 +56,6 @@ namespace LT.DigitalOffice.UserService
     public IConfiguration Configuration { get; }
 
     #region private methods
-
-    private void UpdateDatabase(IApplicationBuilder app)
-    {
-      using var serviceScope = app.ApplicationServices
-        .GetRequiredService<IServiceScopeFactory>()
-        .CreateScope();
-
-      using var context = serviceScope.ServiceProvider.GetService<UserServiceDbContext>();
-
-      context.Database.Migrate();
-    }
 
     private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
     {
@@ -81,60 +73,12 @@ namespace LT.DigitalOffice.UserService
         .First();
     }
 
-    private string HidePassord(string line)
-    {
-      string password = "Password";
-
-      int index = line.IndexOf(password, 0, StringComparison.OrdinalIgnoreCase);
-
-      if (index != -1)
-      {
-        string[] words = Regex.Split(line, @"[=,; ]");
-
-        for (int i = 0; i < words.Length; i++)
-        {
-          if (string.Equals(password, words[i], StringComparison.OrdinalIgnoreCase))
-          {
-            line = line.Replace(words[i + 1], "****");
-            break;
-          }
-        }
-      }
-
-      return line;
-    }
-
     #region configure masstransit
-
-    private (string username, string password) GetRabbitMqCredentials()
-    {
-      static string GetString(string envVar, string formAppsettings, string generated, string fieldName)
-      {
-        string str = Environment.GetEnvironmentVariable(envVar);
-        if (string.IsNullOrEmpty(str))
-        {
-          str = formAppsettings ?? generated;
-
-          Log.Information(
-            formAppsettings == null
-              ? $"Default RabbitMq {fieldName} was used."
-              : $"RabbitMq {fieldName} from appsetings.json was used.");
-        }
-        else
-        {
-          Log.Information($"RabbitMq {fieldName} from environment was used.");
-        }
-
-        return str;
-      }
-
-      return (GetString("RabbitMqUsername", _rabbitMqConfig.Username, $"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}", "Username"),
-        GetString("RabbitMqPassword", _rabbitMqConfig.Password, _serviceInfoConfig.Id, "Password"));
-    }
 
     private void ConfigureMassTransit(IServiceCollection services)
     {
-      (string username, string password) = GetRabbitMqCredentials();
+      (string username, string password) = RabbitMqCredentialsHelper
+        .Get(_rabbitMqConfig, _serviceInfoConfig);
 
       services.AddMassTransit(busConfigurator =>
       {
@@ -160,13 +104,13 @@ namespace LT.DigitalOffice.UserService
     private void ConfigureConsumers(IServiceCollectionBusConfigurator x)
     {
       x.AddConsumer<UserLoginConsumer>();
-      x.AddConsumer<GetUserDataConsumer>();
       x.AddConsumer<GetUsersDataConsumer>();
       x.AddConsumer<AccessValidatorConsumer>();
       x.AddConsumer<SearchUsersConsumer>();
       x.AddConsumer<CreateAdminConsumer>();
       x.AddConsumer<FindParseEntitiesConsumer>();
       x.AddConsumer<CheckUsersExistenceConsumer>();
+      x.AddConsumer<FilterUsersDataConsumer>();
     }
 
     private void ConfigureEndpoints(
@@ -178,11 +122,6 @@ namespace LT.DigitalOffice.UserService
       {
         // TODO Rename
         ep.ConfigureConsumer<AccessValidatorConsumer>(context);
-      });
-
-      cfg.ReceiveEndpoint(rabbitMqConfig.GetUserDataEndpoint, ep =>
-      {
-        ep.ConfigureConsumer<GetUserDataConsumer>(context);
       });
 
       cfg.ReceiveEndpoint(rabbitMqConfig.GetUsersDataEndpoint, ep =>
@@ -214,6 +153,11 @@ namespace LT.DigitalOffice.UserService
       {
         ep.ConfigureConsumer<CheckUsersExistenceConsumer>(context);
       });
+
+      cfg.ReceiveEndpoint(rabbitMqConfig.FilterUsersDataEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<FilterUsersDataConsumer>(context);
+      });
     }
 
     #endregion
@@ -234,7 +178,7 @@ namespace LT.DigitalOffice.UserService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.4.1.0";
+      Version = "1.4.5.5";
       Description = "UserService is an API that intended to work with users.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
@@ -262,28 +206,18 @@ namespace LT.DigitalOffice.UserService
           });
       });
 
-      string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-      if (string.IsNullOrEmpty(connStr))
-      {
-        connStr = Configuration.GetConnectionString("SQLConnectionString");
-
-        Log.Information($"SQL connection string from appsettings.json was used. Value '{HidePassord(connStr)}'.");
-      }
-      else
-      {
-        Log.Information($"SQL connection string from environment was used. Value '{HidePassord(connStr)}'.");
-      }
-
       services.AddHttpContextAccessor();
-
-      services.AddHealthChecks()
-        .AddRabbitMqCheck()
-        .AddSqlServer(connStr);
+      
+      string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<UserServiceDbContext>(options =>
       {
-        options.UseSqlServer(connStr);
+        options.UseSqlServer(dbConnStr);
       });
+
+      services.AddHealthChecks()
+        .AddRabbitMqCheck()
+        .AddSqlServer(dbConnStr);
 
       if (int.TryParse(Environment.GetEnvironmentVariable("MemoryCacheLiveInMinutes"), out int memoryCacheLifetime))
       {
@@ -320,7 +254,6 @@ namespace LT.DigitalOffice.UserService
 
       services.AddMemoryCache();
       services.AddBusinessObjects();
-      services.AddTransient<IRedisHelper, RedisHelper>();
 
       ConfigureMassTransit(services);
 
@@ -329,24 +262,21 @@ namespace LT.DigitalOffice.UserService
       //    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
-      services.AddScoped<IValidator<CreateSkillRequest>, CreateSkillRequestValidator>();
 
-      services.AddTransient<ICacheNotebook, CacheNotebook>();
-
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
 
-        Log.Information($"Redis connection string from appsettings.json was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from appsettings.json was used. Value '{PasswordHider.Hide(redisConnStr)}'");
       }
       else
       {
-        Log.Information($"Redis connection string from environment was used. Value '{HidePassord(redisConnStr)}'");
+        Log.Information($"Redis connection string from environment was used. Value '{PasswordHider.Hide(redisConnStr)}'");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
 
       services
         .AddControllers(options =>
@@ -365,7 +295,13 @@ namespace LT.DigitalOffice.UserService
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
-      UpdateDatabase(app);
+      app.UpdateDatabase<UserServiceDbContext>();
+
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 

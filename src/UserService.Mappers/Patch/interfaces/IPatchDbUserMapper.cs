@@ -8,7 +8,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Patch.Interfaces
   [AutoInject]
   public interface IPatchDbUserMapper
   {
-    JsonPatchDocument<DbUser> Map(
-      JsonPatchDocument<EditUserRequest> request);
+    (JsonPatchDocument<DbUser> dbUserPatch, JsonPatchDocument<DbUserAddition> dbUserAdditionPatch) Map(
+     JsonPatchDocument<EditUserRequest> request);
   }
 }

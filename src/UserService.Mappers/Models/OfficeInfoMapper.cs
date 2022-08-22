@@ -8,20 +8,17 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
   {
     public OfficeInfo Map(OfficeData office)
     {
-      if (office == null)
-      {
-        return null;
-      }
-
-      return new OfficeInfo
-      {
-        Id = office.Id,
-        Name = office.Name,
-        Address = office.Address,
-        City = office.City,
-        Longitude = office.Longitude,
-        Latitude = office.Latitude
-      };
+      return office is null
+        ? default
+        : new OfficeInfo
+        {
+          Id = office.Id,
+          Name = office.Name,
+          Address = office.Address,
+          City = office.City,
+          Longitude = office.Longitude,
+          Latitude = office.Latitude
+        };
     }
   }
 }

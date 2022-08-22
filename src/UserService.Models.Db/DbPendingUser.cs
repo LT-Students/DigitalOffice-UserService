@@ -4,27 +4,33 @@ using System;
 
 namespace LT.DigitalOffice.UserService.Models.Db
 {
-    public class DbPendingUser
+  public class DbPendingUser
+  {
+    public const string TableName = "PendingUsers";
+
+    public Guid UserId { get; set; }
+    public Guid CommunicationId { get; set; }
+    public string Password { get; set; }
+    public DbUser User { get; set; }
+  }
+
+  public class DbPendingUserConfiguration : IEntityTypeConfiguration<DbPendingUser>
+  {
+    public void Configure(EntityTypeBuilder<DbPendingUser> builder)
     {
-        public const string TableName = "PendingUsers";
+      builder
+        .ToTable(DbPendingUser.TableName);
 
-        public Guid UserId { get; set; }
-        public string Password { get; set; }
+      builder
+        .HasKey(pu => pu.UserId);
+
+      builder
+        .Property(pu => pu.Password)
+        .IsRequired();
+
+      builder
+        .HasOne(pu => pu.User)
+        .WithOne(uc => uc.Pending);
     }
-
-    public class DbPendingUserConfiguration : IEntityTypeConfiguration<DbPendingUser>
-    {
-        public void Configure(EntityTypeBuilder<DbPendingUser> builder)
-        {
-            builder
-                .ToTable(DbPendingUser.TableName);
-
-            builder
-                .HasKey(pu => pu.UserId);
-
-            builder
-                .Property(pu => pu.Password)
-                .IsRequired();
-        }
-    }
+  }
 }

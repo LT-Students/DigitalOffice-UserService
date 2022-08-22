@@ -9,5 +9,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Models
     public string ShortName { get; set; }
     public string Status { get; set; }
     public string ShortDescription { get; set; }
+    public ProjectUserInfo User { get; set; }
   }
 }

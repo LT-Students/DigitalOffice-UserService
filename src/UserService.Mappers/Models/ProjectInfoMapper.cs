@@ -1,4 +1,4 @@
-﻿using LT.DigitalOffice.Models.Broker.Models;
+﻿using LT.DigitalOffice.Models.Broker.Models.Project;
 using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
 
@@ -6,21 +6,24 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
 {
   public class ProjectInfoMapper : IProjectInfoMapper
   {
-    public ProjectInfo Map(ProjectData projectData)
+    public ProjectInfo Map(ProjectData projectData, ProjectUserData projectUser)
     {
-      if (projectData == null)
-      {
-        return null;
-      }
-
-      return new ProjectInfo
-      {
-        Id = projectData.Id,
-        Name = projectData.Name,
-        ShortDescription = projectData.ShortDescription,
-        ShortName = projectData.ShortName,
-        Status = projectData.Status
-      };
+      return projectData is null
+        ? default
+        : new ProjectInfo
+        {
+          Id = projectData.Id,
+          Name = projectData.Name,
+          ShortDescription = projectData.ShortDescription,
+          ShortName = projectData.ShortName,
+          Status = projectData.Status,
+          User = projectUser is null
+            ? default
+            : new ProjectUserInfo()
+            {
+              IsActive = projectUser.IsActive
+            }
+        };
     }
   }
 }

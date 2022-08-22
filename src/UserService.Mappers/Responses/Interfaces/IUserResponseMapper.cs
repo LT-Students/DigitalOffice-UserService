@@ -1,10 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Models;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
-using System;
 using System.Collections.Generic;
 
 namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
@@ -14,16 +11,15 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
   {
     UserResponse Map(
       DbUser dbUser,
-      CompanyUserData companyUserData,
+      CompanyUserInfo companyUser,
       ImageInfo avatar,
-      List<CertificateInfo> certificates,
-      CompanyInfo company,
-      DepartmentInfo department,
+      DepartmentUserInfo departmentUser,
       List<EducationInfo> educations,
       List<ImageInfo> images,
       OfficeInfo office,
       PositionInfo position,
       List<ProjectInfo> projects,
-      RoleInfo role);
+      RoleInfo role,
+      List<SkillInfo> skills);
   }
 }

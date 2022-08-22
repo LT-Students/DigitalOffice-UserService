@@ -1,7 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Communication;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using Microsoft.AspNetCore.Http;
 using System;
 
@@ -16,22 +16,19 @@ namespace LT.DigitalOffice.UserService.Mappers.Db
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbUserCommunication Map(CreateCommunicationRequest request)
+    public DbUserCommunication Map(CreateCommunicationRequest request, Guid? userId = null)
     {
-      if (request == null)
-      {
-        return null;
-      }
-
-      return new DbUserCommunication
-      {
-        Id = Guid.NewGuid(),
-        Type = (int)request.Type,
-        UserId = request.UserId.Value,
-        Value = request.Value,
-        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-        CreatedAtUtc = DateTime.UtcNow,
-      };
+      return request is null
+        ? null
+        : new DbUserCommunication
+        {
+          Id = Guid.NewGuid(),
+          UserId = request.UserId.HasValue ? request.UserId.Value : userId.Value,
+          Type = (int)request.Type,
+          Value = request.Value,
+          CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+          CreatedAtUtc = DateTime.UtcNow,
+        };
     }
   }
 }

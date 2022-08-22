@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender;
 
 namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
 {

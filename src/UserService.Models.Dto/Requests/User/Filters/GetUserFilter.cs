@@ -8,11 +8,11 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
     [FromQuery(Name = "userid")]
     public Guid? UserId { get; set; }
 
-    [FromQuery(Name = "name")]
-    public string Name { get; set; }
-
     [FromQuery(Name = "email")]
     public string Email { get; set; }
+
+    [FromQuery(Name = "login")]
+    public string Login { get; set; }
 
     [FromQuery(Name = "includeachievements")]
     public bool IncludeAchievements { get; set; } = false;

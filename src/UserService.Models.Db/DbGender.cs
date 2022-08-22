@@ -13,7 +13,12 @@ namespace LT.DigitalOffice.UserService.Models.Db
     public string Name { get; set; }
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAtUtc { get; set; }
-    public ICollection<DbUserGender> UsersGenders { get; set; }
+    public ICollection<DbUserAddition> UsersAdditions { get; set; }
+
+    public DbGender()
+    {
+      UsersAdditions = new HashSet<DbUserAddition>();
+    }
   }
 
   public class GenderConfiguration : IEntityTypeConfiguration<DbGender>
@@ -31,8 +36,8 @@ namespace LT.DigitalOffice.UserService.Models.Db
         .IsRequired();
 
       builder
-        .HasMany(g => g.UsersGenders)
-        .WithOne(ug => ug.Gender);
+        .HasMany(g => g.UsersAdditions)
+        .WithOne(ua => ua.Gender);
     }
   }
 }
