@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
@@ -31,7 +33,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ICreateUserRequestValidator _validator;
     private readonly IUserRepository _userRepository;
     private readonly IPendingUserRepository _pendingUserRepository;
-    private readonly IUserAvatarRepository _imageRepository;
+    private readonly IUserAvatarRepository _avatarRepository;
     private readonly IDbUserMapper _dbUserMapper;
     private readonly IDbUserAvatarMapper _dbUserAvatarMapper;
     private readonly IAccessValidator _accessValidator;
@@ -65,14 +67,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       string email = dbUser.Communications
         .FirstOrDefault(c => c.Type == (int)CommunicationType.Email)?.Value;
 
-      await _emailService.SendAsync(email, textTemplate.Subject, parsedText, errors);
+      await _emailService.SendAsync(email: email, subject: textTemplate.Subject, text: parsedText, errors);
     }
 
     public CreateUserCommand(
       ICreateUserRequestValidator validator,
       IUserRepository userRepository,
       IPendingUserRepository pendingUserRepository,
-      IUserAvatarRepository imageRepository,
+      IUserAvatarRepository avatarRepository,
       IHttpContextAccessor httpContextAccessor,
       IDbUserMapper dbUserMapper,
       IDbUserAvatarMapper dbUserAvatarMapper,
@@ -88,7 +90,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _validator = validator;
       _userRepository = userRepository;
       _pendingUserRepository = pendingUserRepository;
-      _imageRepository = imageRepository;
+      _avatarRepository = avatarRepository;
       _dbUserMapper = dbUserMapper;
       _dbUserAvatarMapper = dbUserAvatarMapper;
       _accessValidator = accessValidator;
@@ -109,24 +111,28 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         return _responseCreator.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
       }
 
-      if (!_validator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
+        return _responseCreator.CreateFailureResponse<Guid>(
+          HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<Guid> response = new();
-
       DbUser dbUser = _dbUserMapper.Map(request);
+
+      OperationResultResponse<Guid> response = new(body: dbUser.Id);
 
       string password = !string.IsNullOrEmpty(request.Password?.Trim()) ?
         request.Password.Trim() : _generatePassword.Execute();
 
-      Guid userId = await _userRepository.CreateAsync(dbUser);
+      await _userRepository.CreateAsync(dbUser);
 
       await _pendingUserRepository
         .CreateAsync(new DbPendingUser()
         {
-          UserId = userId,
+          UserId = dbUser.Id,
           Password = password,
           CommunicationId = dbUser.Communications.FirstOrDefault().Id
         });
@@ -137,35 +143,33 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (avatarImageId.HasValue)
       {
-        await _imageRepository.CreateAsync(_dbUserAvatarMapper.Map(avatarImageId.Value, userId, true));
+        await _avatarRepository.CreateAsync(_dbUserAvatarMapper.Map(avatarId: avatarImageId.Value, userId: dbUser.Id, isCurrentAvatar: true));
       }
 
       await Task.WhenAll(
-        NotifyAsync(dbUser, password, "ru", response.Errors),
+        NotifyAsync(dbUser, password: password, locale: "ru", response.Errors),
 
         request.OfficeId.HasValue
-          ? _publish.CreateUserOfficeAsync(userId: userId, officeId: request.OfficeId.Value)
+          ? _publish.CreateUserOfficeAsync(userId: dbUser.Id, officeId: request.OfficeId.Value)
           : Task.CompletedTask,
 
         request.RoleId.HasValue
-          ? _publish.CreateUserRoleAsync(userId: userId, roleId: request.RoleId.Value)
+          ? _publish.CreateUserRoleAsync(userId: dbUser.Id, roleId: request.RoleId.Value)
           : Task.CompletedTask,
 
         request.DepartmentId.HasValue
-          ? _publish.CreateDepartmentUserAsync(userId: userId, departmentId: request.DepartmentId.Value)
+          ? _publish.CreateDepartmentUserAsync(userId: dbUser.Id, departmentId: request.DepartmentId.Value)
           : Task.CompletedTask,
 
         request.PositionId.HasValue
-          ? _publish.CreateUserPositionAsync(userId: userId, positionId: request.PositionId.Value)
+          ? _publish.CreateUserPositionAsync(userId: dbUser.Id, positionId: request.PositionId.Value)
           : Task.CompletedTask,
 
         request.UserCompany is not null
-          ? _publish.CreateCompanyUserAsync(userId: userId, request.UserCompany)
+          ? _publish.CreateCompanyUserAsync(userId: dbUser.Id, request.UserCompany)
           : Task.CompletedTask);
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-
-      response.Body = userId;
 
       return response;
     }

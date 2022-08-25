@@ -8,8 +8,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Db.Interfaces
   public interface IDbUserAvatarMapper
   {
     DbUserAvatar Map(
-      Guid imageId,
-      Guid entityId,
+      Guid avatarId,
+      Guid userId,
       bool isCurrentAvatar = false);
   }
 }

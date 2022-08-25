@@ -18,11 +18,11 @@ namespace LT.DigitalOffice.UserService.Data
       _provider = provider;
     }
 
-    public async Task<Guid?> CreateAsync(DbUserAvatar dbUserAvatar)
+    public async Task CreateAsync(DbUserAvatar dbUserAvatar)
     {
       if (dbUserAvatar is null)
       {
-        return null;
+        return;
       }
 
       if (dbUserAvatar.IsCurrentAvatar)
@@ -38,8 +38,6 @@ namespace LT.DigitalOffice.UserService.Data
 
       _provider.UsersAvatars.Add(dbUserAvatar);
       await _provider.SaveAsync();
-
-      return dbUserAvatar.AvatarId;
     }
 
     public Task<List<Guid>> GetAvatarsByUserId(Guid avatarId)
