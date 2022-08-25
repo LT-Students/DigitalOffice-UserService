@@ -4,6 +4,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
@@ -37,6 +38,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly ITextTemplateService _textTemplateService;
     private readonly IEmailService _emailService;
     private readonly ITextTemplateParser _parser;
+    private readonly IGlobalCacheRepository _globalCache;
 
     private async Task NotifyAsync(
       DbUser dbUser,
@@ -71,7 +73,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IPublish publish,
       ITextTemplateService textTemplateService,
       IEmailService emailService,
-      ITextTemplateParser parser)
+      ITextTemplateParser parser,
+      IGlobalCacheRepository globalCache)
     {
       _validator = validator;
       _userRepository = userRepository;
@@ -84,6 +87,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _textTemplateService = textTemplateService;
       _emailService = emailService;
       _parser = parser;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(EditUserActiveRequest request)
@@ -143,6 +147,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           password,
           "ru",
           response.Errors);
+      }
+
+      if (response.Body)
+      {
+        await _globalCache.RemoveAsync(request.UserId);
       }
 
       return response;
