@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           Cache.Users,
           key,
           users,
-          context.Message.UsersIds,
+          users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }
