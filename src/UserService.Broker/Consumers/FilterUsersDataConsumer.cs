@@ -106,7 +106,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
             ascendingSort: context.Message.AscendingSort,
             fullNameIncludeSubstring: context.Message.FullNameIncludeSubstring),
           (users, usersCount),
-          context.Message.UsersIds,
+          users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
       }
     }
