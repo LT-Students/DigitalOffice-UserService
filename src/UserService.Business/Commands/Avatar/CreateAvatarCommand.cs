@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
@@ -27,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IImageService _imageService;
     private readonly IResponseCreator _responseCreator;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public CreateAvatarCommand(
       IUserAvatarRepository avatarRepository,
@@ -35,7 +37,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       IDbUserAvatarMapper dbEntityImageMapper,
       IHttpContextAccessor httpContextAccessor,
       IImageService imageService,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IGlobalCacheRepository globalCache)
     {
       _avatarRepository = avatarRepository;
       _accessValidator = accessValidator;
@@ -44,6 +47,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _httpContextAccessor = httpContextAccessor;
       _imageService = imageService;
       _responseCreator = responseCreator;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateAvatarRequest request)
@@ -74,6 +78,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
             .Map(response.Body.Value, request.UserId.Value, request.IsCurrentAvatar));
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
+        if (request.IsCurrentAvatar)
+        {
+          await _globalCache.RemoveAsync(request.UserId.Value);
+        }
       }
       else
       {
