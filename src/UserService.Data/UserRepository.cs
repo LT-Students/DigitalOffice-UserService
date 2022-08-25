@@ -97,17 +97,15 @@ namespace LT.DigitalOffice.UserService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<Guid> CreateAsync(DbUser dbUser)
+    public Task CreateAsync(DbUser dbUser)
     {
-      if (dbUser is null)
+      if (dbUser is not null)
       {
-        return default;
+        _provider.Users.Add(dbUser);
+        return _provider.SaveAsync(); 
       }
 
-      _provider.Users.Add(dbUser);
-      await _provider.SaveAsync();
-
-      return dbUser.Id;
+      return Task.CompletedTask;
     }
 
     public Task<DbUser> GetAsync(Guid userId)

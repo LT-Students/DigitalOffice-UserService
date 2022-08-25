@@ -1,453 +1,536 @@
-﻿namespace LT.DigitalOffice.UserService.Business.UnitTests.User
+﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Responses.TextTemplate;
+using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UserService.Broker.Publishes.Interfaces;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
+using LT.DigitalOffice.UserService.Business.Commands.User;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.UserCompany;
+using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Moq;
+using Moq.AutoMock;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace LT.DigitalOffice.UserService.Business.UnitTests.User
 {
   class CreateUserCommandTests
+  {
+    private AutoMocker _mocker;
+    private ICreateUserCommand _command;
+
+    private CreateUserRequest _request;
+    private OperationResultResponse<Guid> _response;
+    private OperationResultResponse<Guid> _failureResponse;
+    private DbUser _dbUser;
+    private DbUserAvatar _dbUserAvatar;
+
+    private void Verifiable(
+      Times accessValidatorCalls,
+      Times responseCreatorCalls,
+      Times validatorCalls,
+      Times mapperCalls,
+      Times pendingRepositoryCalls,
+      Times imageSericeCalls,
+      Times imageMapperCalls,
+      Times avaterRepositoryCalls,
+      Times templateServiceCalls,
+      Times emailServiceCalls,
+      Times publishOfficeCalls,
+      Times publishRoleCalls,
+      Times publishDepartmentCalls,
+      Times publishPositionCalls,
+      Times publishCompanyCalls)
     {
-        //private Mock<IDbUserMapper> _mapperUserMock;
-        //private Mock<IUserRepository> _userRepositoryMock;
-        //private Mock<IAccessValidator> _accessValidatorMock;
-        //private Mock<ILogger<CreateUserCommand>> _loggerMock;
-        //private Mock<ICreateUserRequestValidator> _validatorMock;
-        //private Mock<IRequestClient<IAddImageRequest>> _rcImageMock;
-        //private Mock<IHttpContextAccessor> _httpContextAccessorMock;
-        //private Mock<IRequestClient<ISendEmailRequest>> _rcSendEmailMock;
-        //private Mock<IRequestClient<IChangeUserPositionRequest>> _rcPositionMock;
-        //private Mock<IRequestClient<IChangeUserDepartmentRequest>> _rcDepartmentMock;
-        //private Mock<IGeneratePasswordCommand> _generatePasswordMock;
-
-        //private Mock<IOperationResult<IAddImageResponse>> _operationResultAddImageMock;
-        //private Mock<IOperationResult<bool>> _operationResultSendEmailMock;
-        //private Mock<IOperationResult<bool>> _operationResultChangePositionMock;
-        //private Mock<IOperationResult<bool>> _operationResultChangeDepartmentMock;
-
-        //private Guid _imageId = Guid.NewGuid();
-        //private string _password = "password";
-        //private DbUser _dbUser;
-        //private ICreateUserCommand _command;
-        //private CreateUserRequest _createUserRequest;
-        //private DbUserCommunication _dbCommunication;
-        //private OperationResultResponse<Guid> _expectedOperationResultResponse;
-
-        //#region Broker setup
-        //private void RcAddImageSetUp()
-        //{
-        //    _operationResultAddImageMock = new Mock<IOperationResult<IAddImageResponse>>();
-        //    _operationResultAddImageMock.Setup(x => x.Body.Id).Returns(_imageId);
-        //    _operationResultAddImageMock.Setup(x => x.IsSuccess).Returns(true);
-        //    _operationResultAddImageMock.Setup(x => x.Errors).Returns(new List<string>());
-
-        //    var responseBrokerAddImageMock = new Mock<Response<IOperationResult<IAddImageResponse>>>();
-        //    responseBrokerAddImageMock
-        //       .SetupGet(x => x.Message)
-        //       .Returns(_operationResultAddImageMock.Object);
-
-        //    _rcImageMock.Setup(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Returns(Task.FromResult(responseBrokerAddImageMock.Object));
-        //}
-
-        //private void RcSendEmailSetUp()
-        //{
-        //    _operationResultSendEmailMock = new Mock<IOperationResult<bool>>();
-        //    _operationResultSendEmailMock.Setup(x => x.Body).Returns(true);
-        //    _operationResultSendEmailMock.Setup(x => x.IsSuccess).Returns(true);
-        //    _operationResultSendEmailMock.Setup(x => x.Errors).Returns(new List<string>());
-
-        //    var responseBrokerSendEmailMock = new Mock<Response<IOperationResult<bool>>>();
-
-        //    responseBrokerSendEmailMock
-        //       .SetupGet(x => x.Message)
-        //       .Returns(_operationResultSendEmailMock.Object);
-
-        //    _rcSendEmailMock.Setup(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Returns(Task.FromResult(responseBrokerSendEmailMock.Object));
-        //}
-
-        //private void RcChangePositionSetUp()
-        //{
-        //    _operationResultChangePositionMock = new Mock<IOperationResult<bool>>();
-        //    _operationResultChangePositionMock.Setup(x => x.Body).Returns(true);
-        //    _operationResultChangePositionMock.Setup(x => x.IsSuccess).Returns(true);
-        //    _operationResultChangePositionMock.Setup(x => x.Errors).Returns(new List<string>());
-
-        //    var responseBrokerChangePositionMock = new Mock<Response<IOperationResult<bool>>>();
-
-        //    responseBrokerChangePositionMock
-        //       .SetupGet(x => x.Message)
-        //       .Returns(_operationResultChangePositionMock.Object);
-
-        //    _rcPositionMock.Setup(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Returns(Task.FromResult(responseBrokerChangePositionMock.Object));
-        //}
-
-        //#endregion
-
-        //#region Setup
-
-        //[OneTimeSetUp]
-        //public void OneTimeSetUp()
-        //{
-        //    _mapperUserMock = new Mock<IDbUserMapper>();
-        //    _userRepositoryMock = new Mock<IUserRepository>();
-        //    _accessValidatorMock = new Mock<IAccessValidator>();
-        //    _loggerMock = new Mock<ILogger<CreateUserCommand>>();
-        //    _validatorMock = new Mock<ICreateUserRequestValidator>();
-        //    _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-        //    _generatePasswordMock = new Mock<IGeneratePasswordCommand>();
-
-        //    _rcImageMock = new Mock<IRequestClient<IAddImageRequest>>();
-        //    _rcSendEmailMock = new Mock<IRequestClient<ISendEmailRequest>>();
-        //    _rcPositionMock = new Mock<IRequestClient<IChangeUserPositionRequest>>();
-        //    _rcDepartmentMock = new Mock<IRequestClient<IChangeUserDepartmentRequest>>();
-
-        //    var userId = Guid.NewGuid();
-
-        //    _createUserRequest = new CreateUserRequest
-        //    {
-        //        FirstName = "Ivan",
-        //        LastName = "Ivanov",
-        //        MiddleName = "Ivanovich",
-        //        DateOfBirth = "2021-08-23",
-        //        City = "Spb",
-        //        Gender = UserGender.NotSelected,
-        //        Status = UserStatus.Vacation,
-        //        AvatarImage = new AddImageRequest
-        //        {
-        //            Name = "name",
-        //            Content = "[84][104][105][115][32]",
-        //            Extension = ".jpg"
-        //        },
-        //        StartWorkingAt = "2021-08-23",
-        //        IsAdmin = false,
-        //        DepartmentId = Guid.NewGuid(),
-        //        PositionId = Guid.NewGuid()
-        //    };
-
-        //    _dbCommunication = new DbUserCommunication
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        UserId = userId,
-        //        Type = (int)CommunicationType.Email,
-        //        Value = "IvanoIvan@gmail.com"
-        //    };
-
-        //    _dbUser = new DbUser
-        //    {
-        //        Id = userId,
-        //        FirstName = _createUserRequest.FirstName,
-        //        LastName = _createUserRequest.LastName,
-        //        MiddleName = _createUserRequest.MiddleName,
-        //        DateOfBirth = DateTime.Parse(_createUserRequest.DateOfBirth),
-        //        City = _createUserRequest.City,
-        //        Gender = (int)_createUserRequest.Gender,
-        //        Status = (int)_createUserRequest.Status,
-        //        AvatarFileId = _imageId,
-        //        StartWorkingAt = DateTime.Parse(_createUserRequest.StartWorkingAt),
-        //        IsAdmin = (bool)_createUserRequest.IsAdmin,
-        //        IsActive = true,
-        //        Communications = new List<DbUserCommunication>
-        //        {
-        //            _dbCommunication
-        //        }
-        //    };
-
-        //    IDictionary<object, object> httpContextItems = new Dictionary<object, object>();
-
-        //    httpContextItems.Add("UserId", userId);
-
-        //    _httpContextAccessorMock
-        //        .Setup(x => x.HttpContext.Items)
-        //        .Returns(httpContextItems);
-
-        //    _command = new CreateUserCommand(
-        //        _loggerMock.Object,
-        //        _rcImageMock.Object,
-        //        _httpContextAccessorMock.Object,
-        //        _rcDepartmentMock.Object,
-        //        _rcPositionMock.Object,
-        //        _rcSendEmailMock.Object,
-        //        _userRepositoryMock.Object,
-        //        _validatorMock.Object,
-        //        _mapperUserMock.Object,
-        //        _accessValidatorMock.Object,
-        //        _generatePasswordMock.Object);
-        //}
-
-        //[SetUp]
-        //public void SetUp()
-        //{
-        //    _expectedOperationResultResponse = new OperationResultResponse<Guid>()
-        //    {
-        //        Body = _dbUser.Id,
-        //        Status = OperationResultStatusType.FullSuccess,
-        //        Errors = new List<string>()
-        //    };
-
-        //    _mapperUserMock.Reset();
-        //    _userRepositoryMock.Reset();
-        //    _accessValidatorMock.Reset();
-        //    _rcImageMock.Reset();
-        //    _rcDepartmentMock.Reset();
-        //    _rcPositionMock.Reset();
-        //    _rcSendEmailMock.Reset();
-        //    _generatePasswordMock.Reset();
-
-        //    RcAddImageSetUp();
-        //    RcSendEmailSetUp();
-        //    RcChangePositionSetUp();
-        //    RcChangeDepartmentSetUp();
-
-        //    _accessValidatorMock
-        //        .Setup(x => x.IsAdmin(null))
-        //        .Returns(true);
-
-        //    _validatorMock
-        //        .Setup(x => x.Validate(It.IsAny<IValidationContext>()).IsValid)
-        //        .Returns(true);
-
-        //    _mapperUserMock
-        //        .Setup(x => x.Map(_createUserRequest, _operationResultAddImageMock.Object.Body.Id))
-        //        .Returns(_dbUser);
-
-        //    _generatePasswordMock
-        //        .Setup(x => x.Execute())
-        //        .Returns(_password);
-
-        //    _userRepositoryMock
-        //        .Setup(x => x.Create(_dbUser, _password))
-        //        .Returns(_dbUser.Id);
-        //}
-
-        //#endregion
-
-        //[Test]
-        //public void ShoulRequestIsPartialSuccessWhenImageWasNotAdded()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Can not add avatar image to user with id {_dbUser.Id}. Please try again later.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _operationResultAddImageMock
-        //        .Setup(x => x.IsSuccess)
-        //        .Returns(false);
-        //    _operationResultAddImageMock
-        //        .Setup(x => x.Errors)
-        //        .Returns(messageError);
-
-        //    _mapperUserMock
-        //        .Setup(x => x.Map(_createUserRequest, null))
-        //        .Returns(_dbUser);
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldRequestIsPartialSuccessWhenEmailWasNotSent()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Can not send email to '{_dbCommunication.Value}'. " +
-        //        "Email placed in resend queue and will be resended in 1 hour.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _operationResultSendEmailMock
-        //        .Setup(x => x.IsSuccess)
-        //        .Returns(false);
-        //    _operationResultSendEmailMock
-        //        .Setup(x => x.Errors)
-        //        .Returns(messageError);
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldRequestIsPartialSuccessWhenDepartmentWasNotChanged()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Сan't assign user {_dbUser.Id} to the department {_createUserRequest.DepartmentId}. Please try again later.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _operationResultChangeDepartmentMock
-        //        .Setup(x => x.IsSuccess)
-        //        .Returns(false);
-        //    _operationResultChangeDepartmentMock
-        //        .Setup(x => x.Errors)
-        //        .Returns(messageError);
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldRequestIsPartialSuccessWhenPositionWasNotChanged()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Сan't assign position {_createUserRequest.PositionId} to the user {_dbUser.Id}. Please try again later.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _operationResultChangePositionMock
-        //        .Setup(x => x.IsSuccess)
-        //        .Returns(false);
-        //    _operationResultChangePositionMock
-        //        .Setup(x => x.Errors)
-        //        .Returns(messageError);
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldRequestIsPartialSuccessWhenChangeDepartmentRequestThrowException()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Сan't assign user {_dbUser.Id} to the department {_createUserRequest.DepartmentId}. Please try again later.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _rcDepartmentMock.Setup(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Throws(new Exception());
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldRequestIsPartialSuccessWhenChangePositionRequestThrowException()
-        //{
-        //    _expectedOperationResultResponse.Status = OperationResultStatusType.PartialSuccess;
-
-        //    var messageError = new List<string>();
-        //    messageError.Add($"Сan't assign position {_createUserRequest.PositionId} to the user {_dbUser.Id}. Please try again later.");
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _rcPositionMock.Setup(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()))
-        //        .Throws(new Exception());
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
-
-        //[Test]
-        //public void ShouldCreateUserSuccessful()
-        //{
-        //    var messageError = new List<string>();
-
-        //    _expectedOperationResultResponse.Errors = messageError;
-
-        //    _operationResultSendEmailMock
-        //        .Setup(x => x.IsSuccess)
-        //        .Returns(true);
-
-        //    SerializerAssert.AreEqual(_expectedOperationResultResponse, _command.Execute(_createUserRequest));
-        //    _userRepositoryMock.Verify(x => x.Create(_dbUser, _password), Times.Once);
-        //    _rcImageMock.Verify(
-        //        x => x.GetResponse<IOperationResult<IAddImageResponse>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcSendEmailMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcPositionMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //    _rcDepartmentMock.Verify(
-        //        x => x.GetResponse<IOperationResult<bool>>(
-        //            It.IsAny<object>(), default, It.IsAny<RequestTimeout>()), Times.Once);
-        //}
+      _mocker.Verify<IAccessValidator>(
+        x => x.HasRightsAsync(It.IsAny<int[]>()),
+        accessValidatorCalls);
+
+      _mocker.Verify<IResponseCreator>(
+        x => x.CreateFailureResponse<Guid>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()),
+        responseCreatorCalls);
+
+      _mocker.Verify<ICreateUserRequestValidator>(
+        x => x.ValidateAsync(It.IsAny<CreateUserRequest>(), default),
+        validatorCalls);
+
+      _mocker.Verify<IDbUserMapper>(
+        x => x.Map(It.IsAny<CreateUserRequest>()),
+        mapperCalls);
+
+      _mocker.Verify<IPendingUserRepository>(
+        x => x.CreateAsync(It.IsAny<DbPendingUser>()),
+        pendingRepositoryCalls);
+
+      _mocker.Verify<IImageService>(
+        x => x.CreateImageAsync(It.IsAny<CreateAvatarRequest>(), It.IsAny<List<string>>()),
+        imageSericeCalls);
+
+      _mocker.Verify<IDbUserAvatarMapper>(
+        x => x.Map(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<bool>()),
+        imageMapperCalls);
+
+      _mocker.Verify<IUserAvatarRepository>(
+        x => x.CreateAsync(It.IsAny<DbUserAvatar>()),
+        avaterRepositoryCalls);
+
+      _mocker.Verify<ITextTemplateService>(
+        x => x.GetAsync(It.IsAny<TemplateType>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<Guid?>()),
+        templateServiceCalls);
+
+      _mocker.Verify<IEmailService>(
+        x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+        emailServiceCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateUserOfficeAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+        publishOfficeCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateUserRoleAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+        publishRoleCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateDepartmentUserAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+        publishDepartmentCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateUserPositionAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+        publishPositionCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateCompanyUserAsync(It.IsAny<Guid>(), It.IsAny<CreateUserCompanyRequest>()),
+        publishCompanyCalls);
+
+      _mocker.Verify<IPublish>(
+        x => x.CreateCompanyUserAsync(It.IsAny<Guid>(), It.IsAny<CreateUserCompanyRequest>()),
+        publishCompanyCalls);
+
+      _mocker.Resolvers.Clear();
     }
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+      _failureResponse = new()
+      {
+        Body = Guid.Empty,
+        Errors = new() { "Error" }
+      };
+
+      _dbUser = new()
+      {
+        Id = Guid.NewGuid(),
+        Communications = new List<DbUserCommunication>()
+        {
+          new DbUserCommunication()
+        }
+      };
+
+      _dbUserAvatar = new()
+      {
+        Id = Guid.Empty,
+        UserId = _dbUser.Id,
+        AvatarId = Guid.NewGuid()
+      };
+
+      _response = new(body: _dbUser.Id);
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+      _request = new CreateUserRequest()
+      {
+        DepartmentId = Guid.Empty,
+        OfficeId = Guid.Empty,
+        PositionId = Guid.Empty,
+        RoleId = Guid.Empty,
+        UserCompany = new(),
+        AvatarImage = new(),
+        Communication = new()
+      };
+
+      _mocker = new AutoMocker();
+
+      _mocker
+        .Setup<IAccessValidator, Task<bool>>(x => x.HasRightsAsync(It.IsAny<int[]>()))
+        .Returns(Task.FromResult(true));
+
+      _mocker
+        .Setup<IResponseCreator, OperationResultResponse<Guid>>(x => x.CreateFailureResponse<Guid>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()))
+        .Returns(_failureResponse);
+
+      _mocker
+        .Setup<ICreateUserRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateUserRequest>(), default))
+        .Returns(Task.FromResult(new ValidationResult() { }));
+
+      _mocker
+        .Setup<IDbUserMapper, DbUser>(x => x.Map(It.IsAny<CreateUserRequest>()))
+        .Returns(_dbUser);
+
+      _mocker
+        .Setup<IPendingUserRepository, Task>(x => x.CreateAsync(It.IsAny<DbPendingUser>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IImageService, Task<Guid?>>(x => x.CreateImageAsync(It.IsAny<CreateAvatarRequest>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult((Guid?)_dbUserAvatar.AvatarId));
+
+      _mocker
+        .Setup<IDbUserAvatarMapper, DbUserAvatar>(x => x.Map(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<bool>()))
+        .Returns(_dbUserAvatar);
+
+      _mocker
+        .Setup<IUserAvatarRepository, Task>(x => x.CreateAsync(It.IsAny<DbUserAvatar>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IGetTextTemplateResponse, string>(x => x.Text)
+        .Returns(string.Empty);
+
+      _mocker
+        .Setup<IGetTextTemplateResponse, string>(x => x.Subject)
+        .Returns(string.Empty);
+
+      _mocker
+        .Setup<ITextTemplateParser, string>(x => x.ParseModel(It.IsAny<Dictionary<string, string>>(), It.IsAny<string>()))
+        .Returns(_mocker.GetMock<IGetTextTemplateResponse>().Object.Text);
+
+      _mocker
+        .Setup<ITextTemplateParser, string>(x => x.Parse(It.IsAny<Dictionary<string, string>>(), It.IsAny<string>()))
+        .Returns(_mocker.GetMock<IGetTextTemplateResponse>().Object.Text);
+
+      _mocker
+        .Setup<ITextTemplateService, Task<IGetTextTemplateResponse>>(x => x
+          .GetAsync(It.IsAny<TemplateType>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<Guid?>()))
+        .Returns(Task.FromResult(_mocker.GetMock<IGetTextTemplateResponse>().Object));
+
+      _mocker
+        .Setup<IEmailService, Task>(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IPublish, Task>(x => x.CreateUserOfficeAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IPublish, Task>(x => x.CreateUserRoleAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IPublish, Task>(x => x.CreateDepartmentUserAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IPublish, Task>(x => x.CreateUserPositionAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IPublish, Task>(x => x.CreateCompanyUserAsync(It.IsAny<Guid>(), It.IsAny<CreateUserCompanyRequest>()))
+        .Returns(Task.CompletedTask);
+
+      _mocker
+        .Setup<IHttpContextAccessor, int>(x => x.HttpContext.Response.StatusCode)
+        .Returns(201);
+
+      _command = _mocker.CreateInstance<CreateUserCommand>();
+    }
+
+    [Test]
+    public void CreateFullUserInfoSuccesTest()
+    {
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutAvatarSuccesTest()
+    {
+      _request.AvatarImage = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Never(),
+        imageMapperCalls: Times.Never(),
+        avaterRepositoryCalls: Times.Never(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutAvatarIfImageServiceNotRespondedSuccesTest()
+    {
+      _mocker
+        .Setup<IImageService, Task<Guid?>>(x => x.CreateImageAsync(It.IsAny<CreateAvatarRequest>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult((Guid?)null));
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Never(),
+        avaterRepositoryCalls: Times.Never(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutOfficeSuccesTest()
+    {
+      _request.OfficeId = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Never(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutRoleSuccesTest()
+    {
+      _request.RoleId = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Never(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutDepartmentSuccesTest()
+    {
+      _request.DepartmentId = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Never(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutPositionSuccesTest()
+    {
+      _request.PositionId = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Never(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void CreateUserWithoutCompanySuccesTest()
+    {
+      _request.UserCompany = null;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Once(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Never());
+    }
+
+    [Test]
+    public void CreateUserWithoutTextTemplateSuccesTest()
+    {
+      _mocker
+        .Setup<ITextTemplateService, Task<IGetTextTemplateResponse>>(x => x
+          .GetAsync(It.IsAny<TemplateType>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<Guid?>()))
+        .Returns(Task.FromResult((IGetTextTemplateResponse)null));
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Never(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Once(),
+        pendingRepositoryCalls: Times.Once(),
+        imageSericeCalls: Times.Once(),
+        imageMapperCalls: Times.Once(),
+        avaterRepositoryCalls: Times.Once(),
+        templateServiceCalls: Times.Once(),
+        emailServiceCalls: Times.Never(),
+        publishOfficeCalls: Times.Once(),
+        publishRoleCalls: Times.Once(),
+        publishDepartmentCalls: Times.Once(),
+        publishPositionCalls: Times.Once(),
+        publishCompanyCalls: Times.Once());
+    }
+
+    [Test]
+    public void NotEnoughRightTest()
+    {
+      _mocker
+        .Setup<IAccessValidator, Task<bool>>(x => x.HasRightsAsync(It.IsAny<int[]>()))
+        .Returns(Task.FromResult(false));
+
+      SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Once(),
+        validatorCalls: Times.Never(),
+        mapperCalls: Times.Never(),
+        pendingRepositoryCalls: Times.Never(),
+        imageSericeCalls: Times.Never(),
+        imageMapperCalls: Times.Never(),
+        avaterRepositoryCalls: Times.Never(),
+        templateServiceCalls: Times.Never(),
+        emailServiceCalls: Times.Never(),
+        publishOfficeCalls: Times.Never(),
+        publishRoleCalls: Times.Never(),
+        publishDepartmentCalls: Times.Never(),
+        publishPositionCalls: Times.Never(),
+        publishCompanyCalls: Times.Never());
+    }
+
+    [Test]
+    public void ValidationFailureTest()
+    {
+      _mocker
+        .Setup<ICreateUserRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<CreateUserRequest>(), default))
+        .Returns(Task.FromResult(new ValidationResult(new List<ValidationFailure>() { new ValidationFailure("_", "Error") })));
+
+      SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_request).Result);
+
+      Verifiable(
+        accessValidatorCalls: Times.Once(),
+        responseCreatorCalls: Times.Once(),
+        validatorCalls: Times.Once(),
+        mapperCalls: Times.Never(),
+        pendingRepositoryCalls: Times.Never(),
+        imageSericeCalls: Times.Never(),
+        imageMapperCalls: Times.Never(),
+        avaterRepositoryCalls: Times.Never(),
+        templateServiceCalls: Times.Never(),
+        emailServiceCalls: Times.Never(),
+        publishOfficeCalls: Times.Never(),
+        publishRoleCalls: Times.Never(),
+        publishDepartmentCalls: Times.Never(),
+        publishPositionCalls: Times.Never(),
+        publishCompanyCalls: Times.Never());
+    }
+  }
 }

@@ -1,13 +1,12 @@
 using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
+using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.JsonPatch;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
-using System.Threading.Tasks;
 using System.Linq;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
+using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
 {
@@ -22,7 +21,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null);
 
-    Task<Guid> CreateAsync(DbUser dbUser);
+    Task CreateAsync(DbUser dbUser);
 
     Task<bool> EditUserAdditionAsync(Guid userId, JsonPatchDocument<DbUserAddition> patch);
 

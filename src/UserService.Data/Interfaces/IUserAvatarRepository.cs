@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   [AutoInject]
   public interface IUserAvatarRepository
   {
-    Task<Guid?> CreateAsync(DbUserAvatar dbEntityImage);
+    Task CreateAsync(DbUserAvatar dbEntityImage);
 
     Task<List<Guid>> GetAvatarsByUserId(Guid entityId);
 
