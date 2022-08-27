@@ -103,10 +103,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         ? _imageService.GetImagesAsync(dbUser.Avatars?.Select(ua => ua.AvatarId).ToList(), response.Errors)
         : Task.FromResult(null as List<ImageInfo>);
 
-      Task<List<OfficeData>> officesTask = Task.FromResult(null as List<OfficeData>); // fix in next release
-      /*Task<List<OfficeData>> officesTask = filter.IncludeOffice
+      Task<List<OfficeData>> officesTask = filter.IncludeOffice
         ? _officeService.GetOfficesAsync(dbUser.Id, response.Errors)
-        : Task.FromResult(null as List<OfficeData>);*/
+        : Task.FromResult(null as List<OfficeData>);
 
       Task<List<PositionData>> positionsTask = filter.IncludePosition
         ? _positionService.GetPositionsAsync(dbUser.Id, response.Errors)
