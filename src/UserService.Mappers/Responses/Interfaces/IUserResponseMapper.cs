@@ -14,12 +14,9 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses.Interfaces
       CompanyUserInfo companyUser,
       ImageInfo avatar,
       DepartmentUserInfo departmentUser,
-      List<EducationInfo> educations,
       List<ImageInfo> images,
       OfficeInfo office,
       PositionInfo position,
-      List<ProjectInfo> projects,
-      RoleInfo role,
-      List<SkillInfo> skills);
+      RoleInfo role);
   }
 }
