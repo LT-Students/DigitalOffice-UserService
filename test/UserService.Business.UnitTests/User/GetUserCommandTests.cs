@@ -1,355 +1,490 @@
-﻿//using LT.DigitalOffice.Kernel.Broker;
-//using LT.DigitalOffice.Kernel.Exceptions.Models;
-//using LT.DigitalOffice.Models.Broker.Models;
-//using LT.DigitalOffice.Models.Broker.Requests.Company;
-//using LT.DigitalOffice.Models.Broker.Requests.File;
-//using LT.DigitalOffice.Models.Broker.Requests.Project;
-//using LT.DigitalOffice.Models.Broker.Responses.Company;
-//using LT.DigitalOffice.Models.Broker.Responses.File;
-//using LT.DigitalOffice.Models.Broker.Responses.Project;
-//using LT.DigitalOffice.UnitTestKernel;
-//using LT.DigitalOffice.UserService.Business.Interfaces;
-//using LT.DigitalOffice.UserService.Data.Interfaces;
-//using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
-//using LT.DigitalOffice.UserService.Models.Db;
-//using LT.DigitalOffice.UserService.Models.Dto;
-//using LT.DigitalOffice.UserService.Models.Dto.Models;
-//using LT.DigitalOffice.UserService.Models.Dto.Models.Certificates;
-//using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
-//using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
-//using MassTransit;
-//using Microsoft.Extensions.Logging;
-//using Moq;
-//using Moq.AutoMock;
-//using NUnit.Framework;
-//using System;
-//using System.Collections.Generic;
+﻿using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Models.Company;
+using LT.DigitalOffice.Models.Broker.Models.Department;
+using LT.DigitalOffice.Models.Broker.Models.Office;
+using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Right;
+using LT.DigitalOffice.UnitTestKernel;
+using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
+using LT.DigitalOffice.UserService.Business.Commands.User;
+using LT.DigitalOffice.UserService.Business.Interfaces;
+using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.UserService.Mappers.Responses.Interfaces;
+using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Models;
+using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
+using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
+using Moq;
+using Moq.AutoMock;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
-//namespace LT.DigitalOffice.UserService.Business.UnitTests.User
-//{
-//    class GetUserCommandTests
-//    {
-//        private AutoMocker _mocker;
-//        private Mock<ILogger<GetUserCommand>> _loggerMock;
-//        private GetUserFilter _filter;
-//        private DbUser _dbUser;
-//        private UserResponse _userResponse;
-//        private IGetUserCommand _command;
+namespace LT.DigitalOffice.UserService.Business.UnitTests.User
+{
+  class GetUserCommandTests
+  {
+    private AutoMocker _mocker;
 
-//        private Guid _userId = Guid.NewGuid();
-//        private Guid _departmentId = Guid.NewGuid();
-//        private Guid _positionId = Guid.NewGuid();
-//        private List<ProjectShortInfo> _projects;
-//        private Guid _imageId = Guid.NewGuid();
+    private GetUserFilter _filter;
+    private DbUser _dbUser;
+    private UserResponse _userResponse;
+    private OperationResultResponse<UserResponse> _response;
+    private OperationResultResponse<UserResponse> _failureResponse;
+    private IGetUserCommand _command;
 
+    private List<CompanyData> _companiesData = new();
+    private List<DepartmentData> _departmentsData = new();
+    private List<ImageInfo> _imagesInfo = new();
+    private List<OfficeData> _officesData = new();
+    private List<PositionData> _positionsData = new();
+    private List<RoleData> _rolesData = new();
 
-//        [SetUp]
-//        public void SetUp()
-//        {
-//            _dbUser = new DbUser
-//            {
-//                Id = _userId,
-//                FirstName = "First",
-//                LastName = "Last",
-//                MiddleName = "Middle",
-//                Status = 1,
-//                AvatarFileId = Guid.NewGuid(),
-//                IsActive = true,
-//                About = "About",
-//                Rate = 1.3,
-//                CreatedAt = DateTime.UtcNow,
-//                StartWorkingAt = DateTime.UtcNow,
-//                Credentials = new DbUserCredentials(),
-//                Certificates = new List<DbUserCertificate>
-//                {
-//                    new DbUserCertificate
-//                    {
-//                        ImageId = _imageId
-//                    }
-//                },
-//                Achievements = new List<DbUserAchievement>(),
-//                Communications = new List<DbUserCommunication>(),
-//                Skills = new List<DbUserSkill>()
-//            };
+    private CompanyUserInfo _companyUser = new();
+    private DepartmentUserInfo _departmentUser = new();
+    private OfficeInfo _officeUser = new();
+    private PositionInfo _positionUser = new();
+    private RoleInfo _userRole = new();
 
-//            _filter = new GetUserFilter
-//            {
-//                UserId = _userId,
-//                Name = _dbUser.FirstName,
-//                Email = "email",
-//                IncludeCommunications = true,
-//                IncludeCertificates = true,
-//                IncludeAchievements = true,
-//                IncludeDepartment = true,
-//                IncludePosition = true,
-//                IncludeSkills = true,
-//                IncludeImages = true,
-//                IncludeProjects = true
-//            };
+    private void Verifiable(
+      Times responseCreatorCalls,
+      Times userRepositoryCalls,
+      Times companyServiceCalls,
+      Times departmentServiceCalls,
+      Times imageServiceCalls,
+      Times officeServiceCalls,
+      Times positionServiceCalls,
+      Times rightServiceCalls,
+      Times companyUserInfoMapperCalls,
+      Times departmentInfoMapperCalls,
+      Times officeInfoMapperCalls,
+      Times positionInfoMapperCalls,
+      Times roleInfoMapperCalls,
+      Times userResponseMapperCalls)
+    {
+      _mocker.Verify<IResponseCreator>(
+        x => x.CreateFailureResponse<UserResponse>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()),
+        responseCreatorCalls);
 
-//            _projects = new List<ProjectShortInfo>
-//            {
-//                new ProjectShortInfo(Guid.NewGuid(), "Project1", "Suspend"),
-//                new ProjectShortInfo(Guid.NewGuid(), "Project2", "Suspend")
-//            };
+      _mocker.Verify<IUserRepository>(
+        x => x.GetAsync(It.IsAny<GetUserFilter>()),
+        userRepositoryCalls);
 
-//            _userResponse = new UserResponse
-//            {
-//                User = new UserInfo(),
-//                Skills = new List<string>(),
-//                Communications = new List<CommunicationInfo>(),
-//                Certificates = new List<CertificateInfo>(),
-//                Achievements = new List<UserAchievementInfo>(),
-//                Projects = new List<ProjectInfo>(),
-//                Errors = new List<string>()
-//            };
+      _mocker.Verify<ICompanyService>(
+        x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        companyServiceCalls);
 
-//            _mocker = new AutoMocker();
+      _mocker.Verify<IDepartmentService>(
+        x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        departmentServiceCalls);
 
-//            _mocker
-//                .Setup<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()))
-//                .Returns(_dbUser);
+      _mocker.Verify<IImageService>(
+        x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>()),
+        imageServiceCalls);
 
-//            _mocker
-//                .Setup<IUserResponseMapper, UserResponse>(
-//                    x => x.Map(
-//                        It.IsAny<DbUser>(),
-//                        It.IsAny<DepartmentInfo>(),
-//                        It.IsAny<PositionInfo>(),
-//                        It.IsAny<List<ProjectInfo>>(),
-//                        It.IsAny<List<ImageInfo>>(),
-//                        It.IsAny<GetUserFilter>(),
-//                        It.IsAny<List<string>>()))
-//                .Returns(_userResponse);
+      _mocker.Verify<IOfficeService>(
+        x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        officeServiceCalls);
 
-//            _mocker
-//                .Setup<IGetDepartmentUserResponse, Guid>(x => x.DepartmentId)
-//                .Returns(_departmentId);
-//            _mocker
-//                .Setup<IOperationResult<IGetDepartmentUserResponse>, bool>(x => x.IsSuccess)
-//                .Returns(true);
-//            _mocker
-//                .Setup<IOperationResult<IGetDepartmentUserResponse>, IGetDepartmentUserResponse>(x => x.Body)
-//                .Returns(_mocker.GetMock<IGetDepartmentUserResponse>().Object);
-//            _mocker
-//                .Setup<IRequestClient<IGetDepartmentUserRequest>, IOperationResult<IGetDepartmentUserResponse>>(
-//                    x => x.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(IGetDepartmentUserRequest.CreateObj(
-//                        _userId),
-//                        default,
-//                        100)
-//                    .Result.Message)
-//                .Returns(_mocker.GetMock<IOperationResult<IGetDepartmentUserResponse>>().Object);
+      _mocker.Verify<IPositionService>(
+        x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        positionServiceCalls);
 
-//            _mocker
-//                .Setup<IPositionResponse, Guid>(x => x.PositionId)
-//                .Returns(_positionId);
-//            _mocker
-//                .Setup<IOperationResult<IPositionResponse>, bool>(x => x.IsSuccess)
-//                .Returns(true);
-//            _mocker
-//                .Setup<IOperationResult<IPositionResponse>, IPositionResponse>(x => x.Body)
-//                .Returns(_mocker.GetMock<IPositionResponse>().Object);
-//            _mocker
-//                .Setup<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
-//                    x => x.GetResponse<IOperationResult<IPositionResponse>>(IGetPositionRequest.CreateObj(
-//                        _userId, null),
-//                        default,
-//                        default)
-//                    .Result.Message)
-//                .Returns(_mocker.GetMock<IOperationResult<IPositionResponse>>().Object);
+      _mocker.Verify<IRightService>(
+        x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+        rightServiceCalls);
 
-//            _mocker
-//                .Setup<IGetUserProjectsInfoResponse, List<ProjectShortInfo>>(x => x.Projects)
-//                .Returns(_projects);
-//            _mocker
-//                .Setup<IOperationResult<IGetUserProjectsInfoResponse>, bool>(x => x.IsSuccess)
-//                .Returns(true);
-//            _mocker
-//                .Setup<IOperationResult<IGetUserProjectsInfoResponse>, IGetUserProjectsInfoResponse>(x => x.Body)
-//                .Returns(_mocker.GetMock<IGetUserProjectsInfoResponse>().Object);
-//            _mocker
-//                .Setup<IRequestClient<IGetUserProjectsInfoRequest>, IOperationResult<IGetUserProjectsInfoResponse>>(
-//                    x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(IGetUserProjectsInfoRequest.CreateObj(
-//                        _userId),
-//                        default,
-//                        default)
-//                    .Result.Message)
-//                .Returns(_mocker.GetMock<IOperationResult<IGetUserProjectsInfoResponse>>().Object);
+      _mocker.Verify<ICompanyUserInfoMapper>(
+        x => x.Map(It.IsAny<CompanyData>(), It.IsAny<CompanyUserData>()),
+        companyUserInfoMapperCalls);
 
-//            _mocker
-//                .Setup<IGetImageResponse, Guid>(x => x.ImageId)
-//                .Returns(Guid.NewGuid());
-//            _mocker
-//                .Setup<IOperationResult<IGetImageResponse>, bool>(x => x.IsSuccess)
-//                .Returns(true);
-//            _mocker
-//                .Setup<IOperationResult<IGetImageResponse>, IGetImageResponse>(x => x.Body)
-//                .Returns(_mocker.GetMock<IGetImageResponse>().Object);
-//            _mocker
-//                .Setup<IRequestClient<IGetImageRequest>, IOperationResult<IGetImageResponse>>(
-//                    x => x.GetResponse<IOperationResult<IGetImageResponse>>(IGetImageRequest.CreateObj(
-//                        _imageId),
-//                        default,
-//                        default)
-//                    .Result.Message)
-//                .Returns(_mocker.GetMock<IOperationResult<IGetImageResponse>>().Object);
+      _mocker.Verify<IDepartmentInfoMapper>(
+        x => x.Map(It.IsAny<Guid>(), It.IsAny<DepartmentData>()),
+        departmentInfoMapperCalls);
 
-//            _loggerMock = new Mock<ILogger<GetUserCommand>>();
+      _mocker.Verify<IOfficeInfoMapper>(
+        x => x.Map(It.IsAny<OfficeData>()),
+        officeInfoMapperCalls);
 
-//            _command = new GetUserCommand(
-//                _loggerMock.Object,
-//                _mocker.GetMock<IUserRepository>().Object,
-//                _mocker.GetMock<IUserResponseMapper>().Object,
-//                _mocker.GetMock<IRequestClient<IGetDepartmentUserRequest>>().Object,
-//                _mocker.GetMock<IRequestClient<IGetPositionRequest>>().Object,
-//                _mocker.GetMock<IRequestClient<IGetUserProjectsInfoRequest>>().Object,
-//                _mocker.GetMock<IRequestClient<IGetImageRequest>>().Object);
-//        }
+      _mocker.Verify<IPositionInfoMapper>(
+        x => x.Map(It.IsAny<PositionData>()),
+        positionInfoMapperCalls);
 
-//        [Test]
-//        public void ThrowExсeptionWhenFilterIsNull()
-//        {
-//            _filter = null;
+      _mocker.Verify<IRoleInfoMapper>(
+        x => x.Map(It.IsAny<RoleData>()),
+        roleInfoMapperCalls);
 
-//            Assert.Throws<BadRequestException>(() => _command.Execute(_filter));
+      _mocker.Verify<IUserResponseMapper>(
+        x => x.Map(
+          It.IsAny<DbUser>(),
+          It.IsAny<CompanyUserInfo>(),
+          It.IsAny<ImageInfo>(),
+          It.IsAny<DepartmentUserInfo>(),
+          It.IsAny<List<ImageInfo>>(),
+          It.IsAny<OfficeInfo>(),
+          It.IsAny<PositionInfo>(),
+          It.IsAny<RoleInfo>()),
+        userResponseMapperCalls);
 
-//            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Never());
+      _mocker.Resolvers.Clear();
+    }
 
-//            _mocker.Verify<IRequestClient<IGetDepartmentUserRequest>, IOperationResult<IGetDepartmentUserResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+      _failureResponse = new OperationResultResponse<UserResponse>(body: null, errors: new List<string>() { "Error" });
+    }
 
-//            _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
-//                x => x.GetResponse<IOperationResult<IPositionResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+    [SetUp]
+    public void SetUp()
+    {
+      _filter = new GetUserFilter
+      {
+        UserId = Guid.NewGuid(),
+        IncludeCurrentAvatar = true,
+        IncludeAvatars = true,
+        IncludeCommunications = true,
+        IncludeCompany = true,
+        IncludeDepartment = true,
+        IncludeOffice = true,
+        IncludePosition = true,
+        IncludeRole = true,
+        Locale = "en"
+      };
 
-//            _mocker.Verify<IRequestClient<IGetUserProjectsInfoRequest>, IOperationResult<IGetUserProjectsInfoResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _dbUser = new DbUser()
+      {
+        Id = _filter.UserId.Value
+      };
 
-//            _mocker.Verify<IRequestClient<IGetImageRequest>, IOperationResult<IGetImageResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetImageResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _userResponse = new UserResponse()
+      {
+        User = new UserInfo(),
+        UserAddition = new UserAdditionInfo(),
+        CompanyUser = _companyUser,
+        DepartmentUser = _departmentUser,
+        Images = _imagesInfo,
+        Office = _officeUser,
+        Position = _positionUser,
+        Role = _userRole
+      };
 
-//            _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
-//                It.IsAny<DbUser>(),
-//                It.IsAny<DepartmentInfo>(),
-//                It.IsAny<PositionInfo>(),
-//                It.IsAny<List<ProjectInfo>>(),
-//                It.IsAny<List<ImageInfo>>(),
-//                It.IsAny<GetUserFilter>(),
-//                It.IsAny<List<string>>()),
-//                Times.Never);
-//        }
+      _response = new OperationResultResponse<UserResponse>(body: _userResponse);
 
-//        [Test]
-//        public void ThrowExсeptionWhenFilterDoNotContainIdAndNameAndEmailData()
-//        {
-//            _filter.UserId = null;
-//            _filter.Name = null;
-//            _filter.Email = null;
+      _mocker = new AutoMocker();
 
-//            Assert.Throws<BadRequestException>(() => _command.Execute(_filter));
+      _mocker
+        .Setup<IResponseCreator, OperationResultResponse<UserResponse>>(x => x.CreateFailureResponse<UserResponse>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()))
+        .Returns(_failureResponse);
 
-//            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Never());
+      _mocker
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Returns(Task.FromResult(_dbUser));
 
-//            _mocker.Verify<IRequestClient<IGetDepartmentUserRequest>, IOperationResult<IGetDepartmentUserResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<ICompanyService, Task<List<CompanyData>>>(x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_companiesData));
 
-//            _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
-//                x => x.GetResponse<IOperationResult<IPositionResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IDepartmentService, Task<List<DepartmentData>>>(x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_departmentsData));
 
-//            _mocker.Verify<IRequestClient<IGetUserProjectsInfoRequest>, IOperationResult<IGetUserProjectsInfoResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IImageService, Task<List<ImageInfo>>>(x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_imagesInfo));
 
-//            _mocker.Verify<IRequestClient<IGetImageRequest>, IOperationResult<IGetImageResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetImageResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IOfficeService, Task<List<OfficeData>>>(x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_officesData));
 
-//            _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
-//                It.IsAny<DbUser>(),
-//                It.IsAny<DepartmentInfo>(),
-//                It.IsAny<PositionInfo>(),
-//                It.IsAny<List<ProjectInfo>>(),
-//                It.IsAny<List<ImageInfo>>(),
-//                It.IsAny<GetUserFilter>(),
-//                It.IsAny<List<string>>()),
-//                Times.Never);
-//        }
+      _mocker
+        .Setup<IPositionService, Task<List<PositionData>>>(x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_positionsData));
 
-//        [Test]
-//        public void ThrowNotFoundExceptionWhenUserIsNotFound()
-//        {
-//            DbUser emptyDbUser = null;
-//            _mocker
-//                .Setup<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()))
-//                .Returns(emptyDbUser);
+      _mocker
+        .Setup<IRightService, Task<List<RoleData>>>(x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+        .Returns(Task.FromResult(_rolesData));
 
-//            Assert.Throws<NotFoundException>(() => _command.Execute(_filter));
+      _mocker
+        .Setup<ICompanyUserInfoMapper, CompanyUserInfo>(x => x.Map(It.IsAny<CompanyData>(), It.IsAny<CompanyUserData>()))
+        .Returns(_companyUser);
 
-//            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Once());
+      _mocker
+        .Setup<IDepartmentInfoMapper, DepartmentUserInfo>(x => x.Map(It.IsAny<Guid>(), It.IsAny<DepartmentData>()))
+        .Returns(_departmentUser);
 
-//            _mocker.Verify<IRequestClient<IGetDepartmentUserRequest>, IOperationResult<IGetDepartmentUserResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IOfficeInfoMapper, OfficeInfo>(x => x.Map(It.IsAny<OfficeData>()))
+        .Returns(_officeUser);
 
-//            _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
-//                x => x.GetResponse<IOperationResult<IPositionResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IPositionInfoMapper, PositionInfo>(x => x.Map(It.IsAny<PositionData>()))
+        .Returns(_positionUser);
 
-//            _mocker.Verify<IRequestClient<IGetUserProjectsInfoRequest>, IOperationResult<IGetUserProjectsInfoResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IRoleInfoMapper, RoleInfo>(x => x.Map(It.IsAny<RoleData>()))
+        .Returns(_userRole);
 
-//            _mocker.Verify<IRequestClient<IGetImageRequest>, IOperationResult<IGetImageResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetImageResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      _mocker
+        .Setup<IUserResponseMapper, UserResponse>(
+          x => x.Map(
+            It.IsAny<DbUser>(),
+            It.IsAny<CompanyUserInfo>(),
+            It.IsAny<ImageInfo>(),
+            It.IsAny<DepartmentUserInfo>(),
+            It.IsAny<List<ImageInfo>>(),
+            It.IsAny<OfficeInfo>(),
+            It.IsAny<PositionInfo>(),
+            It.IsAny<RoleInfo>()))
+        .Returns(_userResponse);
 
-//            _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
-//                It.IsAny<DbUser>(),
-//                It.IsAny<DepartmentInfo>(),
-//                It.IsAny<PositionInfo>(),
-//                It.IsAny<List<ProjectInfo>>(),
-//                It.IsAny<List<ImageInfo>>(),
-//                It.IsAny<GetUserFilter>(),
-//                It.IsAny<List<string>>()),
-//                Times.Never);
-//        }
+      _command = _mocker.CreateInstance<GetUserCommand>();
+    }
 
-//        [Test]
-//        public void ReturnSuccessfulResponse()
-//        {
-//            SerializerAssert.AreEqual(_userResponse, _command.Execute(_filter));
-//            _mocker.Verify<IUserRepository, DbUser>(x => x.Get(It.IsAny<GetUserFilter>()), Times.Once());
+    [Test]
+    public void SuccessTest()
+    {
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
 
-//            _mocker.Verify<IRequestClient<IGetDepartmentUserRequest>, IOperationResult<IGetDepartmentUserResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetDepartmentUserResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Never());
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
 
-//            _mocker.Verify<IRequestClient<IGetPositionRequest>, IOperationResult<IPositionResponse>>(
-//                x => x.GetResponse<IOperationResult<IPositionResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Once());
+    [Test]
+    public void SuccessWithoutCompanyServiceTest()
+    {
+      _filter.IncludeCompany = false;
 
-//            _mocker.Verify<IRequestClient<IGetUserProjectsInfoRequest>, IOperationResult<IGetUserProjectsInfoResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetUserProjectsInfoResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Once());
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
 
-//            _mocker.Verify<IRequestClient<IGetImageRequest>, IOperationResult<IGetImageResponse>>(
-//                x => x.GetResponse<IOperationResult<IGetImageResponse>>(
-//                    It.IsAny<object>(), default, default).Result.Message, Times.Once());
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Never(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
 
-//            _mocker.Verify<IUserResponseMapper, UserResponse>(x => x.Map(
-//                It.IsAny<DbUser>(),
-//                It.IsAny<DepartmentInfo>(),
-//                It.IsAny<PositionInfo>(),
-//                It.IsAny<List<ProjectInfo>>(),
-//                It.IsAny<List<ImageInfo>>(),
-//                It.IsAny<GetUserFilter>(),
-//                It.IsAny<List<string>>()),
-//                Times.Once);
-//        }
-//    }
-//}
+    [Test]
+    public void SuccessWithoutDepartmentServiceTest()
+    {
+      _filter.IncludeDepartment = false;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Never(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
+
+    [Test]
+    public void SuccessWithoutImageServiceTest()
+    {
+      _filter.IncludeAvatars = false;
+      _filter.IncludeCurrentAvatar = false;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Never(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
+
+    [Test]
+    public void SuccessWithoutOfficeServiceTest()
+    {
+      _filter.IncludeOffice = false;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Never(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
+
+    [Test]
+    public void SuccessWithoutPositionServiceTest()
+    {
+      _filter.IncludePosition = false;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Never(),
+        rightServiceCalls: Times.Once(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
+
+    [Test]
+    public void SuccessWithoutRoleServiceTest()
+    {
+      _filter.IncludeRole = false;
+
+      SerializerAssert.AreEqual(_response, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Never(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Once(),
+        departmentServiceCalls: Times.Once(),
+        imageServiceCalls: Times.Once(),
+        officeServiceCalls: Times.Once(),
+        positionServiceCalls: Times.Once(),
+        rightServiceCalls: Times.Never(),
+        companyUserInfoMapperCalls: Times.Once(),
+        departmentInfoMapperCalls: Times.Once(),
+        officeInfoMapperCalls: Times.Once(),
+        positionInfoMapperCalls: Times.Once(),
+        roleInfoMapperCalls: Times.Once(),
+        userResponseMapperCalls: Times.Once());
+    }
+
+    [Test]
+    public void BadRequestIfFilterIsNullTest()
+    {
+      _filter = null;
+
+      SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Once(),
+        userRepositoryCalls: Times.Never(),
+        companyServiceCalls: Times.Never(),
+        departmentServiceCalls: Times.Never(),
+        imageServiceCalls: Times.Never(),
+        officeServiceCalls: Times.Never(),
+        positionServiceCalls: Times.Never(),
+        rightServiceCalls: Times.Never(),
+        companyUserInfoMapperCalls: Times.Never(),
+        departmentInfoMapperCalls: Times.Never(),
+        officeInfoMapperCalls: Times.Never(),
+        positionInfoMapperCalls: Times.Never(),
+        roleInfoMapperCalls: Times.Never(),
+        userResponseMapperCalls: Times.Never());
+    }
+
+    [Test]
+    public void BadRequestIfUserIdAndEmailWereNotSpecifiedTest()
+    {
+      _filter.UserId = null;
+      _filter.Email = null;
+
+      SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Once(),
+        userRepositoryCalls: Times.Never(),
+        companyServiceCalls: Times.Never(),
+        departmentServiceCalls: Times.Never(),
+        imageServiceCalls: Times.Never(),
+        officeServiceCalls: Times.Never(),
+        positionServiceCalls: Times.Never(),
+        rightServiceCalls: Times.Never(),
+        companyUserInfoMapperCalls: Times.Never(),
+        departmentInfoMapperCalls: Times.Never(),
+        officeInfoMapperCalls: Times.Never(),
+        positionInfoMapperCalls: Times.Never(),
+        roleInfoMapperCalls: Times.Never(),
+        userResponseMapperCalls: Times.Never());
+    }
+
+    [Test]
+    public void NotFoundResponseTest()
+    {
+      _mocker
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Returns(Task.FromResult((DbUser)null));
+
+      SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_filter).Result);
+
+      Verifiable(
+        responseCreatorCalls: Times.Once(),
+        userRepositoryCalls: Times.Once(),
+        companyServiceCalls: Times.Never(),
+        departmentServiceCalls: Times.Never(),
+        imageServiceCalls: Times.Never(),
+        officeServiceCalls: Times.Never(),
+        positionServiceCalls: Times.Never(),
+        rightServiceCalls: Times.Never(),
+        companyUserInfoMapperCalls: Times.Never(),
+        departmentInfoMapperCalls: Times.Never(),
+        officeInfoMapperCalls: Times.Never(),
+        positionInfoMapperCalls: Times.Never(),
+        roleInfoMapperCalls: Times.Never(),
+        userResponseMapperCalls: Times.Never());
+    }
+  }
+}

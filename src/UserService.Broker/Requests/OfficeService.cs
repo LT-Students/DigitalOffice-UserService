@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       Guid userId,
       List<string> errors)
     {
-      List<OfficeData> offices = await _globalCache
+      /*List<OfficeData> offices = await _globalCache
         .GetAsync<List<OfficeData>>(Cache.Offices, userId.GetRedisCacheHashCode());
 
       if (offices is not null)
@@ -53,7 +53,8 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
           ?.Offices;
       }
 
-      return offices;
+      return offices;*/
+      return null;
     }
   }
 }
