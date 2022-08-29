@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Helpers.TextHandlers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
@@ -128,7 +127,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
       OperationResultResponse<string> response = new();
 
-      await NotifyAsync(dbUser, email, secret, "ru", response.Errors);
+      await NotifyAsync(dbUser, email: email, secret: secret, locale: "ru", response.Errors);
 
       response.Body = response.Errors.Any() ? null : email;
 

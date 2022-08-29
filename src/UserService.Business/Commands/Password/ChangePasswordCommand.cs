@@ -1,7 +1,5 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
@@ -12,8 +10,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Password;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -59,15 +55,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       }
 
       if (dbUserCredentials.PasswordHash
-        != UserPasswordHash.GetPasswordHash(dbUserCredentials.Login, dbUserCredentials.Salt, request.Password))
+        != UserPasswordHash.GetPasswordHash(userLogin: dbUserCredentials.Login, salt: dbUserCredentials.Salt, userPassword: request.Password))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
       dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
-        dbUserCredentials.Login,
-        dbUserCredentials.Salt,
-        request.NewPassword);
+        userLogin: dbUserCredentials.Login,
+        salt: dbUserCredentials.Salt,
+        userPassword: request.NewPassword);
 
       return new OperationResultResponse<bool>(
         body: await _repository.EditAsync(dbUserCredentials));
