@@ -1,4 +1,6 @@
-﻿using LT.DigitalOffice.Kernel.Extensions;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -10,7 +12,9 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Password;
 using LT.DigitalOffice.UserService.Validation.Password.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -37,9 +41,13 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(ChangePasswordRequest request)
     {
-      if (!_validator.ValidateCustom(request.NewPassword, out List<string> errors))
+      ValidationResult validationResult = await _validator.ValidateAsync(request.NewPassword);
+
+      if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest, errors);
+        return _responseCreator.CreateFailureResponse<bool>(
+          HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
       DbUserCredentials dbUserCredentials = await _repository
@@ -61,13 +69,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         dbUserCredentials.Salt,
         request.NewPassword);
 
-      OperationResultResponse<bool> response = new();
-
-      response.Body = await _repository.EditAsync(dbUserCredentials);
-
-      return response.Body
-        ? response
-        : _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+      return new OperationResultResponse<bool>(
+        body: await _repository.EditAsync(dbUserCredentials));
     }
   }
 }

@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace LT.DigitalOffice.UserService.Business.UnitTests
+namespace LT.DigitalOffice.UserService.Business.UnitTests.Password
 {
   class ForgotPasswordCommandTests
   {
@@ -110,7 +110,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests
         FirstName = _createUserRequest.FirstName,
         LastName = _createUserRequest.LastName,
         MiddleName = _createUserRequest.MiddleName,
-        IsAdmin = (bool)_createUserRequest.IsAdmin,
+        IsAdmin = _createUserRequest.IsAdmin,
         IsActive = true,
         Communications = new List<DbUserCommunication>
                 {
