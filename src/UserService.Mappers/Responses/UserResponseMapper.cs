@@ -22,13 +22,10 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
       CompanyUserInfo companyUser,
       ImageInfo avatar,
       DepartmentUserInfo departmentUser,
-      List<EducationInfo> educations,
       List<ImageInfo> images,
       OfficeInfo office,
       PositionInfo position,
-      List<ProjectInfo> projects,
-      RoleInfo role,
-      List<SkillInfo> skills)
+      RoleInfo role)
     {
       return dbUser is null
         ? default
@@ -50,10 +47,7 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           Office = office,
           Position = position,
           Role = role,
-          Images = images,
-          Educations = educations,
-          Projects = projects,
-          Skills = skills
+          Images = images
         };
     }
   }

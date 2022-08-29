@@ -13,8 +13,5 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Responses.User
     public PositionInfo Position { get; set; }
     public RoleInfo Role { get; set; }
     public IEnumerable<ImageInfo> Images { get; set; }
-    public IEnumerable<EducationInfo> Educations { get; set; }
-    public IEnumerable<ProjectInfo> Projects { get; set; }
-    public IEnumerable<SkillInfo> Skills { get; set; }
   }
 }

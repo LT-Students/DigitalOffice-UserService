@@ -3,14 +3,11 @@ using LT.DigitalOffice.Kernel.EndpointSupport.Broker.Configurations;
 using LT.DigitalOffice.Models.Broker.Requests.Auth;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
-using LT.DigitalOffice.Models.Broker.Requests.Education;
 using LT.DigitalOffice.Models.Broker.Requests.Email;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
-using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Rights;
-using LT.DigitalOffice.Models.Broker.Requests.Skill;
 using LT.DigitalOffice.Models.Broker.Requests.TextTemplate;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
@@ -18,7 +15,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 {
   public class RabbitMqConfig : ExtendedBaseRabbitMqConfig
   {
-    public string CompanyServiceUrl { get; set; }
     public string GetUserCredentialsEndpoint { get; set; }
     public string GetUsersDataEndpoint { get; set; }
     public string CreateAdminEndpoint { get; set; }
@@ -40,21 +36,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Configurations
 
     [AutoInjectRequest(typeof(IGetTokenRequest))]
     public string GetTokenEndpoint { get; set; }
-
-    //Education
-
-    [AutoInjectRequest(typeof(IGetUserEducationsRequest))]
-    public string GetUserEducationsEndpoint { get; set; }
-
-    //Skill
-
-    [AutoInjectRequest(typeof(IGetUserSkillsRequest))]
-    public string GetUserSkillsEndpoint { get; set; }
-
-    //Project
-
-    [AutoInjectRequest(typeof(IGetProjectsRequest))]
-    public string GetProjectsEndpoint { get; set; }
 
     //Search
 
