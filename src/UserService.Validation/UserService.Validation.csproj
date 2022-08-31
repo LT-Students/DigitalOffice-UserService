@@ -7,4 +7,28 @@
     <ProjectReference Include="..\UserService.Models.Dto\UserService.Models.Dto.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Credentials\Resources\CreateCredentialsRequestValidationResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CreateCredentialsRequestValidationResource.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Gender\Resources\CreateGenderRequestValidationResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CreateGenderRequestValidationResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Credentials\Resources\CreateCredentialsRequestValidationResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CreateCredentialsRequestValidationResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Gender\Resources\CreateGenderRequestValidationResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CreateGenderRequestValidationResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
