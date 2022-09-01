@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           SkipCount = request.SkipCount,
           TakeCount = request.TakeCount,
           IncludeCurrentAvatar = true,
-          IsActive = true,
+          IsActive = request.IsActive,
           IsAscendingSort = request.AscendingSort,
           FullNameIncludeSubstring = request.FullNameIncludeSubstring
         },

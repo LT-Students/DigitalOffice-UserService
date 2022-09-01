@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
+using LT.DigitalOffice.UserService.Broker.Publishes.Interfaces;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Credentials.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -27,6 +28,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IAuthService _authService;
     private readonly ICreateCredentialsRequestValidator _validator;
     private readonly IResponseCreator _responseCreator;
+    private readonly IPublish _publish;
 
     public CreateCredentialsCommand(
       IDbUserCredentialsMapper mapper,
@@ -36,7 +38,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserCommunicationRepository communicationRepository,
       IAuthService authService,
       ICreateCredentialsRequestValidator validator,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IPublish publish)
     {
       _mapper = mapper;
       _userRepository = userRepository;
@@ -46,18 +49,19 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _authService = authService;
       _validator = validator;
       _responseCreator = responseCreator;
+      _publish = publish;
     }
 
     public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(CreateCredentialsRequest request)
     {
       ValidationResult validationResult = await _validator.ValidateAsync(request);
 
-      if (!validationResult.IsValid)
+      /*if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<CredentialsResponse>(
           HttpStatusCode.BadRequest,
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
-      }
+      }*/
 
       List<string> errors = new();
 
@@ -70,10 +74,11 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           errors);
       }
 
-      await _userCredentialsRepository.CreateAsync(_mapper.Map(request));
-      DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
-      await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
-      await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
+      //await _userCredentialsRepository.CreateAsync(_mapper.Map(request));
+      //DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
+      //await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
+      //await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
+      await _publish.ActivateUserAsync(request.UserId);
 
       return new()
       {

@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.Extensions;
+﻿using DigitalOffice.Models.Broker.Publishing;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Company;
@@ -38,6 +39,12 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes
           modifiedBy: _httpContextAccessor.HttpContext.GetUserId()));
     }
 
+    public Task ActivateUserAsync(Guid userId)
+    {
+      return _bus.Publish<IActivateUserPublish>(
+        IActivateUserPublish.CreateObj(userId: userId));
+    }
+
     public Task RemoveImagesAsync(List<Guid> imagesIds)
     {
       return _bus.Publish<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
@@ -58,27 +65,27 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes
     {
       return _bus.Publish<ICreateUserRolePublish>(
         ICreateUserRolePublish.CreateObj(
-          roleId: roleId,
           userId: userId,
-          changedBy: _httpContextAccessor.HttpContext.GetUserId()));
+          roleId: roleId,
+          createdBy: _httpContextAccessor.HttpContext.GetUserId()));
     }
 
     public Task CreateDepartmentUserAsync(Guid userId, Guid departmentId)
     {
       return _bus.Publish<ICreateDepartmentUserPublish>(
         ICreateDepartmentUserPublish.CreateObj(
+          userId: userId,
           departmentId: departmentId,
-          createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-          userId: userId));
+          createdBy: _httpContextAccessor.HttpContext.GetUserId()));
     }
 
     public Task CreateUserPositionAsync(Guid userId, Guid positionId)
     {
       return _bus.Publish<ICreateUserPositionPublish>(
         ICreateUserPositionPublish.CreateObj(
+          userId: userId,
           positionId: positionId,
-          createdBy: _httpContextAccessor.HttpContext.GetUserId(),
-          userId: userId));
+          createdBy: _httpContextAccessor.HttpContext.GetUserId()));
     }
 
     public Task CreateCompanyUserAsync(Guid userId, CreateUserCompanyRequest userCompany)
