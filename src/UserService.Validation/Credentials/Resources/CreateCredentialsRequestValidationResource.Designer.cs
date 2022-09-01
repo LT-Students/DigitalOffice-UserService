@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The login already exist.
+        ///   Looks up a localized string similar to Login already in use.
         /// </summary>
         internal static string LoginExist {
             get {
@@ -107,7 +107,7 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The wrong password.
+        ///   Looks up a localized string similar to Wrong password.
         /// </summary>
         internal static string PasswordWrong {
             get {
