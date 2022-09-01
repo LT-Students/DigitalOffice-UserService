@@ -285,7 +285,7 @@ namespace LT.DigitalOffice.UserService
         }) // TODO check enum serialization from request without .AddJsonOptions()
            //this will be used when all validation takes place on the pipeline
            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
-        .AddFluentValidation()
+        //.AddFluentValidation()
         .AddJsonOptions(options =>
         {
           options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());

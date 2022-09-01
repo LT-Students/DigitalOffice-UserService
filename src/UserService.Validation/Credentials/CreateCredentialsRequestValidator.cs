@@ -2,7 +2,10 @@
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials;
 using LT.DigitalOffice.UserService.Validation.Credentials.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Credentials.Resources;
+using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace LT.DigitalOffice.UserService.Validation.Credentials
 {
@@ -14,24 +17,26 @@ namespace LT.DigitalOffice.UserService.Validation.Credentials
       IPendingUserRepository repository,
       IUserCredentialsRepository credentialsRepository)
     {
+      Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-RU");
+
       RuleFor(request => request.Login.Trim())
-        .MinimumLength(5).WithMessage("Login is too short.")
-        .MaximumLength(15).WithMessage("Login is too long.")
+        .MinimumLength(5).WithMessage(CreateCredentialsRequestValidationResource.LoginShort)
+        .MaximumLength(15).WithMessage(CreateCredentialsRequestValidationResource.LoginLong)
         .Must(login => loginRegex.IsMatch(login))
-        .WithMessage("Login must contain only Latin letters and digits or only Latin letters.");
+        .WithMessage(CreateCredentialsRequestValidationResource.LoginMatch);
 
       RuleFor(request => request.UserId)
-        .NotEmpty().WithMessage("UserId can't be empty.");
+        .NotEmpty().WithMessage(CreateCredentialsRequestValidationResource.UserId);
 
       RuleFor(request => request)
         .Cascade(CascadeMode.Stop)
         .MustAsync(async (r, _) => !await credentialsRepository.DoesExistAsync(r.UserId))
-        .WithMessage("The credentials already exist.")
+        .WithMessage(CreateCredentialsRequestValidationResource.CredentialsExist)
         .MustAsync(async (r, _) => !await credentialsRepository.DoesLoginExistAsync(r.Login))
-        .WithMessage("The login already exist.")
+        .WithMessage(CreateCredentialsRequestValidationResource.LoginExist)
         .MustAsync(async (r, _) =>
           (await repository.GetAsync(r.UserId))?.Password == r.Password)
-        .WithMessage("The wrong password.");
+        .WithMessage(CreateCredentialsRequestValidationResource.PasswordWrong);
     }
   }
 }
