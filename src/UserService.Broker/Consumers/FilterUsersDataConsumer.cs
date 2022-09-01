@@ -95,7 +95,8 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<IFilteredUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IFilteredUsersDataResponse.CreateObj(users, usersCount), context));
 
-      if (users is not null)
+      //TODO - add params name to args in redis support
+      /*if (users is not null)
       {
         await _globalCache.CreateAsync(
           Cache.Users,
@@ -108,7 +109,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           (users, usersCount),
           users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-      }
+      }*/
     }
   }
 }
