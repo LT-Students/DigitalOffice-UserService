@@ -56,12 +56,12 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     {
       ValidationResult validationResult = await _validator.ValidateAsync(request);
 
-      /*if (!validationResult.IsValid)
+      if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<CredentialsResponse>(
           HttpStatusCode.BadRequest,
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
-      }*/
+      }
 
       List<string> errors = new();
 
@@ -74,10 +74,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
           errors);
       }
 
-      //await _userCredentialsRepository.CreateAsync(_mapper.Map(request));
-      //DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
-      //await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
-      //await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
+      await _userCredentialsRepository.CreateAsync(_mapper.Map(request));
+      DbPendingUser dbPendingUser = await _pendingUserRepository.RemoveAsync(request.UserId);
+      await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
+      await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
       await _publish.ActivateUserAsync(request.UserId);
 
       return new()
