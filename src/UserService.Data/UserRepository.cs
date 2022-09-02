@@ -144,11 +144,11 @@ namespace LT.DigitalOffice.UserService.Data
       return user;
     }
 
-    public async Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
+    public Task<List<Guid>> AreExistingIdsAsync(List<Guid> usersIds)
     {
       return usersIds is null
-        ? new()
-        : await _provider.Users
+        ? Task.FromResult(new List<Guid>())
+        : _provider.Users
           .Where(u => usersIds.Contains(u.Id) && u.IsActive)
           .Select(u => u.Id)
           .ToListAsync();
@@ -217,19 +217,19 @@ namespace LT.DigitalOffice.UserService.Data
         return (null, default);
       }
 
-      IQueryable<DbUser> dbUsers = CreateFindPredicates(
+      IQueryable<DbUser> userQuery = CreateFindPredicates(
         filter,
         userIds,
         _provider.Users.AsQueryable());
 
       if (!string.IsNullOrEmpty(filter.FullNameIncludeSubstring))
       {
-        dbUsers = SearchAsync(filter.FullNameIncludeSubstring, dbUsers);
+        userQuery = SearchAsync(filter.FullNameIncludeSubstring, userQuery);
       }
 
       return (
-        await dbUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        dbUsers.Count());
+        await userQuery.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
+        await userQuery.CountAsync());
     }
 
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
