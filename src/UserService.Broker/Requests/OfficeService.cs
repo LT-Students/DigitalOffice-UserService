@@ -1,10 +1,6 @@
-﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
-using LT.DigitalOffice.Kernel.RedisSupport.Constants;
-using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
-using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
+﻿using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models.Office;
 using LT.DigitalOffice.Models.Broker.Requests.Office;
-using LT.DigitalOffice.Models.Broker.Responses.Office;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -34,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     public async Task<List<OfficeData>> GetOfficesAsync(
       Guid userId,
       List<string> errors,
-      CancellationToken token)
+      CancellationToken cancellationToken)
     {
       /*List<OfficeData> offices = await _globalCache
         .GetAsync<List<OfficeData>>(Cache.Offices, userId.GetRedisCacheHashCode());

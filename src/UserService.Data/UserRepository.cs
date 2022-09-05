@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -115,7 +116,7 @@ namespace LT.DigitalOffice.UserService.Data
       return _provider.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task<DbUser> GetAsync(GetUserFilter filter)
+    public async Task<DbUser> GetAsync(GetUserFilter filter, CancellationToken cancellationToken = default)
     {
       if (filter is null)
       {
@@ -128,19 +129,19 @@ namespace LT.DigitalOffice.UserService.Data
 
       if (filter.UserId.HasValue)
       {
-        user = await query.FirstOrDefaultAsync(u => u.Id == filter.UserId);
+        user = await query.FirstOrDefaultAsync(u => u.Id == filter.UserId, cancellationToken);
       }
       else if (!string.IsNullOrEmpty(filter.Login))
       {
         user = await query
           .Include(u => u.Credentials)
-          .FirstOrDefaultAsync(u => u.Credentials.Login == filter.Login);
+          .FirstOrDefaultAsync(u => u.Credentials.Login == filter.Login, cancellationToken);
       }
       else if (!string.IsNullOrEmpty(filter.Email))
       {
         user = await query
           .Include(u => u.Communications)
-          .FirstOrDefaultAsync(u => u.Communications.Select(c => c.Value).Contains(filter.Email));
+          .FirstOrDefaultAsync(u => u.Communications.Select(c => c.Value).Contains(filter.Email), cancellationToken);
       }
 
       return user;
@@ -212,7 +213,7 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
-    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null)
+    public async Task<(List<DbUser> dbUsers, int totalCount)> FindAsync(FindUsersFilter filter, List<Guid> userIds = null, CancellationToken cancellationToken = default)
     {
       if (filter is null)
       {
@@ -230,8 +231,8 @@ namespace LT.DigitalOffice.UserService.Data
       }
 
       return (
-        await userQuery.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await userQuery.CountAsync());
+        await userQuery.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(cancellationToken),
+        await userQuery.CountAsync(cancellationToken));
     }
 
     public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)

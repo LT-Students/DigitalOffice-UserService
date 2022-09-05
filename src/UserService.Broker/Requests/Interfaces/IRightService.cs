@@ -14,6 +14,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
       Guid userId,
       string locale,
       List<string> errors,
-      CancellationToken token);
+      CancellationToken cancellationToken);
   }
 }

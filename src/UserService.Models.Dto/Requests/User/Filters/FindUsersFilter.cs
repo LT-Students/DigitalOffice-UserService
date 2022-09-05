@@ -6,8 +6,6 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 {
   public record FindUsersFilter : BaseFindFilter
   {
-    public CancellationToken Token;
-
     [FromQuery(Name = "isascendingsort")]
     public bool? IsAscendingSort { get; set; }
 

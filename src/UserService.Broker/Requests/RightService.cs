@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       Guid userId,
       string locale,
       List<string> errors,
-      CancellationToken token)
+      CancellationToken cancellationToken)
     {
       //TO DO add cache
       return (await RequestHandler.ProcessRequest<IGetUserRolesRequest, IGetUserRolesResponse>(
