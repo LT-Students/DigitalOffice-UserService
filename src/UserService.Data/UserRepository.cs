@@ -61,9 +61,11 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Where(u => u.IsActive == filter.IsActive.Value);
 
-        if (!filter.IsActive.Value)
+        if (!filter.IsActive.Value && filter.IsPending.HasValue)
         {
-          dbUsers = dbUsers.Include(u => u.Pending);
+          dbUsers = filter.IsPending.Value
+            ? dbUsers.Include(u => u.Pending).Where(u => u.Pending != null)
+            : dbUsers.Where(u => u.Pending == null);
         }
       }
 
@@ -83,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Include(u => u.Communications);
       }
-
+      
       return dbUsers;
     }
 

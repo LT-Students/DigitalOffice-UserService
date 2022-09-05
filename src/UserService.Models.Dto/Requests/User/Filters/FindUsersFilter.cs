@@ -14,6 +14,9 @@ namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
     [FromQuery(Name = "isactive")]
     public bool? IsActive { get; set; }
 
+    [FromQuery(Name = "ispending")]
+    public bool? IsPending { get; set; }
+
     [FromQuery(Name = "includecurrentavatar")]
     public bool IncludeCurrentAvatar { get; set; } = false;
 
