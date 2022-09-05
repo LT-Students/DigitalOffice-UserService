@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters
 {
   public class GetUserFilter
   {
+    public CancellationToken Token { get; set; }
+
     [FromQuery(Name = "userid")]
     public Guid? UserId { get; set; }
 

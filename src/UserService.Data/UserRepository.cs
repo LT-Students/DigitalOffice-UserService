@@ -1,7 +1,7 @@
-using LT.DigitalOffice.CompanyService.Data.Provider;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
@@ -85,7 +85,7 @@ namespace LT.DigitalOffice.UserService.Data
       {
         dbUsers = dbUsers.Include(u => u.Communications);
       }
-      
+
       return dbUsers;
     }
 
@@ -104,7 +104,7 @@ namespace LT.DigitalOffice.UserService.Data
       if (dbUser is not null)
       {
         _provider.Users.Add(dbUser);
-        return _provider.SaveAsync(); 
+        return _provider.SaveAsync();
       }
 
       return Task.CompletedTask;

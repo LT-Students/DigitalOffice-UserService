@@ -1,5 +1,4 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
@@ -207,7 +206,7 @@ namespace LT.DigitalOffice.UserService
       });
 
       services.AddHttpContextAccessor();
-      
+
       string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<UserServiceDbContext>(options =>
@@ -285,7 +284,7 @@ namespace LT.DigitalOffice.UserService
         }) // TODO check enum serialization from request without .AddJsonOptions()
            //this will be used when all validation takes place on the pipeline
            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
-        //.AddFluentValidation()
+           //.AddFluentValidation()
         .AddJsonOptions(options =>
         {
           options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());

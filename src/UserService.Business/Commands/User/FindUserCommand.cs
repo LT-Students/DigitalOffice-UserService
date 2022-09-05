@@ -55,7 +55,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             .Where(u => u.Avatars.Any()).Select(u => u.Avatars.FirstOrDefault())
             .Select(ua => ua.AvatarId)
             .ToList(),
-          response.Errors)
+          response.Errors,
+          filter.Token)
         : default;
 
       response.Body = new();

@@ -7,6 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
@@ -27,7 +28,8 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     public async Task<List<RoleData>> GetRolesAsync(
       Guid userId,
       string locale,
-      List<string> errors)
+      List<string> errors,
+      CancellationToken token)
     {
       //TO DO add cache
       return (await RequestHandler.ProcessRequest<IGetUserRolesRequest, IGetUserRolesResponse>(

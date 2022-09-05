@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+﻿using Fizzler;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Models.Department;
@@ -17,6 +18,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
@@ -92,27 +94,27 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       }
 
       Task<List<CompanyData>> companiesTask = filter.IncludeCompany
-        ? _companyService.GetCompaniesAsync(dbUser.Id, response.Errors)
+        ? _companyService.GetCompaniesAsync(dbUser.Id, response.Errors, filter.Token)
         : Task.FromResult(null as List<CompanyData>);
 
       Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
-        ? _departmentService.GetDepartmentsAsync(dbUser.Id, response.Errors)
+        ? _departmentService.GetDepartmentsAsync(dbUser.Id, response.Errors, filter.Token)
         : Task.FromResult(null as List<DepartmentData>);
 
       Task<List<ImageInfo>> imagesTask = filter.IncludeAvatars || filter.IncludeCurrentAvatar
-        ? _imageService.GetImagesAsync(dbUser.Avatars?.Select(ua => ua.AvatarId).ToList(), response.Errors)
+        ? _imageService.GetImagesAsync(dbUser.Avatars?.Select(ua => ua.AvatarId).ToList(), response.Errors, filter.Token)
         : Task.FromResult(null as List<ImageInfo>);
 
       Task<List<OfficeData>> officesTask = filter.IncludeOffice
-        ? _officeService.GetOfficesAsync(dbUser.Id, response.Errors)
+        ? _officeService.GetOfficesAsync(dbUser.Id, response.Errors, filter.Token)
         : Task.FromResult(null as List<OfficeData>);
 
       Task<List<PositionData>> positionsTask = filter.IncludePosition
-        ? _positionService.GetPositionsAsync(dbUser.Id, response.Errors)
+        ? _positionService.GetPositionsAsync(dbUser.Id, response.Errors, filter.Token)
         : Task.FromResult(null as List<PositionData>);
 
       Task<List<RoleData>> rolesTask = filter.IncludeRole
-        ? _rightService.GetRolesAsync(dbUser.Id, filter.Locale, response.Errors)
+        ? _rightService.GetRolesAsync(dbUser.Id, filter.Locale, response.Errors, filter.Token)
         : Task.FromResult(null as List<RoleData>);
 
       List<CompanyData> companies = await companiesTask;

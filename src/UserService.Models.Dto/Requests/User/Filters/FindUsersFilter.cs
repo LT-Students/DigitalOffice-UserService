@@ -1,10 +1,13 @@
 ﻿using LT.DigitalOffice.Kernel.Requests;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres
 {
   public record FindUsersFilter : BaseFindFilter
   {
+    public CancellationToken Token;
+
     [FromQuery(Name = "isascendingsort")]
     public bool? IsAscendingSort { get; set; }
 

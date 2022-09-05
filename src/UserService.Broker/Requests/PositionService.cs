@@ -10,6 +10,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
@@ -32,7 +33,8 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
 
     public async Task<List<PositionData>> GetPositionsAsync(
       Guid userId,
-      List<string> errors)
+      List<string> errors,
+      CancellationToken token)
     {
       List<PositionData> positions = await _globalCache
         .GetAsync<List<PositionData>>(Cache.Positions, userId.GetRedisCacheHashCode());

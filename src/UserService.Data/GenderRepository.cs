@@ -1,9 +1,8 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.UserService.Data.Interfaces;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Gender.Filters;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Data
         query = query.Where(g => g.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
       }
 
-      return ( 
+      return (
         await query.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
         await query.CountAsync());
     }
