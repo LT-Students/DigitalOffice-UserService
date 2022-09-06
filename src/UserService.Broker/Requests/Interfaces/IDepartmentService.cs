@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IDepartmentService
   {
-    Task<List<DepartmentData>> GetDepartmentsAsync(Guid userId, List<string> errors, CancellationToken cancellationToken);
+    Task<List<DepartmentData>> GetDepartmentsAsync(Guid userId, List<string> errors, CancellationToken cancellationToken = default);
   }
 }

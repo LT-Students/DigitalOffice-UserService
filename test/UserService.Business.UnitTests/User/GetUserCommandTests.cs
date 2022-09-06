@@ -71,7 +71,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         responseCreatorCalls);
 
       _mocker.Verify<IUserRepository>(
-        x => x.GetAsync(It.IsAny<GetUserFilter>()),
+        x => x.GetAsync(It.IsAny<GetUserFilter>(), default),
         userRepositoryCalls);
 
       _mocker.Verify<ICompanyService>(
@@ -182,7 +182,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         .Returns(_failureResponse);
 
       _mocker
-        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>(), default))
         .Returns(Task.FromResult(_dbUser));
 
       _mocker
@@ -465,7 +465,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
     public void NotFoundResponseTest()
     {
       _mocker
-        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>(), default))
         .Returns(Task.FromResult((DbUser)null));
 
       SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_filter).Result);

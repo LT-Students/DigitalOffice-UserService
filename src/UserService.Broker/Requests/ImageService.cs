@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, List<string> errors, CancellationToken cancellationToken)
+    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, List<string> errors, CancellationToken cancellationToken = default)
     {
       return imagesIds is null || !imagesIds.Any()
         ? default

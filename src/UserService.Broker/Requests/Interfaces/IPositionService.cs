@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IPositionService
   {
-    Task<List<PositionData>> GetPositionsAsync(Guid userId, List<string> errors, CancellationToken cancellationToken);
+    Task<List<PositionData>> GetPositionsAsync(Guid userId, List<string> errors, CancellationToken cancellationToken = default);
   }
 }

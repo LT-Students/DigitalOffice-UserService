@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IOfficeService
   {
-    Task<List<OfficeData>> GetOfficesAsync(Guid userId, List<string> errors, CancellationToken cancellationToken);
+    Task<List<OfficeData>> GetOfficesAsync(Guid userId, List<string> errors, CancellationToken cancellationToken = default);
   }
 }

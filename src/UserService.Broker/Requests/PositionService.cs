@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     public async Task<List<PositionData>> GetPositionsAsync(
       Guid userId,
       List<string> errors,
-      CancellationToken cancellationToken)
+      CancellationToken cancellationToken = default)
     {
       List<PositionData> positions = await _globalCache
         .GetAsync<List<PositionData>>(Cache.Positions, userId.GetRedisCacheHashCode());

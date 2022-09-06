@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IImageService
   {
-    Task<List<ImageInfo>> GetImagesAsync(List<Guid> imageIds, List<string> errors, CancellationToken cancellationToken);
+    Task<List<ImageInfo>> GetImagesAsync(List<Guid> imageIds, List<string> errors, CancellationToken cancellationToken = default);
 
     Task<Guid?> CreateImageAsync(CreateAvatarRequest request, List<string> errors);
   }

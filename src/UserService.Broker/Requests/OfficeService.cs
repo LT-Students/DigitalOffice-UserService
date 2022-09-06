@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     public async Task<List<OfficeData>> GetOfficesAsync(
       Guid userId,
       List<string> errors,
-      CancellationToken cancellationToken)
+      CancellationToken cancellationToken = default)
     {
       /*List<OfficeData> offices = await _globalCache
         .GetAsync<List<OfficeData>>(Cache.Offices, userId.GetRedisCacheHashCode());
