@@ -1,10 +1,8 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.UserService.Data.Interfaces;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.PendingUser.Filters;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -42,32 +40,6 @@ namespace LT.DigitalOffice.UserService.Data
     {
       _provider.PendingUsers.Update(dbPendingUser);
       return _provider.SaveAsync();
-    }
-
-    public async Task<(List<DbPendingUser> dbPendingUsers, int totalCount)> FindAsync(
-      FindPendingUserFilter filter)
-    {
-      IQueryable<DbPendingUser> dbPendingUsers = _provider.PendingUsers.AsQueryable();
-
-      dbPendingUsers = dbPendingUsers.Include(pu => pu.User);
-
-      if (filter.IncludeCommunication)
-      {
-        dbPendingUsers = dbPendingUsers
-          .Include(pu => pu.User)
-          .ThenInclude(u => u.Communications);
-      }
-
-      if (filter.IncludeCurrentAvatar)
-      {
-        dbPendingUsers = dbPendingUsers
-          .Include(pu => pu.User)
-          .ThenInclude(u => u.Avatars.Where(ua => ua.IsCurrentAvatar));
-      }
-
-      return (
-        await dbPendingUsers.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await dbPendingUsers.CountAsync());
     }
 
     public async Task<DbPendingUser> RemoveAsync(Guid userId)

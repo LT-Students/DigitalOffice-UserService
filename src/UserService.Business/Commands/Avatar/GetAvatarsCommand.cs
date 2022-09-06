@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Responses;
+﻿using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.Avatar.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
@@ -8,6 +7,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.Image;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
@@ -28,15 +28,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Avatar
       _mapper = mapper;
     }
 
-    public async Task<OperationResultResponse<UserImagesResponse>> ExecuteAsync(Guid userId)
+    public async Task<OperationResultResponse<UserImagesResponse>> ExecuteAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-      List<Guid> dbImagesIds = await _avatarRepository.GetAvatarsByUserId(userId);
+      List<Guid> dbImagesIds = await _avatarRepository.GetAvatarsByUserId(userId, cancellationToken);
 
       OperationResultResponse<UserImagesResponse> response = new();
 
       if (dbImagesIds is null || !dbImagesIds.Any())
       {
-        response.Body = _mapper.Map(userId, await _imageService.GetImagesAsync(dbImagesIds, response.Errors));
+        response.Body = _mapper.Map(userId, await _imageService.GetImagesAsync(dbImagesIds, response.Errors, cancellationToken));
       }
 
       return response;

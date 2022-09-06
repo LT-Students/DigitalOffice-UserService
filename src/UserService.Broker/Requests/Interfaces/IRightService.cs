@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Models.Broker.Models.Right;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
@@ -12,6 +13,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests.Interfaces
     Task<List<RoleData>> GetRolesAsync(
       Guid userId,
       string locale,
-      List<string> errors);
+      List<string> errors,
+      CancellationToken cancellationToken = default);
   }
 }

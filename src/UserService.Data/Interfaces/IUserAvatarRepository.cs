@@ -2,6 +2,7 @@
 using LT.DigitalOffice.UserService.Models.Db;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data.Interfaces
@@ -11,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
   {
     Task CreateAsync(DbUserAvatar dbEntityImage);
 
-    Task<List<Guid>> GetAvatarsByUserId(Guid entityId);
+    Task<List<Guid>> GetAvatarsByUserId(Guid entityId, CancellationToken cancellationToken = default);
 
     Task<List<DbUserAvatar>> GetAsync(List<Guid> imagesIds);
 

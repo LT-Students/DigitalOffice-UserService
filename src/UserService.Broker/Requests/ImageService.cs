@@ -1,9 +1,7 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
-using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Image;
-using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
@@ -16,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
@@ -42,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, List<string> errors)
+    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, List<string> errors, CancellationToken cancellationToken = default)
     {
       return imagesIds is null || !imagesIds.Any()
         ? default
