@@ -153,6 +153,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           password,
           "ru",
           response.Errors);
+
+        await _publish.ActivateUserAsync(request.UserId);
       }
 
       if (response.Body)
