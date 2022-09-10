@@ -24,28 +24,6 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IGlobalCacheRepository _globalCache;
 
-    private string CreateRedisKey(
-      List<Guid> usersIds,
-      int skipCount,
-      int takeCount,
-      bool? ascendingSort,
-      string fullNameIncludeSubstring)
-    {
-      List<object> additionalArgs = new() { skipCount, takeCount };
-
-      if (ascendingSort.HasValue)
-      {
-        additionalArgs.Add(ascendingSort.Value);
-      }
-
-      if (!string.IsNullOrEmpty(fullNameIncludeSubstring))
-      {
-        additionalArgs.Add(fullNameIncludeSubstring);
-      }
-
-      return usersIds.GetRedisCacheHashCode(additionalArgs.ToArray());
-    }
-
     private async Task<(List<UserData> userData, int totalCount)> GetUserInfoAsync(IFilteredUsersDataRequest request)
     {
       List<DbUser> dbUsers = new();
@@ -95,21 +73,15 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
       await context.RespondAsync<IOperationResult<IFilteredUsersDataResponse>>(
         OperationResultWrapper.CreateResponse((_) => IFilteredUsersDataResponse.CreateObj(users, usersCount), context));
 
-      //TODO - add params name to args in redis support
-      /*if (users is not null)
+      if (users is not null)
       {
         await _globalCache.CreateAsync(
           Cache.Users,
-          CreateRedisKey(
-            usersIds: context.Message.UsersIds,
-            skipCount: context.Message.SkipCount,
-            takeCount: context.Message.TakeCount,
-            ascendingSort: context.Message.AscendingSort,
-            fullNameIncludeSubstring: context.Message.FullNameIncludeSubstring),
+          context.Message.UsersIds.GetRedisCacheKey(context.Message.GetBasicProperties()),
           (users, usersCount),
           users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-      }*/
+      }
     }
   }
 }

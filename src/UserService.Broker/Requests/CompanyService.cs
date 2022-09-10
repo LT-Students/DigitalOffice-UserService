@@ -36,8 +36,10 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       List<string> errors,
       CancellationToken cancellationToken = default)
     {
+      object request = IGetCompaniesRequest.CreateObj(usersIds: new() { userId });
+
       List<CompanyData> companies = await _globalCache
-        .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheHashCode());
+        .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (companies is not null)
       {
@@ -49,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       {
         companies = (await RequestHandler.ProcessRequest<IGetCompaniesRequest, IGetCompaniesResponse>(
             _rcGetCompanies,
-            IGetCompaniesRequest.CreateObj(usersIds: new() { userId }),
+            request,
             errors,
             _logger))
           ?.Companies;
