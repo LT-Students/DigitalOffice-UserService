@@ -31,6 +31,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IEditUserActiveRequestValidator _validator;
     private readonly IUserRepository _userRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
+    private readonly IUserCommunicationRepository _userCommunicationRepository;
     private readonly IPendingUserRepository _pendingRepository;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly IAccessValidator _accessValidator;
@@ -70,6 +71,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IEditUserActiveRequestValidator validator,
       IUserRepository userRepository,
       IUserCredentialsRepository userCredentialsRepository,
+      IUserCommunicationRepository userCommunicationRepository,
       IPendingUserRepository pendingRepository,
       IGeneratePasswordCommand generatePassword,
       IAccessValidator accessValidator,
@@ -84,6 +86,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _validator = validator;
       _userRepository = userRepository;
       _userCredentialsRepository = userCredentialsRepository;
+      _userCommunicationRepository = userCommunicationRepository;
       _pendingRepository = pendingRepository;
       _generatePassword = generatePassword;
       _accessValidator = accessValidator;
@@ -130,6 +133,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         }
 
         await _publish.DisactivateUserAsync(request.UserId);
+
+        await _userCommunicationRepository.RemoveBaseTypeAsync(request.UserId);
 
         response.Body = true;
       }
