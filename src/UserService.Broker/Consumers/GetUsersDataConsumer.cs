@@ -61,11 +61,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
 
       if (users is not null)
       {
-        string key = users.Select(u => u.Id).ToList().GetRedisCacheHashCode();
-
         await _globalCache.CreateAsync(
           Cache.Users,
-          key,
+          users.Select(u => u.Id).GetRedisCacheKey(context.Message.GetBasicProperties()),
           users,
           users.Select(u => u.Id).ToList(),
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
