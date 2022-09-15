@@ -139,12 +139,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         await _userCommunicationRepository.RemoveBaseTypeAsync(request.UserId);
 
-        List<Guid> avatarsIds = await _userAvatarRepository.RemoveAsync(request.UserId);
-
-        if (avatarsIds is not null)
-        {
-          await _publish.RemoveImagesAsync(avatarsIds);
-        }
+        await _publish.RemoveImagesAsync(await _userAvatarRepository.RemoveAsync(request.UserId));
 
         response.Body = true;
       }
