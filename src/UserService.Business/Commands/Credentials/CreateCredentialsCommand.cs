@@ -84,7 +84,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
       await _publish.ActivateUserAsync(request.UserId);
 
-      await _globalCache.RemoveAsync(request.UserId);
+      await _globalCache.Clear();
 
       return new()
       {

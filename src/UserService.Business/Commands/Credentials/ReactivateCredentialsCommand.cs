@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
 
-      await _globalCache.RemoveAsync(request.UserId);
+      await _globalCache.Clear();
 
       response.Body = new CredentialsResponse
       {
