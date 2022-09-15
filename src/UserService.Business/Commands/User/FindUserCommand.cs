@@ -12,6 +12,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Commands.User
@@ -38,8 +39,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _responseCreator = responseCreator;
     }
 
-    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(FindUsersFilter filter, CancellationToken cancellationToken = default)
     {
+
       if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
       {
         return _responseCreator.CreateFailureFindResponse<UserInfo>(HttpStatusCode.BadRequest, errors);
@@ -47,7 +49,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       FindResultResponse<UserInfo> response = new();
 
-      (List<DbUser> dbUsers, int totalCount) = await _userRepository.FindAsync(filter);
+      (List<DbUser> dbUsers, int totalCount) = await _userRepository.FindAsync(filter, cancellationToken: cancellationToken);
 
       List<ImageInfo> images = filter.IncludeCurrentAvatar
         ? await _imageService.GetImagesAsync(
@@ -55,7 +57,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
             .Where(u => u.Avatars.Any()).Select(u => u.Avatars.FirstOrDefault())
             .Select(ua => ua.AvatarId)
             .ToList(),
-          response.Errors)
+          response.Errors,
+          cancellationToken)
         : default;
 
       response.Body = new();

@@ -2,6 +2,7 @@
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Business.Interfaces
@@ -16,6 +17,6 @@ namespace LT.DigitalOffice.UserService.Business.Interfaces
     /// <summary>
     /// Returns the user information.
     /// </summary>
-    Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter);
+    Task<OperationResultResponse<UserResponse>> ExecuteAsync(GetUserFilter filter, CancellationToken cancellationToken = default);
   }
 }

@@ -1,5 +1,5 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.UserService.Data.Interfaces;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Credentials.Filters;

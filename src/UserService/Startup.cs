@@ -1,5 +1,5 @@
+using DigitalOffice.Kernel.RedisSupport.Extensions;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker.Consumer;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
@@ -10,7 +10,6 @@ using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.EFSupport.Extensions;
 using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
@@ -36,8 +35,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Serilog;
-using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,7 +204,7 @@ namespace LT.DigitalOffice.UserService
       });
 
       services.AddHttpContextAccessor();
-      
+
       string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<UserServiceDbContext>(options =>
@@ -263,20 +260,7 @@ namespace LT.DigitalOffice.UserService
       //    "LT.DigitalOffice.UserService.Validation.dll");
       services.AddScoped<IValidator<JsonPatchDocument<EditUserRequest>>, EditUserRequestValidator>();
 
-      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
-      if (string.IsNullOrEmpty(redisConnStr))
-      {
-        redisConnStr = Configuration.GetConnectionString("Redis");
-
-        Log.Information($"Redis connection string from appsettings.json was used. Value '{PasswordHider.Hide(redisConnStr)}'");
-      }
-      else
-      {
-        Log.Information($"Redis connection string from environment was used. Value '{PasswordHider.Hide(redisConnStr)}'");
-      }
-
-      services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
+      redisConnStr = services.AddRedisSingleton(Configuration);
 
       services
         .AddControllers(options =>
@@ -285,7 +269,7 @@ namespace LT.DigitalOffice.UserService
         }) // TODO check enum serialization from request without .AddJsonOptions()
            //this will be used when all validation takes place on the pipeline
            //.AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.LoadFrom(path)))
-        //.AddFluentValidation()
+           //.AddFluentValidation()
         .AddJsonOptions(options =>
         {
           options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -297,11 +281,7 @@ namespace LT.DigitalOffice.UserService
     {
       app.UpdateDatabase<UserServiceDbContext>();
 
-      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
-      if (error is not null)
-      {
-        Log.Error(error);
-      }
+      FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Users);
 
       app.UseForwardedHeaders();
 

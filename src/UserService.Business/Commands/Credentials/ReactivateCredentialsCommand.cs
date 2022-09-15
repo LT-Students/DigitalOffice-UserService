@@ -1,4 +1,5 @@
 ﻿using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Responses.Auth;
 using LT.DigitalOffice.UserService.Broker.Requests.Interfaces;
@@ -22,6 +23,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
     private readonly IUserCommunicationRepository _communicationRepository;
     private readonly IResponseCreator _responseCreator;
     private readonly IAuthService _authService;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public ReactivateCredentialsCommand(
       IPendingUserRepository pendingRepository,
@@ -29,7 +31,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserRepository userRepository,
       IUserCommunicationRepository communicationRepository,
       IResponseCreator responseCreator,
-      IAuthService authService)
+      IAuthService authService,
+      IGlobalCacheRepository globalCache)
     {
       _pendingRepository = pendingRepository;
       _credentialsRepository = credentialsRepository;
@@ -37,6 +40,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _communicationRepository = communicationRepository;
       _responseCreator = responseCreator;
       _authService = authService;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(ReactivateCredentialsRequest request)
@@ -71,6 +75,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       await _pendingRepository.RemoveAsync(request.UserId);
       await _userRepository.SwitchActiveStatusAsync(request.UserId, true);
       await _communicationRepository.SetBaseTypeAsync(dbPendingUser.CommunicationId, request.UserId);
+
+      await _globalCache.Clear();
 
       response.Body = new CredentialsResponse
       {

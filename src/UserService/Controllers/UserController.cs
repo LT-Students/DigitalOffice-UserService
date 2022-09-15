@@ -11,6 +11,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Responses.User;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
@@ -39,9 +40,10 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpGet("get")]
     public async Task<OperationResultResponse<UserResponse>> GetAsync(
       [FromServices] IGetUserCommand command,
-      [FromQuery] GetUserFilter filter)
+      [FromQuery] GetUserFilter filter,
+      CancellationToken cansellationToken)
     {
-      return await command.ExecuteAsync(filter);
+      return await command.ExecuteAsync(filter, cansellationToken);
     }
 
     [HttpGet("getinfo")]
@@ -54,9 +56,10 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpGet("find")]
     public async Task<FindResultResponse<UserInfo>> FindAsync(
       [FromServices] IFindUserCommand command,
-      [FromQuery] FindUsersFilter filter)
+      [FromQuery] FindUsersFilter filter,
+      CancellationToken cansellationToken)
     {
-      return await command.ExecuteAsync(filter);
+      return await command.ExecuteAsync(filter, cansellationToken);
     }
 
     [HttpPut("editactive")]

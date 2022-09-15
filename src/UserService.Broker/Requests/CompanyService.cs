@@ -10,6 +10,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
@@ -32,10 +33,13 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
 
     public async Task<List<CompanyData>> GetCompaniesAsync(
       Guid userId,
-      List<string> errors)
+      List<string> errors,
+      CancellationToken cancellationToken = default)
     {
+      object request = IGetCompaniesRequest.CreateObj(usersIds: new() { userId });
+
       List<CompanyData> companies = await _globalCache
-        .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheHashCode());
+        .GetAsync<List<CompanyData>>(Cache.Companies, userId.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (companies is not null)
       {
@@ -47,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       {
         companies = (await RequestHandler.ProcessRequest<IGetCompaniesRequest, IGetCompaniesResponse>(
             _rcGetCompanies,
-            IGetCompaniesRequest.CreateObj(usersIds: new() { userId }),
+            request,
             errors,
             _logger))
           ?.Companies;

@@ -1,10 +1,11 @@
-﻿using LT.DigitalOffice.CompanyService.Data.Provider;
-using LT.DigitalOffice.UserService.Data.Interfaces;
+﻿using LT.DigitalOffice.UserService.Data.Interfaces;
+using LT.DigitalOffice.UserService.Data.Provider;
 using LT.DigitalOffice.UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Data
@@ -40,12 +41,12 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
     }
 
-    public Task<List<Guid>> GetAvatarsByUserId(Guid avatarId)
+    public Task<List<Guid>> GetAvatarsByUserId(Guid avatarId, CancellationToken cancellationToken = default)
     {
       return _provider.UsersAvatars
         .Where(a => a.AvatarId == avatarId)
         .Select(a => a.AvatarId)
-        .ToListAsync();
+        .ToListAsync(cancellationToken);
     }
 
     public Task<List<DbUserAvatar>> GetAsync(List<Guid> imagesIds)
@@ -80,6 +81,17 @@ namespace LT.DigitalOffice.UserService.Data
       await _provider.SaveAsync();
 
       return true;
+    }
+
+    public async Task<List<Guid>> RemoveAsync(Guid userId)
+    {
+      List<DbUserAvatar> removeUsersAvatars = await _provider.UsersAvatars
+        .Where(ua => ua.UserId == userId).ToListAsync();
+
+      _provider.UsersAvatars.RemoveRange(removeUsersAvatars);
+      await _provider.SaveAsync();
+
+      return removeUsersAvatars.Select(ua => ua.AvatarId).ToList();
     }
 
     public async Task<bool> RemoveAsync(List<Guid> imagesIds)

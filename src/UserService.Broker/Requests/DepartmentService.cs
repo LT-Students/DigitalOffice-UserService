@@ -10,6 +10,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Requests
@@ -32,10 +33,13 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
 
     public async Task<List<DepartmentData>> GetDepartmentsAsync(
       Guid userId,
-      List<string> errors)
+      List<string> errors,
+      CancellationToken cancellationToken = default)
     {
+      object request = IGetDepartmentsRequest.CreateObj(usersIds: new() { userId });
+
       List<DepartmentData> departments = await _globalCache
-        .GetAsync<List<DepartmentData>>(Cache.Departments, userId.GetRedisCacheHashCode());
+        .GetAsync<List<DepartmentData>>(Cache.Departments, userId.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (departments is not null)
       {
@@ -47,7 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
       {
         departments = (await RequestHandler.ProcessRequest<IGetDepartmentsRequest, IGetDepartmentsResponse>(
             _rcGetDepartments,
-            IGetDepartmentsRequest.CreateObj(usersIds: new() { userId }),
+            request,
             errors,
             _logger))
           ?.Departments;

@@ -18,6 +18,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -29,6 +30,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
   {
     private readonly IEditUserActiveRequestValidator _validator;
     private readonly IUserRepository _userRepository;
+    private readonly IUserCredentialsRepository _userCredentialsRepository;
+    private readonly IUserCommunicationRepository _userCommunicationRepository;
+    private readonly IUserAvatarRepository _userAvatarRepository;
     private readonly IPendingUserRepository _pendingRepository;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly IAccessValidator _accessValidator;
@@ -47,8 +51,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       string locale,
       List<string> errors)
     {
-      IGetTextTemplateResponse textTemplate = await _textTemplateService
-        .GetAsync(TemplateType.UserRecovery, locale, errors);
+      IGetTextTemplateResponse textTemplate = await _textTemplateService.GetAsync(
+        await _userCredentialsRepository.DoesExistAsync(dbUser.Id) ? TemplateType.UserRecovery : TemplateType.Greeting,
+        locale,
+        errors);
 
       if (textTemplate is null)
       {
@@ -59,12 +65,15 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         new Dictionary<string, string> { { "Password", password } },
         _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
 
-      await _emailService.SendAsync(email, textTemplate.Subject, parsedText, errors);
+      await _emailService.SendAsync(email: email, subject: textTemplate.Subject, text: parsedText, errors);
     }
 
     public EditUserActiveCommand(
       IEditUserActiveRequestValidator validator,
       IUserRepository userRepository,
+      IUserCredentialsRepository userCredentialsRepository,
+      IUserCommunicationRepository userCommunicationRepository,
+      IUserAvatarRepository userAvatarRepository,
       IPendingUserRepository pendingRepository,
       IGeneratePasswordCommand generatePassword,
       IAccessValidator accessValidator,
@@ -78,6 +87,9 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       _validator = validator;
       _userRepository = userRepository;
+      _userCredentialsRepository = userCredentialsRepository;
+      _userCommunicationRepository = userCommunicationRepository;
+      _userAvatarRepository = userAvatarRepository;
       _pendingRepository = pendingRepository;
       _generatePassword = generatePassword;
       _accessValidator = accessValidator;
@@ -125,6 +137,10 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
         await _publish.DisactivateUserAsync(request.UserId);
 
+        await _userCommunicationRepository.RemoveBaseTypeAsync(request.UserId);
+
+        await _publish.RemoveImagesAsync(await _userAvatarRepository.RemoveAsync(request.UserId));
+
         response.Body = true;
       }
       else
@@ -147,6 +163,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           password,
           "ru",
           response.Errors);
+
+        await _publish.ActivateUserAsync(request.UserId);
       }
 
       if (response.Body)
