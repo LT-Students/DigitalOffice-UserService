@@ -18,6 +18,8 @@ namespace LT.DigitalOffice.UserService.Data.Interfaces
 
     Task<bool> UpdateCurrentAvatarAsync(Guid userId, Guid imageId);
 
+    Task<List<Guid>> RemoveAsync(Guid userId);
+
     Task<bool> RemoveAsync(List<Guid> imagesIds);
   }
 }

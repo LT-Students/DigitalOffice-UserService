@@ -83,6 +83,17 @@ namespace LT.DigitalOffice.UserService.Data
       return true;
     }
 
+    public async Task<List<Guid>> RemoveAsync(Guid userId)
+    {
+      List<DbUserAvatar> removeUsersAvatars = await _provider.UsersAvatars
+        .Where(ua => ua.UserId == userId).ToListAsync();
+
+      _provider.UsersAvatars.RemoveRange(removeUsersAvatars);
+      await _provider.SaveAsync();
+
+      return removeUsersAvatars.Select(ua => ua.AvatarId).ToList();
+    }
+
     public async Task<bool> RemoveAsync(List<Guid> imagesIds)
     {
       if (imagesIds is null || !imagesIds.Any())

@@ -14,6 +14,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Broker.Publishes
@@ -47,9 +48,11 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes
 
     public Task RemoveImagesAsync(List<Guid> imagesIds)
     {
-      return _bus.Publish<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
-        imagesIds: imagesIds,
-        imageSource: ImageSource.User));
+      return imagesIds is null || !imagesIds.Any()
+        ? Task.CompletedTask
+        : _bus.Publish<IRemoveImagesPublish>(IRemoveImagesPublish.CreateObj(
+          imagesIds: imagesIds,
+          imageSource: ImageSource.User));
     }
 
     public Task CreateUserOfficeAsync(Guid userId, Guid officeId)
