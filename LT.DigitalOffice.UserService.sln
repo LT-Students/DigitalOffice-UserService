@@ -44,8 +44,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\DigitalOffice-BrokerModels\src\Models\Models.csproj", "{1F81B4F6-33A9-4C7B-A71B-537A31644B33}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,10 +102,6 @@ Global
 		{90AD447B-CD38-467E-A011-077BC2C87641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90AD447B-CD38-467E-A011-077BC2C87641}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90AD447B-CD38-467E-A011-077BC2C87641}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F81B4F6-33A9-4C7B-A71B-537A31644B33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F81B4F6-33A9-4C7B-A71B-537A31644B33}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F81B4F6-33A9-4C7B-A71B-537A31644B33}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F81B4F6-33A9-4C7B-A71B-537A31644B33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
