@@ -8,6 +8,7 @@ using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
+using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Filtres;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -28,7 +29,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
     {
       (List<DbUser> dbUsers, int totalCount) =
         await _userRepository.FindAsync(
-          filter: new FindUsersFilter() { TakeCount = int.MaxValue, IncludeCurrentAvatar = true }, //TODO fix takeCount
+          filter: new FindUsersFilter() { TakeCount = int.MaxValue, IncludeCurrentAvatar = true, IncludeCommunications = request.IncludeBaseEmail }, //TODO fix takeCount
           userIds: request.UsersIds);
 
       return dbUsers.Select(
@@ -38,7 +39,10 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           firstName: u.FirstName,
           middleName: u.MiddleName,
           lastName: u.LastName,
-          isActive: u.IsActive))
+          isActive: u.IsActive,
+          email: request.IncludeBaseEmail
+            ? u.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email)?.Value
+            : null))
         .ToList();
     }
 
