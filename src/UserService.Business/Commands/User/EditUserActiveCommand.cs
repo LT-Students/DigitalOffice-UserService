@@ -14,11 +14,11 @@ using LT.DigitalOffice.UserService.Business.Commands.Password.Interfaces;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
 using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Db;
-using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -32,6 +32,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IUserRepository _userRepository;
     private readonly IUserCredentialsRepository _userCredentialsRepository;
     private readonly IUserCommunicationRepository _userCommunicationRepository;
+    private readonly IUserAvatarRepository _userAvatarRepository;
     private readonly IPendingUserRepository _pendingRepository;
     private readonly IGeneratePasswordCommand _generatePassword;
     private readonly IAccessValidator _accessValidator;
@@ -51,7 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       List<string> errors)
     {
       IGetTextTemplateResponse textTemplate = await _textTemplateService.GetAsync(
-        await _userCredentialsRepository.DoesExistAsync(dbUser.Id) ? TemplateType.UserRecovery : TemplateType.Greeting, 
+        await _userCredentialsRepository.DoesExistAsync(dbUser.Id) ? TemplateType.UserRecovery : TemplateType.Greeting,
         locale,
         errors);
 
@@ -72,6 +73,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IUserRepository userRepository,
       IUserCredentialsRepository userCredentialsRepository,
       IUserCommunicationRepository userCommunicationRepository,
+      IUserAvatarRepository userAvatarRepository,
       IPendingUserRepository pendingRepository,
       IGeneratePasswordCommand generatePassword,
       IAccessValidator accessValidator,
@@ -87,6 +89,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       _userRepository = userRepository;
       _userCredentialsRepository = userCredentialsRepository;
       _userCommunicationRepository = userCommunicationRepository;
+      _userAvatarRepository = userAvatarRepository;
       _pendingRepository = pendingRepository;
       _generatePassword = generatePassword;
       _accessValidator = accessValidator;
@@ -135,6 +138,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         await _publish.DisactivateUserAsync(request.UserId);
 
         await _userCommunicationRepository.RemoveBaseTypeAsync(request.UserId);
+
+        await _publish.RemoveImagesAsync(await _userAvatarRepository.RemoveAsync(request.UserId));
 
         response.Body = true;
       }
