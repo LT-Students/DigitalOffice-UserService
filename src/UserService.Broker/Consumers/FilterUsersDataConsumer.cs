@@ -51,8 +51,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           firstName: u.FirstName,
           middleName: u.MiddleName,
           lastName: u.LastName,
-          isActive: u.IsActive,
-          email: null))
+          isActive: u.IsActive))
         .ToList(),
         totalCount);
     }
