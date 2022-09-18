@@ -31,8 +31,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           firstName: dbUser.FirstName,
           middleName: dbUser.MiddleName,
           lastName: dbUser.LastName,
-          isActive: dbUser.IsActive,
-          email: null));
+          isActive: dbUser.IsActive));
     }
   }
 }
