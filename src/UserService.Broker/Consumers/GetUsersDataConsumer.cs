@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
           lastName: u.LastName,
           isActive: u.IsActive,
           email: request.IncludeBaseEmail
-            ? u.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.Email)?.Value
+            ? u.Communications.FirstOrDefault(c => c.Type == (int)CommunicationType.BaseEmail)?.Value
             : null))
         .ToList();
     }
