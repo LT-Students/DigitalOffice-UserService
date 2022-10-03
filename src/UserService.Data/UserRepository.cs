@@ -237,8 +237,6 @@ namespace LT.DigitalOffice.UserService.Data
 
     public IQueryable<DbUser> SearchAsync(string searchText, IQueryable<DbUser> dbUsersFiltered = null)
     {
-      searchText = null;
-
       string[] names = searchText?.ToLower().Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
       IQueryable<DbUser> dbUsers = dbUsersFiltered is null
@@ -263,6 +261,7 @@ namespace LT.DigitalOffice.UserService.Data
             || (u.MiddleName.ToLower().Contains(names[0]) && (u.FirstName.ToLower().Contains(names[1]) || u.LastName.ToLower().Contains(names[1]))));
 
         // when in search string there are 3 words - one for name, one for surname and one for middle name, full name must contain them all
+        // these words can be sent in different sequences
         case 3:
           return dbUsers.Where(u =>
             u.MiddleName != null &&
@@ -278,7 +277,7 @@ namespace LT.DigitalOffice.UserService.Data
         
         // when in search string are more than 3 words - no users will be found
         default:
-          return Enumerable.Empty<DbUser>().AsQueryable();
+          return dbUsers.Take(0); //Can't use Enumerable.Empty<T>().AsQueryable because it doesn't implement IAsyncEnumerable, returning null can cause unpredictable results
       }
     }
   }
