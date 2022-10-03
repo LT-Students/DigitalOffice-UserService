@@ -16,9 +16,9 @@ namespace LT.DigitalOffice.UserService.Broker.Consumers
   {
     private IUserRepository _userRepository;
 
-    private async Task<object> SearchUsersAsync(string text)
+    private async Task<object> SearchUsersAsync(string searchText)
     {
-      List<DbUser> users = await _userRepository.SearchAsync(text, null).ToListAsync();
+      List<DbUser> users = await _userRepository.SearchAsync(searchText).ToListAsync();
 
       return ISearchResponse.CreateObj(
         users.Select(

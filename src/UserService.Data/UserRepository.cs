@@ -235,13 +235,13 @@ namespace LT.DigitalOffice.UserService.Data
         await userQuery.CountAsync(cancellationToken));
     }
 
-    public IQueryable<DbUser> SearchAsync(string searchText, IQueryable<DbUser> dbUsersFiltered = null)
+    public IQueryable<DbUser> SearchAsync(string searchText, IQueryable<DbUser> usersQuery = null)
     {
       string[] names = searchText?.ToLower().Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-      IQueryable<DbUser> dbUsers = dbUsersFiltered is null
+      IQueryable<DbUser> dbUsers = usersQuery is null
         ? _provider.Users
-        : dbUsersFiltered;
+        : usersQuery;
 
       switch (names?.Count())
       {
