@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
       if (dbUserCredentials.PasswordHash
         != UserPasswordHash.GetPasswordHash(dbUserCredentials.Login, dbUserCredentials.Salt, request.Password))
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest, new List<string>() { "Old password is wrong."});
       }
 
       dbUserCredentials.PasswordHash = UserPasswordHash.GetPasswordHash(
