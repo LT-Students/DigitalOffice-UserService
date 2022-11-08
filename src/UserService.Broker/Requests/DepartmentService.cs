@@ -34,9 +34,10 @@ namespace LT.DigitalOffice.UserService.Broker.Requests
     public async Task<List<DepartmentData>> GetDepartmentsAsync(
       Guid userId,
       List<string> errors,
+      bool includeChildDepartmentsIds = false,
       CancellationToken cancellationToken = default)
     {
-      object request = IGetDepartmentsRequest.CreateObj(usersIds: new() { userId });
+      object request = IGetDepartmentsRequest.CreateObj(usersIds: new() { userId }, includeChildDepartmentsIds: includeChildDepartmentsIds);
 
       List<DepartmentData> departments = await _globalCache
         .GetAsync<List<DepartmentData>>(Cache.Departments, userId.GetRedisCacheKey(nameof(IGetDepartmentsRequest), request.GetBasicProperties()));

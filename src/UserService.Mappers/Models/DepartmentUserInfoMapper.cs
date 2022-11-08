@@ -20,7 +20,8 @@ namespace LT.DigitalOffice.UserService.Mappers.Models
           {
             Id = department.Id,
             Name = department.Name,
-            ShortName = department.ShortName
+            ShortName = department.ShortName,
+            ChildDepartmentsIds = department.ChildDepartmentsIds
           },
           Role = user.Role
         };
