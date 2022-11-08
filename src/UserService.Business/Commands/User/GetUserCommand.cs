@@ -97,7 +97,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
         : Task.FromResult(null as List<CompanyData>);
 
       Task<List<DepartmentData>> departmentsTask = filter.IncludeDepartment
-        ? _departmentService.GetDepartmentsAsync(dbUser.Id, response.Errors, cancellationToken)
+        ? _departmentService.GetDepartmentsAsync(dbUser.Id, response.Errors, includeChildDepartmentsIds: true, cancellationToken)
         : Task.FromResult(null as List<DepartmentData>);
 
       Task<List<ImageInfo>> imagesTask = filter.IncludeAvatars || filter.IncludeCurrentAvatar
