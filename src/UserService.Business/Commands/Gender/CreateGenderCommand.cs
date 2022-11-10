@@ -1,4 +1,6 @@
 ﻿using FluentValidation.Results;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.UserService.Business.Commands.User.Interfaces;
@@ -22,23 +24,31 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IGenderRepository _genderRepository;
     private readonly ICreateGenderRequestValidator _validator;
     private readonly IResponseCreator _responseCreator;
+    private readonly IAccessValidator _accessValidator;
 
     public CreateGenderCommand(
       IHttpContextAccessor httpContextAccessor,
       IDbGenderMapper mapper,
       IGenderRepository genderRepository,
       ICreateGenderRequestValidator validator,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IAccessValidator accessValidator)
     {
       _httpContextAccessor = httpContextAccessor;
       _mapper = mapper;
       _genderRepository = genderRepository;
       _validator = validator;
       _responseCreator = responseCreator;
+      _accessValidator = accessValidator;
     }
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateGenderRequest request)
     {
+      if (!await _accessValidator.IsAdminAsync(_httpContextAccessor.HttpContext.GetUserId()))
+      {
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
+      }
+
       ValidationResult validationResult = await _validator.ValidateAsync(request);
 
       if (!validationResult.IsValid)
