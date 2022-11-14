@@ -78,6 +78,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Password
         return;
       }
 
+      //do not put "secret" into the link! it's not safe
       string parsedText = _parser.Parse(
         new Dictionary<string, string> { { "Password", secret } },
         _parser.ParseModel<DbUser>(dbUser, textTemplate.Text));
