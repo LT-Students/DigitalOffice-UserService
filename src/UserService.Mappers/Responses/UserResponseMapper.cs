@@ -34,7 +34,11 @@ namespace LT.DigitalOffice.UserService.Mappers.Responses
           User = _userInfoMapper.Map(dbUser, avatar),
           UserAddition = dbUser.Addition is null ? new() : new()
           {
-            GenderName = dbUser.Addition.Gender?.Name,
+            Gender = dbUser.Addition.Gender is null ? new() : new()
+            {
+              Id = dbUser.Addition.Gender.Id,
+              Name = dbUser.Addition.Gender.Name
+            },
             About = dbUser.Addition.About,
             DateOfBirth = dbUser.Addition.DateOfBirth,
             Latitude = dbUser.Addition.Latitude,
