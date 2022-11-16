@@ -34,7 +34,8 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       IUserCommunicationRepository communicationRepository,
       IResponseCreator responseCreator,
       IAuthService authService,
-      IGlobalCacheRepository globalCache)
+      IGlobalCacheRepository globalCache,
+      IPublish publish)
     {
       _pendingRepository = pendingRepository;
       _credentialsRepository = credentialsRepository;
@@ -43,6 +44,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.Credentials
       _responseCreator = responseCreator;
       _authService = authService;
       _globalCache = globalCache;
+      _publish = publish;
     }
 
     public async Task<OperationResultResponse<CredentialsResponse>> ExecuteAsync(ReactivateCredentialsRequest request)
