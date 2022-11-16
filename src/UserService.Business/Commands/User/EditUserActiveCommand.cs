@@ -18,7 +18,6 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User.Filters;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -164,7 +163,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
           "ru",
           response.Errors);
 
-        await _publish.ActivateUserAsync(request.UserId);
+        await _publish.CreatePendingUserAsync(request.UserId);
       }
 
       if (response.Body)

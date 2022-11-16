@@ -46,6 +46,14 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes
         IActivateUserPublish.CreateObj(userId: userId));
     }
 
+    public Task CreatePendingUserAsync(Guid userId)
+    {
+      return _bus.Publish<ICreatePendingUserPublish>(
+        ICreatePendingUserPublish.CreateObj(
+          userId: userId,
+          createdBy: _httpContextAccessor.HttpContext.GetUserId()));
+    }
+
     public Task RemoveImagesAsync(List<Guid> imagesIds)
     {
       return imagesIds is null || !imagesIds.Any()
@@ -79,7 +87,8 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes
         ICreateDepartmentUserPublish.CreateObj(
           userId: userId,
           departmentId: departmentId,
-          createdBy: _httpContextAccessor.HttpContext.GetUserId()));
+          createdBy: _httpContextAccessor.HttpContext.GetUserId(),
+          isActive: false));
     }
 
     public Task CreateUserPositionAsync(Guid userId, Guid positionId)
