@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.UserService.Validation.Communication.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Communication value already exist..
+        ///   Looks up a localized string similar to Communication value already exists..
         /// </summary>
         internal static string ExistingCommunicationValue {
             get {
