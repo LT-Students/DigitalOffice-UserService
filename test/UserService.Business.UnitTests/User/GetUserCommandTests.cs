@@ -71,31 +71,31 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         responseCreatorCalls);
 
       _mocker.Verify<IUserRepository>(
-        x => x.GetAsync(It.IsAny<GetUserFilter>()),
+        x => x.GetAsync(It.IsAny<GetUserFilter>(), default),
         userRepositoryCalls);
 
       _mocker.Verify<ICompanyService>(
-        x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default),
         companyServiceCalls);
 
       _mocker.Verify<IDepartmentService>(
-        x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), true, default),
         departmentServiceCalls);
 
       _mocker.Verify<IImageService>(
-        x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>()),
+        x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>(), default),
         imageServiceCalls);
 
       _mocker.Verify<IOfficeService>(
-        x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default),
         officeServiceCalls);
 
       _mocker.Verify<IPositionService>(
-        x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()),
+        x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default),
         positionServiceCalls);
 
       _mocker.Verify<IRightService>(
-        x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>()),
+        x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>(), default),
         rightServiceCalls);
 
       _mocker.Verify<ICompanyUserInfoMapper>(
@@ -182,31 +182,31 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         .Returns(_failureResponse);
 
       _mocker
-        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>(), default))
         .Returns(Task.FromResult(_dbUser));
 
       _mocker
-        .Setup<ICompanyService, Task<List<CompanyData>>>(x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Setup<ICompanyService, Task<List<CompanyData>>>(x => x.GetCompaniesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default))
         .Returns(Task.FromResult(_companiesData));
 
       _mocker
-        .Setup<IDepartmentService, Task<List<DepartmentData>>>(x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Setup<IDepartmentService, Task<List<DepartmentData>>>(x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), true, default))
         .Returns(Task.FromResult(_departmentsData));
 
       _mocker
-        .Setup<IImageService, Task<List<ImageInfo>>>(x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>()))
+        .Setup<IImageService, Task<List<ImageInfo>>>(x => x.GetImagesAsync(It.IsAny<List<Guid>>(), It.IsAny<List<string>>(), default))
         .Returns(Task.FromResult(_imagesInfo));
 
       _mocker
-        .Setup<IOfficeService, Task<List<OfficeData>>>(x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Setup<IOfficeService, Task<List<OfficeData>>>(x => x.GetOfficesAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default))
         .Returns(Task.FromResult(_officesData));
 
       _mocker
-        .Setup<IPositionService, Task<List<PositionData>>>(x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>()))
+        .Setup<IPositionService, Task<List<PositionData>>>(x => x.GetPositionsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default))
         .Returns(Task.FromResult(_positionsData));
 
       _mocker
-        .Setup<IRightService, Task<List<RoleData>>>(x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>()))
+        .Setup<IRightService, Task<List<RoleData>>>(x => x.GetRolesAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<string>>(), default))
         .Returns(Task.FromResult(_rolesData));
 
       _mocker
@@ -465,7 +465,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
     public void NotFoundResponseTest()
     {
       _mocker
-        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>()))
+        .Setup<IUserRepository, Task<DbUser>>(x => x.GetAsync(It.IsAny<GetUserFilter>(), default))
         .Returns(Task.FromResult((DbUser)null));
 
       SerializerAssert.AreEqual(_failureResponse, _command.ExecuteAsync(_filter).Result);

@@ -1,5 +1,4 @@
-﻿using LT.DigitalOffice.UserService.Models.Dto.Enums;
-using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
+﻿using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.UserCompany;
 using System;

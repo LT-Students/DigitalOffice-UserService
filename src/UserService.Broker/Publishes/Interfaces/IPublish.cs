@@ -11,6 +11,10 @@ namespace LT.DigitalOffice.UserService.Broker.Publishes.Interfaces
   {
     Task DisactivateUserAsync(Guid userId);
 
+    Task ActivateUserAsync(Guid userId);
+
+    Task CreatePendingUserAsync(Guid userId);
+
     Task RemoveImagesAsync(List<Guid> imagesIds);
 
     Task CreateUserOfficeAsync(Guid userId, Guid officeId);

@@ -1,9 +1,9 @@
 using FluentValidation;
-using FluentValidation.Validators;
 using LT.DigitalOffice.Kernel.Validators;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.User;
 using LT.DigitalOffice.UserService.Validation.User.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace LT.DigitalOffice.UserService.Validation.User
   {
     private static Regex NameRegex = new(@"\d");
 
-    private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, CustomContext context)
+    private void HandleInternalPropertyValidation(Operation<EditUserRequest> requestedOperation, ValidationContext<JsonPatchDocument<EditUserRequest>> context)
     {
       Context = context;
       RequestedOperation = requestedOperation;

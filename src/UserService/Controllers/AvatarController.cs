@@ -4,6 +4,7 @@ using LT.DigitalOffice.UserService.Models.Dto.Requests.Avatar;
 using LT.DigitalOffice.UserService.Models.Dto.Responses.Image;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LT.DigitalOffice.UserService.Controllers
@@ -23,9 +24,10 @@ namespace LT.DigitalOffice.UserService.Controllers
     [HttpGet("get")]
     public async Task<OperationResultResponse<UserImagesResponse>> GetAsync(
       [FromServices] IGetAvatarsCommand command,
-      [FromQuery] Guid userId)
+      [FromQuery] Guid userId,
+      CancellationToken token)
     {
-      return await command.ExecuteAsync(userId);
+      return await command.ExecuteAsync(userId, token);
     }
 
     [HttpDelete("remove")]
