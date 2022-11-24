@@ -4,8 +4,10 @@ using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
 using LT.DigitalOffice.UserService.Validation.Communication.Resources;
+using System.Globalization;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace LT.DigitalOffice.UserService.Validation.Communication
 {
@@ -16,6 +18,8 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
     public CreateCommunicationRequestValidator(
       IUserCommunicationRepository _communicationRepository)
     {
+      Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-RU");
+
       RuleFor(c => c.Type)
         .IsInEnum()
         .WithMessage(CreateCommunicationRequestValidatorResource.IncorrectCommunicationTypeFormat)
