@@ -8,6 +8,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Communication\Resources\EditCommunicationRequestValidatorResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditCommunicationRequestValidatorResource.resx</DependentUpon>
+    </Compile>
     <Compile Update="Credentials\Resources\CreateCredentialsRequestValidationResource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -21,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Communication\Resources\EditCommunicationRequestValidatorResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EditCommunicationRequestValidatorResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Credentials\Resources\CreateCredentialsRequestValidationResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>CreateCredentialsRequestValidationResource.Designer.cs</LastGenOutput>
