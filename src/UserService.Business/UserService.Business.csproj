@@ -9,4 +9,19 @@
     <ProjectReference Include="..\UserService.Validation\UserService.Validation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Commands\Password\Resources\ChangePasswordCommandResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ChangePasswordCommandResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Commands\Password\Resources\ChangePasswordCommandResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ChangePasswordCommandResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

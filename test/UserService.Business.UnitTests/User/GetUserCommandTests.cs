@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         companyServiceCalls);
 
       _mocker.Verify<IDepartmentService>(
-        x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default),
+        x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), true, default),
         departmentServiceCalls);
 
       _mocker.Verify<IImageService>(
@@ -190,7 +190,7 @@ namespace LT.DigitalOffice.UserService.Business.UnitTests.User
         .Returns(Task.FromResult(_companiesData));
 
       _mocker
-        .Setup<IDepartmentService, Task<List<DepartmentData>>>(x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), default))
+        .Setup<IDepartmentService, Task<List<DepartmentData>>>(x => x.GetDepartmentsAsync(It.IsAny<Guid>(), It.IsAny<List<string>>(), true, default))
         .Returns(Task.FromResult(_departmentsData));
 
       _mocker

@@ -3,8 +3,11 @@ using LT.DigitalOffice.UserService.Data.Interfaces;
 using LT.DigitalOffice.UserService.Models.Dto.Enums;
 using LT.DigitalOffice.UserService.Models.Dto.Requests.Communication;
 using LT.DigitalOffice.UserService.Validation.Communication.Interfaces;
+using LT.DigitalOffice.UserService.Validation.Communication.Resources;
+using System.Globalization;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace LT.DigitalOffice.UserService.Validation.Communication
 {
@@ -15,15 +18,17 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
     public CreateCommunicationRequestValidator(
       IUserCommunicationRepository _communicationRepository)
     {
+      Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-RU");
+
       RuleFor(c => c.Type)
         .IsInEnum()
-        .WithMessage("Incorrect communication type format.")
+        .WithMessage(CreateCommunicationRequestValidatorResource.IncorrectCommunicationTypeFormat)
         .Must(ct => ct != CommunicationType.BaseEmail)
-        .WithMessage("Can't set unconfirmed email as base.");
-
+        .WithMessage(CreateCommunicationRequestValidatorResource.UnconfirmedEmail);
+       
       When(c => c.Type == CommunicationType.Phone, () =>
         RuleFor(c => c.Value)
-          .Must(v => PhoneRegex.IsMatch(v.Trim())).WithMessage("Incorrect phone number."));
+          .Must(v => PhoneRegex.IsMatch(v.Trim())).WithMessage(CreateCommunicationRequestValidatorResource.IncorrectPhoneNumber));
 
       When(c => c.Type == CommunicationType.Email, () =>
         RuleFor(c => c.Value)
@@ -39,11 +44,11 @@ namespace LT.DigitalOffice.UserService.Validation.Communication
               return false;
             }
           })
-          .WithMessage("Incorrect email address."));
+          .WithMessage(CreateCommunicationRequestValidatorResource.IncorrectEmailAddress));
 
       RuleFor(c => c.Value)
         .MustAsync(async (v, _, _) => !await _communicationRepository.DoesValueExist(v.Value))
-        .WithMessage("Communication value already exist.");
+        .WithMessage(CreateCommunicationRequestValidatorResource.ExistingCommunicationValue);
     }
   }
 }

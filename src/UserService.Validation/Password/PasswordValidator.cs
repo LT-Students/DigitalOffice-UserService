@@ -12,7 +12,7 @@ namespace LT.DigitalOffice.UserService.Validation.Password
     {
       RuleFor(p => p)
         .MinimumLength(8).WithMessage("Password is too short.")
-        .MaximumLength(14).WithMessage("Password is too long.")
+        .MaximumLength(50).WithMessage("Password is too long.")
         .Must(p => PasswordRegex.IsMatch(p))
         .WithMessage("The password must contain at least one special character.")
         .Must(p => !p.Contains(' ')).WithMessage("Password must not contain space.");

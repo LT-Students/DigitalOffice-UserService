@@ -235,33 +235,50 @@ namespace LT.DigitalOffice.UserService.Data
         await userQuery.CountAsync(cancellationToken));
     }
 
-    public IQueryable<DbUser> SearchAsync(string text, IQueryable<DbUser> dbUsersFiltered = null)
+    public IQueryable<DbUser> SearchAsync(string searchText, IQueryable<DbUser> usersQuery = null)
     {
-      string[] cleanedFullName = string.Join(" ", text.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-        .ToLower().Split(" ");
+      string[] names = searchText?.ToLower().Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-      IQueryable<DbUser> dbUsers = dbUsersFiltered is null && !dbUsersFiltered.Any() ? _provider.Users : dbUsersFiltered;
+      IQueryable<DbUser> dbUsers = usersQuery is null
+        ? _provider.Users
+        : usersQuery;
 
-      if (cleanedFullName.Count() == 1)
+      switch (names?.Count())
       {
-        return dbUsers.Where(u =>
-            u.FirstName.ToLower().Contains(cleanedFullName[0])
-            || u.LastName.ToLower().Contains(cleanedFullName[0])
-            || u.MiddleName.ToLower().Contains(cleanedFullName[0]));
-      }
+        case 0:
+          return dbUsers;
 
-      if (cleanedFullName.Count() == 2)
-      {
-        return dbUsers.Where(u =>
-            u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1])
-            || u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1])
-            || u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]));
-      }
+        case 1:
+          return dbUsers.Where(u =>
+            u.FirstName.ToLower().Contains(names[0])
+            || u.LastName.ToLower().Contains(names[0])
+            || u.MiddleName.ToLower().Contains(names[0]));
 
-      return dbUsers.Where(u =>
-        u.FirstName.ToLower().Contains(cleanedFullName[0]) || u.FirstName.ToLower().Contains(cleanedFullName[1]) || u.FirstName.ToLower().Contains(cleanedFullName[2])
-        && u.LastName.ToLower().Contains(cleanedFullName[0]) || u.LastName.ToLower().Contains(cleanedFullName[1]) || u.LastName.ToLower().Contains(cleanedFullName[2])
-        && u.MiddleName.ToLower().Contains(cleanedFullName[0]) || u.MiddleName.ToLower().Contains(cleanedFullName[1]) || u.MiddleName.ToLower().Contains(cleanedFullName[2]));
+        case 2:
+          return dbUsers.Where(u =>
+            (u.FirstName.ToLower().Contains(names[0]) && (u.LastName.ToLower().Contains(names[1]) || u.MiddleName.ToLower().Contains(names[1])))
+            || (u.LastName.ToLower().Contains(names[0]) && (u.FirstName.ToLower().Contains(names[1]) || u.MiddleName.ToLower().Contains(names[1])))
+            || (u.MiddleName.ToLower().Contains(names[0]) && (u.FirstName.ToLower().Contains(names[1]) || u.LastName.ToLower().Contains(names[1]))));
+
+        // when in search string there are 3 words - one for name, one for surname and one for middle name, full name must contain them all
+        // these words can be sent in different sequences
+        case 3:
+          return dbUsers.Where(u =>
+            u.MiddleName != null &&
+            ((u.FirstName.ToLower().Contains(names[0]) &&
+              ((u.LastName.ToLower().Contains(names[1]) && u.MiddleName.ToLower().Contains(names[2]))
+              || (u.LastName.ToLower().Contains(names[2]) && u.MiddleName.ToLower().Contains(names[1]))))
+            || (u.FirstName.ToLower().Contains(names[1]) &&
+              ((u.LastName.ToLower().Contains(names[0]) && u.MiddleName.ToLower().Contains(names[2]))
+              || (u.LastName.ToLower().Contains(names[2]) && u.MiddleName.ToLower().Contains(names[0]))))
+            || (u.FirstName.ToLower().Contains(names[2]) &&
+              ((u.LastName.ToLower().Contains(names[0]) && u.MiddleName.ToLower().Contains(names[1]))
+              || (u.LastName.ToLower().Contains(names[1]) && u.MiddleName.ToLower().Contains(names[0]))))));
+        
+        // when in search string are more than 3 words - no users will be found
+        default:
+          return dbUsers.Take(0); //Can't use Enumerable.Empty<T>().AsQueryable because it doesn't implement IAsyncEnumerable, returning null can cause unpredictable results
+      }
     }
   }
 }
